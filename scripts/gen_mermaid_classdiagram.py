@@ -39,9 +39,16 @@ class MermaidClassDiagramGenerator(Generator):
     file_extension = "md"
     uses_schemaloader = False
 
-    def _edges(self) -> tuple[list[str], list[str]]:
+    def _collect(self) -> tuple[dict[str, list[str]], list[str], list[str]]:
+        """Return per-class attribute lines, inheritance edges and association edges.
+
+        Only *directly declared* slots are shown per class; inherited attributes
+        live on the ancestor and are carried by the inheritance edge (clean UML).
+        Scalar/enum slots become attributes; object-valued slots become edges.
+        """
         sv = self.schemaview
         class_names = set(sv.all_classes())
+        attrs: dict[str, list[str]] = {}
         inheritance: list[str] = []
         associations: list[str] = []
 
@@ -49,19 +56,30 @@ class MermaidClassDiagramGenerator(Generator):
             cls = sv.get_class(cn)
             if cls.is_a:
                 inheritance.append(f"    {cls.is_a} <|-- {cn}")
+            lines: list[str] = []
             for slot_name in sv.class_slots(cn, direct=True):
                 slot = sv.induced_slot(slot_name, cn)
-                if slot.range not in class_names:  # scalar/enum -> a property, not an edge
-                    continue
-                target_has_id = sv.get_identifier_slot(slot.range) is not None
-                arrow = "-->" if target_has_id else "*--"  # composition for value objects
-                card = _cardinality(bool(slot.required), bool(slot.multivalued))
-                associations.append(f'    {cn} {arrow} "{card}" {slot.range} : {slot.name}')
-        return inheritance, associations
+                if slot.range in class_names:  # object-valued -> association edge
+                    target_has_id = sv.get_identifier_slot(slot.range) is not None
+                    arrow = "-->" if target_has_id else "*--"  # composition for value objects
+                    card = _cardinality(bool(slot.required), bool(slot.multivalued))
+                    associations.append(f'    {cn} {arrow} "{card}" {slot.range} : {slot.name}')
+                else:  # scalar/enum -> attribute
+                    suffix = "[]" if slot.multivalued else ""
+                    lines.append(f"        +{slot.range} {slot.name}{suffix}")
+            attrs[cn] = lines
+        return attrs, inheritance, associations
 
     def serialize(self, **kwargs) -> str:
-        inheritance, associations = self._edges()
-        class_decls = [f"    class {cn}" for cn in sorted(self.schemaview.all_classes())]
+        attrs, inheritance, associations = self._collect()
+        class_decls: list[str] = []
+        for cn in sorted(attrs):
+            if attrs[cn]:
+                class_decls.append(f"    class {cn} {{")
+                class_decls.extend(attrs[cn])
+                class_decls.append("    }")
+            else:
+                class_decls.append(f"    class {cn}")
         body = "\n".join(class_decls + [""] + inheritance + [""] + associations)
         return (
             f"# {self.schema.name} — class diagram (whole model)\n\n"

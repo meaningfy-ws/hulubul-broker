@@ -4,21 +4,85 @@
 
 ```mermaid
 classDiagram
-    class Address
-    class Agent
-    class AgentInRole
-    class Area
-    class Channel
-    class DeliveryRequest
-    class Feedback
-    class GeoCoordinates
-    class Parcel
-    class Place
-    class Receiver
+    class Address {
+        +string number
+        +string street
+        +string postCode
+    }
+    class Agent {
+        +uriorcurie id
+        +string name
+        +string description
+        +string identifier
+    }
+    class AgentInRole {
+        +uriorcurie id
+    }
+    class Area {
+        +string locality
+        +string county
+        +string country
+        +string state
+    }
+    class Channel {
+        +uriorcurie id
+        +string description
+        +string alias
+        +string systemID
+        +string email
+        +string telephone
+        +Medium hasMedium
+        +ChannelValidationStatus validationStatus
+    }
+    class DeliveryRequest {
+        +uriorcurie id
+        +string requestNote[]
+        +string preferredPeriod
+        +datetime created
+        +datetime updated
+        +datetime closed
+        +RequestStatus hasStatus
+    }
+    class Feedback {
+        +uriorcurie id
+        +integer rating
+        +string comment
+    }
+    class GeoCoordinates {
+        +float latitude
+        +float longitude
+    }
+    class Parcel {
+        +uriorcurie id
+        +string declaredContent
+        +uri photoURL[]
+        +float weightKg
+        +string dimensions
+    }
+    class Place {
+        +string name
+        +string hasIdentifier
+        +string hasType
+    }
+    class Receiver {
+        +string deliveryNote
+    }
     class Sender
-    class ServiceOffer
-    class SpatialObject
-    class TransportService
+    class ServiceOffer {
+        +uriorcurie id
+        +string description
+        +Frequency withFrequency
+    }
+    class SpatialObject {
+        +uriorcurie id
+        +string comment
+    }
+    class TransportService {
+        +uriorcurie id
+        +string description
+        +string serviceTitle
+        +ServiceType serviceType[]
+    }
     class Transporter
 
     SpatialObject <|-- Address
