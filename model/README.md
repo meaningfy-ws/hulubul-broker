@@ -26,23 +26,39 @@ schema is the single source of truth**; every artifact under
 | [`hulubul_request.yaml`](linkml/hulubul_request.yaml) | Delivery requests, parcels |
 | [`hulubul_feedback.yaml`](linkml/hulubul_feedback.yaml) | Feedback |
 
-## Regenerating (after any change in `linkml/`)
+## How to use
 
-The LinkML schema is the only thing you edit by hand. Whenever anything under
-[`linkml/`](linkml/) changes, regenerate every artifact — run from the repo root:
+Everything is driven by `make` from the **repo root** (not this folder). One-time
+setup, then a single command regenerates all artifacts:
 
 ```bash
-pip install linkml neomodel   # once
-make all                      # regenerate everything into generated/
+pip install linkml neomodel   # one-time: the generators + neomodel property types
+make all                       # lint the schema, then regenerate everything
 ```
 
-Or rebuild a single artifact with its target (e.g. `make plantuml`,
-`make neomodel`, `make neo4j-constraints`). `make lint` alone validates the
-schema; `make clean` wipes `generated/`. The `generated/` tree is committed, so
-**commit its changes alongside the schema edit that produced them**. Never edit
-files under `generated/` by hand — they are overwritten on the next run. CI
-should run `make all` and fail if `generated/` changes (schema and committed
-artifacts out of sync).
+`make all` runs the schema linter first (`make lint`), then every generator,
+writing into `generated/`.
+
+## Regenerating (after any change in `linkml/`)
+
+The **LinkML schema under [`linkml/`](linkml/) is the only thing you edit by hand.**
+Files under `generated/` are outputs — never edit them; the next `make` overwrites
+them. The workflow after touching the schema:
+
+1. Edit the relevant module in [`linkml/`](linkml/).
+2. `make all` (or a single target below, e.g. `make neomodel`) from the repo root.
+3. Review the diff and **commit the `generated/` changes in the same commit as the
+   schema edit** — the committed artifacts must always match the schema.
+
+Handy targets: `make lint` (validate only), `make clean` (wipe `generated/`),
+`make <target>` (rebuild one artifact — see the table below).
+
+> **CI drift check.** CI runs `make all` and fails if `generated/` changes, proving
+> the committed artifacts are in sync. **Caveat:** the OWL and SHACL Turtle output
+> is not byte-stable across runs (rdflib reorders blank nodes), so a naive `git
+> diff` check will flag spurious churn on `owl`/`shacl`. Either exclude those two
+> from the drift check or normalise them (e.g. `rdfpipe`/canonicalisation) before
+> comparing. The Python/JSON/Mermaid/Cypher outputs are deterministic.
 
 ## Generated artifacts (`make <target>`)
 
@@ -60,8 +76,10 @@ All land under a single `generated/` tree. Run `make all` for the lot.
 | `neo4j-constraints` | `generated/neo4j/constraints.cypher` | Neo4j constraint DDL |
 | `neomodel` | `generated/neomodel/hulubul_ogm.py` | neomodel OGM classes |
 
-Requires `pip install linkml neomodel`. The two custom generators live in
-[`../scripts/`](../scripts/).
+Most targets call LinkML's stock `gen-*` tools. Three artifacts have no LinkML
+generator, so they use custom ones in [`../scripts/`](../scripts/) (each a
+`linkml.utils.generator.Generator` subclass): `classdiagram`
+(whole-model Mermaid), `neo4j-constraints` (Cypher DDL) and `neomodel` (OGM).
 
 ## Class diagram (whole model)
 
