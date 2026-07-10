@@ -216,3 +216,9 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# JetBrains IDE
+.idea/
+
+# LinkML generated artifacts — reproduce with `make all`, never commit or hand-edit
+model/generated/

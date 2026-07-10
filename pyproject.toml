@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "hulubul-broker"
+version = "0.1.0"
+description = "Hulubul V1 conceptual model and deterministic generators (LinkML)."
+authors = ["Meaningfy <eugen@meaningfy.ws>"]
+license = "CC-BY-4.0"
+# Only the generator is packaged; the LinkML schemas live under model/linkml.
+packages = [{ include = "gen_neo4j_constraints.py", from = "scripts" }]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+linkml = "*"
+
+[tool.poetry.scripts]
+gen-neo4j-constraints = "gen_neo4j_constraints:cli"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
