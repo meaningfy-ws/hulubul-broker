@@ -8,6 +8,7 @@ license = "CC-BY-4.0"
 packages = [
     { include = "gen_neo4j_constraints.py", from = "scripts" },
     { include = "gen_neomodel.py", from = "scripts" },
+    { include = "gen_mermaid_classdiagram.py", from = "scripts" },
 ]
 
 [tool.poetry.dependencies]
@@ -17,6 +18,7 @@ linkml = "*"
 [tool.poetry.scripts]
 gen-neo4j-constraints = "gen_neo4j_constraints:cli"
 gen-neomodel = "gen_neomodel:cli"
+gen-mermaid-classdiagram = "gen_mermaid_classdiagram:cli"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

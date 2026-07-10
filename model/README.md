@@ -39,6 +39,7 @@ All land under a single `generated/` tree. Run `make all` for the lot.
 | `erdiagram` | `generated/erdiagram/hulubul.er.md` | Mermaid ER diagram |
 | `plantuml` | `generated/plantuml/hulubul.puml` | **UML class diagram, whole model** (PlantUML) |
 | `classdiagram` | `generated/classdiagram/*.md` | UML class diagrams, one per class (Mermaid) |
+| `classdiagram-full` | `generated/classdiagram/hulubul.full.md` | **UML class diagram, whole model** (Mermaid, renders on GitHub) |
 | `docs` | `generated/docs/` | Markdown docs; each page embeds a Mermaid diagram |
 | `neo4j-constraints` | `generated/neo4j/constraints.cypher` | Neo4j constraint DDL |
 | `neomodel` | `generated/neomodel/hulubul_ogm.py` | neomodel OGM classes |
@@ -48,46 +49,8 @@ Requires `pip install linkml neomodel`. The two custom generators live in
 
 ## Class diagram (whole model)
 
-Regenerate the authoritative UML with `make plantuml`
-(`generated/plantuml/hulubul.puml`). The equivalent below renders inline on
-GitHub:
+Generated, not hand-drawn — regenerate with `make classdiagram-full` (Mermaid,
+renders on GitHub) or `make plantuml` (authoritative PlantUML):
 
-```mermaid
-classDiagram
-    SpatialObject <|-- Address
-    SpatialObject <|-- Area
-    SpatialObject <|-- Place
-    AgentInRole <|-- Sender
-    AgentInRole <|-- Receiver
-    AgentInRole <|-- Transporter
-
-    SpatialObject *-- GeoCoordinates : hasCoordinates
-    Address --> "1" Area : withinArea
-    Area --> "0..1" Area : withinArea
-    Place --> "0..1" Area : withinArea
-
-    Agent --> "0..*" Channel : hasContactPoint
-    Agent --> "0..1" Channel : hasMainContactPoint
-    Agent --> "0..1" Address : hasMainLocation
-    Agent --> "0..1" TransportService : providesService
-
-    AgentInRole --> "1" Agent : playedBy
-    AgentInRole --> "0..1" Channel : hasAltContactPointInRole
-
-    TransportService --> "1..*" ServiceOffer : hasBaseArea
-    TransportService --> "1..*" ServiceOffer : hasDestinationArea
-    ServiceOffer --> "1" Area : withinArea
-
-    DeliveryRequest --> "1" Sender : hasSender
-    DeliveryRequest --> "1" Receiver : hasReceiver
-    DeliveryRequest --> "0..1" Transporter : hasTransporter
-    DeliveryRequest --> "1..*" Parcel : hasDeliveryItem
-    DeliveryRequest --> "1" SpatialObject : hasPickUpLocation
-    DeliveryRequest --> "1" SpatialObject : hasDropOffLocation
-    DeliveryRequest --> "0..1" SpatialObject : hasAltDropOffLocation
-    Parcel --> "0..1" Receiver : hasAltReceiver
-
-    Feedback --> "1" AgentInRole : fromProvider
-    Feedback --> "1" AgentInRole : toRecipient
-    Feedback --> "0..1" DeliveryRequest : aboutRequest
-```
+- [`generated/classdiagram/hulubul.full.md`](generated/classdiagram/hulubul.full.md) — whole-model Mermaid class diagram
+- [`generated/plantuml/hulubul.puml`](generated/plantuml/hulubul.puml) — whole-model PlantUML

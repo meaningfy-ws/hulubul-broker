@@ -5,10 +5,10 @@
 SCHEMA := model/linkml/hulubul.yaml
 GEN    := model/generated
 
-.PHONY: all lint pydantic owl shacl jsonschema erdiagram plantuml classdiagram docs neo4j neo4j-constraints neomodel clean
+.PHONY: all lint pydantic owl shacl jsonschema erdiagram plantuml classdiagram classdiagram-full docs neo4j neo4j-constraints neomodel clean
 
 # Every artifact lands under a single tree: $(GEN)/<target>/...
-all: lint pydantic owl shacl jsonschema erdiagram plantuml classdiagram docs neo4j-constraints neomodel
+all: lint pydantic owl shacl jsonschema erdiagram plantuml classdiagram classdiagram-full docs neo4j-constraints neomodel
 
 lint:
 	linkml-lint -c .linkmllint.yaml $(SCHEMA)
@@ -38,6 +38,11 @@ plantuml:
 # UML class diagrams as Mermaid (one per class; render natively on GitHub).
 classdiagram:
 	mkdir -p $(GEN)/classdiagram && gen-mermaid-class-diagram -d $(GEN)/classdiagram $(SCHEMA)
+
+# Whole-model UML class diagram as a single Mermaid .md (renders on GitHub).
+# Custom generator — LinkML only emits per-class; see scripts/gen_mermaid_classdiagram.py.
+classdiagram-full:
+	mkdir -p $(GEN)/classdiagram && python scripts/gen_mermaid_classdiagram.py $(SCHEMA) > $(GEN)/classdiagram/hulubul.full.md
 
 # Human-readable Markdown docs (one file per class/slot/enum + index), each page
 # embedding a Mermaid class diagram of the element.
