@@ -1,0 +1,10 @@
+# Hulubul LinkML linter config.
+# Extends the recommended profile but disables `standard_naming`: slot names are
+# deliberately kept in the source ontology's camelCase (hasContactPoint,
+# withinArea, …) so they match the transcribed hlb: terms. Each slot also sets an
+# explicit slot_uri, so URIs are exact regardless of the Python name. All other
+# recommended rules stay active, so real issues still fail the build.
+extends: recommended
+rules:
+  standard_naming:
+    level: disabled
