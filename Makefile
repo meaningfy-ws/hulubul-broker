@@ -5,10 +5,10 @@
 SCHEMA := model/linkml/hulubul.yaml
 GEN    := model/generated
 
-.PHONY: all lint pydantic owl shacl jsonschema erdiagram docs neo4j neo4j-constraints clean
+.PHONY: all lint pydantic owl shacl jsonschema erdiagram docs neo4j neo4j-constraints neomodel clean
 
 # Every artifact lands under a single tree: $(GEN)/<target>/...
-all: lint pydantic owl shacl jsonschema erdiagram docs neo4j-constraints
+all: lint pydantic owl shacl jsonschema erdiagram docs neo4j-constraints neomodel
 
 lint:
 	linkml-lint -c .linkmllint.yaml $(SCHEMA)
@@ -43,9 +43,8 @@ docs:
 #   linkml-store -d neo4j://localhost:7687 insert -i data.yaml --schema $(SCHEMA)
 #
 # neomodel (https://neomodel.readthedocs.io) is a separate Neo4j OGM. LinkML ships
-# NO neomodel generator — the native path above is linkml-store. To emit neomodel
-# StructuredNode/StructuredRel classes you'd add a custom Jinja generator; not
-# provided here. Ask if you want it built.
+# no neomodel generator, so we provide one: scripts/gen_neomodel.py (Generator
+# subclass + Jinja2 template) — see the `neomodel` target below.
 neo4j:
 	@echo "Load instances with linkml-store: linkml-store ... insert --schema $(SCHEMA)"
 	@echo "No neomodel generator exists in LinkML — see Makefile comment."
@@ -55,6 +54,11 @@ neo4j:
 # on linkml.utils.generator.Generator — see scripts/gen_neo4j_constraints.py.
 neo4j-constraints:
 	mkdir -p $(GEN)/neo4j && python scripts/gen_neo4j_constraints.py $(SCHEMA) > $(GEN)/neo4j/constraints.cypher
+
+# neomodel OGM classes (StructuredNode + RelationshipTo). Custom generator built
+# on linkml.utils.generator.Generator + Jinja2 — see scripts/gen_neomodel.py.
+neomodel:
+	mkdir -p $(GEN)/neomodel && python scripts/gen_neomodel.py $(SCHEMA) > $(GEN)/neomodel/hulubul_ogm.py
 
 clean:
 	rm -rf $(GEN)
