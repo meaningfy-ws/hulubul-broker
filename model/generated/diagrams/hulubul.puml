@@ -1,0 +1,126 @@
+@startuml
+skinparam nodesep 10
+hide circle
+hide empty members
+class "TransportService" [[{A standing, request-agnostic offering published by a transporter agent, declaring service types and its base and destination service areas.}]] {
+    {field} id : uriorcurie  
+    {field} description : string  
+    {field} serviceTitle : string  
+    {field} serviceType : ServiceType  [1..*]
+}
+class "ServiceOffer" [[{A served area paired with an orientative frequency. The same shape serves both base and destination offers; direction is given by which association (hasBaseArea vs hasDestinationArea) it sits under, not by a flag. Given an id (graph node) because it carries an outgoing edge to Area.}]] {
+    {field} id : uriorcurie  
+    {field} description : string  
+    {field} withFrequency : Frequency  
+}
+class "Agent" [[{An enduring party — a person or an organisation — that participates in Hulubul. Holds stable identity, communication channels, an optional main location, and may publish a standing transport service and play episodic roles.}]] {
+    {field} id : uriorcurie  
+    {field} name : string  
+    {field} description : string  
+    {field} identifier : string  
+}
+"TransportService" --> "1..*" "ServiceOffer" : "hasDestinationArea"
+"TransportService" --> "1..*" "ServiceOffer" : "hasBaseArea"
+"Agent" --> "0..1" "TransportService" : "providesService"
+abstract "SpatialObject" [[{Root of the spatial hierarchy (aligned to geo:SpatialObject). Anything with spatial identity that may carry a geometry.}]] {
+    {field} id : uriorcurie  
+    {field} comment : string  
+}
+class "GeoCoordinates" [[{A WGS84 latitude/longitude point — the geometry attached to a spatial object (GeoSPARQL geo:Geometry analogue). Composed value object, inlined (no id) rather than a node.}]] {
+    {field} latitude : float  
+    {field} longitude : float  
+}
+class "DeliveryRequest" [[{A request to move one or more parcels from a pickup location to a drop-off location, carrying its participants, status and lifecycle timestamps.}]] {
+    {field} id : uriorcurie  
+    {field} requestNote : string  [0..*]
+    {field} preferredPeriod : string  
+    {field} created : datetime  
+    {field} updated : datetime  
+    {field} closed : datetime  
+    {field} hasStatus : RequestStatus  
+}
+class "Place" [[{A named, typed point/place of interest (landmark, depot, pickup point) sitting within an Area. Distinct from coarse Area and precise Address.}]] {
+    {field} name : string  
+    {field} hasIdentifier : string  
+    {field} hasType : string  
+    {field} id(i) : uriorcurie  
+    {field} comment(i) : string  
+}
+class "Area" [[{A coarse administrative or geographic unit (locality, county, state, country) forming a nested containment hierarchy. Transporter service offers and matching operate on Area; exact pickup/delivery use Address.}]] {
+    {field} locality : string  
+    {field} county : string  
+    {field} country : string  
+    {field} state : string  
+    {field} id(i) : uriorcurie  
+    {field} comment(i) : string  
+}
+class "Address" [[{A precise, pin-level postal address.}]] {
+    {field} number : string  
+    {field} street : string  
+    {field} postCode : string  
+    {field} id(i) : uriorcurie  
+    {field} comment(i) : string  
+}
+"SpatialObject" *--> "0..1" "GeoCoordinates" : "hasCoordinates"
+"DeliveryRequest" --> "0..1" "SpatialObject" : "hasAltDropOffLocation"
+"DeliveryRequest" --> "1" "SpatialObject" : "hasDropOffLocation"
+"DeliveryRequest" --> "1" "SpatialObject" : "hasPickUpLocation"
+"SpatialObject" ^-- "Place"
+"SpatialObject" ^-- "Area"
+"SpatialObject" ^-- "Address"
+"ServiceOffer" --> "1" "Area" : "withinArea"
+"Place" --> "0..1" "Area" : "withinArea"
+class "Parcel" [[{A physical item to be delivered as part of a request.}]] {
+    {field} id : uriorcurie  
+    {field} declaredContent : string  
+    {field} photoURL : uri  [0..*]
+    {field} weightKg : float  
+    {field} dimensions : string  
+}
+class "Receiver" [[{The role of the agent intended to take delivery of the parcel(s).}]] {
+    {field} deliveryNote : string  
+    {field} id(i) : uriorcurie  
+}
+"Parcel" --> "0..1" "Receiver" : "hasAltReceiver"
+"DeliveryRequest" --> "1..*" "Parcel" : "hasDeliveryItem"
+abstract "AgentInRole" [[{The episodic, situation-dependent role an Agent plays within a specific interaction; a reified participation. Anti-rigid: the same Agent plays different roles across different requests.}]] {
+    {field} id : uriorcurie  
+}
+"DeliveryRequest" --> "1" "Receiver" : "hasReceiver"
+"AgentInRole" ^-- "Receiver"
+class "Feedback" [[{A reified rating and/or comment left by one participation about another, optionally scoped to a delivery request.}]] {
+    {field} id : uriorcurie  
+    {field} rating : integer  
+    {field} comment : string  
+}
+"Feedback" --> "0..1" "DeliveryRequest" : "aboutRequest"
+"Feedback" --> "1" "AgentInRole" : "toRecipient"
+"Feedback" --> "1" "AgentInRole" : "fromProvider"
+class "Transporter" [[{The role of the agent that carries the parcel(s) for a delivery request.}]] {
+    {field} id(i) : uriorcurie  
+}
+class "Sender" [[{The role of the agent that initiates a delivery request and hands over the parcel(s). The sender also names the receiver.}]] {
+    {field} id(i) : uriorcurie  
+}
+"DeliveryRequest" --> "0..1" "Transporter" : "hasTransporter"
+"DeliveryRequest" --> "1" "Sender" : "hasSender"
+"AgentInRole" ^-- "Transporter"
+"AgentInRole" ^-- "Sender"
+class "Channel" [[{A communication channel bound to a single agent — the endpoint through which the agent is reached and, when validated, authenticated.}]] {
+    {field} id : uriorcurie  
+    {field} description : string  
+    {field} alias : string  
+    {field} systemID : string  
+    {field} email : string  
+    {field} telephone : string  
+    {field} hasMedium : Medium  
+    {field} validationStatus : ChannelValidationStatus  
+}
+"AgentInRole" --> "0..1" "Channel" : "hasAltContactPointInRole"
+"Agent" --> "0..*" "Channel" : "hasContactPoint"
+"Agent" --> "0..1" "Channel" : "hasMainContactPoint"
+"Area" --> "0..1" "Area" : "withinArea"
+"Address" --> "1" "Area" : "withinArea"
+"AgentInRole" --> "1" "Agent" : "playedBy"
+"Agent" --> "0..1" "Address" : "hasMainLocation"
+@enduml

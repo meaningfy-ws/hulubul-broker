@@ -4,11 +4,13 @@
 
 SCHEMA := model/linkml/hulubul.yaml
 GEN    := model/generated
+DIAG   := $(GEN)/diagrams
 
-.PHONY: all lint pydantic owl shacl jsonschema erdiagram plantuml classdiagram classdiagram-full docs neo4j neo4j-constraints neomodel clean
+.PHONY: all lint pydantic owl shacl jsonschema erdiagram plantuml classdiagram neo4j neo4j-constraints neomodel clean
 
-# Every artifact lands under a single tree: $(GEN)/<target>/...
-all: lint pydantic owl shacl jsonschema erdiagram plantuml classdiagram classdiagram-full docs neo4j-constraints neomodel
+# Every artifact lands under a single tree: $(GEN)/<target>/...; all diagrams
+# (ER, PlantUML UML, whole-model class) go under $(DIAG).
+all: lint pydantic owl shacl jsonschema erdiagram plantuml classdiagram neo4j-constraints neomodel
 
 lint:
 	linkml-lint -c .linkmllint.yaml $(SCHEMA)
@@ -28,26 +30,18 @@ shacl:
 jsonschema:
 	mkdir -p $(GEN)/jsonschema && gen-json-schema $(SCHEMA) > $(GEN)/jsonschema/hulubul.schema.json
 
+# ER diagram (Mermaid, whole model).
 erdiagram:
-	mkdir -p $(GEN)/erdiagram && gen-erdiagram $(SCHEMA) > $(GEN)/erdiagram/hulubul.er.md
+	mkdir -p $(DIAG) && gen-erdiagram $(SCHEMA) > $(DIAG)/hulubul.er.md
 
-# UML class diagram (PlantUML) — the .puml renders via any PlantUML tool/plugin.
+# UML class diagram (PlantUML, whole model) — renders via any PlantUML tool/plugin.
 plantuml:
-	mkdir -p $(GEN)/plantuml && gen-plantuml $(SCHEMA) > $(GEN)/plantuml/hulubul.puml
-
-# UML class diagrams as Mermaid (one per class; render natively on GitHub).
-classdiagram:
-	mkdir -p $(GEN)/classdiagram && gen-mermaid-class-diagram -d $(GEN)/classdiagram $(SCHEMA)
+	mkdir -p $(DIAG) && gen-plantuml $(SCHEMA) > $(DIAG)/hulubul.puml
 
 # Whole-model UML class diagram as a single Mermaid .md (renders on GitHub).
 # Custom generator — LinkML only emits per-class; see scripts/gen_mermaid_classdiagram.py.
-classdiagram-full:
-	mkdir -p $(GEN)/classdiagram && python scripts/gen_mermaid_classdiagram.py $(SCHEMA) > $(GEN)/classdiagram/hulubul.full.md
-
-# Human-readable Markdown docs (one file per class/slot/enum + index), each page
-# embedding a Mermaid class diagram of the element.
-docs:
-	mkdir -p $(GEN)/docs && gen-doc -d $(GEN)/docs $(SCHEMA)
+classdiagram:
+	mkdir -p $(DIAG) && python scripts/gen_mermaid_classdiagram.py $(SCHEMA) > $(DIAG)/hulubul.class.md
 
 # Neo4j is loaded via linkml-store, not a codegen target:
 #   https://linkml.io/linkml-store/how-to/Use-Neo4j.html

@@ -1,0 +1,840 @@
+{
+    "$defs": {
+        "Address": {
+            "additionalProperties": false,
+            "description": "A precise, pin-level postal address.",
+            "properties": {
+                "comment": {
+                    "description": "Free-text remark or annotation.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "hasCoordinates": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/GeoCoordinates"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "description": "The point geometry of this spatial object."
+                },
+                "id": {
+                    "description": "Graph node identity for this instance (distinct from any business identifier).",
+                    "type": "string"
+                },
+                "number": {
+                    "description": "House/building number.",
+                    "type": "string"
+                },
+                "postCode": {
+                    "description": "Postal code.",
+                    "type": "string"
+                },
+                "street": {
+                    "description": "Street name.",
+                    "type": "string"
+                },
+                "withinArea": {
+                    "description": "The area this object sits within.",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "withinArea",
+                "number",
+                "street",
+                "postCode",
+                "id"
+            ],
+            "title": "Address",
+            "type": "object"
+        },
+        "Agent": {
+            "additionalProperties": false,
+            "description": "An enduring party \u2014 a person or an organisation \u2014 that participates in Hulubul. Holds stable identity, communication channels, an optional main location, and may publish a standing transport service and play episodic roles.",
+            "properties": {
+                "description": {
+                    "description": "Free-text description.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "hasContactPoint": {
+                    "description": "Communication channels through which the agent can be reached and, when validated, authenticated.",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "hasMainContactPoint": {
+                    "description": "The agent's primary/default channel; also the trusted login channel.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "hasMainLocation": {
+                    "description": "The agent's principal location.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "id": {
+                    "description": "Graph node identity for this instance (distinct from any business identifier).",
+                    "type": "string"
+                },
+                "identifier": {
+                    "description": "Stable unique business identifier of the agent within Hulubul.",
+                    "type": "string"
+                },
+                "name": {
+                    "description": "Human-readable name.",
+                    "type": "string"
+                },
+                "providesService": {
+                    "description": "The standing, request-agnostic transport offering published by this agent (present only for transporters).",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                }
+            },
+            "required": [
+                "id",
+                "name",
+                "identifier"
+            ],
+            "title": "Agent",
+            "type": "object"
+        },
+        "AgentInRole": {
+            "additionalProperties": false,
+            "description": "The episodic, situation-dependent role an Agent plays within a specific interaction; a reified participation. Anti-rigid: the same Agent plays different roles across different requests.",
+            "properties": {
+                "hasAltContactPointInRole": {
+                    "description": "An alternative channel to use for this participation, overriding the agent's default.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "id": {
+                    "description": "Graph node identity for this instance (distinct from any business identifier).",
+                    "type": "string"
+                },
+                "playedBy": {
+                    "description": "The enduring agent enacting this role.",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "id",
+                "playedBy"
+            ],
+            "title": "AgentInRole",
+            "type": "object"
+        },
+        "Area": {
+            "additionalProperties": false,
+            "description": "A coarse administrative or geographic unit (locality, county, state, country) forming a nested containment hierarchy. Transporter service offers and matching operate on Area; exact pickup/delivery use Address.",
+            "properties": {
+                "comment": {
+                    "description": "Free-text remark or annotation.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "country": {
+                    "description": "Country name.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "county": {
+                    "description": "County/district (raion).",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "hasCoordinates": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/GeoCoordinates"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "description": "The point geometry of this spatial object."
+                },
+                "id": {
+                    "description": "Graph node identity for this instance (distinct from any business identifier).",
+                    "type": "string"
+                },
+                "locality": {
+                    "description": "Town/city/locality name.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "state": {
+                    "description": "State/region within country.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "withinArea": {
+                    "description": "The area this object sits within.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                }
+            },
+            "required": [
+                "id"
+            ],
+            "title": "Area",
+            "type": "object"
+        },
+        "Channel": {
+            "additionalProperties": false,
+            "description": "A communication channel bound to a single agent \u2014 the endpoint through which the agent is reached and, when validated, authenticated.",
+            "properties": {
+                "alias": {
+                    "description": "Human label for the channel (e.g. \"mum's WhatsApp\").",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "description": {
+                    "description": "Free-text description.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "email": {
+                    "description": "Email address, when the medium is email.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "hasMedium": {
+                    "$ref": "#/$defs/Medium",
+                    "description": "The medium/platform of this channel."
+                },
+                "id": {
+                    "description": "Graph node identity for this instance (distinct from any business identifier).",
+                    "type": "string"
+                },
+                "systemID": {
+                    "description": "Provider/platform-issued identifier (e.g. Telegram chat/user id).",
+                    "type": "string"
+                },
+                "telephone": {
+                    "description": "Phone number, when the medium is phone-based.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "validationStatus": {
+                    "$ref": "#/$defs/ChannelValidationStatus",
+                    "description": "Whether control of the channel has been verified."
+                }
+            },
+            "required": [
+                "id",
+                "systemID",
+                "hasMedium",
+                "validationStatus"
+            ],
+            "title": "Channel",
+            "type": "object"
+        },
+        "ChannelValidationStatus": {
+            "description": "Whether control of a channel has been verified.",
+            "enum": [
+                "valid",
+                "invalid",
+                "needsReview"
+            ],
+            "title": "ChannelValidationStatus",
+            "type": "string"
+        },
+        "DeliveryRequest": {
+            "additionalProperties": false,
+            "description": "A request to move one or more parcels from a pickup location to a drop-off location, carrying its participants, status and lifecycle timestamps.",
+            "properties": {
+                "closed": {
+                    "description": "When the request was closed/terminated.",
+                    "format": "date-time",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "created": {
+                    "description": "When the request was created.",
+                    "format": "date-time",
+                    "type": "string"
+                },
+                "hasAltDropOffLocation": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "description": "An alternative drop-off location (Address or Place). Owner resolved to request-level per diagram 2 (a Receiver-level variant was drawn in diagram 3 \u2014 not modelled here).",
+                    "type": "string"
+                },
+                "hasDeliveryItem": {
+                    "description": "The parcel(s) to be delivered.",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "hasDropOffLocation": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ],
+                    "description": "Where the parcel(s) are delivered \u2014 an Address or a named Place.",
+                    "type": "string"
+                },
+                "hasPickUpLocation": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ],
+                    "description": "Where the parcel(s) are collected \u2014 an Address or a named Place.",
+                    "type": "string"
+                },
+                "hasReceiver": {
+                    "description": "The primary receiver participation.",
+                    "type": "string"
+                },
+                "hasSender": {
+                    "description": "The sender participation for this request.",
+                    "type": "string"
+                },
+                "hasStatus": {
+                    "$ref": "#/$defs/RequestStatus",
+                    "description": "Current lifecycle status."
+                },
+                "hasTransporter": {
+                    "description": "The assigned transporter participation, once one is selected.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "id": {
+                    "description": "Graph node identity for this instance (distinct from any business identifier).",
+                    "type": "string"
+                },
+                "preferredPeriod": {
+                    "description": "The requester's preferred timeframe (orientative, free text).",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "requestNote": {
+                    "description": "Free-text notes attached to the request.",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "updated": {
+                    "description": "When the request was last modified.",
+                    "format": "date-time",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "id",
+                "created",
+                "updated",
+                "hasSender",
+                "hasReceiver",
+                "hasStatus",
+                "hasDeliveryItem",
+                "hasPickUpLocation",
+                "hasDropOffLocation"
+            ],
+            "title": "DeliveryRequest",
+            "type": "object"
+        },
+        "Feedback": {
+            "additionalProperties": false,
+            "description": "A reified rating and/or comment left by one participation about another, optionally scoped to a delivery request.",
+            "properties": {
+                "aboutRequest": {
+                    "description": "The delivery request the feedback concerns.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "comment": {
+                    "description": "Free-text remark.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "fromProvider": {
+                    "description": "The participation that authored the feedback.",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "Graph node identity for this instance (distinct from any business identifier).",
+                    "type": "string"
+                },
+                "rating": {
+                    "description": "Numeric score.",
+                    "type": [
+                        "integer",
+                        "null"
+                    ]
+                },
+                "toRecipient": {
+                    "description": "The participation the feedback is about.",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "id",
+                "fromProvider",
+                "toRecipient"
+            ],
+            "title": "Feedback",
+            "type": "object"
+        },
+        "Frequency": {
+            "description": "Orientative coarse human-coordination label for how often a transporter serves an area \u2014 not a timetable/RRULE.",
+            "enum": [
+                "daily",
+                "weekly",
+                "biweekly",
+                "fortnightly",
+                "monthly"
+            ],
+            "title": "Frequency",
+            "type": "string"
+        },
+        "GeoCoordinates": {
+            "additionalProperties": false,
+            "description": "A WGS84 latitude/longitude point \u2014 the geometry attached to a spatial object (GeoSPARQL geo:Geometry analogue). Composed value object, inlined (no id) rather than a node.",
+            "properties": {
+                "latitude": {
+                    "description": "WGS84 latitude.",
+                    "type": "number"
+                },
+                "longitude": {
+                    "description": "WGS84 longitude.",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "latitude",
+                "longitude"
+            ],
+            "title": "GeoCoordinates",
+            "type": "object"
+        },
+        "Medium": {
+            "description": "The medium/platform of a communication channel.",
+            "enum": [
+                "GSM",
+                "WhatsApp",
+                "Telegram",
+                "Viber",
+                "email"
+            ],
+            "title": "Medium",
+            "type": "string"
+        },
+        "Parcel": {
+            "additionalProperties": false,
+            "description": "A physical item to be delivered as part of a request.",
+            "properties": {
+                "declaredContent": {
+                    "description": "The sender's declared description of contents.",
+                    "type": "string"
+                },
+                "dimensions": {
+                    "description": "Free-text dimensions (e.g. \"30x20x10 cm\").",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "hasAltReceiver": {
+                    "description": "An alternative receiver for this specific parcel.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "id": {
+                    "description": "Graph node identity for this instance (distinct from any business identifier).",
+                    "type": "string"
+                },
+                "photoURL": {
+                    "description": "URLs of photos of the parcel.",
+                    "items": {
+                        "format": "uri",
+                        "type": "string"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "weightKg": {
+                    "description": "Weight in kilograms.",
+                    "type": [
+                        "number",
+                        "null"
+                    ]
+                }
+            },
+            "required": [
+                "id",
+                "declaredContent"
+            ],
+            "title": "Parcel",
+            "type": "object"
+        },
+        "Place": {
+            "additionalProperties": false,
+            "description": "A named, typed point/place of interest (landmark, depot, pickup point) sitting within an Area. Distinct from coarse Area and precise Address.",
+            "properties": {
+                "comment": {
+                    "description": "Free-text remark or annotation.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "hasCoordinates": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/GeoCoordinates"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "description": "The point geometry of this spatial object."
+                },
+                "hasIdentifier": {
+                    "description": "Identifier of the place (e.g. gazetteer id).",
+                    "type": "string"
+                },
+                "hasType": {
+                    "description": "Type of the place (e.g. depot, landmark, pickup point).",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "Graph node identity for this instance (distinct from any business identifier).",
+                    "type": "string"
+                },
+                "name": {
+                    "description": "Human-readable name of the place.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "withinArea": {
+                    "description": "The area this object sits within.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                }
+            },
+            "required": [
+                "hasIdentifier",
+                "hasType",
+                "id"
+            ],
+            "title": "Place",
+            "type": "object"
+        },
+        "Receiver": {
+            "additionalProperties": false,
+            "description": "The role of the agent intended to take delivery of the parcel(s).",
+            "properties": {
+                "deliveryNote": {
+                    "description": "A note from or for the receiver regarding delivery (e.g. handover instructions).",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "hasAltContactPointInRole": {
+                    "description": "An alternative channel to use for this participation, overriding the agent's default.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "id": {
+                    "description": "Graph node identity for this instance (distinct from any business identifier).",
+                    "type": "string"
+                },
+                "playedBy": {
+                    "description": "The enduring agent enacting this role.",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "id",
+                "playedBy"
+            ],
+            "title": "Receiver",
+            "type": "object"
+        },
+        "RequestStatus": {
+            "description": "Lifecycle states of a DeliveryRequest. Listed in intended progression order; access gates read these as reached-milestone, not numeric compare.",
+            "enum": [
+                "new",
+                "needsClarification",
+                "complete",
+                "optionsProposed",
+                "waitingResponse",
+                "accepted",
+                "rejected",
+                "pickUpPlanned",
+                "pickedUp",
+                "delivered",
+                "cancelled"
+            ],
+            "title": "RequestStatus",
+            "type": "string"
+        },
+        "Sender": {
+            "additionalProperties": false,
+            "description": "The role of the agent that initiates a delivery request and hands over the parcel(s). The sender also names the receiver.",
+            "properties": {
+                "hasAltContactPointInRole": {
+                    "description": "An alternative channel to use for this participation, overriding the agent's default.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "id": {
+                    "description": "Graph node identity for this instance (distinct from any business identifier).",
+                    "type": "string"
+                },
+                "playedBy": {
+                    "description": "The enduring agent enacting this role.",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "id",
+                "playedBy"
+            ],
+            "title": "Sender",
+            "type": "object"
+        },
+        "ServiceOffer": {
+            "additionalProperties": false,
+            "description": "A served area paired with an orientative frequency. The same shape serves both base and destination offers; direction is given by which association (hasBaseArea vs hasDestinationArea) it sits under, not by a flag. Given an id (graph node) because it carries an outgoing edge to Area.",
+            "properties": {
+                "description": {
+                    "description": "Free-text description.",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "Graph node identity for this instance (distinct from any business identifier).",
+                    "type": "string"
+                },
+                "withFrequency": {
+                    "$ref": "#/$defs/Frequency",
+                    "description": "How often the transporter is in/through the area (orientative)."
+                },
+                "withinArea": {
+                    "description": "The area this object sits within.",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "id",
+                "description",
+                "withinArea",
+                "withFrequency"
+            ],
+            "title": "ServiceOffer",
+            "type": "object"
+        },
+        "ServiceType": {
+            "description": "What a transport service carries.",
+            "enum": [
+                "peopleTransport",
+                "parcelTransport"
+            ],
+            "title": "ServiceType",
+            "type": "string"
+        },
+        "SpatialObject": {
+            "additionalProperties": false,
+            "description": "Root of the spatial hierarchy (aligned to geo:SpatialObject). Anything with spatial identity that may carry a geometry.",
+            "properties": {
+                "comment": {
+                    "description": "Free-text remark or annotation.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "hasCoordinates": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/GeoCoordinates"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "description": "The point geometry of this spatial object."
+                },
+                "id": {
+                    "description": "Graph node identity for this instance (distinct from any business identifier).",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "id"
+            ],
+            "title": "SpatialObject",
+            "type": "object"
+        },
+        "TransportService": {
+            "additionalProperties": false,
+            "description": "A standing, request-agnostic offering published by a transporter agent, declaring service types and its base and destination service areas.",
+            "properties": {
+                "description": {
+                    "description": "Free-text description.",
+                    "type": "string"
+                },
+                "hasBaseArea": {
+                    "description": "Pickup footprint \u2014 areas (with frequency) where the transporter can collect.",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "hasDestinationArea": {
+                    "description": "Delivery reach \u2014 areas (with frequency) the transporter serves as destinations.",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "id": {
+                    "description": "Graph node identity for this instance (distinct from any business identifier).",
+                    "type": "string"
+                },
+                "serviceTitle": {
+                    "description": "Short title of the offering.",
+                    "type": "string"
+                },
+                "serviceType": {
+                    "description": "What the service carries (people and/or parcels).",
+                    "items": {
+                        "$ref": "#/$defs/ServiceType"
+                    },
+                    "type": "array"
+                }
+            },
+            "required": [
+                "id",
+                "description",
+                "serviceTitle",
+                "serviceType",
+                "hasBaseArea",
+                "hasDestinationArea"
+            ],
+            "title": "TransportService",
+            "type": "object"
+        },
+        "Transporter": {
+            "additionalProperties": false,
+            "description": "The role of the agent that carries the parcel(s) for a delivery request.",
+            "properties": {
+                "hasAltContactPointInRole": {
+                    "description": "An alternative channel to use for this participation, overriding the agent's default.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "id": {
+                    "description": "Graph node identity for this instance (distinct from any business identifier).",
+                    "type": "string"
+                },
+                "playedBy": {
+                    "description": "The enduring agent enacting this role.",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "id",
+                "playedBy"
+            ],
+            "title": "Transporter",
+            "type": "object"
+        }
+    },
+    "$id": "http://meaningfy.ws/ontology/hulubul/hulubul",
+    "$schema": "https://json-schema.org/draft/2019-09/schema",
+    "additionalProperties": true,
+    "metamodel_version": "1.11.0",
+    "title": "hulubul",
+    "type": "object",
+    "version": null
+}
+

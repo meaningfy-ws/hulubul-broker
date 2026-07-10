@@ -219,6 +219,3 @@ __marimo__/
 
 # JetBrains IDE
 .idea/
-
-# LinkML generated artifacts — reproduce with `make all`, never commit or hand-edit
-model/generated/
