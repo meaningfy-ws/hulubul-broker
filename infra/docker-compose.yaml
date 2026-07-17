@@ -1,0 +1,116 @@
+# Hulubul V1 — local infrastructure.
+#
+# Three concerns:
+#   1. Langflow (low-code agent orchestration, ADR-016) over Postgres.
+#   2. Neo4j Community 5 (graph system of record, ADR-005) with APOC.
+#   3. mcp-neo4j-cypher (Neo4j Labs MCP server, ADR-005/015 admin path) exposing
+#      the graph to agents via the Model Context Protocol over streamable HTTP.
+#
+# All passwords/ports come from .env (gitignored). See .env.example.
+
+services:
+  langflow:
+    image: langflowai/langflow:latest
+    ports:
+      - "7860:7860"
+
+    depends_on:
+      - postgres
+
+    environment:
+      LANGFLOW_HOST: 0.0.0.0
+      LANGFLOW_CONFIG_DIR: /app/langflow
+      LANGFLOW_DATABASE_URL: postgresql://langflow:${POSTGRES_PASSWORD}@postgres:5432/langflow
+      # Login/auth disabled — auto-login is re-enabled below.
+      # SUPERUSER_USERNAME: ${LANGFLOW_SUPERUSER_USERNAME:-admin}
+      # SUPERUSER_PASSWORD: ${LANGFLOW_SUPERUSER_PASSWORD}
+      LANGFLOW_AUTO_LOGIN: "true"
+
+    env_file:
+      - ./langflow.env
+
+    volumes:
+      - langflow-data:/app/langflow
+
+  postgres:
+    image: postgres:16-trixie
+
+    environment:
+      POSTGRES_USER: langflow
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: langflow
+
+    volumes:
+      - langflow-postgres:/var/lib/postgresql/data
+
+  # Neo4j Community 5 — graph system of record (ADR-005).
+  # APOC enabled (required by the MCP server's schema introspection tool).
+  neo4j:
+    image: neo4j:5.26-community
+    ports:
+      - "7474:7474"   # Neo4j Browser (HTTP)
+      - "7687:7687"   # Bolt (cypher-shell, drivers, MCP server)
+
+    environment:
+      NEO4J_AUTH: neo4j/${NEO4J_PASSWORD}
+      NEO4J_PLUGINS: '["apoc"]'
+      NEO4J_dbms_security_procedures_unrestricted: apoc.*
+      NEO4J_server_memory_heap_initial__size: 512m
+      NEO4J_server_memory_heap_max__size: 1G
+      NEO4J_server_memory_pagecache_size: 512m
+      # Listen on all interfaces so the host can reach Bolt/Browser.
+      NEO4J_server_bolt_listen__address: :7687
+      NEO4J_server_http_listen__address: :7474
+
+    volumes:
+      - neo4j-data:/data
+
+    healthcheck:
+      # cypher-shell is bundled in the image; validates Bolt + auth + readiness.
+      # ${NEO4J_PASSWORD} is interpolated by compose from .env at parse time.
+      test: ["CMD-SHELL", "cypher-shell -u neo4j -p ${NEO4J_PASSWORD} -a bolt://localhost:7687 'RETURN 1' || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 40s
+
+  # Neo4j Labs MCP server (mcp-neo4j-cypher) — admin-style, audited path
+  # (ADR-007/015). Exposes read/write Cypher + schema introspection tools to
+  # agents over MCP streamable HTTP. Party-facing scoped MCP is deferred
+  # (modelling-blocked); see infra/README.md "Security".
+  mcp-neo4j:
+    build: ./mcp
+    ports:
+      - "${NEO4J_MCP_PORT:-8000}:8000"
+
+    environment:
+      NEO4J_URL: neo4j://neo4j:7687
+      NEO4J_USERNAME: ${NEO4J_USERNAME}
+      NEO4J_PASSWORD: ${NEO4J_PASSWORD}
+      NEO4J_DATABASE: ${NEO4J_DATABASE}
+      NEO4J_TRANSPORT: http
+      NEO4J_MCP_SERVER_HOST: 0.0.0.0
+      NEO4J_MCP_SERVER_PORT: "8000"
+      NEO4J_MCP_SERVER_PATH: /mcp/
+      # false = writable (admin path). Set NEO4J_MCP_READ_ONLY=true to lock to reads.
+      NEO4J_READ_ONLY: ${NEO4J_MCP_READ_ONLY:-false}
+      NEO4J_READ_TIMEOUT: "30"
+      NEO4J_SCHEMA_SAMPLE_SIZE: "1000"
+
+    depends_on:
+      neo4j:
+        condition: service_healthy
+
+    healthcheck:
+      # TCP connect check — the streamable-http endpoint only answers to a
+      # properly initialised MCP client, so we only verify the port is listening.
+      test: ["CMD-SHELL", "python -c \"import socket; s=socket.socket(); s.settimeout(2); s.connect(('127.0.0.1',8000)); s.close()\" || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 10s
+
+volumes:
+  langflow-data:
+  langflow-postgres:
+  neo4j-data:

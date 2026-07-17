@@ -1,0 +1,4 @@
+# Neo4j Labs MCP server (https://github.com/neo4j-labs/neo4j-mcp-server).
+# Labs/beta grade — pin the version and re-verify on upgrade (architecture/task-2
+# frameworks-exploration.md §8). Exposes mcp-neo4j-cypher (streamable HTTP MCP).
+mcp-neo4j-cypher==0.6.0
