@@ -1,6 +1,8 @@
-# Hulubul Agentic System Blueprint v0.2
+# Hulubul Agentic System Blueprint v0.3
 
 ## 1. Scope interpretation
+
+This document describes the **target agentic-system architecture**. The incremental development strategy and phase-specific blueprints define which parts are implemented in each phase and which temporary simplifications apply. In particular, the Phase 1 Walking Skeleton consolidates several target agents, uses a seeded Transporter, omits guardrails, and implements only a narrow happy path.
 
 ### Included user-goal use cases
 
@@ -13,21 +15,21 @@
 * **UC-8:** Coordinate and confirm delivery
 * **UC-9:** Close request and collect feedback
 
-The use cases describe a manually assisted V1, but also state that the Admin role can be replaced by the System or agents in the autonomous direction. The blueprint therefore treats human Admin involvement as an execution mode and exception path, rather than making successful parcel intermediation depend on a human operator.
+The use cases describe a manually assisted V1, but also state that the Admin role can be replaced by the System or agents in the autonomous direction. This blueprint therefore treats a human Admin as an exception and observability path rather than making successful parcel intermediation depend on a human operator.
 
 ### Necessary dependencies from excluded use cases
 
 Some behaviour from excluded use cases is still required internally:
 
-| Deferred use case             | Required dependency                                                                                                                                                           |
-| ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| UC-2 — Transporter preference | UC-3 may read an already-recorded preference, but this iteration does not create, validate, or anonymously notify preferred Transporters.                                     |
-| UC-10 — Cascade               | Rejection and timeout in UC-5 require automatic selection of the next candidate. Implement this as an internal Brokerage Agent subflow, not as a separately exposed use case. |
-| UC-11 — Cancellation          | Keep the `Cancelled` state in the model, but defer conversational cancellation handling unless it is needed for testing.                                                      |
-| UC-13 — Party profile         | UC-1 requires an identifiable Sender. Implement minimal Sender bootstrap, but defer full profile registration and maintenance.                                                |
-| UC-12 — Transporter profile   | Matching assumes Transporter profiles, routes, and contact points already exist as fixtures or seeded data.                                                                   |
+| Deferred use case | Required dependency |
+| --- | --- |
+| UC-2 — Transporter preference | UC-3 may read an already-recorded preference, but the selected scope does not create, validate, or anonymously notify preferred Transporters. |
+| UC-10 — Cascade | Rejection and timeout in UC-5 require selection of the next candidate. Implement this as an internal Brokerage Agent capability rather than a separately exposed use case. |
+| UC-11 — Cancellation | The domain model contains `cancelled`; conversational cancellation handling remains deferred until its phase. |
+| UC-13 — Party profile | UC-1 requires an identifiable Sender. Implement minimal Sender bootstrap while deferring full profile registration and maintenance. |
+| UC-12 — Transporter profile | Matching assumes Transporter profiles, routes, and Channels already exist or are provided by the relevant profile-lifecycle phase. |
 
----
+Note: the above UCs will most likely be reintroduced in the fourth Phase (HS).
 
 # 2. Main conclusions from the use cases
 
@@ -38,17 +40,17 @@ UC-6 covers two fundamentally different situations:
 1. The System detects missing data while registering the request.
 2. A Transporter asks for additional information after receiving the request.
 
-These situations must not share the same state transition.
+The supplied `RequestStatus` model contains a single `needsClarification` value. The distinction must therefore be carried by an operational clarification context rather than by inventing separate domain statuses.
 
 ```text
 Intake clarification:
-NewRequest → RequestNeedsClarification → Complete
+new → needsClarification → complete
 
 Transporter clarification:
-WaitingForResponse → TransporterClarification → WaitingForResponse
+waitingResponse → needsClarification → waitingResponse
 ```
 
-Returning a Transporter clarification to `Complete` would incorrectly restart matching.
+A typed clarification record must identify its kind and resume status so that a Transporter question does not incorrectly restart matching.
 
 ## 2.2 UC-4 and UC-5 form a brokerage process
 
@@ -71,13 +73,13 @@ Closing a request and collecting feedback are not transport coordination. Closur
 * closure audit;
 * optional feedback handling.
 
-A small **Closure and Feedback Agent** provides a cleaner boundary. It can later be merged into Fulfilment if the separate flow proves unnecessarily small.
+A small **Closure and Feedback Agent** provides a cleaner boundary. In the supplied domain model, closure is represented by setting `DeliveryRequest.closed`; `closed` is not a `RequestStatus` value.
 
 ## 2.5 Matching must produce a reusable candidate queue
 
 UC-3 allows the Sender to select or rank options, while UC-5 may later require moving to another option.
 
-The matching result therefore needs a persistent ordered candidate queue:
+The matching result therefore needs a persistent operational candidate queue:
 
 ```text
 candidate_order =
@@ -86,11 +88,11 @@ candidate_order =
     selected candidate first + original system ranking for the remainder
 ```
 
-The Brokerage Agent consumes this queue without rerunning matching after each rejection.
+The Brokerage Agent consumes this queue without rerunning matching after every rejection. The candidate queue is an operational structure unless it is later incorporated into the conceptual domain model.
 
 ---
 
-# 3. Revised agent inventory
+# 3. Target agent inventory
 
 ## Primary agents
 
@@ -105,16 +107,18 @@ The Brokerage Agent consumes this queue without rerunning matching after each re
 9. **Data Access Agent**
 10. **Guardrail Agent**
 
-This does not mean that every component must use a separate model invocation. The Clarification and Closure agents can initially be LangFlow subflows with narrow prompts and can later be merged if operational experience shows that the separation adds no value.
+This is the target decomposition, not a requirement that every phase use every agent or perform a separate model invocation for each responsibility. Earlier phases may consolidate target agents into narrower LangFlow subflows.
 
 ---
 
-# 4. Revised logical architecture
+# 4. Target logical architecture
 
 ```mermaid
 flowchart TD
     USER[Sender / Transporter / Receiver]
-    GW[Communication Gateway]
+    GW[Communication Gateway / LangFlow Chat Input]
+    PG[(LangFlow PostgreSQL<br/>messages and session history)]
+    CTX[Routing Context Loader]
     ROUTER[Router Agent]
 
     INTAKE[Request Intake Agent]
@@ -132,14 +136,18 @@ flowchart TD
 
     POLICY[Guardrail Agent<br/>operation policy]
     DATA[Data Access Agent]
-    QUERYGUARD[Guardrail Agent<br/>query validation]
-    READMCP[Guarded Neo4j Read MCP]
-    WRITEMCP[Guarded Neo4j Write MCP]
-    NEO[(Neo4j)]
+    QUERYGUARD[Guardrail Agent<br/>query policy]
+    READMCP[Guarded Neo4j read-cypher]
+    WRITEMCP[Guarded Neo4j write-cypher]
+    NEO[(Neo4j<br/>domain graph + operational bindings)]
     AUDIT[(Audit and Event Log)]
 
     USER --> GW
-    GW --> ROUTER
+    GW -. session_id and messages .-> PG
+    GW --> CTX
+    CTX -->|get_request_routing_context| DATA
+    DATA -->|binding + authoritative request status| CTX
+    CTX --> ROUTER
 
     ROUTER --> INTAKE
     ROUTER --> CLARIFY
@@ -157,7 +165,7 @@ flowchart TD
 
     MATCH --> MATCHER
 
-    POLICY -->|allowed operation| DATA
+    POLICY -->|allowed logical operation| DATA
     POLICY -->|denied / ambiguous| ADMIN
 
     DATA --> QUERYGUARD
@@ -184,147 +192,144 @@ flowchart TD
     QUERYGUARD --> AUDIT
 ```
 
-## Important architectural boundary
+## Storage and routing responsibilities
 
-The Data Access Agent must not receive an unguarded Neo4j MCP connection.
+* **LangFlow/PostgreSQL** stores conversation messages grouped by `session_id` and other LangFlow operational records.
+* **Neo4j** stores the authoritative `DeliveryRequest` domain and lifecycle state.
+* An explicitly operational `OperationalConversationBinding` associates a LangFlow `session_id` with the active `DeliveryRequest`. It is colocated in Neo4j for simple domain-grounded routing but is not part of the conceptual Hulubul JSON Schema.
+* The Router receives a mandatory `get_request_routing_context` result before making a routing decision. Chat memory helps interpret the message, but Neo4j state determines the workflow stage.
 
-It should receive only tools such as:
+## Important data-access boundary
+
+Domain agents invoke **operation-oriented tools** implemented as LangFlow `Run Flow` calls to the Data Access flow:
 
 ```text
-guarded_neo4j_read
-guarded_neo4j_write
+Domain Agent
+  → typed logical operation tool
+  → Data Access flow / Data Access Agent
+  → mandatory guardrail stages
+  → Neo4j MCP executor
+  → Neo4j
 ```
 
-Each tool is itself a flow containing policy checks and the raw Neo4j MCP component.
+In the target architecture, the Data Access Agent must not receive an unguarded write path that can bypass the Guardrail Agent. It produces a typed data-access plan; guarded read/write flows validate and execute it.
+
+The Phase 1 Walking Skeleton is a deliberate temporary exception: it exposes `get-schema`, `read-cypher`, and `write-cypher` only to the Data Access Agent in a non-production development environment and introduces the LLM Guardrail Agent in Phase 2.
 
 ---
 
 # 5. Use-case ownership matrix
 
-| Use case                             | Primary conversational actor    | Owning agent               | Supporting agents/components                        |
-| ------------------------------------ | ------------------------------- | -------------------------- | --------------------------------------------------- |
-| UC-1 Register request                | Sender                          | Request Intake Agent       | Clarification Agent, Data Access Agent              |
-| UC-3 Match and choose                | Sender                          | Matching and Choice Agent  | Matching Engine, Data Access Agent                  |
-| UC-4 Forward request                 | System/Admin                    | Brokerage Agent            | Messaging Service, Data Access Agent                |
-| UC-5 Respond to request              | Transporter                     | Brokerage Agent            | Clarification Agent, Recovery Agent                 |
-| UC-6 Provide clarification           | Sender or Receiver              | Clarification Agent        | Intake Agent or Brokerage Agent as resumption owner |
-| UC-7 Plan pickup and handover        | Sender and Transporter          | Fulfilment Agent           | Messaging Service                                   |
-| UC-8 Coordinate and confirm delivery | Transporter, Receiver or Sender | Fulfilment Agent           | Recovery Agent                                      |
-| UC-9 Close and collect feedback      | System/Admin                    | Closure and Feedback Agent | Data Access Agent, Messaging Service                |
+| Use case | Primary conversational actor | Owning agent | Supporting agents/components |
+| --- | --- | --- | --- |
+| UC-1 Register request | Sender | Request Intake Agent | Clarification Agent, Data Access Agent |
+| UC-3 Match and choose | Sender | Matching and Choice Agent | Matching Engine, Data Access Agent |
+| UC-4 Forward request | System, with Admin exception handling | Brokerage Agent | Messaging Service, Data Access Agent |
+| UC-5 Respond to request | Transporter | Brokerage Agent | Clarification Agent, Recovery Agent |
+| UC-6 Provide clarification | Sender or Receiver | Clarification Agent | Intake Agent or Brokerage Agent as resumption owner |
+| UC-7 Plan pickup and handover | Sender and Transporter | Fulfilment Agent | Messaging Service |
+| UC-8 Coordinate and confirm delivery | Transporter, Receiver or Sender | Fulfilment Agent | Recovery Agent |
+| UC-9 Close and collect feedback | System, with Admin exception handling | Closure and Feedback Agent | Data Access Agent, Messaging Service |
 
 ---
 
-# 6. Revised state machine
+# 6. Domain-aligned state machine
+
+The state machine below uses only values currently defined by `RequestStatus`. Matching, dispatch, candidate exhaustion, clarification type, and closure are represented as operations, events, or operational context rather than additional status values.
 
 ```mermaid
 stateDiagram-v2
-  [*] --> NewRequest: request created
+  [*] --> new: request created
 
-  NewRequest --> RequestNeedsClarification: minimum data missing
-  RequestNeedsClarification --> Complete: minimum data supplied
-  NewRequest --> Complete: minimum data sufficient
+  new --> needsClarification: intake data missing
+  needsClarification --> complete: intake clarification resolved
+  new --> complete: minimum data sufficient
 
-  Complete --> Matching: matching started
-  Matching --> OptionsProposed: candidates found
-  Matching --> NoMatch: no eligible candidates
+  complete --> optionsProposed: matching completed and options recorded
+  complete --> rejected: no candidates found
 
-  OptionsProposed --> SentToTransporter: candidate selected and dispatch initiated
+  optionsProposed --> waitingResponse: selected candidate received request
 
-  SentToTransporter --> WaitingForResponse: channel delivery confirmed
-  SentToTransporter --> SentToTransporter: retry alternate contact point
+  waitingResponse --> accepted: transporter accepts
+  waitingResponse --> needsClarification: transporter asks a question
+  needsClarification --> waitingResponse: transporter clarification resolved
 
-  WaitingForResponse --> Accepted: transporter accepts
-  WaitingForResponse --> TransporterClarification: transporter asks a question
-  TransporterClarification --> WaitingForResponse: answer and updated summary delivered
+  waitingResponse --> rejected: rejection or timeout
+  rejected --> waitingResponse: next candidate received request
+  rejected --> [*]: candidates exhausted; closed timestamp set
 
-  WaitingForResponse --> RejectedNextOption: rejection or response timeout
-  RejectedNextOption --> SentToTransporter: next candidate available
-  RejectedNextOption --> NoMatch: no candidates remain
+  accepted --> pickUpPlanned: pickup details agreed
+  pickUpPlanned --> pickedUp: handover confirmed
+  pickedUp --> delivered: delivery confirmed
+  delivered --> [*]: closed timestamp set
 
-  Accepted --> PickupPlanned: pickup details agreed
-  PickupPlanned --> ParcelPickedUp: handover confirmed
-  ParcelPickedUp --> Delivered: delivery confirmed
-  Delivered --> Closed: closure recorded
-
-  NoMatch --> [*]
-  Closed --> [*]
-
-  NewRequest --> Cancelled: deferred UC-11
-  RequestNeedsClarification --> Cancelled: deferred UC-11
-  Complete --> Cancelled: deferred UC-11
-  OptionsProposed --> Cancelled: deferred UC-11
-  WaitingForResponse --> Cancelled: deferred UC-11
-  Accepted --> Cancelled: deferred policy
-  Cancelled --> [*]
+  new --> cancelled: sender cancels
+  needsClarification --> cancelled: sender cancels
+  complete --> cancelled: sender cancels
+  optionsProposed --> cancelled: sender cancels
+  waitingResponse --> cancelled: sender cancels
+  accepted --> cancelled: policy permits cancellation
+  cancelled --> [*]: closed timestamp set
 ```
 
-## State semantics
+## State and operational semantics
 
-### `SentToTransporter`
+### Matching
 
-This state now has a precise meaning:
+`matching` is an operation or event, not a value in the current `RequestStatus` enum. A request remains `complete` while matching runs and becomes `optionsProposed` when candidates are recorded.
 
-> A dispatch operation has started, but successful channel delivery has not yet been confirmed.
+### Dispatch
 
-This supports UC-4 extension 2a:
+`sentToTransporter` is an operational dispatch stage, not a domain status. The request becomes `waitingResponse` only after the selected candidate has received the request according to the configured channel-delivery policy.
 
-* retry the same Contact Point;
-* try another Contact Point belonging to the same Transporter;
-* escalate to Admin;
-* only then decide whether to skip the candidate.
+### Clarification
 
-### `WaitingForResponse`
+`needsClarification` is shared by intake and Transporter clarification. A typed operational clarification case records:
 
-This means:
+* clarification type;
+* requested items;
+* requesting actor;
+* owning agent;
+* resume status;
+* optional deadline.
 
-> The request summary was successfully delivered to the selected Transporter and a response deadline is active.
+### Rejection and no match
 
-### `TransporterClarification`
+`rejected` represents a failed active candidate attempt. If another candidate remains, Brokerage advances the queue and returns the request to `waitingResponse` after successful delivery. If no candidates remain, an operational outcome such as `NO_MATCH` is recorded and `DeliveryRequest.closed` is set.
 
-This means:
+### Delivery and closure
 
-> The selected Transporter has asked a question and the current offer remains active, but its response timer has been suspended or replaced by a clarification timer.
-
-### `Delivered`
-
-This means:
-
-> Delivery was confirmed by an authorized participant, but closure has not yet been recorded.
-
-### `Closed`
-
-This means:
-
-> The operational request is complete. Feedback may still be collected without reopening the request.
+`delivered` is the final successful `RequestStatus`. Closure is represented by `DeliveryRequest.closed != null`. Feedback may be collected after closure without reopening the operational request.
 
 ---
 
 # 7. Domain event catalogue
 
-The agents should request domain events. They must not assign statuses directly.
+Agents request domain or operational events; they do not directly invent target statuses.
 
-| Event                                 | Source state                              | Target state                | Authorized origin                                   |
-| ------------------------------------- | ----------------------------------------- | --------------------------- | --------------------------------------------------- |
-| `REQUEST_CREATED`                     | None                                      | `NewRequest`                | Request Intake Agent                                |
-| `REQUEST_DATA_INCOMPLETE`             | `NewRequest`                              | `RequestNeedsClarification` | Intake Agent                                        |
-| `REQUEST_COMPLETED`                   | `NewRequest`, `RequestNeedsClarification` | `Complete`                  | Intake Agent after deterministic completeness check |
-| `MATCHING_STARTED`                    | `Complete`                                | `Matching`                  | Matching Agent                                      |
-| `MATCHES_FOUND`                       | `Matching`                                | `OptionsProposed`           | Matching Agent                                      |
-| `NO_MATCHES_FOUND`                    | `Matching`                                | `NoMatch`                   | Matching Agent                                      |
-| `CANDIDATE_DISPATCH_STARTED`          | `OptionsProposed`, `RejectedNextOption`   | `SentToTransporter`         | Brokerage Agent                                     |
-| `TRANSPORTER_MESSAGE_DELIVERED`       | `SentToTransporter`                       | `WaitingForResponse`        | Messaging delivery callback                         |
-| `TRANSPORTER_ACCEPTED`                | `WaitingForResponse`                      | `Accepted`                  | Selected Transporter                                |
-| `TRANSPORTER_REJECTED`                | `WaitingForResponse`                      | `RejectedNextOption`        | Selected Transporter                                |
-| `TRANSPORTER_RESPONSE_TIMED_OUT`      | `WaitingForResponse`                      | `RejectedNextOption`        | Recovery policy                                     |
-| `TRANSPORTER_REQUESTED_CLARIFICATION` | `WaitingForResponse`                      | `TransporterClarification`  | Selected Transporter                                |
-| `TRANSPORTER_CLARIFICATION_DELIVERED` | `TransporterClarification`                | `WaitingForResponse`        | Clarification Agent after updated summary delivery  |
-| `NEXT_CANDIDATE_SELECTED`             | `RejectedNextOption`                      | `SentToTransporter`         | Brokerage Agent                                     |
-| `CANDIDATES_EXHAUSTED`                | `RejectedNextOption`                      | `NoMatch`                   | Brokerage Agent                                     |
-| `PICKUP_DETAILS_AGREED`               | `Accepted`                                | `PickupPlanned`             | Sender or selected Transporter                      |
-| `PARCEL_HANDOVER_CONFIRMED`           | `PickupPlanned`                           | `ParcelPickedUp`            | Selected Transporter, optionally Sender             |
-| `DELIVERY_CONFIRMED`                  | `ParcelPickedUp`                          | `Delivered`                 | Transporter, Receiver or Sender according to policy |
-| `REQUEST_CLOSED`                      | `Delivered`                               | `Closed`                    | Closure Agent or Admin                              |
-| `REQUEST_CANCELLED`                   | Permitted active states                   | `Cancelled`                 | Sender; deferred in current scope                   |
+| Event | Source `RequestStatus` | Status effect | Authorized origin |
+| --- | --- | --- | --- |
+| `REQUEST_CREATED` | None | `new` | Request Intake Agent |
+| `REQUEST_DATA_INCOMPLETE` | `new` | `needsClarification` | Request Intake Agent |
+| `REQUEST_COMPLETED` | `new`, intake `needsClarification` | `complete` | Request Intake Agent after completeness check |
+| `MATCHING_STARTED` | `complete` | unchanged | Matching and Choice Agent |
+| `MATCHES_FOUND` | `complete` | `optionsProposed` | Matching and Choice Agent |
+| `NO_MATCHES_FOUND` | `complete` | `rejected`, then closed with `NO_MATCH` outcome | Matching and Choice Agent |
+| `CANDIDATE_SELECTED` | `optionsProposed`, `rejected` | unchanged | Sender or Brokerage policy |
+| `CANDIDATE_DISPATCH_STARTED` | `optionsProposed`, `rejected` | unchanged | Brokerage Agent |
+| `TRANSPORTER_MESSAGE_DELIVERED` | `optionsProposed`, `rejected` | `waitingResponse` | Messaging delivery callback or trusted confirmation |
+| `TRANSPORTER_ACCEPTED` | `waitingResponse` | `accepted` | Selected Transporter |
+| `TRANSPORTER_REJECTED` | `waitingResponse` | `rejected` | Selected Transporter |
+| `TRANSPORTER_RESPONSE_TIMED_OUT` | `waitingResponse` | `rejected` | Recovery policy |
+| `TRANSPORTER_REQUESTED_CLARIFICATION` | `waitingResponse` | `needsClarification` with Transporter clarification context | Selected Transporter |
+| `TRANSPORTER_CLARIFICATION_DELIVERED` | Transporter `needsClarification` | `waitingResponse` | Clarification Agent after updated summary delivery |
+| `NEXT_CANDIDATE_SELECTED` | `rejected` | unchanged until delivery | Brokerage Agent |
+| `CANDIDATES_EXHAUSTED` | `rejected` | status unchanged; closed timestamp and `NO_MATCH` outcome recorded | Brokerage Agent |
+| `PICKUP_DETAILS_AGREED` | `accepted` | `pickUpPlanned` | Sender or selected Transporter |
+| `PARCEL_HANDOVER_CONFIRMED` | `pickUpPlanned` | `pickedUp` | Selected Transporter, optionally Sender |
+| `DELIVERY_CONFIRMED` | `pickedUp` | `delivered` | Transporter, Receiver or Sender according to policy |
+| `REQUEST_CLOSED` | `delivered` | status unchanged; `closed` timestamp set | Closure and Feedback Agent |
+| `REQUEST_CANCELLED` | Permitted active statuses | `cancelled` and `closed` timestamp set | Sender; policy-dependent after acceptance |
 
 ---
 
@@ -341,34 +346,45 @@ The Router Agent determines:
 * which specialist agent should process it;
 * whether disambiguation is necessary.
 
-It must use:
+The Router does not retrieve domain state opportunistically. Before it runs, a mandatory routing-context step resolves the `OperationalConversationBinding` and loads the authoritative request context from Neo4j.
 
-* authenticated actor;
-* actor role;
-* channel identity;
-* reply-to message;
-* active requests;
-* current request states;
-* pending clarification, selection, response, pickup, or delivery actions.
+A representative routing context is:
 
-It must not infer the target request solely from message text.
+```json
+{
+  "session_id": "session-id",
+  "request_id": "request-id-or-null",
+  "request_status": "waitingResponse",
+  "closed": false,
+  "assigned_transporter_id": "agent-id-or-null",
+  "clarification_type": "TRANSPORTER_QUESTION",
+  "next_expected_role": "sender"
+}
+```
 
-### Tools
+Conversation memory may help interpret phrases such as “yes” or “tomorrow morning”, but it must not be the authority for the request status or workflow stage.
 
-| Tool                         | Purpose                                                                  |
-| ---------------------------- | ------------------------------------------------------------------------ |
-| `resolve_channel_actor`      | Map channel identity to Sender, Transporter, Receiver, or Admin context. |
-| `get_actor_open_requests`    | Retrieve requests in which the actor currently participates.             |
-| `get_pending_interactions`   | Retrieve unanswered questions, offers, selections, and confirmations.    |
-| `resolve_reply_reference`    | Correlate a reply with the outbound message that prompted it.            |
-| `start_request_goal`         | Create a goal/session for a new parcel request.                          |
-| `route_to_intake`            | Invoke the Request Intake Agent flow.                                    |
-| `route_to_clarification`     | Invoke the Clarification Agent flow.                                     |
-| `route_to_matching`          | Invoke the Matching and Choice Agent flow.                               |
-| `route_to_brokerage`         | Invoke the Brokerage Agent flow.                                         |
-| `route_to_fulfilment`        | Invoke the Fulfilment Agent flow.                                        |
-| `route_to_closure`           | Invoke the Closure and Feedback Agent flow.                              |
-| `ask_request_disambiguation` | Ask the user which request they mean.                                    |
+### Mandatory pre-routing context operations
+
+| Operation | Purpose |
+| --- | --- |
+| `resolve_channel_actor` | Map a trusted channel identity to an Agent and role context. |
+| `get_request_routing_context` | Resolve the session/request binding and load authoritative `DeliveryRequest` status, closure, assignment, and pending operational context. |
+| `resolve_reply_reference` | Correlate a reply with the outbound message that prompted it when the channel supports reply identifiers. |
+
+These are deterministic or data-access preprocessing steps, not optional Router tools.
+
+### Router tools
+
+| Tool | Purpose |
+| --- | --- |
+| `route_to_intake` | Invoke the Request Intake Agent flow. |
+| `route_to_clarification` | Invoke the Clarification Agent flow. |
+| `route_to_matching` | Invoke the Matching and Choice Agent flow. |
+| `route_to_brokerage` | Invoke the Brokerage Agent flow. |
+| `route_to_fulfilment` | Invoke the Fulfilment Agent flow. |
+| `route_to_closure` | Invoke the Closure and Feedback Agent flow. |
+| `ask_request_disambiguation` | Ask which request the user means when deterministic context cannot identify one. |
 
 ### Restrictions
 
@@ -388,41 +404,39 @@ The Router receives no raw Neo4j MCP tools and no state-changing tools.
 * understand the parcel-sending intention;
 * resolve or minimally bootstrap the Sender;
 * create a draft request immediately;
-* extract request information;
+* extract request information into structured fields;
 * check completeness;
 * request missing information;
-* complete the request when deterministic rules pass.
+* complete the request when the completeness rule passes.
 
 ### Tools
 
-| Tool                            | Purpose                                                                 |
-| ------------------------------- | ----------------------------------------------------------------------- |
-| `resolve_sender_profile`        | Find the Sender associated with the channel identity.                   |
-| `create_minimal_sender_profile` | Create only the minimum Sender identity required for UC-1.              |
-| `create_request_draft`          | Create the request and Request ID in `NewRequest`.                      |
-| `get_request_snapshot`          | Retrieve the current request and version.                               |
-| `extract_request_fields`        | Produce a typed partial request from the Sender message.                |
-| `update_request_fields`         | Submit changed request information through guarded data access.         |
-| `store_attachment_reference`    | Associate a photo or file reference with the request.                   |
-| `evaluate_minimum_data`         | Deterministically determine whether the minimum-data rule is satisfied. |
-| `open_clarification_case`       | Create an intake clarification with requested items.                    |
-| `propose_domain_event`          | Request `REQUEST_DATA_INCOMPLETE` or `REQUEST_COMPLETED`.               |
-| `send_message`                  | Ask for missing data or confirm completion.                             |
+Every real persistence operation delegates to the Data Access flow and Data Access Agent.
+
+| Tool | Purpose |
+| --- | --- |
+| `resolve_sender_profile` | Find the Sender Agent associated with the trusted actor context. |
+| `create_minimal_sender_profile` | Create only the minimum Agent and Sender participation required for UC-1. |
+| `create_request_draft` | Create the `DeliveryRequest` and required related nodes with status `new`; create the operational session binding when applicable. |
+| `get_request_snapshot` | Retrieve the current request and relevant related objects. |
+| `extract_request_fields` | Produce a typed partial request from the Sender message. |
+| `update_request_fields` | Submit changed request information through the Data Access flow. |
+| `store_attachment_reference` | Associate a photo or file reference with the relevant `Parcel` when attachments are supported. |
+| `evaluate_minimum_data` | Determine whether the current phase's minimum-data rule is satisfied. |
+| `open_clarification_case` | Create an intake clarification context and request the `REQUEST_DATA_INCOMPLETE` event. |
+| `request_completion` | Request the `REQUEST_COMPLETED` event after completeness validation. |
+| `send_message` | Ask for missing data or confirm completion. |
 
 ### Minimal Sender bootstrap
 
-Because UC-13 is out of scope, this iteration should not implement full profile maintenance.
-
-Recommended rule:
-
 ```text
-No Sender profile:
-  create minimal Sender profile sufficient to own the request
+No Sender Agent:
+  create the minimum Agent + Sender participation needed to own the request
 
 Incomplete Sender profile:
-  collect only information needed for UC-1
+  collect only information required by the current phase
 
-Full profile editing:
+Full profile maintenance:
   deferred to UC-13
 ```
 
@@ -437,7 +451,7 @@ Full profile editing:
 
 ### Responsibility
 
-The Clarification Agent manages a typed clarification case.
+The Clarification Agent manages a typed operational clarification case:
 
 ```json
 {
@@ -447,7 +461,7 @@ The Clarification Agent manages a typed clarification case.
   "requested_by": "system-or-transporter-id",
   "requested_items": [],
   "resume_owner": "intake_agent | brokerage_agent",
-  "resume_state": "Complete | WaitingForResponse",
+  "resume_status": "complete | waitingResponse",
   "target_transporter_id": "optional",
   "deadline": "optional"
 }
@@ -455,29 +469,27 @@ The Clarification Agent manages a typed clarification case.
 
 ### Tools
 
-| Tool                                | Purpose                                                               |
-| ----------------------------------- | --------------------------------------------------------------------- |
-| `get_clarification_case`            | Retrieve the outstanding questions and origin.                        |
-| `extract_clarification_answers`     | Map the response to requested items.                                  |
-| `update_request_fields`             | Add answers to the same Request ID.                                   |
-| `store_attachment_reference`        | Store references to supplied photos or documents.                     |
-| `evaluate_minimum_data`             | Recheck completeness for intake clarification.                        |
-| `build_updated_transporter_summary` | Rebuild the summary for a Transporter question.                       |
-| `send_updated_summary`              | Send the answer to the selected Transporter.                          |
-| `close_clarification_case`          | Mark the clarification as resolved.                                   |
-| `propose_domain_event`              | Request `REQUEST_COMPLETED` or `TRANSPORTER_CLARIFICATION_DELIVERED`. |
-| `send_message`                      | Ask follow-up questions or acknowledge completion.                    |
+| Tool | Purpose |
+| --- | --- |
+| `get_clarification_case` | Retrieve the outstanding questions and clarification type. |
+| `extract_clarification_answers` | Map the response to requested items. |
+| `update_request_fields` | Add answers to the same `DeliveryRequest`. |
+| `store_attachment_reference` | Store references to supplied photos or documents. |
+| `evaluate_minimum_data` | Recheck completeness for intake clarification. |
+| `build_updated_transporter_summary` | Rebuild the summary for a Transporter question. |
+| `send_updated_summary` | Send the answer to the selected Transporter through the Messaging Service. |
+| `close_clarification_case` | Mark the operational clarification context as resolved. |
+| `request_resume_event` | Request `REQUEST_COMPLETED` or `TRANSPORTER_CLARIFICATION_DELIVERED`. |
+| `send_message` | Ask follow-up questions or acknowledge completion. |
 
 ### Important routing rule
 
-The same user message can produce different outcomes:
-
 ```text
 INTAKE_MISSING_DATA:
-  answer → completeness check → Complete
+  answer → completeness check → complete
 
 TRANSPORTER_QUESTION:
-  answer → resend updated summary → WaitingForResponse
+  answer → updated summary delivered → waitingResponse
 ```
 
 ---
@@ -495,22 +507,22 @@ TRANSPORTER_QUESTION:
 * present up to three options;
 * explain the recommendations;
 * capture Sender selection or ranking;
-* persist the candidate queue;
+* persist the operational candidate queue;
 * hand control to the Brokerage Agent.
 
 ### Tools
 
-| Tool                                | Purpose                                                                            |
-| ----------------------------------- | ---------------------------------------------------------------------------------- |
-| `get_matching_context`              | Retrieve route, parcel, date, urgency, preference, and usable profile information. |
-| `run_transporter_matching`          | Execute deterministic eligibility and ranking logic.                               |
-| `save_match_result`                 | Persist candidate IDs, ordering, scores, and reason codes.                         |
-| `get_presentable_candidate_details` | Return only information the Sender is allowed to see.                              |
-| `record_sender_candidate_order`     | Store the Sender’s selection or ranking.                                           |
-| `build_candidate_queue`             | Produce the order the Brokerage Agent should consume.                              |
-| `propose_domain_event`              | Request `MATCHING_STARTED`, `MATCHES_FOUND`, or `NO_MATCHES_FOUND`.                |
-| `start_brokerage`                   | Invoke Brokerage after selection.                                                  |
-| `send_message`                      | Present options and request selection or ranking.                                  |
+| Tool | Purpose |
+| --- | --- |
+| `get_matching_context` | Retrieve route, parcel, date, urgency, preference, and usable profile information. |
+| `run_transporter_matching` | Execute deterministic eligibility and ranking logic. |
+| `save_match_result` | Persist candidate IDs, ordering, scores, and reason codes in the operational model. |
+| `get_presentable_candidate_details` | Return only candidate information the Sender is allowed to see. |
+| `record_sender_candidate_order` | Store the Sender's selection or ranking. |
+| `build_candidate_queue` | Produce the order the Brokerage Agent should consume. |
+| `request_matching_event` | Request `MATCHING_STARTED`, `MATCHES_FOUND`, or `NO_MATCHES_FOUND`. |
+| `start_brokerage` | Invoke Brokerage after selection. |
+| `send_message` | Present options and request selection or ranking. |
 
 ### Matching tool output
 
@@ -520,8 +532,8 @@ TRANSPORTER_QUESTION:
   "options": [
     {
       "candidate_id": "candidate-id",
-      "transporter_id": "transporter-id",
-      "contact_point_ids": ["contact-1"],
+      "transporter_id": "transporter-role-id",
+      "channel_ids": ["channel-id"],
       "system_rank": 1,
       "eligibility": "ELIGIBLE",
       "reason_codes": [
@@ -536,7 +548,7 @@ TRANSPORTER_QUESTION:
 }
 ```
 
-The final scoring formula can remain undecided, but eligibility and ranking must remain outside the agent prompt.
+The final scoring formula can remain undecided, but eligibility and ranking remain outside the agent prompt.
 
 ---
 
@@ -553,7 +565,7 @@ The final scoring formula can remain undecided, but eligibility and ranking must
 
 * consume the candidate queue;
 * build the request summary;
-* select a valid Contact Point;
+* select a usable Channel;
 * forward the request;
 * monitor delivery;
 * process acceptance, rejection, or questions;
@@ -563,44 +575,30 @@ The final scoring formula can remain undecided, but eligibility and ranking must
 
 ### Tools
 
-| Tool                                | Purpose                                                                 |
-| ----------------------------------- | ----------------------------------------------------------------------- |
-| `get_candidate_queue`               | Retrieve ordered candidates and prior attempt results.                  |
-| `select_current_candidate`          | Select the next unused candidate.                                       |
-| `get_usable_contact_points`         | Retrieve validated Contact Points for the candidate.                    |
-| `build_transporter_request_summary` | Produce the scoped summary using the same Request ID.                   |
-| `forward_request_to_transporter`    | Send automatically or create an Admin forwarding task.                  |
-| `record_dispatch_attempt`           | Record channel, Contact Point, summary version, and timestamp.          |
-| `schedule_response_deadline`        | Create a reminder and final response deadline.                          |
-| `cancel_response_deadline`          | Cancel the wait after acceptance, rejection, or question.               |
-| `record_transporter_response`       | Record accept, reject, or clarification request.                        |
-| `open_clarification_case`           | Create a `TRANSPORTER_QUESTION` clarification.                          |
-| `select_next_candidate`             | Advance through the existing queue.                                     |
-| `propose_domain_event`              | Request dispatch, acceptance, rejection, timeout, or exhaustion events. |
-| `notify_sender`                     | Inform the Sender about acceptance, rejection, delay, or No Match.      |
-| `create_admin_exception_task`       | Escalate channel failure or inconsistent response.                      |
+| Tool | Purpose |
+| --- | --- |
+| `get_candidate_queue` | Retrieve ordered candidates and prior attempt results. |
+| `select_current_candidate` | Select the next unused candidate. |
+| `get_usable_channels` | Retrieve validated Channels for the candidate. |
+| `build_transporter_request_summary` | Produce the scoped summary using the same Request ID. |
+| `forward_request_to_transporter` | Send the request through the Messaging Service. |
+| `record_dispatch_attempt` | Record channel, summary version, and timestamp. |
+| `schedule_response_deadline` | Create a reminder and final response deadline. |
+| `cancel_response_deadline` | Cancel the wait after acceptance, rejection, or question. |
+| `record_transporter_response` | Record acceptance, rejection, or clarification request. |
+| `open_clarification_case` | Create a `TRANSPORTER_QUESTION` clarification context. |
+| `select_next_candidate` | Advance through the existing candidate queue. |
+| `request_brokerage_event` | Request dispatch, acceptance, rejection, timeout, or exhaustion events. |
+| `notify_sender` | Inform the Sender about acceptance, rejection, delay, or no match. |
+| `create_admin_exception_task` | Escalate channel failure, contradictory responses, or policy exceptions. |
 
-### Automated versus assisted forwarding
+### Admin exception path
 
-The forwarding tool should support:
-
-```text
-AUTOMATED:
-  System sends directly through the gateway.
-
-ADMIN_ASSISTED:
-  System prepares the summary and creates an Admin task.
-  Admin confirms the actual send.
-```
-
-The rest of the state machine remains unchanged.
+The autonomous path sends through the configured gateway. A human Admin is introduced only when delivery cannot be confirmed, the response is contradictory, or policy requires review. The blueprint does not require a formal configurable `AUTOMATED` versus `ADMIN_ASSISTED` runtime mode unless that remains a product requirement.
 
 ### Channel delivery rule
 
-`SentToTransporter → WaitingForResponse` should occur only after:
-
-* a successful channel delivery callback; or
-* explicit Admin confirmation in assisted mode.
+The request becomes `waitingResponse` only after the selected Transporter's Channel has successfully received the request according to the configured delivery semantics. Dispatch initiation and retry attempts are operational events, not `RequestStatus` values.
 
 ---
 
@@ -614,31 +612,31 @@ The rest of the state machine remains unchanged.
 ### Responsibility
 
 * record pickup coordination;
-* record pickup plan;
+* record pickup planning;
 * record handover confirmation;
 * record delivery notes;
 * accept delivery confirmation from authorized participants;
 * notify relevant parties;
 * follow up when confirmation is missing.
 
-Detailed coordination may happen directly between Sender and Transporter. The system therefore records only the minimum operational information required by the use cases.
+Detailed coordination may happen directly between Sender and Transporter. The system records the minimum operational information required by the use cases.
 
 ### Tools
 
-| Tool                           | Purpose                                                     |
-| ------------------------------ | ----------------------------------------------------------- |
-| `get_fulfilment_context`       | Retrieve accepted request, participants, and current state. |
-| `record_pickup_plan`           | Store place, time, and contact person.                      |
-| `record_pickup_note`           | Store coordination notes communicated through Hulubul.      |
-| `record_handover_confirmation` | Record Transporter or Sender confirmation of receipt.       |
-| `record_delivery_note`         | Record delivery-related information.                        |
-| `record_delivery_confirmation` | Record confirmation and confirming actor.                   |
-| `get_visible_party_contact`    | Retrieve contact information allowed at the current stage.  |
-| `schedule_pickup_followup`     | Schedule follow-up if handover is not confirmed.            |
-| `schedule_delivery_followup`   | Schedule follow-up if delivery is not confirmed.            |
-| `propose_domain_event`         | Request pickup, handover, or delivery transitions.          |
-| `notify_participants`          | Notify Sender and optionally Receiver or Transporter.       |
-| `create_admin_exception_task`  | Escalate disputed or indefinitely unconfirmed delivery.     |
+| Tool | Purpose |
+| --- | --- |
+| `get_fulfilment_context` | Retrieve the accepted request, participants, and current status. |
+| `record_pickup_plan` | Store place, time, and contact person using the agreed domain/operational mapping. |
+| `record_pickup_note` | Store coordination notes communicated through Hulubul. |
+| `record_handover_confirmation` | Record Transporter or Sender confirmation of receipt. |
+| `record_delivery_note` | Record delivery-related information. |
+| `record_delivery_confirmation` | Record confirmation and confirming actor. |
+| `get_visible_party_channel` | Retrieve contact information allowed at the current stage. |
+| `schedule_pickup_followup` | Schedule follow-up if handover is not confirmed. |
+| `schedule_delivery_followup` | Schedule follow-up if delivery is not confirmed. |
+| `request_fulfilment_event` | Request pickup, handover, or delivery events. |
+| `notify_participants` | Notify Sender and optionally Receiver or Transporter. |
+| `create_admin_exception_task` | Escalate disputed or indefinitely unconfirmed delivery. |
 
 ### Delivery confirmation policy
 
@@ -648,18 +646,18 @@ UC-8 allows confirmation from:
 * Receiver;
 * Sender.
 
-The event must record:
+The confirmation must record:
 
 ```json
 {
-  "confirmed_by_actor_id": "actor-id",
+  "confirmed_by_actor_id": "agent-id",
   "confirmed_by_role": "transporter | receiver | sender",
-  "confirmation_channel": "channel",
+  "confirmation_channel": "channel-id-or-medium",
   "confirmed_at": "timestamp"
 }
 ```
 
-Whether every role can independently close delivery or whether some confirmations require corroboration remains a policy decision.
+Whether every role can independently confirm delivery or whether some confirmations require corroboration remains a policy decision.
 
 ---
 
@@ -672,31 +670,31 @@ Whether every role can independently close delivery or whether some confirmation
 ### Responsibility
 
 * verify that delivery has been validly confirmed;
-* close the request;
+* set the request's `closed` timestamp;
 * retain history;
 * optionally request feedback;
 * record feedback without reopening the operational process.
 
 ### Tools
 
-| Tool                             | Purpose                                                   |
-| -------------------------------- | --------------------------------------------------------- |
-| `get_closure_context`            | Retrieve delivery confirmation and unresolved exceptions. |
-| `validate_closure_preconditions` | Deterministically check whether closure is allowed.       |
-| `propose_domain_event`           | Request `REQUEST_CLOSED`.                                 |
-| `send_feedback_request`          | Ask the Sender for optional feedback.                     |
-| `record_feedback`                | Store feedback or an internal note.                       |
-| `record_closure_summary`         | Persist the final outcome and relevant timestamps.        |
-| `create_admin_exception_task`    | Escalate incomplete or contradictory delivery evidence.   |
+| Tool | Purpose |
+| --- | --- |
+| `get_closure_context` | Retrieve delivery confirmation and unresolved exceptions. |
+| `validate_closure_preconditions` | Check whether closure is allowed. |
+| `set_request_closed_timestamp` | Set `DeliveryRequest.closed` while leaving status `delivered`. |
+| `send_feedback_request` | Ask the Sender for optional feedback. |
+| `record_feedback` | Store `Feedback` or an internal note. |
+| `record_closure_summary` | Persist the final outcome and relevant timestamps. |
+| `create_admin_exception_task` | Escalate incomplete or contradictory delivery evidence. |
 
 ### Recommended sequence
 
 ```text
 Delivery confirmed
-  → persist Delivered
+  → persist delivered
   → notify Sender
   → validate closure
-  → persist Closed
+  → set DeliveryRequest.closed
   → optionally request feedback
 ```
 
@@ -718,33 +716,31 @@ It supports:
 * Transporter response timeout;
 * automatic candidate cascade;
 * pickup follow-up;
-* delivery confirmation follow-up.
+* delivery-confirmation follow-up.
 
 ### Tools
 
-| Tool                          | Purpose                                             |
-| ----------------------------- | --------------------------------------------------- |
-| `get_due_wait_conditions`     | Retrieve processes with due reminders or deadlines. |
-| `get_recovery_policy`         | Load timeout and reminder configuration.            |
-| `record_recovery_attempt`     | Atomically increment the recovery count.            |
-| `send_reminder`               | Send a context-specific reminder.                   |
-| `expire_wait_condition`       | Mark a waiting period as expired.                   |
-| `propose_domain_event`        | Request a timeout or cascade event.                 |
-| `invoke_owning_agent`         | Resume Brokerage, Clarification, or Fulfilment.     |
-| `create_admin_exception_task` | Escalate after the configured limit.                |
+| Tool | Purpose |
+| --- | --- |
+| `get_due_wait_conditions` | Retrieve processes with due reminders or deadlines. |
+| `get_recovery_policy` | Load timeout and reminder configuration. |
+| `record_recovery_attempt` | Atomically increment the recovery count. |
+| `send_reminder` | Send a context-specific reminder. |
+| `expire_wait_condition` | Mark a waiting period as expired. |
+| `request_recovery_event` | Request a timeout, rejection, or cascade event. |
+| `invoke_owning_agent` | Resume Brokerage, Clarification, or Fulfilment. |
+| `create_admin_exception_task` | Escalate after the configured limit. |
 
 ### Restriction
 
-The Recovery Agent should not decide arbitrary business policy.
-
-For example:
+The Recovery Agent does not invent arbitrary recovery policy.
 
 ```text
-Response deadline passed:
-  deterministic policy says whether to remind or cascade
+Deadline reached:
+  deterministic policy selects remind, cascade, or escalate
 
 Recovery Agent:
-  formulates the message and invokes the prescribed action
+  formulates the contextual message and invokes the prescribed action
 ```
 
 ---
@@ -755,24 +751,27 @@ Recovery Agent:
 
 The Data Access Agent:
 
-* understands the Neo4j schema;
-* translates approved logical operations into parameterized Cypher;
-* requests guarded reads and writes;
-* translates Neo4j results into typed domain results.
+* understands the approved Neo4j schema;
+* translates typed logical operations into parameterized Cypher plans;
+* uses Neo4j MCP only through the configured phase-specific boundary;
+* translates Neo4j results into typed domain/operational results;
+* never communicates directly with end users.
 
-It never communicates directly with users.
+Domain agents call operation-oriented tools that delegate to the common Data Access flow. They do not call Neo4j or MCP directly.
 
-### Tools available to the Data Access Agent
+### Target tools available to the Data Access Agent
 
-| Tool                       | Purpose                                                           |
-| -------------------------- | ----------------------------------------------------------------- |
-| `get_schema_snapshot`      | Retrieve the approved schema description.                         |
-| `guarded_neo4j_read`       | Submit a scoped, parameterized read through the read guardrail.   |
-| `guarded_neo4j_write`      | Submit a scoped, parameterized write through the write guardrail. |
-| `validate_result_shape`    | Validate Neo4j results against the expected operation schema.     |
-| `record_data_access_audit` | Record purpose, query hash, actor scope, and result metadata.     |
+| Tool | Purpose |
+| --- | --- |
+| `get_schema_snapshot` | Retrieve the approved schema description, backed by Neo4j MCP `get-schema` when needed. |
+| `submit_guarded_read_plan` | Submit a scoped, parameterized read plan to the guarded read flow. |
+| `submit_guarded_write_plan` | Submit a scoped, parameterized write plan to the guarded write flow. |
+| `validate_result_shape` | Validate Neo4j results against the expected operation schema. |
+| `record_data_access_audit` | Record purpose, query hash, actor scope, and result metadata. |
 
-### Tools not available
+The official Neo4j MCP capabilities relevant to this architecture are `get-schema`, `read-cypher`, and `write-cypher`. The raw MCP tools live inside the data-access boundary. `list-gds-procedures` is not required for the defined workflows.
+
+### Tools not available to domain agents
 
 * raw Neo4j MCP;
 * unrestricted `read-cypher`;
@@ -790,14 +789,13 @@ It never communicates directly with users.
   "mode": "WRITE",
   "requested_by_agent": "brokerage_agent",
   "actor": {
-    "id": "actor-id",
+    "id": "agent-id",
     "role": "transporter"
   },
   "resource": {
-    "type": "ParcelRequest",
+    "type": "DeliveryRequest",
     "id": "request-id",
-    "expected_state": "WaitingForResponse",
-    "expected_version": 8
+    "expected_status": "waitingResponse"
   },
   "business_event": "TRANSPORTER_ACCEPTED",
   "payload": {},
@@ -805,9 +803,15 @@ It never communicates directly with users.
 }
 ```
 
+The Data Access flow also supports operational reads such as `get_request_routing_context(session_id)` by joining `OperationalConversationBinding` with the associated `DeliveryRequest`.
+
 ---
 
 ## 8.10 Guardrail Agent
+
+### Phase placement
+
+The Guardrail Agent is part of the target decomposition but is intentionally omitted from the Phase 1 Walking Skeleton. It is introduced as a mandatory LLM-based stage in Phase 2 and progressively replaced by deterministic policy and operation-specific tools in the hardened target system.
 
 ### Responsibility
 
@@ -816,11 +820,11 @@ The initial Guardrail Agent evaluates:
 * whether the calling agent may request the operation;
 * whether the actor may perform it;
 * whether the actor is related to the request;
-* whether the current state permits the event;
+* whether the current status permits the requested event;
 * whether the requested fields are in scope;
-* whether the generated Cypher matches the approved operation;
+* whether the generated Cypher matches the approved logical operation;
 * whether the read would disclose unrelated data;
-* whether idempotency and version requirements are present.
+* whether idempotency and expected-status information are present.
 
 ### Two-stage use
 
@@ -828,32 +832,34 @@ The initial Guardrail Agent evaluates:
 
 ```text
 Specialist agent
-  → logical operation request
+  → typed logical operation request
   → Guardrail Agent
-  → allow or deny operation intent
+  → allow, deny, or require review
 ```
 
 #### Stage 2: query policy
 
 ```text
 Allowed operation
-  → Data Access Agent creates Cypher
-  → Guardrail Agent validates Cypher against approved operation
-  → Neo4j MCP execution
+  → Data Access Agent creates a Cypher plan
+  → Guardrail Agent validates the plan
+  → conditional MCP executor runs the approved query
 ```
+
+The Guardrail Agent is a mandatory sequential stage, not an optional tool that the Data Access Agent may skip.
 
 ### Guardrail tools
 
-| Tool                        | Purpose                                                                              |
-| --------------------------- | ------------------------------------------------------------------------------------ |
-| `load_authoritative_state`  | Read the current state and aggregate version.                                        |
-| `load_actor_relationship`   | Verify ownership, assignment, or participation.                                      |
-| `get_operation_policy`      | Retrieve allowed agents, roles, fields, and graph scope.                             |
-| `get_transition_policy`     | Retrieve allowed source state, event, and target state.                              |
-| `validate_operation_schema` | Check required fields and types.                                                     |
-| `analyze_cypher`            | Detect unrestricted matches, prohibited labels, deletes, and unparameterized values. |
-| `check_idempotency`         | Detect an already-processed message or event.                                        |
-| `record_guardrail_decision` | Persist decision and reason codes.                                                   |
+| Tool | Purpose |
+| --- | --- |
+| `load_authoritative_status` | Read the current `RequestStatus` and closure state. |
+| `load_actor_relationship` | Verify ownership, assignment, or participation. |
+| `get_operation_policy` | Retrieve allowed agents, roles, fields, and graph scope. |
+| `get_transition_policy` | Retrieve allowed source status, event, and status effect. |
+| `validate_operation_schema` | Check required fields and types. |
+| `analyze_cypher` | Detect unrestricted matches, prohibited labels, deletes, and unparameterized values. |
+| `check_idempotency` | Detect an already-processed message or event. |
+| `record_guardrail_decision` | Persist the decision and reason codes. |
 
 ### Guardrail decision
 
@@ -864,67 +870,76 @@ Allowed operation
   "reason_codes": [
     "CALLER_ALLOWED",
     "ACTOR_IS_SELECTED_TRANSPORTER",
-    "STATE_TRANSITION_ALLOWED",
+    "STATUS_TRANSITION_ALLOWED",
     "QUERY_SCOPE_VALID"
   ],
   "constraints": {
     "request_id": "request-id",
-    "expected_state": "WaitingForResponse",
-    "expected_version": 8,
+    "expected_status": "waitingResponse",
     "maximum_affected_records": 1
   }
 }
 ```
 
-### Deterministic controls required from the beginning
+### Deterministic controls around the LLM guardrail
 
-Even while the main guardrail is an agent, the following must be deterministic:
+Once guarded data access is introduced, the following remain deterministic even while semantic policy is evaluated by an agent:
 
-* actor identity injection;
+* trusted actor-context injection;
 * operation-name allowlist;
-* JSON-schema validation;
+* JSON Schema validation;
 * query timeout;
 * result-size limit;
 * parameterized Cypher;
-* request ID scoping;
-* no `DELETE` or `DETACH DELETE`;
-* expected-version comparison;
+* request-ID scoping;
+* prohibition of `DELETE` and `DETACH DELETE`;
+* expected-status comparison;
 * idempotency-key enforcement;
 * maximum affected-record count;
 * separate read and write database credentials.
 
-The Guardrail Agent is temporary semantic policy assistance, not the sole security boundary.
+The LLM Guardrail Agent is temporary semantic policy assistance, not the sole security boundary.
 
 ---
 
 # 9. Permission model derived from the use cases
 
-| Action                         |           Sender | Selected Transporter | Other Transporter |             Receiver | System/Admin |
-| ------------------------------ | ---------------: | -------------------: | ----------------: | -------------------: | -----------: |
-| Create request                 |              Yes |                   No |                No |                   No |     Assisted |
-| Update request during intake   |              Yes |                   No |                No | Limited contribution |     Assisted |
-| View proposed options          |              Yes |                   No |                No |                   No |          Yes |
-| Select or rank options         |              Yes |                   No |                No |                   No |     Assisted |
-| View forwarded request summary |               No |                  Yes |                No |                   No |          Yes |
-| Accept or reject request       |               No |                  Yes |                No |                   No |           No |
-| Ask package clarification      |               No |                  Yes |                No |                   No |     Assisted |
-| Provide package clarification  |              Yes |                   No |                No |              Limited |     Assisted |
-| Plan pickup                    |              Yes |                  Yes |                No |                   No |     Assisted |
-| Confirm handover               |         Optional |                  Yes |                No |                   No |     Assisted |
-| Add delivery details           |          Limited |                  Yes |                No |                  Yes |     Assisted |
-| Confirm delivery               | Policy-dependent |                  Yes |                No |                  Yes |     Assisted |
-| Close request                  |               No |                   No |                No |                   No | System/Admin |
-| Provide feedback               |              Yes |       Possibly later |                No |       Possibly later |           No |
+| Action | Sender | Selected Transporter | Other Transporter | Receiver | System/Admin exception path |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Create request | Yes | No | No | No | Exception only |
+| Update request during intake | Yes | No | No | Limited contribution | Exception only |
+| View proposed options | Yes | No | No | No | Yes |
+| Select or rank options | Yes | No | No | No | Exception only |
+| View forwarded request summary | No | Yes | No | No | Yes |
+| Accept or reject request | No | Yes | No | No | No |
+| Ask package clarification | No | Yes | No | No | Exception only |
+| Provide package clarification | Yes | No | No | Limited | Exception only |
+| Plan pickup | Yes | Yes | No | No | Exception only |
+| Confirm handover | Optional | Yes | No | No | Exception only |
+| Add delivery details | Limited | Yes | No | Yes | Exception only |
+| Confirm delivery | Policy-dependent | Yes | No | Yes | Exception only |
+| Set closed timestamp | No | No | No | No | System; Admin on exception |
+| Provide feedback | Yes | Possibly later | No | Possibly later | No |
 
-“Selected Transporter” means the Transporter associated with the currently active candidate attempt, not any Transporter returned by matching.
+“Selected Transporter” means the Transporter participation associated with the currently active candidate attempt, not any Transporter returned by matching.
 
 ---
 
 # 10. LangFlow flow design
 
-LangFlow currently supports using components, other agents, and MCP servers as Agent tools. Its `Run Flow` component can execute another flow as a subprocess and expose that flow as an Agent tool.
+Use native LangFlow components and patterns before introducing custom components:
 
-## Suggested flow inventory
+* Chat Input and Chat Output;
+* Agent with structured response;
+* Run Flow in Tool Mode for specialist and Data Access delegation;
+* MCP Tools inside the Data Access boundary;
+* Parser and JSON Operations for deterministic rendering and extraction;
+* If-Else for simple guarded branches;
+* built-in `session_id` and PostgreSQL-backed message history.
+
+Custom components should be added only where native components cannot express a required deterministic constraint cleanly.
+
+## Suggested target flow inventory
 
 ```text
 LF-00 Inbound Router
@@ -938,23 +953,23 @@ LF-60 Recovery
 LF-70 Data Access
 LF-71 Guarded Neo4j Read
 LF-72 Guarded Neo4j Write
-LF-73 State Transition
 LF-90 Admin Exception
 ```
 
 ## LF-00 — Inbound Router
 
 ```text
-Webhook / API Input
-  → Parse channel envelope
-  → Resolve actor and reply context
-  → Load open requests and pending interactions
-  → Router Agent
+Chat Input / gateway input
+  → resolve trusted actor and reply context
+  → Run Flow LF-70: get_request_routing_context(session_id, optional request_id)
+  → Router Agent with authoritative domain context
   → Run selected specialist flow
-  → Gateway response
+  → structured result
+  → Parser
+  → Chat Output / gateway response
 ```
 
-LangFlow provides webhook-triggered flows and API execution, so the external WhatsApp or Telegram gateway can normalize channel events and call this single entry flow.
+The routing-context lookup is mandatory preprocessing, not an optional Router tool. The LangFlow conversation history can be supplied to the Router for language understanding but does not determine the business stage.
 
 ## LF-10 — Request Intake
 
@@ -962,125 +977,112 @@ LangFlow provides webhook-triggered flows and API execution, so the external Wha
 AgentTaskEnvelope
   → Request Intake Agent
        tools:
-         resolve sender
-         create request
-         update request
-         evaluate completeness
-         open clarification
-         propose event
-  → Validate AgentResult
-  → Return to Router / Gateway
+         Run Flow LF-70: Data Access operations
+  → structured AgentResult
+  → deterministic validation and branch
+  → Chat Output / flow result
 ```
 
 ## LF-15 — Clarification
 
 ```text
-AgentTaskEnvelope
-  → Load clarification case
+AgentTaskEnvelope + clarification context
   → Clarification Agent
-  → Update request
-  → Branch by clarification type
-       intake:
-         evaluate completeness
-       transporter:
-         rebuild and resend summary
-  → Propose event
-  → Return result
+  → Run Flow LF-70 for request updates
+  → branch by clarification type
+       intake: completeness check
+       transporter: rebuild and deliver updated summary
+  → request resume event
+  → structured result
 ```
 
 ## LF-20 — Matching and Choice
 
 ```text
-Complete request
+complete DeliveryRequest
   → Matching and Choice Agent
-  → Deterministic matching component
-  → Persist options
-  → Present up to three options
-  → Record Sender order
-  → Start Brokerage
+  → deterministic matching component/service
+  → persist operational candidates
+  → present up to three options
+  → record Sender order
+  → invoke Brokerage
 ```
 
 ## LF-30 — Brokerage
 
 ```text
-Selected candidate queue
+candidate queue
   → Brokerage Agent
-  → Build summary
-  → Forward or create Admin task
-  → Wait for delivery callback
-  → Start response deadline
-  → Process:
-       accept
-       reject
-       clarification
-       timeout
-       channel failure
-  → Advance or hand over to Fulfilment
+  → build summary
+  → deliver through Messaging Service
+  → process delivery callback
+  → start response deadline
+  → process accept, reject, clarification, timeout, or failure
+  → advance candidate or invoke Fulfilment
 ```
 
 ## LF-40 — Fulfilment
 
 ```text
-Accepted request
+accepted request
   → Fulfilment Agent
-  → Record pickup plan
-  → Record handover
-  → Record delivery notes
-  → Record delivery confirmation
-  → Invoke Closure flow
+  → record pickup plan
+  → record handover
+  → record delivery notes
+  → record delivery confirmation
+  → invoke Closure flow
 ```
 
 ## LF-50 — Closure and Feedback
 
 ```text
-Delivered request
-  → Validate closure
-  → Closure Agent
-  → Close request
-  → Send optional feedback request
-  → Record optional feedback
+delivered request
+  → validate closure
+  → set DeliveryRequest.closed
+  → send optional feedback request
+  → record optional feedback
 ```
 
 ## LF-60 — Recovery
 
 ```text
-Scheduled webhook
-  → Load due wait condition
-  → Apply deterministic recovery policy
+scheduled trigger
+  → load due wait condition
+  → apply deterministic recovery policy
   → Recovery Agent generates contextual action/message
-  → Resume owning flow or escalate
+  → resume owning flow or escalate
 ```
 
 ## LF-70 — Data Access
 
 ```text
-Approved DataOperationRequest
-  → Data Access Agent
-  → produce parameterized query request
-  → call guarded read or guarded write flow
+typed DataOperationRequest
+  → operation-policy guard
+  → Data Access Agent produces parameterized read/write plan
+  → guarded read or write flow
   → validate result shape
-  → return typed DataOperationResult
+  → typed DataOperationResult
 ```
+
+Phase 1 temporarily omits the guard stages inside this flow while preserving the same external request/result contract.
 
 ## LF-71/LF-72 — Guarded Neo4j access
 
 ```text
-Query request
+Cypher plan
   → Guardrail Agent
   → deterministic hard checks
-  → conditional branch
-       allow:
-         MCP Tools component → Neo4j MCP
-       deny:
-         denial result
+  → If-Else
+       allow: MCP Tools component executes read-cypher or write-cypher
+       deny: structured denial
   → audit
 ```
 
-LangFlow’s MCP Tools component exposes an external MCP server’s tools to a flow or Agent. The raw Neo4j MCP component should live only inside LF-71 and LF-72, while the Data Access Agent receives the guarded flows as tools.
+The raw Neo4j MCP components live only inside the data-access boundary. Domain agents receive the Data Access flow as an operation-oriented tool, not MCP tools.
 
 ## Structured outputs
 
-Use a fixed output schema for every Agent flow:
+Every Agent flow returns an enforced schema. A general target envelope is:
 
 ```json
 {
@@ -1094,131 +1096,66 @@ Use a fixed output schema for every Agent flow:
 }
 ```
 
-LangFlow provides schema-driven structured-output support, but schema validation must be followed by deterministic business validation before executing any operation.
+A single structured model result should be deterministically rendered through Parser and Chat Output rather than generating a separate free-text Agent response. Schema validation is followed by deterministic business validation before side effects are executed.
 
 ---
 
-# 11. Information still missing after adding the use cases
+# 11. Target-level decisions still to finalize
 
-The remaining gaps are now much narrower.
+These decisions are required by the relevant later phases, but most are not blockers for the Phase 1 Walking Skeleton.
 
-## Required before implementing the flows
+### Final minimum-data rule
 
-### Minimum-data rule
-
-Exactly which fields make UC-1 complete?
-
-For example:
-
-* Sender identity/contact;
-* origin;
-* destination;
-* Receiver identity/contact;
-* parcel type;
-* dimensions or weight;
-* needed date;
-* special handling.
+Define the full completion rule for UC-1, including which Sender, Receiver, parcel, location, date, and special-handling fields are mandatory.
 
 ### Matching rules
 
-The use cases identify matching signals but not:
+Define:
 
 * eligibility rules;
 * weighting;
-* route compatibility definition;
+* route compatibility;
 * urgency handling;
-* treatment of inactive or unvalidated Contact Points;
+* treatment of invalid or unvalidated Channels;
 * whether past experience is Sender-specific or global.
 
 ### Candidate selection semantics
 
-When the Sender selects only one option rather than ranking all options:
-
-* should the remaining options retain system ranking;
-* or should the Sender be asked again after rejection?
-
-The recommended default is to retain the system ranking.
+When the Sender selects only one option rather than ranking all options, decide whether remaining candidates retain the system ranking or require another Sender choice. The recommended default is to retain the system ranking.
 
 ### Response timing
 
-Define:
+Define reminder delay, final timeout, reminder count, cascade behaviour, and handling of late acceptance.
 
-* first reminder time;
-* final timeout;
-* number of reminders;
-* whether late acceptance is ignored after cascading.
+### Admin exception boundary
 
-### UC-4 automation level
-
-Decide whether the first implementation:
-
-* sends automatically;
-* prepares an Admin task;
-* or supports both through configuration.
+Define which failures and policy conflicts require human intervention. Do not introduce a formal Admin-assisted runtime mode unless it remains a product requirement.
 
 ### Confirmation authority
 
-Decide whether:
-
-* Transporter confirmation alone is sufficient for `Delivered`;
-* Receiver confirmation is preferred;
-* Sender confirmation is accepted;
-* contradictory confirmations require Admin review.
-
-### Pickup confirmation
-
-Decide whether:
-
-* only the Transporter confirms handover;
-* Sender confirmation is also accepted;
-* both are required.
+Define who may confirm pickup and delivery, whether corroboration is needed, and how contradictory confirmations are handled.
 
 ### Channel delivery semantics
 
-Define what counts as “reached the Transporter”:
-
-* provider accepted message;
-* delivered callback;
-* read receipt;
-* Admin confirmation.
+Define what counts as successful request delivery to a Transporter: provider acceptance, delivery callback, read receipt, or another trusted signal.
 
 ### Attachments
 
-UC-6 allows photos and details. Define:
-
-* supported file types;
-* maximum size;
-* storage location;
-* malware scanning;
-* whether the LLM may inspect the content;
-* retention policy.
+Define supported types, size, storage, scanning, model access, and retention.
 
 ### Feedback
 
-Define:
-
-* questions asked;
-* rating scale;
-* whether Transporter feedback is also needed;
-* whether feedback affects future matching.
+Define questions, rating scale, eligible participants, and whether feedback affects matching.
 
 ---
 
-# 12. Recommended implementation sequence
+# 12. Implementation alignment
 
-1. Finalize the event and transition table.
-2. Define the minimum-data completeness rule.
-3. Define the authorization matrix.
-4. Define typed agent and data-operation contracts.
-5. Build guarded Neo4j read and write flows.
-6. Build the temporary Guardrail Agent.
-7. Build Request Intake and Clarification.
-8. Build deterministic matching and Matching Agent.
-9. Build Brokerage, including dispatch callbacks and timeout cascade.
-10. Build Fulfilment.
-11. Build Closure and Feedback.
-12. Build Router after all specialist contracts are stable.
-13. Build Recovery and scheduled triggers.
-14. Replace Guardrail Agent decisions progressively with deterministic policy tools.
+Implementation order is governed by `hulubul-incremental-system-development-strategy.md`, while this document remains the target architecture reference:
 
-The Router should not be the first flow implemented. It can only route reliably after the specialist flow contracts, pending-interaction types, and state ownership rules are established.
+1. **Walking Skeleton:** UC-1 intake, domain-grounded routing, structured outputs, Data Access Agent + Neo4j MCP, seeded Transporter, simulated communication, durable process completion, and automated tests.
+2. **Working Brokerage:** split specialist agents, candidate choice, rejection, clarification, fallback, and mandatory LLM Guardrail Agent.
+3. **Field Pilot:** real gateway, trusted identity mapping, multiple requests, session isolation, recovery, delivery callbacks, and pilot reliability.
+4. **Hardened Service:** deterministic authorization and guardrails, operation-specific write tools, full selected/deferred use cases, resilience, privacy, and scale.
+
+Verification requirements evolve in parallel according to `verification-testing-and-evaluation-strategy.md`.
