@@ -1,6 +1,6 @@
 ---
 title: "Hulubul Phase 1 - Walking Skeleton Blueprint"
-version: "v0.3"
+version: "v0.4"
 date: "2026-07-20"
 project: "Hulubul V1"
 status: "Working design document"
@@ -27,28 +27,56 @@ This blueprint specifies the first implementable Hulubul increment. It intention
 | UC-8 Delivery                  | Record transporter delivery confirmation.                                                              |
 | UC-9 Closure                   | Set DeliveryRequest.closed after delivered; feedback deferred.                                         |
 
+### 1.2 LangFlow flow identifiers
+
+This document uses identifiers such as `LF-00`, `LF-10`, and `LF-70` as concise, document-local names for LangFlow flows:
+
+- `LF` means **LangFlow flow**.
+- The number groups flows by responsibility: `00` for the entry/router flow, `10`–`20` for Phase 1 domain flows, and `70` for the shared data-access flow.
+- These identifiers are a project naming convention, not a LangFlow platform feature.
+
+The same identifier always refers to the same flow throughout this document.
+
 ## 2. Architecture overview
 
-LangFlow PostgreSQL
-- chat messages grouped by session_id
-- LangFlow flow/application records and native traces
+The diagram is read from top to bottom. Solid arrows show mandatory processing steps. Dashed arrows labelled **Run Flow tool** show one LangFlow flow invoking another flow as an agent tool. PostgreSQL stores LangFlow-managed conversation and execution records; Neo4j stores the authoritative Hulubul request state and the Phase 1 operational conversation binding.
 
-```
-Chat Input
-→ LF-70 Data Access: getRequestRoutingContext(session_id)
-→ Router Agent
-tools: Run Flow LF-10 Request Intake
-Run Flow LF-20 Parcel Coordination
-→ structured Router/Domain result
-→ Parser
-→ Chat Output + structured flow output
+```mermaid
+flowchart TB
+    PG[("LangFlow PostgreSQL<br/>messages, session grouping, flow records, traces")]
 
-LF-10 / LF-20
-→ Run Flow tool: LF-70 Data Access
-→ Data Access Agent
-tools: Neo4j MCP get-schema, read-cypher, write-cypher
-→ Neo4j
-domain data + OperationalConversationBinding
+    CHAT[Chat Input]
+    PREFETCH["LF-70 routing-context lookup<br/>getRequestRoutingContext"]
+    ROUTER[Router Agent]
+    INTAKE[LF-10 Request Intake]
+    COORD[LF-20 Parcel Coordination]
+    RESULT[Structured specialist result]
+    RENDER[Parser / Template]
+    CHATOUT[Chat Output]
+    DATAOUT[Structured flow output]
+
+    DATA[LF-70 Data Access Agent]
+    MCP["Neo4j MCP<br/>get-schema / read-cypher / write-cypher"]
+    NEO[("Neo4j<br/>domain data + OperationalConversationBinding")]
+
+    CHAT --> PREFETCH --> ROUTER
+    ROUTER -. "Run Flow tool" .-> INTAKE
+    ROUTER -. "Run Flow tool" .-> COORD
+
+    INTAKE -. "Run Flow tool" .-> DATA
+    COORD -. "Run Flow tool" .-> DATA
+    PREFETCH --> DATA
+    DATA --> MCP --> NEO
+
+    INTAKE --> RESULT
+    COORD --> RESULT
+    RESULT --> RENDER --> CHATOUT
+    RESULT --> DATAOUT
+
+    CHAT -. "session messages" .-> PG
+    CHATOUT -. "session messages" .-> PG
+    ROUTER -. "native traces" .-> PG
+    DATA -. "native traces" .-> PG
 ```
 ### 2.1 Storage responsibilities
 
@@ -56,13 +84,15 @@ domain data + OperationalConversationBinding
 |-----------------------------|-------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------|
 | LangFlow PostgreSQL         | Messages, session_id grouping, flow/application metadata, native traces                         | Use LangFlow built-in support and avoid reimplementing conversation history.                               |
 | Neo4j domain graph          | Agent, role participations, DeliveryRequest, Parcel, Place, RequestStatus, assigned transporter | Authoritative business state and relationships.                                                            |
-| Neo4j operational extension | ConversationBinding(sessionId → DeliveryRequest)                                              | Loads binding and domain status in one data-access call; avoids a custom PostgreSQL repository in Phase 1. |
+| Neo4j operational extension | `ConversationBinding(sessionId, activeRequestId)`                                              | Loads binding and domain status in one data-access call; avoids a custom PostgreSQL repository in Phase 1. |
 
 ConversationBinding should use an explicitly operational label, for example OperationalConversationBinding, and should not be added to the conceptual JSON Schema. It is a temporary application concern colocated with the domain graph for Phase 1 simplicity.
 
 > **Environment note:** Phase 1 development uses the project's existing Neo4j development instance. Testcontainers creates disposable Neo4j instances only for automated integration and end-to-end tests; it is not the development or production database strategy.
 
 ## 3. Phase 1 flow inventory
+
+This section lists the four physical LangFlow flows that make up the Phase 1 implementation and summarizes the responsibility of each one. The LF-xx identifiers are project-local flow names used to make their roles and relationships easier to reference throughout the blueprint.
 
 | **Flow ID** | **Name**            | **Purpose**                                                                                                                     |
 |-------------|---------------------|---------------------------------------------------------------------------------------------------------------------------------|
@@ -75,20 +105,29 @@ ConversationBinding should use an explicitly operational label, for example Oper
 
 ### 4.1 Component layout
 
-Chat Input
-→ Run Flow LF-70 (normal mode)
-operation = getRequestRoutingContext
-session_id = current session
-→ combine user message + RoutingContext
-→ Router Agent
-Tool: Run Flow LF-10 Request Intake (Tool Mode)
-Tool: Run Flow LF-20 Parcel Coordination (Tool Mode)
-→ Structured Response
-→ Parser/Template
-→ Chat Output
-→ structured result output
+```mermaid
+flowchart TB
+    INPUT[Chat Input]
+    LOOKUP["Run Flow LF-70 in normal mode<br/>operation: getRequestRoutingContext<br/>session_id: current session"]
+    COMBINE[Combine user message and RoutingContext]
+    ROUTER[Router Agent]
+    INTAKE["Run Flow LF-10<br/>Tool Mode"]
+    COORD["Run Flow LF-20<br/>Tool Mode"]
+    RESPONSE[Structured Response]
+    RENDER[Parser / Template]
+    CHATOUT[Chat Output]
+    DATAOUT[Structured result output]
 
-The routing-context lookup is a deterministic preprocessing step. It is not an optional Router tool, so the Router cannot skip it.
+    INPUT --> LOOKUP --> COMBINE --> ROUTER
+    ROUTER -. "specialist tool" .-> INTAKE
+    ROUTER -. "specialist tool" .-> COORD
+    INTAKE --> RESPONSE
+    COORD --> RESPONSE
+    RESPONSE --> RENDER --> CHATOUT
+    RESPONSE --> DATAOUT
+```
+
+The routing-context lookup is a mandatory preprocessing step. It runs before the Router Agent rather than being exposed as an optional Router tool, so routing always receives the authoritative Neo4j context.
 
 ### 4.2 Routing rules
 
@@ -106,6 +145,17 @@ LangFlow built-in memory helps interpret the message and preserve conversational
 
 ## 5. LF-10 Request Intake
 
+```mermaid
+flowchart LR
+    INPUT[Flow input] --> AGENT[Request Intake Agent]
+
+    AGENT -. Data Access tool call .-> DATA[LF-70 Data Access]
+    DATA -. DataOperationResult .-> AGENT
+
+    AGENT --> RESULT[IntakeResult]
+    RESULT --> OUTPUT[Structured flow output]
+```
+
 ### 5.1 Agent responsibility
 
 - Extract the Phase 1 minimum request data from the sender message.
@@ -122,60 +172,32 @@ LangFlow built-in memory helps interpret the message and preserve conversational
 
 ### 5.2 Tools available to the Intake Agent
 
-<table>
-<colgroup>
-<col style="width: 33%" />
-<col style="width: 33%" />
-<col style="width: 33%" />
-</colgroup>
-<thead>
-<tr class="header">
-<th><strong>Logical action</strong></th>
-<th><strong>Agent-facing tool</strong></th>
-<th><strong>Actual path</strong></th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>Create request</td>
-<td>execute_delivery_data_operation<br />
-operation=createDeliveryRequest</td>
-<td>Run Flow LF-70 -&gt; Data Access Agent -&gt; MCP write-cypher.</td>
-</tr>
-<tr class="even">
-<td>Read request</td>
-<td>execute_delivery_data_operation<br />
-operation=readDeliveryRequest</td>
-<td>Run Flow LF-70 -&gt; Data Access Agent -&gt; MCP read-cypher.</td>
-</tr>
-<tr class="odd">
-<td>Update request</td>
-<td>execute_delivery_data_operation<br />
-operation=updateDeliveryRequest</td>
-<td>Run Flow LF-70 -&gt; Data Access Agent -&gt; MCP write-cypher.</td>
-</tr>
-<tr class="even">
-<td>Bind session</td>
-<td>Included in createDeliveryRequest</td>
-<td>Create OperationalConversationBinding atomically with the request where practical.</td>
-</tr>
-<tr class="odd">
-<td>Set status</td>
-<td>execute_delivery_data_operation<br />
-operation=setRequestStatus</td>
-<td>Expected current status is supplied; Data Access Agent writes the new enum value.</td>
-</tr>
-<tr class="even">
-<td>Ask clarification</td>
-<td>No external tool</td>
-<td>Return IntakeResult.user_message; Parser sends it to Chat Output.</td>
-</tr>
-</tbody>
-</table>
+| **Logical action** | **Agent-facing tool** | **Actual path** |
+|---|---|---|
+| Create request | `execute_delivery_data_operation` with `operation=createDeliveryRequest` | The tool invokes LF-70. The Data Access Agent uses Neo4j MCP `write-cypher`. |
+| Read request | `execute_delivery_data_operation` with `operation=readDeliveryRequest` | The tool invokes LF-70. The Data Access Agent uses Neo4j MCP `read-cypher`. |
+| Update request | `execute_delivery_data_operation` with `operation=updateDeliveryRequest` | The tool invokes LF-70. The Data Access Agent uses Neo4j MCP `write-cypher`. |
+| Bind session | Included in `createDeliveryRequest` | Create `OperationalConversationBinding` with the request, atomically where practical. |
+| Set status | `execute_delivery_data_operation` with `operation=setRequestStatus` | The request includes the expected current status; the Data Access Agent writes the new enum value. |
+| Ask clarification | No external tool | Return `IntakeResult.user_message`; the rendering path sends it to Chat Output. |
 
 The label "real data access operation" means the operation has a real Neo4j effect through LF-70. It does not mean that the Intake Agent talks directly to the database.
 
 ## 6. LF-20 Parcel Coordination
+
+```mermaid
+flowchart LR
+    INPUT[Flow input] --> AGENT[Parcel Coordination Agent]
+
+    AGENT -. Data Access tool call .-> DATA[LF-70 Data Access]
+    DATA -. DataOperationResult .-> AGENT
+
+    AGENT --> RESULT[CoordinationResult]
+    RESULT --> OUTPUT[Structured flow output]
+
+    RESULT --> RENDER[Render user message or communication stub]
+    RENDER --> CHAT[LangFlow Chat Output]
+```
 
 ### 6.1 Agent responsibility
 
@@ -207,13 +229,30 @@ LangFlow can expose another flow to an Agent through Run Flow in Tool Mode. LF-1
 
 ### 7.2 Internal layout
 
-DataOperationRequest
-→ Data Access Agent
-Tools:
-Neo4j MCP get-schema
-Neo4j MCP read-cypher
-Neo4j MCP write-cypher
-→ Structured DataOperationResult
+```mermaid
+flowchart LR
+    REQUEST[DataOperationRequest]
+    AGENT[Data Access Agent]
+    SCHEMA[Neo4j MCP get-schema]
+    READ[Neo4j MCP read-cypher]
+    WRITE[Neo4j MCP write-cypher]
+    NEO[(Neo4j)]
+    RESULT[Structured DataOperationResult]
+
+    REQUEST --> AGENT
+    AGENT -. "tool call" .-> SCHEMA
+    AGENT -. "tool call" .-> READ
+    AGENT -. "tool call" .-> WRITE
+    SCHEMA --> NEO
+    READ --> NEO
+    WRITE --> NEO
+    SCHEMA --> AGENT
+    READ --> AGENT
+    WRITE --> AGENT
+    AGENT --> RESULT
+```
+
+The Data Access Agent chooses among the exposed MCP tools based on the typed logical operation. Domain agents do not see or invoke these MCP tools directly.
 
 ### 7.3 Supported operations
 
@@ -243,21 +282,36 @@ Neo4j MCP write-cypher
 
 ### 8.1 Phase 1
 
-Domain Agent
-→ LF-70 Data Access Agent
-→ Neo4j MCP
-→ Neo4j
+```mermaid
+flowchart LR
+    DOMAIN[Domain Agent]
+    DATA[LF-70 Data Access Agent]
+    MCP[Neo4j MCP]
+    NEO[(Neo4j)]
+
+    DOMAIN -. "Run Flow tool" .-> DATA
+    DATA --> MCP --> NEO
+```
 
 No Guardrail Agent is present because the current phase explicitly prioritizes the first working loop. The development-only risk is bounded by schemas, a fixed operation enum, the Data Access boundary, a seeded database, and independent tests.
 
 ### 8.2 Phase 2 insertion
 
-DataOperationRequest
-→ Data Access Planner Agent produces DataAccessPlan
-→ Guardrail Agent returns ALLOW / DENY
-→ If-Else
-ALLOW → Neo4j MCP executor
-DENY → DataOperationResult failure
+```mermaid
+flowchart LR
+    REQUEST[DataOperationRequest]
+    PLANNER[Data Access Planner Agent]
+    PLAN[DataAccessPlan]
+    GUARD[Guardrail Agent]
+    DECISION{ALLOW?}
+    EXECUTOR[Neo4j MCP executor]
+    NEO[(Neo4j)]
+    FAILURE[DataOperationResult failure]
+
+    REQUEST --> PLANNER --> PLAN --> GUARD --> DECISION
+    DECISION -->|yes| EXECUTOR --> NEO
+    DECISION -->|no| FAILURE
+```
 
 The Guardrail Agent must be a mandatory sequential stage. The planner must not retain direct access to write-cypher, otherwise the guardrail could be bypassed. The caller-facing DataOperationRequest/DataOperationResult contract stays unchanged.
 
@@ -307,109 +361,129 @@ The values matching, sentToTransporter, noMatch, transporterClarification, and c
 
 ## 11. Operational schemas
 
+The following blocks describe the intended Phase 1 exchange shapes. They are conceptual schema summaries, not the final source-controlled JSON Schema files. Values such as `"string | empty"` describe the permitted shape.
+
 ### 11.1 RoutingContext
 
+```json
 {
-"session_id": "string",
-"binding_found": true,
-"request_id": "string",
-"request_status": "new \| needsClarification \| complete \| optionsProposed \| waitingResponse \| accepted \| rejected \| pickUpPlanned \| pickedUp \| delivered \| cancelled \| none",
-"closed": false,
-"assigned_transporter_id": "string \| empty",
-"routing_stage": "intake \| coordination \| closed \| none",
-"error_code": "string \| empty"
+  "session_id": "string",
+  "binding_found": "boolean",
+  "request_id": "string | empty",
+  "request_status": "new | needsClarification | complete | optionsProposed | waitingResponse | accepted | rejected | pickUpPlanned | pickedUp | delivered | cancelled | none",
+  "closed": "boolean",
+  "assigned_transporter_id": "string | empty",
+  "routing_stage": "intake | coordination | closed | none",
+  "error_code": "string | empty"
 }
+```
 
 ### 11.2 RouterResult
 
+```json
 {
-"target_agent": "requestIntake \| parcelCoordination \| none",
-"request_id": "string \| empty",
-"routing_reason": "string",
-"user_message": "string",
-"error_code": "string \| empty"
+  "target_agent": "requestIntake | parcelCoordination | none",
+  "request_id": "string | empty",
+  "routing_reason": "string",
+  "user_message": "string",
+  "error_code": "string | empty"
 }
+```
 
 ### 11.3 IntakeResult
 
+```json
 {
-"result_type": "clarificationRequired \| requestComplete \| failure",
-"request_id": "string",
-"current_status": "new \| needsClarification \| complete",
-"missing_fields": \["string"\],
-"user_message": "string",
-"next_expected_action": "provideMissingData \| none",
-"error_code": "string \| empty",
-"error_message": "string \| empty"
+  "result_type": "clarificationRequired | requestComplete | failure",
+  "request_id": "string",
+  "current_status": "new | needsClarification | complete",
+  "missing_fields": ["string"],
+  "user_message": "string",
+  "next_expected_action": "provideMissingData | none",
+  "error_code": "string | empty",
+  "error_message": "string | empty"
 }
+```
 
 ### 11.4 CoordinationResult
 
+```json
 {
-"result_type": "actionCompleted \| waitingForInput \| failure",
-"operation": "assignTransporter \| simulateForwarding \| acceptRequest \| planPickup \| confirmPickup \| confirmDelivery \| closeRequest \| none",
-"request_id": "string",
-"previous_status": "string",
-"current_status": "string",
-"user_message": "string",
-"next_expected_actor": "sender \| transporter \| system \| none",
-"next_expected_action": "string",
-"communication": { ... CommunicationStub ... } \| null,
-"error_code": "string \| empty",
-"error_message": "string \| empty"
+  "result_type": "actionCompleted | waitingForInput | failure",
+  "operation": "assignTransporter | simulateForwarding | acceptRequest | planPickup | confirmPickup | confirmDelivery | closeRequest | none",
+  "request_id": "string",
+  "previous_status": "string",
+  "current_status": "string",
+  "user_message": "string",
+  "next_expected_actor": "sender | transporter | system | none",
+  "next_expected_action": "string",
+  "communication": "CommunicationStub | null",
+  "error_code": "string | empty",
+  "error_message": "string | empty"
 }
+```
 
 ### 11.5 DataOperationRequest
 
+```json
 {
-"operation": "getRequestRoutingContext \| createDeliveryRequest \| readDeliveryRequest \| updateDeliveryRequest \| assignSeededTransporter \| setRequestStatus \| setClosedTimestamp",
-"session_id": "string \| empty",
-"request_id": "string \| empty",
-"expected_status": "string \| empty",
-"target_status": "string \| empty",
-"payload_json": "JSON-encoded string",
-"correlation_id": "string"
+  "operation": "getRequestRoutingContext | createDeliveryRequest | readDeliveryRequest | updateDeliveryRequest | assignSeededTransporter | setRequestStatus | setClosedTimestamp",
+  "session_id": "string | empty",
+  "request_id": "string | empty",
+  "expected_status": "string | empty",
+  "target_status": "string | empty",
+  "payload_json": "JSON-encoded string",
+  "correlation_id": "string"
 }
+```
 
-### 11.6 DataOperationResult and CommunicationStub
+### 11.6 DataOperationResult
 
-DataOperationResult = {
-"success": true,
-"operation": "string",
-"request_id": "string \| empty",
-"current_status": "string \| empty",
-"affected_records": 0,
-"result_json": "JSON-encoded string",
-"error_code": "string \| empty",
-"error_message": "string \| empty"
+```json
+{
+  "success": "boolean",
+  "operation": "string",
+  "request_id": "string | empty",
+  "current_status": "string | empty",
+  "affected_records": "integer",
+  "result_json": "JSON-encoded string",
+  "error_code": "string | empty",
+  "error_message": "string | empty"
 }
+```
 
-CommunicationStub = {
-"request_id": "string",
-"message_type": "transportRequest \| statusNotification",
-"from_role": "system",
-"to_role": "transporter \| sender",
-"to_actor_id": "string",
-"message_text": "string",
-"delivery_mode": "simulated",
-"simulated_delivery_status": "delivered"
+### 11.7 CommunicationStub
+
+```json
+{
+  "request_id": "string",
+  "message_type": "transportRequest | statusNotification",
+  "from_role": "system",
+  "to_role": "transporter | sender",
+  "to_actor_id": "string",
+  "message_text": "string",
+  "delivery_mode": "simulated",
+  "simulated_delivery_status": "delivered"
 }
+```
 
 Keep the Agent output schemas flat where possible because the LangFlow Agent output-schema editor is table-oriented. Validate the corresponding full JSON Schema or Pydantic model in the automated test harness.
 
 ## 12. Structured output and chat rendering
 
-Agent Structured Response
-→ JSON Operations / Parser
-- validate required fields and enum values
-- render user_message or CommunicationStub.message_text
-→ Chat Output
-→ stored under the LangFlow session_id
+```mermaid
+flowchart LR
+    RESPONSE[Agent Structured Response]
+    PROCESS["JSON Operations / Parser<br/>validate fields and enums<br/>render user-facing text"]
+    CHAT[Chat Output]
+    PG[("LangFlow PostgreSQL<br/>session message history")]
+    DATA["Structured flow Data output<br/>for tests and callers"]
 
-Agent Structured Response
-→ retained as flow Data output for tests and callers
+    RESPONSE --> PROCESS --> CHAT --> PG
+    RESPONSE --> DATA
+```
 
-Use the Structured Response output only. Connecting both Agent response outputs would generate separate model calls. Structured Response alone is not written to chat history, so the explicit Parser-to-Chat-Output path is required and must be tested.
+The rendering step selects `user_message` or `CommunicationStub.message_text` and converts it into the Chat Output message. Use the Structured Response output only. Connecting both Agent response outputs would generate separate model calls. Structured Response alone is not written to chat history, so the explicit rendering-to-Chat-Output path is required and must be tested.
 
 ## 13. Phase 1 sequence
 
