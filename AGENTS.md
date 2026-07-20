@@ -59,6 +59,8 @@ build-up plan.
   CI drift check can re-run `make all` and fail on diff. Caveat: OWL and SHACL
   Turtle output is not byte-stable across runs (rdflib reorders blank nodes),
   so exclude those from a naive diff check.
+- **Commit messages** follow [Conventional Commits 1.0.0](https://www.conventionalcommits.org/en/v1.0.0/)
+  (e.g. `docs:`, `feat(scope):`, `fix:`).
 
 ## What could not be established
 
