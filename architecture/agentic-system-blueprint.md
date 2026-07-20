@@ -263,7 +263,7 @@ stateDiagram-v2
 
   waitingResponse --> rejected: rejection or timeout
   rejected --> waitingResponse: next candidate received request
-  rejected --> [*]: candidates exhausted; closed timestamp set
+  rejected --> [*]: candidates exhausted, closed timestamp set
 
   accepted --> pickUpPlanned: pickup details agreed
   pickUpPlanned --> pickedUp: handover confirmed
@@ -278,6 +278,8 @@ stateDiagram-v2
   accepted --> cancelled: policy permits cancellation
   cancelled --> [*]: closed timestamp set
 ```
+
+Note: The above state machine intentionally simplifies several aspects of preliminary-architecture/diagrams/workflows.md. The diagram should be revisited and aligned with the state machine before the end of Phase 4.
 
 ## State and operational semantics
 
