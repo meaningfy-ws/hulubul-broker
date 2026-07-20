@@ -31,6 +31,13 @@ Some behaviour from excluded use cases is still required internally:
 
 Note: the above UCs will most likely be reintroduced in the fourth Phase (HS).
 
+> **Phase 4 scope note.** The user-goal use cases omitted from V1 — UC-2
+> (Transporter preference), UC-10 (Cascade), UC-11 (Cancellation), UC-12
+> (Transporter profile & routes), and UC-13 (Party profile) — are scheduled
+> for inclusion in Phase 4 (Hardened Service), per
+> `incremental-system-development-strategy.md` §7.1. The dependencies table
+> above lists the minimal behaviour Phase 1–3 internalises from each.
+
 # 2. Main conclusions from the use cases
 
 ## 2.1 Clarification is a shared capability with two distinct contexts
