@@ -1,5 +1,11 @@
 schema: spec-driven
 
+# Use the below instead of "spec-driven" if you want to use the Superpowers
+# Bridge plugin implicitly. Otherwise, you'd need to specify the schema when
+# calling /opsx-new (`/opsx-new <feature-name> --schema superpowers-bridge`).
+# schema: superpowers-bridge
+
+
 # Project context (optional)
 # This is shown to AI when creating artifacts.
 # Add your tech stack, conventions, style guides, domain knowledge, etc.
