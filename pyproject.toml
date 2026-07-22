@@ -4,16 +4,43 @@ version = "0.1.0"
 description = "Hulubul V1 conceptual model and deterministic generators (LinkML)."
 authors = ["Meaningfy <eugen@meaningfy.ws>"]
 license = "CC-BY-4.0"
-# Only the generators are packaged; the LinkML schemas live under model/linkml.
+# hulubul is the installable application package; the generator scripts stay
+# packaged alongside it. The LinkML schemas live under model/linkml.
 packages = [
+    { include = "hulubul", from = "src" },
     { include = "gen_neo4j_constraints.py", from = "scripts" },
     { include = "gen_neomodel.py", from = "scripts" },
     { include = "gen_mermaid_classdiagram.py", from = "scripts" },
+    # gen_operational_schemas.py is added here once Task 9 creates the file
+    # (see plan.md Task 9, which also modifies pyproject.toml). Declaring the
+    # include ahead of the file's existence breaks `poetry install`/`poetry
+    # build` (poetry-core errors: "does not contain any element").
 ]
 
 [tool.poetry.dependencies]
-python = "^3.10"
-linkml = "*"
+python = ">=3.10,<3.15"
+linkml = "1.9.5"
+pydantic = "2.12.5"
+
+[tool.poetry.group.langflow.dependencies]
+lfx = "1.10.2"
+onnxruntime = "<1.24"
+
+[tool.poetry.group.test.dependencies]
+pytest = "8.4.1"
+pytest-bdd = "8.1.0"
+pytest-cov = "7.0.0"
+
+[tool.poetry.group.integration.dependencies]
+httpx = "0.28.1"
+neo4j = "5.28.2"
+testcontainers = {version = "4.10.0", extras = ["neo4j"]}
+
+[tool.poetry.group.quality.dependencies]
+import-linter = "2.3"
+ruff = "0.12.5"
+mypy = "1.17.1"
+tox = "4.28.4"
 
 [tool.poetry.scripts]
 gen-neo4j-constraints = "gen_neo4j_constraints:cli"
