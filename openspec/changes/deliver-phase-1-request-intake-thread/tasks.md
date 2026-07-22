@@ -1,7 +1,7 @@
 ## 1. Security And Project Foundation
 
 - [x] 1.1 Rotate the active local model-provider credential, create `infra/langflow.env.example` with safe placeholders including ignored Playground actor variable names, and add automated checks that reject literal secrets without printing their values
-- [ ] 1.2 Convert `pyproject.toml` from generator-only packaging to include `src/hulubul`, lock the approved runtime/test/quality dependencies, and preserve the existing LinkML generator commands
+- [x] 1.2 Convert `pyproject.toml` from generator-only packaging to include `src/hulubul`, lock the approved runtime/test/quality dependencies, and preserve the existing LinkML generator commands
 - [ ] 1.3 Add pytest, coverage, lint, formatting, import-linter, and tox configuration with separate fast, integration, system, and soft-evaluation environments
 - [ ] 1.4 Extend the Makefile with non-conflicting Python, architecture, schema-generation, flow, test, and CI targets while preserving `make lint` as LinkML lint
 
