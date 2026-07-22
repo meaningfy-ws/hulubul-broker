@@ -257,5 +257,115 @@ install-git-hooks: ## Install the local pre-commit secret scan hook
 	@ install -m 755 scripts/git-hooks/pre-commit "$$(git rev-parse --git-common-dir)/hooks/pre-commit"
 	@ echo -e "$(BUILD_PRINT)$(ICON_DONE) Installed pre-commit hook (runs check_committed_secrets.py)$(END_BUILD_PRINT)"
 
+#-----------------------------------------------------------------------------
+# Python quality, tests and CI
+# Namespaced so they never collide with the LinkML generation targets above:
+# `lint` stays LinkML-only (linkml-lint); Python style/type checks live under
+# `lint-python`/`typecheck`. Targets whose source scripts/tests are introduced
+# by later plan tasks fail naturally until those tasks land — that is
+# expected, not a bug in this target set.
+#-----------------------------------------------------------------------------
+.PHONY: install lint-python format-check-python typecheck test-unit \
+	check-architecture operational-schemas format-python check-model-generated \
+	check-operational-schemas check-secrets check-flows test-integration \
+	test-system test-bdd test-evaluation-recorded test-evaluation-live \
+	test-evaluation-judge ci-static ci-acceptance ci acceptance-up \
+	acceptance-ready acceptance-deploy preflight-langflow-1-10-2 \
+	acceptance-diagnostics acceptance-down release-evidence
+
+install: ## Install all dependency groups (test, quality, langflow, integration)
+	poetry install --with test,quality,langflow,integration
+
+lint-python: ## Lint Python source with Ruff
+	poetry run ruff check src tests scripts
+
+format-check-python: ## Check Python formatting with Ruff (no changes)
+	poetry run ruff format --check src tests scripts
+
+format-python: ## Apply Ruff formatting to Python source
+	poetry run ruff format src tests scripts
+
+typecheck: ## Type-check with mypy
+	poetry run mypy src/hulubul scripts tests
+
+test-unit: ## Run unit tests with coverage (fails under 80%)
+	poetry run pytest tests/unit --cov=hulubul --cov-branch --cov-fail-under=80
+
+check-architecture: ## Enforce import boundaries with import-linter
+	poetry run lint-imports
+
+operational-schemas: ## Generate operational JSON schemas
+	poetry run gen-operational-schemas --output schemas/operational/v1
+
+check-model-generated: ## Fail if model/generated is stale relative to the LinkML schema
+	$(MAKE) all
+	git diff --exit-code -- model/generated ':(exclude)model/generated/owl/**' ':(exclude)model/generated/shacl/**'
+
+check-operational-schemas: ## Fail if operational schemas are stale
+	poetry run gen-operational-schemas --output schemas/operational/v1 --check
+
+check-secrets: ## Scan tracked files for committed secrets
+	poetry run python scripts/check_committed_secrets.py
+
+check-flows: ## Validate LangFlow flow assets (normalize, manifest, lfx checks)
+	poetry run python scripts/normalize_langflow_flows.py --check langflow/flows/*.json
+	poetry run python scripts/validate_langflow_assets.py langflow/flow-manifest.yaml
+	poetry run lfx validate --level 4 --strict --skip-credentials langflow/flows/*.json
+	for flow in langflow/flows/*.json; do poetry run lfx upgrade --strict "$$flow"; done
+
+test-integration: ## Run integration-marked tests
+	poetry run pytest -m integration
+
+test-system: ## Run system-marked tests
+	poetry run pytest -m system
+
+test-bdd: ## Run BDD step-definition tests
+	poetry run pytest tests/steps/test_delivery_request_intake.py tests/steps/test_conversation_resumption.py
+
+test-evaluation-recorded: ## Run recorded-model evaluation tests (no live calls)
+	poetry run pytest tests/evaluation/test_dataset_contract.py tests/evaluation/test_recorded_intake_evaluation.py
+
+test-evaluation-live: ## Run live-model evaluation tests (opt-in, calls the real model)
+	poetry run pytest tests/evaluation/test_live_intake_evaluation.py --run-live-evaluation
+
+test-evaluation-judge: ## Run the LLM-judge clarification evaluation (opt-in, calls the real model)
+	poetry run pytest tests/evaluation/test_clarification_judge.py --run-live-evaluation
+
+# Static CI: schema + Python quality + fast tests (no comment on the target
+# line itself, so the prerequisite list stays exactly the canonical set).
+ci-static: lint check-model-generated lint-python format-check-python typecheck check-architecture check-operational-schemas check-secrets check-flows test-unit test-evaluation-recorded
+
+# Acceptance CI: integration + system + BDD tests + evidence report.
+ci-acceptance: test-integration test-system test-bdd release-evidence
+
+# Full CI pipeline (static + acceptance).
+ci: ci-static ci-acceptance
+
+ACCEPTANCE_PROJECT ?= hulubul-change1-$${USER}
+ACCEPTANCE_COMPOSE = docker compose -p $(ACCEPTANCE_PROJECT) -f infra/docker-compose.yaml -f infra/docker-compose.test.yaml
+
+acceptance-up: ## Start the acceptance Docker stack (Postgres, Neo4j, MCP, recorded model, LangFlow)
+	$(ACCEPTANCE_COMPOSE) up -d --build postgres neo4j neo4j-schema mcp-neo4j recorded-model langflow
+
+acceptance-ready: ## Wait for the acceptance stack to report ready, in dependency order
+	poetry run pytest tests/integration/runtime/test_readiness_order.py -q
+
+acceptance-deploy: check-flows ## Push validated LangFlow flows to the acceptance environment
+	cd langflow && lfx push --env ci --no-normalize --keep-secrets flows/10-lf-70-data-access.json
+	cd langflow && lfx push --env ci --no-normalize --keep-secrets flows/20-lf-10-request-intake.json
+	cd langflow && lfx push --env ci --no-normalize --keep-secrets flows/30-lf-00-main-router.json
+
+preflight-langflow-1-10-2: ## Verify LangFlow 1.10.2 persistence/trace/recorded-model compatibility
+	poetry run pytest tests/integration/langflow/test_langflow_persistence_contract.py tests/integration/langflow/test_recorded_model_compatibility.py tests/integration/langflow/test_native_trace_contract.py -q
+
+acceptance-diagnostics: ## Collect acceptance-stack diagnostics only (no evidence assertions)
+	poetry run python scripts/build_change1_evidence.py --diagnostics-only --output reports/change1/diagnostics.json
+
+acceptance-down: ## Tear down the acceptance Docker stack and its volumes
+	$(ACCEPTANCE_COMPOSE) down -v --remove-orphans
+
+release-evidence: ## Build the Change 1 release evidence report
+	poetry run python scripts/build_change1_evidence.py --output reports/change1/release-evidence.json
+
 # Default target
 .DEFAULT_GOAL := help
