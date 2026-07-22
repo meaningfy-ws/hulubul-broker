@@ -125,4 +125,17 @@ When all 5 hold → proactively suggest "ready to `/opsx:propose`?" — wait for
 - Promoting to opsx with unresolved blocking TBDs
 - Opening a change for bug fix / typo
 
+### Implementation subagent routing
+
+- During `/opsx:apply` or subagent-driven plan execution, dispatch the
+  project-scoped `implementer` subagent for implementation tasks instead of the
+  generic `general` subagent.
+- The controller owns worktree setup, task ordering, scope decisions, and final
+  verification. Give `implementer` one bounded task brief at a time, including
+  the relevant OpenSpec artifacts and acceptance criteria.
+- Keep specification-conformance and code-quality review as separate dispatches;
+  the implementation subagent must not review its own work.
+- Do not grant commit approval implicitly. The developer retains approval of
+  each commit unless they explicitly delegate it for the current task.
+
 Full detail: [superpowers-bridge README §Entry & exit gates](https://github.com/JiangWay/openspec-schemas/blob/main/superpowers-bridge/README.md#entry--exit-gates).
