@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+# Rejects a commit if scripts/check_committed_secrets.py finds a
+# credential-shaped literal in a currently tracked file. Install with
+# `make install-git-hooks`; never printed values, only path/rule findings.
+set -euo pipefail
+
+repo_root=$(git rev-parse --show-toplevel)
+cd "$repo_root"
+
+if ! poetry run python scripts/check_committed_secrets.py; then
+    echo "pre-commit: committed-secrets scan failed — see findings above." >&2
+    exit 1
+fi

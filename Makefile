@@ -67,6 +67,9 @@ help: ## Display available targets
 	@ echo "    mcp-logs            - Follow the MCP server logs"
 	@ echo "    mcp-restart         - Restart the MCP server"
 	@ echo ""
+	@ echo -e "  $(BUILD_PRINT)Git hooks:$(END_BUILD_PRINT)"
+	@ echo "    install-git-hooks   - Install the local pre-commit secret scan hook"
+	@ echo ""
 
 # Every artifact lands under a single tree: $(GEN)/<target>/...; all diagrams
 # (ER, PlantUML UML, whole-model class) go under $(DIAG).
@@ -244,6 +247,15 @@ mcp-logs: check-env ## Follow the MCP server logs
 
 mcp-restart: check-env ## Restart the MCP server
 	@ docker compose -f $(COMPOSE_FILE) --env-file $(ENV_FILE) restart mcp-neo4j
+
+#-----------------------------------------------------------------------------
+# Git hooks
+#-----------------------------------------------------------------------------
+.PHONY: install-git-hooks
+
+install-git-hooks: ## Install the local pre-commit secret scan hook
+	@ install -m 755 scripts/git-hooks/pre-commit "$$(git rev-parse --git-common-dir)/hooks/pre-commit"
+	@ echo -e "$(BUILD_PRINT)$(ICON_DONE) Installed pre-commit hook (runs check_committed_secrets.py)$(END_BUILD_PRINT)"
 
 # Default target
 .DEFAULT_GOAL := help
