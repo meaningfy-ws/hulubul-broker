@@ -224,3 +224,4 @@ langflow.env
 
 # Agent local overrides (never committed)
 AGENTS.local.md
+.worktrees/
