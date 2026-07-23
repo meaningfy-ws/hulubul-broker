@@ -77,7 +77,7 @@ all: lint pydantic owl shacl jsonschema erdiagram plantuml classdiagram neo4j-co
 
 lint:
 	@ echo -e "$(BUILD_PRINT)$(ICON_PROGRESS) Linting LinkML schema$(END_BUILD_PRINT)"
-	@ linkml-lint -c .linkmllint.yaml $(SCHEMA)
+	@ poetry run linkml-lint -c .linkmllint.yaml $(SCHEMA)
 	@ echo -e "$(BUILD_PRINT)$(ICON_DONE) Lint complete$(END_BUILD_PRINT)"
 
 # Pydantic classes (the "possibly generate pydantic" target).
