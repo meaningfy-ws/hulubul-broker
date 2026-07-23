@@ -23,7 +23,7 @@ class TestStrictModel:
             value: str
 
         with pytest.raises(ValidationError):
-            Model(value="test", extra="not_allowed")
+            Model(value="test", extra="not_allowed")  # type: ignore[call-arg]
 
     def test_strict_type_checking(self) -> None:
         """Strict mode rejects type coercion."""
@@ -33,7 +33,7 @@ class TestStrictModel:
 
         # Strict=True means no string-to-int coercion
         with pytest.raises(ValidationError):
-            Model(count="123")
+            Model(count="123")  # type: ignore[call-arg]
 
     def test_strips_whitespace(self) -> None:
         """Whitespace is stripped from strings."""
@@ -66,7 +66,7 @@ class TestVersionedContract:
     def test_requires_correlation_id(self) -> None:
         """Correlation ID is required."""
         with pytest.raises(ValidationError):
-            VersionedContract()
+            VersionedContract()  # type: ignore[call-arg]
 
 
 class TestHumanSuppliedText:

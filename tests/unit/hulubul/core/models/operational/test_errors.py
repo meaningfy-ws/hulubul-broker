@@ -246,7 +246,7 @@ class TestValidationErrorConversion:
                 # Rule ID should be present (e.g., "string_type", "value_error")
                 assert violation.rule_id is not None
                 # Violated value should not be stored
-                assert violation.violated_value is None
+                assert not hasattr(violation, "violated_value")
 
     def test_omits_unavailable_identifiers_from_violations(self) -> None:
         """Violations must not fabricate unavailable identifiers."""

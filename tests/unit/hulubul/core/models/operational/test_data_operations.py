@@ -69,7 +69,7 @@ class TestRoutingContextRequestPayload:
     def test_routing_context_rejects_extra_fields(self) -> None:
         """Any extra field in routing context request fails."""
         with pytest.raises(ValidationError):
-            GetRequestRoutingContextRequest(
+            GetRequestRoutingContextRequest(  # type: ignore[call-arg]
                 operation=DataOperation.GET_REQUEST_ROUTING_CONTEXT,
                 operation_id=str(uuid4()),
                 caller="test_caller",
@@ -104,7 +104,7 @@ class TestCreateDeliveryRequestPayload:
     def test_create_rejects_created_at(self) -> None:
         """Create payload cannot include created_at; Neo4j owns timestamp."""
         with pytest.raises(ValidationError):
-            CreateDeliveryRequestRequest(
+            CreateDeliveryRequestRequest(  # type: ignore[call-arg]
                 operation=DataOperation.CREATE_DELIVERY_REQUEST,
                 operation_id=str(uuid4()),
                 caller="test_caller",
@@ -120,7 +120,7 @@ class TestCreateDeliveryRequestPayload:
     def test_create_rejects_updated_at(self) -> None:
         """Create payload cannot include updated_at; Neo4j owns timestamp."""
         with pytest.raises(ValidationError):
-            CreateDeliveryRequestRequest(
+            CreateDeliveryRequestRequest(  # type: ignore[call-arg]
                 operation=DataOperation.CREATE_DELIVERY_REQUEST,
                 operation_id=str(uuid4()),
                 caller="test_caller",
@@ -156,7 +156,7 @@ class TestReadDeliveryRequestPayload:
     def test_read_rejects_extra_fields(self) -> None:
         """Read rejects extra fields beyond request_id."""
         with pytest.raises(ValidationError):
-            ReadDeliveryRequestRequest(
+            ReadDeliveryRequestRequest(  # type: ignore[call-arg]
                 operation=DataOperation.READ_DELIVERY_REQUEST,
                 operation_id=str(uuid4()),
                 caller="test_caller",
@@ -195,7 +195,7 @@ class TestUpdateDeliveryRequestPayload:
     def test_update_rejects_missing_expected_updated_at(self) -> None:
         """Update requires expected_updated_at for concurrency check."""
         with pytest.raises(ValidationError):
-            UpdateDeliveryRequestRequest(
+            UpdateDeliveryRequestRequest(  # type: ignore[call-arg]
                 operation=DataOperation.UPDATE_DELIVERY_REQUEST,
                 operation_id=str(uuid4()),
                 caller="test_caller",

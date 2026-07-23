@@ -91,6 +91,7 @@ class TestIntakeFactsSparseBoundaries:
     def test_preferred_period_accepts_4000_characters(self) -> None:
         """preferred_period also subject to 1-4000 when present."""
         facts = IntakeFacts(sender_actor_id="urn:actor:alice", preferred_period="x" * 4000)
+        assert facts.preferred_period is not None
         assert len(facts.preferred_period) == 4000
 
 
@@ -129,7 +130,7 @@ class TestIntakeFactsReceiverIdentity:
 class TestIntakeFactsSenderIdentity:
     """Test sender field contracts."""
 
-    def test_sender_actor_id_required(self) -> None:
+    def test_sender_actor_id_required(self) -> None:  # type: ignore[call-arg]
         """sender_actor_id is always required (from chain identity)."""
         with pytest.raises(ValidationError, match="sender_actor_id"):
             IntakeFacts()
@@ -172,7 +173,7 @@ class TestIntakeFactUpdates:
 class TestCompleteIntakeFacts:
     """Test that complete facts enforce all four required fields."""
 
-    def test_complete_facts_requires_all_four_required_fields(self) -> None:
+    def test_complete_facts_requires_all_four_required_fields(self) -> None:  # type: ignore[call-arg]
         """Complete facts require sender_actor_id, receiver, pickup, and drop_off."""
         with pytest.raises(ValidationError):
             CompleteIntakeFacts(

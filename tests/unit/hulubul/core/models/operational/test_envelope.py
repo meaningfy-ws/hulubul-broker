@@ -57,17 +57,17 @@ class TestActorContext:
     def test_rejects_extra_fields(self) -> None:
         """ActorContext must reject extra fields."""
         with pytest.raises(ValidationError):
-            ActorContext(actor_id="actor-123", display_name="Test User", extra_field="value")
+            ActorContext(actor_id="actor-123", display_name="Test User", extra_field="value")  # type: ignore[call-arg]
 
     def test_requires_actor_id(self) -> None:
         """actor_id is required."""
         with pytest.raises(ValidationError):
-            ActorContext(display_name="Test User")
+            ActorContext(display_name="Test User")  # type: ignore[call-arg]
 
     def test_requires_display_name(self) -> None:
         """display_name is required."""
         with pytest.raises(ValidationError):
-            ActorContext(actor_id="actor-123")
+            ActorContext(actor_id="actor-123")  # type: ignore[call-arg]
 
 
 class TestMainFlowInput:
@@ -178,7 +178,7 @@ class TestMainFlowInput:
         actor = ActorContext(actor_id="actor-123", display_name="Test User")
 
         with pytest.raises(ValidationError):
-            MainFlowInput(
+            MainFlowInput(  # type: ignore[call-arg]
                 correlation_id=test_uuid,
                 message_id=message_id,
                 session_id="session-123",
@@ -195,7 +195,7 @@ class TestMainFlowInput:
         actor = ActorContext(actor_id="actor-123", display_name="Test User")
 
         with pytest.raises(ValidationError):
-            MainFlowInput(
+            MainFlowInput(  # type: ignore[call-arg]
                 message_id=message_id,
                 session_id="session-123",
                 actor=actor,
@@ -210,7 +210,7 @@ class TestMainFlowInput:
         actor = ActorContext(actor_id="actor-123", display_name="Test User")
 
         with pytest.raises(ValidationError):
-            MainFlowInput(
+            MainFlowInput(  # type: ignore[call-arg]
                 correlation_id=test_uuid,
                 session_id="session-123",
                 actor=actor,
@@ -226,7 +226,7 @@ class TestMainFlowInput:
         actor = ActorContext(actor_id="actor-123", display_name="Test User")
 
         with pytest.raises(ValidationError):
-            MainFlowInput(
+            MainFlowInput(  # type: ignore[call-arg]
                 correlation_id=test_uuid,
                 message_id=message_id,
                 actor=actor,
@@ -240,7 +240,7 @@ class TestMainFlowInput:
         message_id = UUID("87654321-4321-8765-4321-876543218765")
 
         with pytest.raises(ValidationError):
-            MainFlowInput(
+            MainFlowInput(  # type: ignore[call-arg]
                 correlation_id=test_uuid,
                 message_id=message_id,
                 session_id="session-123",
@@ -256,7 +256,7 @@ class TestMainFlowInput:
         actor = ActorContext(actor_id="actor-123", display_name="Test User")
 
         with pytest.raises(ValidationError):
-            MainFlowInput(
+            MainFlowInput(  # type: ignore[call-arg]
                 correlation_id=test_uuid,
                 message_id=message_id,
                 session_id="session-123",
@@ -272,7 +272,7 @@ class TestMainFlowInput:
         actor = ActorContext(actor_id="actor-123", display_name="Test User")
 
         with pytest.raises(ValidationError):
-            MainFlowInput(
+            MainFlowInput(  # type: ignore[call-arg]
                 correlation_id=test_uuid,
                 message_id=message_id,
                 session_id="session-123",
