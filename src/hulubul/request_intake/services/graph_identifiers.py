@@ -1,14 +1,32 @@
 """Graph identifier generation service for deterministic UUID management.
 
-Provides stable, deterministic graph node ID generation for:
-- Session IDs (random UUID4 for each call)
-- Request IDs (deterministic UUID5 based on parcel_intent and receiver_id)
-- Delivery IDs (deterministic UUID5 based on request_id and transporter_id)
+Implements Task 12 (original 3.3) deterministic graph identifier generation per plan.md.
 
+Provides:
+- Session IDs (random UUID4 per call, one per request intake flow)
+- Enduring Agent IDs (stable UUID5 from Sender/Receiver identifier, reusable across requests)
+- Request-scoped identifiers (request, sender role, receiver role, parcel, places)
+- Sparse allocation (only allocate IDs for entities actually present in the request)
+
+All UUIDs are prefixed per design DEC-010: req-, ag-, s-, r-, p-, pl-, urn:uuid:, urn:hulubul:phase1:receiver:
 All outputs are strings in RFC 4122 UUID format.
 """
 
-from uuid import NAMESPACE_DNS, uuid4, uuid5
+from __future__ import annotations
+
+from dataclasses import dataclass
+from typing import Callable
+from uuid import NAMESPACE_DNS, NAMESPACE_URL, uuid4, uuid5
+
+from hulubul.core.models.operational.intake import GraphIdentifiers
+
+__all__ = [
+    "generate_session_id",
+    "generate_request_id",
+    "generate_delivery_id",
+    "enduring_agent_id",
+    "new_graph_identifiers",
+]
 
 
 def generate_session_id() -> str:
@@ -43,8 +61,6 @@ def generate_request_id(parcel_intent: str, receiver_id: str) -> str:
         >>> id1 == id2
         True
     """
-    # Combine inputs into a single seed string for UUID5
-    # Prefix with "request:" to distinguish from delivery IDs
     seed = f"request:{parcel_intent}:{receiver_id}"
     return str(uuid5(NAMESPACE_DNS, seed))
 
@@ -67,7 +83,108 @@ def generate_delivery_id(request_id: str, transporter_id: str) -> str:
         >>> id1 == id2
         True
     """
-    # Combine inputs into a single seed string for UUID5
-    # Prefix with "delivery:" to distinguish from request IDs
     seed = f"delivery:{request_id}:{transporter_id}"
     return str(uuid5(NAMESPACE_DNS, seed))
+
+
+def enduring_agent_id(stable_identifier: str) -> str:
+    """Generate a stable enduring Agent ID (Sender or Receiver identity).
+
+    Uses UUID5 to ensure the same identifier always produces the same Agent ID.
+    This ID persists across requests for trusted Senders and stable-identified Receivers.
+
+    Args:
+        stable_identifier: The stable identity string (e.g., Sender phone, Receiver email)
+
+    Returns:
+        str: An Agent ID with `ag-` prefix followed by UUID5 hex.
+
+    Example:
+        >>> id1 = enduring_agent_id("sender@example.com")
+        >>> id2 = enduring_agent_id("sender@example.com")
+        >>> id1 == id2 and id1.startswith("ag-")
+        True
+    """
+    uuid_part = str(uuid5(NAMESPACE_URL, stable_identifier))
+    return f"ag-{uuid_part}"
+
+
+def new_graph_identifiers(
+    *,
+    actor_id: str,
+    receiver_stable_id: str | None,
+    include_receiver: bool = False,
+    include_parcel: bool = False,
+    include_pickup: bool = False,
+    include_drop_off: bool = False,
+    uuid_factory: Callable[[], str] = generate_session_id,
+) -> GraphIdentifiers:
+    """Allocate graph node identifiers in deterministic order (sparse).
+
+    Allocation order: request → sender → receiver (if present) → parcel (if present)
+    → pickup place (if present) → drop-off place (if present).
+
+    Each entity gets a prefixed UUID4 from uuid_factory. Places also get a urn:uuid: identifier.
+    Name-only Receiver (no stable_id) gets a request-scoped URN instead of an enduring Agent ID.
+
+    Args:
+        actor_id: The actor (Sender) stable identifier (for enduring agent ID)
+        receiver_stable_id: Receiver stable identifier (or None for name-only Receiver)
+        include_receiver: Whether to allocate Receiver role ID
+        include_parcel: Whether to allocate Parcel ID
+        include_pickup: Whether to allocate pickup Place ID
+        include_drop_off: Whether to allocate drop-off Place ID
+        uuid_factory: Function to generate UUIDs (default: generate_session_id)
+
+    Returns:
+        GraphIdentifiers: Partially populated model with allocated IDs; unallocated fields are None.
+    """
+    identifiers: dict[str, str | None] = {}
+
+    # 1. Request ID (always allocated)
+    identifiers["request_id"] = f"req-{uuid_factory()}"
+
+    # 2. Sender role ID (always allocated if actor_id present)
+    identifiers["sender_id"] = f"s-{uuid_factory()}"
+    identifiers["sender_agent_id"] = enduring_agent_id(actor_id)
+
+    # 3. Receiver role ID and agent ID (sparse)
+    if include_receiver:
+        identifiers["receiver_id"] = f"r-{uuid_factory()}"
+        if receiver_stable_id:
+            identifiers["receiver_agent_id"] = enduring_agent_id(receiver_stable_id)
+            identifiers["receiver_agent_identifier"] = receiver_stable_id
+        else:
+            # Name-only Receiver: request-scoped URN instead of enduring agent ID
+            request_scoped_urn = f"urn:hulubul:phase1:receiver:{uuid_factory()}"
+            identifiers["receiver_agent_identifier"] = request_scoped_urn
+    else:
+        identifiers["receiver_id"] = None
+        identifiers["receiver_agent_id"] = None
+        identifiers["receiver_agent_identifier"] = None
+
+    # 4. Parcel ID (sparse)
+    if include_parcel:
+        identifiers["parcel_id"] = f"p-{uuid_factory()}"
+    else:
+        identifiers["parcel_id"] = None
+
+    # 5. Pickup Place ID and URN (sparse)
+    if include_pickup:
+        pickup_uuid = uuid_factory()
+        identifiers["pickup_place_id"] = f"pl-{pickup_uuid}"
+        identifiers["pickup_place_identifier"] = f"urn:uuid:{pickup_uuid}"
+    else:
+        identifiers["pickup_place_id"] = None
+        identifiers["pickup_place_identifier"] = None
+
+    # 6. Drop-off Place ID and URN (sparse)
+    if include_drop_off:
+        drop_off_uuid = uuid_factory()
+        identifiers["drop_off_place_id"] = f"pl-{drop_off_uuid}"
+        identifiers["drop_off_place_identifier"] = f"urn:uuid:{drop_off_uuid}"
+    else:
+        identifiers["drop_off_place_id"] = None
+        identifiers["drop_off_place_identifier"] = None
+
+    return GraphIdentifiers(**identifiers)

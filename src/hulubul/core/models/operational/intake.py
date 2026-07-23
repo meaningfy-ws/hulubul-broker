@@ -198,7 +198,17 @@ class CompleteIntakeFacts(BaseModel):
 
 
 class GraphIdentifiers(BaseModel):
-    """Graph node identifiers for linking entities."""
+    """Graph node identifiers for linking entities.
+
+    Per plan Task 12 (original task ID 3.3) and design DEC-010, these are
+    generated deterministically by `graph_identifiers.py` before a create or
+    update operation reaches LF-70. Role/entity IDs (`request_id`,
+    `sender_id`, `receiver_id`, `parcel_id`, `pickup_place_id`,
+    `drop_off_place_id`) are freshly generated per request; enduring
+    `sender_agent_id`/`receiver_agent_id` values are stable UUID5 identities
+    that let the same trusted Sender or stable-identified Receiver be reused
+    safely across requests.
+    """
 
     model_config = ConfigDict(validate_default=True)
 
@@ -209,12 +219,56 @@ class GraphIdentifiers(BaseModel):
 
     sender_id: str | None = Field(
         default=None,
-        description="Graph node ID for the sender (optional).",
+        description="Graph node ID for the Sender role (optional).",
+    )
+
+    sender_agent_id: str | None = Field(
+        default=None,
+        description="Stable UUID5 enduring Agent ID for the Sender (optional).",
     )
 
     receiver_id: str | None = Field(
         default=None,
-        description="Graph node ID for the receiver (optional).",
+        description="Graph node ID for the Receiver role (optional).",
+    )
+
+    receiver_agent_id: str | None = Field(
+        default=None,
+        description="Stable UUID5 enduring Agent ID for the Receiver (optional).",
+    )
+
+    receiver_agent_identifier: str | None = Field(
+        default=None,
+        description=(
+            "Identity string the Receiver Agent ID was derived from: the "
+            "supplied stable Receiver identifier, or a request-scoped URN "
+            "for a name-only Receiver (optional)."
+        ),
+    )
+
+    parcel_id: str | None = Field(
+        default=None,
+        description="Graph node ID for the Parcel (optional).",
+    )
+
+    pickup_place_id: str | None = Field(
+        default=None,
+        description="Graph node ID for the pickup Place (optional).",
+    )
+
+    pickup_place_identifier: str | None = Field(
+        default=None,
+        description="Generated urn:uuid: identifier for the pickup Place (optional).",
+    )
+
+    drop_off_place_id: str | None = Field(
+        default=None,
+        description="Graph node ID for the drop-off Place (optional).",
+    )
+
+    drop_off_place_identifier: str | None = Field(
+        default=None,
+        description="Generated urn:uuid: identifier for the drop-off Place (optional).",
     )
 
 
