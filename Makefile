@@ -106,43 +106,43 @@ lint:
 # Pydantic classes (the "possibly generate pydantic" target).
 pydantic:
 	@ echo -e "$(BUILD_PRINT)$(ICON_PROGRESS) Generating Pydantic classes$(END_BUILD_PRINT)"
-	@ mkdir -p $(GEN)/pydantic && gen-pydantic $(SCHEMA) > $(GEN)/pydantic/hulubul_models.py
+	@ mkdir -p $(GEN)/pydantic && poetry run gen-pydantic $(SCHEMA) > $(GEN)/pydantic/hulubul_models.py
 	@ echo -e "$(BUILD_PRINT)$(ICON_DONE) Pydantic classes generated$(END_BUILD_PRINT)"
 
 # Ontology + constraints. Every class/slot carries an explicit hlb: URI, so the
 # OWL/SHACL come out complete even though the shipped targets are Python/Neo4j.
 owl:
 	@ echo -e "$(BUILD_PRINT)$(ICON_PROGRESS) Generating OWL ontology$(END_BUILD_PRINT)"
-	@ mkdir -p $(GEN)/owl && gen-owl $(SCHEMA) > $(GEN)/owl/hulubul.owl.ttl
+	@ mkdir -p $(GEN)/owl && poetry run gen-owl $(SCHEMA) > $(GEN)/owl/hulubul.owl.ttl
 	@ echo -e "$(BUILD_PRINT)$(ICON_DONE) OWL ontology generated$(END_BUILD_PRINT)"
 
 shacl:
 	@ echo -e "$(BUILD_PRINT)$(ICON_PROGRESS) Generating SHACL shapes$(END_BUILD_PRINT)"
-	@ mkdir -p $(GEN)/shacl && gen-shacl $(SCHEMA) > $(GEN)/shacl/hulubul.shacl.ttl
+	@ mkdir -p $(GEN)/shacl && poetry run gen-shacl $(SCHEMA) > $(GEN)/shacl/hulubul.shacl.ttl
 	@ echo -e "$(BUILD_PRINT)$(ICON_DONE) SHACL shapes generated$(END_BUILD_PRINT)"
 
 jsonschema:
 	@ echo -e "$(BUILD_PRINT)$(ICON_PROGRESS) Generating JSON Schema$(END_BUILD_PRINT)"
-	@ mkdir -p $(GEN)/jsonschema && gen-json-schema $(SCHEMA) > $(GEN)/jsonschema/hulubul.schema.json
+	@ mkdir -p $(GEN)/jsonschema && poetry run gen-json-schema $(SCHEMA) > $(GEN)/jsonschema/hulubul.schema.json
 	@ echo -e "$(BUILD_PRINT)$(ICON_DONE) JSON Schema generated$(END_BUILD_PRINT)"
 
 # ER diagram (Mermaid, whole model).
 erdiagram:
 	@ echo -e "$(BUILD_PRINT)$(ICON_PROGRESS) Generating ER diagram$(END_BUILD_PRINT)"
-	@ mkdir -p $(DIAG) && gen-erdiagram $(SCHEMA) > $(DIAG)/hulubul.er.md
+	@ mkdir -p $(DIAG) && poetry run gen-erdiagram $(SCHEMA) > $(DIAG)/hulubul.er.md
 	@ echo -e "$(BUILD_PRINT)$(ICON_DONE) ER diagram generated$(END_BUILD_PRINT)"
 
 # UML class diagram (PlantUML, whole model) — renders via any PlantUML tool/plugin.
 plantuml:
 	@ echo -e "$(BUILD_PRINT)$(ICON_PROGRESS) Generating PlantUML diagram$(END_BUILD_PRINT)"
-	@ mkdir -p $(DIAG) && gen-plantuml $(SCHEMA) > $(DIAG)/hulubul.puml
+	@ mkdir -p $(DIAG) && poetry run gen-plantuml $(SCHEMA) > $(DIAG)/hulubul.puml
 	@ echo -e "$(BUILD_PRINT)$(ICON_DONE) PlantUML diagram generated$(END_BUILD_PRINT)"
 
 # Whole-model UML class diagram as a single Mermaid .md (renders on GitHub).
 # Custom generator — LinkML only emits per-class; see scripts/gen_mermaid_classdiagram.py.
 classdiagram:
 	@ echo -e "$(BUILD_PRINT)$(ICON_PROGRESS) Generating whole-model class diagram$(END_BUILD_PRINT)"
-	@ mkdir -p $(DIAG) && python scripts/gen_mermaid_classdiagram.py $(SCHEMA) > $(DIAG)/hulubul.class.md
+	@ mkdir -p $(DIAG) && poetry run python scripts/gen_mermaid_classdiagram.py $(SCHEMA) > $(DIAG)/hulubul.class.md
 	@ echo -e "$(BUILD_PRINT)$(ICON_DONE) Class diagram generated$(END_BUILD_PRINT)"
 
 # Neo4j is loaded via linkml-store, not a codegen target:
@@ -164,14 +164,14 @@ neo4j:
 # on linkml.utils.generator.Generator — see scripts/gen_neo4j_constraints.py.
 neo4j-constraints:
 	@ echo -e "$(BUILD_PRINT)$(ICON_PROGRESS) Generating Neo4j constraints$(END_BUILD_PRINT)"
-	@ mkdir -p $(GEN)/neo4j && python scripts/gen_neo4j_constraints.py $(SCHEMA) > $(GEN)/neo4j/constraints.cypher
+	@ mkdir -p $(GEN)/neo4j && poetry run python scripts/gen_neo4j_constraints.py $(SCHEMA) > $(GEN)/neo4j/constraints.cypher
 	@ echo -e "$(BUILD_PRINT)$(ICON_DONE) Neo4j constraints generated$(END_BUILD_PRINT)"
 
 # neomodel OGM classes (StructuredNode + RelationshipTo). Custom generator built
 # on linkml.utils.generator.Generator + Jinja2 — see scripts/gen_neomodel.py.
 neomodel:
 	@ echo -e "$(BUILD_PRINT)$(ICON_PROGRESS) Generating neomodel OGM classes$(END_BUILD_PRINT)"
-	@ mkdir -p $(GEN)/neomodel && python scripts/gen_neomodel.py $(SCHEMA) > $(GEN)/neomodel/hulubul_ogm.py
+	@ mkdir -p $(GEN)/neomodel && poetry run python scripts/gen_neomodel.py $(SCHEMA) > $(GEN)/neomodel/hulubul_ogm.py
 	@ echo -e "$(BUILD_PRINT)$(ICON_DONE) neomodel OGM classes generated$(END_BUILD_PRINT)"
 
 clean: ## Remove generated artifacts
