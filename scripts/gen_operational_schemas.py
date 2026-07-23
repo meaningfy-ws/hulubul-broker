@@ -4,9 +4,16 @@
 Generates one JSON schema per operational contract kind from Pydantic models.
 Schemas are committed to ensure deterministic, version-controlled validation.
 
-Usage:
-  gen-operational-schemas --output schemas/operational/v1
-  gen-operational-schemas --output schemas/operational/v1 --check
+Usage (via entry point):
+  poetry run gen-operational-schemas --output schemas/operational/v1
+  poetry run gen-operational-schemas --output schemas/operational/v1 --check
+
+Usage (direct script):
+  python scripts/gen_operational_schemas.py --output schemas/operational/v1
+  python scripts/gen_operational_schemas.py --output schemas/operational/v1 --check
+
+Make target:
+  make check-operational-schemas
 """
 from __future__ import annotations
 
