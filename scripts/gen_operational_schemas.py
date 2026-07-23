@@ -75,6 +75,7 @@ def get_model_class(module_path: str, class_name: str) -> type[Any]:
     """Dynamically import and return a Pydantic model class."""
     try:
         from typing import cast
+
         module = import_module(module_path)
         return cast(type[Any], getattr(module, class_name))
     except (ImportError, AttributeError) as e:
@@ -104,6 +105,7 @@ def generate_schema(contract_kind: str) -> dict[str, Any]:
         # Check if it's a model class with model_json_schema method
         if hasattr(model_class, "model_json_schema"):
             from typing import cast
+
             return cast(dict[str, Any], model_class.model_json_schema())
         else:
             # It's a type annotation, use TypeAdapter
