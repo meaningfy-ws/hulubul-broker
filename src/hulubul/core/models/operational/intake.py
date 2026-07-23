@@ -13,7 +13,7 @@ from __future__ import annotations
 
 from typing import Any, cast
 
-from pydantic import BaseModel, ConfigDict, Field, ValidationInfo, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from hulubul.core.models.operational.base import (
     ActorUrn,

@@ -232,7 +232,7 @@ def test_release_evidence_builds_change1_evidence_report(makefile_text: str) -> 
 
 
 @pytest.mark.parametrize("target_name", _NEW_QUALITY_TARGETS_WITHOUT_ENV_FILES)
-def test_new_quality_and_ci_targets_do_not_read_local_env_files(makefile_text: str, target_name: str) -> None:
+def test_new_targets_do_not_read_local_env_files(makefile_text: str, target_name: str) -> None:
     body = target_body(makefile_text, target_name)
     assert "infra/.env" not in body
     assert "infra/langflow.env" not in body

@@ -1,8 +1,7 @@
 """Tests for routing lookup validation and adaptation."""
 
-from uuid import uuid4
-
 from typing import Any
+from uuid import uuid4
 
 import pytest
 from pydantic import ValidationError

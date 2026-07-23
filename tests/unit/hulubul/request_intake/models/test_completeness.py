@@ -88,7 +88,7 @@ class TestMissingRequiredFields:
         "receiver_field",
         ["receiver_name", "receiver_stable_id"],
     )
-    def test_receiver_identity_satisfied_by_either_name_or_stable_id(self, receiver_field: str) -> None:
+    def test_receiver_identity_satisfied_by_name_or_stable_id(self, receiver_field: str) -> None:
         facts = IntakeFacts(
             sender_actor_id="urn:actor:alice",
             pickup_location="123 Main St",

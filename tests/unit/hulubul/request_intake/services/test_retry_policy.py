@@ -138,7 +138,7 @@ class TestMaxRetries:
         assert max_retries(failure_kind) == 1
 
     @pytest.mark.parametrize("failure_kind", TOOL_LESS_REPAIR_FAILURE_KINDS)
-    def test_malformed_result_allows_exactly_one_repair_attempt(self, failure_kind: FailureKind) -> None:
+    def test_malformed_result_allows_one_repair_attempt(self, failure_kind: FailureKind) -> None:
         assert max_retries(failure_kind) == 1
 
     @pytest.mark.parametrize("failure_kind", PERMANENT_FAILURE_KINDS)

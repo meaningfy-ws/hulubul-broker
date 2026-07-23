@@ -32,8 +32,8 @@ from typing import Any, ClassVar
 
 import click
 from jinja2 import Template
-from linkml_runtime import SlotDefinition  # type: ignore[import-untyped]
 from linkml.utils.generator import Generator, shared_arguments  # type: ignore[import-untyped]
+from linkml_runtime.linkml_model import SlotDefinition  # type: ignore[import-untyped]
 
 # LinkML scalar range -> neomodel property class.
 NEOMODEL_PROP = {
