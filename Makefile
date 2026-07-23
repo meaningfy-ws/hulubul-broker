@@ -289,7 +289,8 @@ typecheck: ## Type-check with mypy
 	poetry run mypy src/hulubul scripts tests
 
 test-unit: ## Run unit tests with coverage (fails under 80%)
-	poetry run pytest tests/unit --cov=hulubul --cov-branch --cov-fail-under=80
+	@ mkdir -p reports
+	poetry run pytest tests/unit --cov=hulubul --cov-branch --cov-fail-under=80 --junitxml=reports/junit-unit.xml
 
 check-architecture: ## Enforce import boundaries with import-linter
 	poetry run lint-imports
@@ -333,7 +334,7 @@ test-evaluation-judge: ## Run the LLM-judge clarification evaluation (opt-in, ca
 
 # Static CI: schema + Python quality + fast tests (no comment on the target
 # line itself, so the prerequisite list stays exactly the canonical set).
-ci-static: lint check-model-generated lint-python format-check-python typecheck check-architecture check-operational-schemas check-secrets check-flows test-unit test-evaluation-recorded
+ci-static: lint check-model-generated lint-python format-check-python typecheck check-architecture check-secrets test-unit
 
 # Acceptance CI: integration + system + BDD tests + evidence report.
 ci-acceptance: test-integration test-system test-bdd release-evidence

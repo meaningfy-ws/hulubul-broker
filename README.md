@@ -9,8 +9,9 @@ WhatsApp in prod) and a Neo4j graph system of record.
 Install dependencies with Poetry:
 
 ```bash
-make install              # Install base + test + quality dependencies
-make install --with dev   # Include optional dependency groups (langflow, integration, etc.)
+make install                                # Install base + test + quality groups
+poetry install --with test --with quality  # Same as above (explicit Poetry syntax)
+poetry install --with test --with quality --with langflow --with integration  # All groups
 ```
 
 Dependencies are split into optional groups:
@@ -46,8 +47,8 @@ Dependencies are split into optional groups:
 - Prerequisite: `cp infra/.env.example infra/.env` (gitignored; edit passwords)
 
 **Neo4j + MCP**:
-- `make neo4j-schema` / `neo4j-seed` / `neo4j-queries` / `make neo4j-reset` / `neo4j-shell` / `neo4j-browser`
-- `make mcp-logs` / `mcp-restart`
+- `make neo4j-schema` / `make neo4j-seed` / `make neo4j-queries` / `make neo4j-reset` / `make neo4j-shell` / `make neo4j-browser`
+- `make mcp-logs` / `make mcp-restart`
 
 **CI/CD**:
 - `make ci` — full CI pipeline (static quality + model + schema + secrets checks)
