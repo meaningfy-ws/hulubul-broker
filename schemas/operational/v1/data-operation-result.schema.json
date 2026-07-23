@@ -1,0 +1,139 @@
+{
+  "$defs": {
+    "DataOperation": {
+      "description": "Data operation types.",
+      "enum": [
+        "getRequestRoutingContext",
+        "createDeliveryRequest",
+        "readDeliveryRequest",
+        "updateDeliveryRequest",
+        "setRequestStatus"
+      ],
+      "title": "DataOperation",
+      "type": "string"
+    },
+    "DataOperationOutcome": {
+      "description": "Data operation result outcome.",
+      "enum": [
+        "confirmed",
+        "rejected",
+        "ambiguous"
+      ],
+      "title": "DataOperationOutcome",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Result of a data operation with invariants.\n\nConfirmed writes require dispatch=true, one affected request, and\nmatching typed result/status.\n\nConfirmed create also requires Neo4j-returned aware created_at == updated_at.\n\nConfirmed reads require dispatch=false and no count.\n\nRejected results cannot claim success/status/result.\n\nAmbiguous results require dispatched write, no count/result/status,\nand exactly MCP_WRITE_AMBIGUOUS error.",
+  "properties": {
+    "count": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Count"
+    },
+    "created_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Created At"
+    },
+    "error_code": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Error Code"
+    },
+    "operation": {
+      "$ref": "#/$defs/DataOperation"
+    },
+    "outcome": {
+      "$ref": "#/$defs/DataOperationOutcome"
+    },
+    "request_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Request Id"
+    },
+    "result": {
+      "anyOf": [
+        {
+          "additionalProperties": true,
+          "type": "object"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Result"
+    },
+    "status": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Status"
+    },
+    "success": {
+      "title": "Success",
+      "type": "boolean"
+    },
+    "updated_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Updated At"
+    },
+    "write_dispatched": {
+      "default": false,
+      "title": "Write Dispatched",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "operation",
+    "outcome",
+    "success"
+  ],
+  "title": "DataOperationResult",
+  "type": "object"
+}

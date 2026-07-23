@@ -1,0 +1,303 @@
+{
+  "$defs": {
+    "CompleteIntakeFacts": {
+      "description": "Complete intake facts for 'complete' status requests.\n\nEnforces that four core fields are present and non-None:\n- sender_actor_id (required, always)\n- receiver_name OR receiver_stable_id (at least one required)\n- pickup_location (required)\n- drop_off_location (required)\n\nOptional fields (can be None if not captured):\n- sender_display_name\n- parcel_declared_content\n- preferred_period",
+      "properties": {
+        "drop_off_location": {
+          "description": "Human-supplied drop-off location (required, 1-4000 chars).",
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Drop Off Location",
+          "type": "string"
+        },
+        "parcel_declared_content": {
+          "anyOf": [
+            {
+              "maxLength": 4000,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Sender's declared description of contents (1-4000 chars).",
+          "title": "Parcel Declared Content"
+        },
+        "pickup_location": {
+          "description": "Human-supplied pickup location (required, 1-4000 chars).",
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Pickup Location",
+          "type": "string"
+        },
+        "preferred_period": {
+          "anyOf": [
+            {
+              "maxLength": 4000,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Requester's preferred timeframe (orientative, free text, 1-4000 chars).",
+          "title": "Preferred Period"
+        },
+        "receiver_name": {
+          "anyOf": [
+            {
+              "maxLength": 4000,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Human-supplied name of the receiver (1-4000 chars).",
+          "title": "Receiver Name"
+        },
+        "receiver_stable_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Stable business identifier for the receiver.",
+          "title": "Receiver Stable Id"
+        },
+        "sender_actor_id": {
+          "description": "URN-style actor identifier of the sender (required).",
+          "minLength": 1,
+          "title": "Sender Actor Id",
+          "type": "string"
+        },
+        "sender_display_name": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Human-readable display name for the sender.",
+          "title": "Sender Display Name"
+        }
+      },
+      "required": [
+        "sender_actor_id",
+        "pickup_location",
+        "drop_off_location"
+      ],
+      "title": "CompleteIntakeFacts",
+      "type": "object"
+    },
+    "IntakeFacts": {
+      "description": "Sparse intake facts for new and needsClarification parcel requests.\n\nAllows up to 8 fields with nullable human-text inputs (1-4000 chars each).\nReceiver identity satisfied by either name OR stable_id (both allowed).\nNo missing/clarification/error fields; those belong in IntakeResult.",
+      "properties": {
+        "drop_off_location": {
+          "anyOf": [
+            {
+              "maxLength": 4000,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Human-supplied drop-off location (1-4000 chars).",
+          "title": "Drop Off Location"
+        },
+        "parcel_declared_content": {
+          "anyOf": [
+            {
+              "maxLength": 4000,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Sender's declared description of contents (1-4000 chars).",
+          "title": "Parcel Declared Content"
+        },
+        "pickup_location": {
+          "anyOf": [
+            {
+              "maxLength": 4000,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Human-supplied pickup location (1-4000 chars).",
+          "title": "Pickup Location"
+        },
+        "preferred_period": {
+          "anyOf": [
+            {
+              "maxLength": 4000,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Requester's preferred timeframe (orientative, free text, 1-4000 chars).",
+          "title": "Preferred Period"
+        },
+        "receiver_name": {
+          "anyOf": [
+            {
+              "maxLength": 4000,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Human-supplied name of the receiver (1-4000 chars).",
+          "title": "Receiver Name"
+        },
+        "receiver_stable_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Stable business identifier for the receiver.",
+          "title": "Receiver Stable Id"
+        },
+        "sender_actor_id": {
+          "description": "URN-style actor identifier of the sender (chain identity).",
+          "minLength": 1,
+          "title": "Sender Actor Id",
+          "type": "string"
+        },
+        "sender_display_name": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Human-readable display name for the sender.",
+          "title": "Sender Display Name"
+        }
+      },
+      "required": [
+        "sender_actor_id"
+      ],
+      "title": "IntakeFacts",
+      "type": "object"
+    }
+  },
+  "description": "Immutable snapshot of a delivery request state.\n\nEnforces nested schema equality and sparse/complete contradictions:\n- For 'new' and 'needsClarification' states: sparse IntakeFacts allowed\n- For 'complete' state: CompleteIntakeFacts required, empty missing_fields\n- Timestamps: created_at immutable, updated_at authoritative, closed_at nullable",
+  "properties": {
+    "closed_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "When the request was closed/terminated (nullable).",
+      "title": "Closed At"
+    },
+    "created_at": {
+      "description": "When the request was created (immutable).",
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "facts": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/IntakeFacts"
+        },
+        {
+          "$ref": "#/$defs/CompleteIntakeFacts"
+        }
+      ],
+      "description": "Sparse or complete intake facts depending on status.",
+      "title": "Facts"
+    },
+    "missing_fields": {
+      "description": "Immutable tuple of field names not yet provided.",
+      "items": {
+        "type": "string"
+      },
+      "title": "Missing Fields",
+      "type": "array"
+    },
+    "request_id": {
+      "description": "Graph node ID for this delivery request.",
+      "title": "Request Id",
+      "type": "string"
+    },
+    "status": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Request lifecycle status (new, needsClarification, complete, etc.).",
+      "title": "Status"
+    },
+    "updated_at": {
+      "description": "When the request was last modified (authoritative).",
+      "format": "date-time",
+      "title": "Updated At",
+      "type": "string"
+    }
+  },
+  "required": [
+    "request_id",
+    "created_at",
+    "updated_at",
+    "facts"
+  ],
+  "title": "DeliveryRequestSnapshot",
+  "type": "object"
+}

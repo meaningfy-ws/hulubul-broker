@@ -11,10 +11,7 @@ packages = [
     { include = "gen_neo4j_constraints.py", from = "scripts" },
     { include = "gen_neomodel.py", from = "scripts" },
     { include = "gen_mermaid_classdiagram.py", from = "scripts" },
-    # gen_operational_schemas.py is added here once Task 9 creates the file
-    # (see plan.md Task 9, which also modifies pyproject.toml). Declaring the
-    # include ahead of the file's existence breaks `poetry install`/`poetry
-    # build` (poetry-core errors: "does not contain any element").
+    { include = "gen_operational_schemas.py", from = "scripts" },
 ]
 
 [tool.poetry.dependencies]
@@ -58,6 +55,7 @@ tox = "4.28.4"
 gen-neo4j-constraints = "gen_neo4j_constraints:cli"
 gen-neomodel = "gen_neomodel:cli"
 gen-mermaid-classdiagram = "gen_mermaid_classdiagram:cli"
+gen-operational-schemas = "gen_operational_schemas:cli"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

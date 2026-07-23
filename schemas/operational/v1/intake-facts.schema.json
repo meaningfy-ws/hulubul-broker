@@ -1,0 +1,119 @@
+{
+  "description": "Sparse intake facts for new and needsClarification parcel requests.\n\nAllows up to 8 fields with nullable human-text inputs (1-4000 chars each).\nReceiver identity satisfied by either name OR stable_id (both allowed).\nNo missing/clarification/error fields; those belong in IntakeResult.",
+  "properties": {
+    "drop_off_location": {
+      "anyOf": [
+        {
+          "maxLength": 4000,
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Human-supplied drop-off location (1-4000 chars).",
+      "title": "Drop Off Location"
+    },
+    "parcel_declared_content": {
+      "anyOf": [
+        {
+          "maxLength": 4000,
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Sender's declared description of contents (1-4000 chars).",
+      "title": "Parcel Declared Content"
+    },
+    "pickup_location": {
+      "anyOf": [
+        {
+          "maxLength": 4000,
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Human-supplied pickup location (1-4000 chars).",
+      "title": "Pickup Location"
+    },
+    "preferred_period": {
+      "anyOf": [
+        {
+          "maxLength": 4000,
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Requester's preferred timeframe (orientative, free text, 1-4000 chars).",
+      "title": "Preferred Period"
+    },
+    "receiver_name": {
+      "anyOf": [
+        {
+          "maxLength": 4000,
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Human-supplied name of the receiver (1-4000 chars).",
+      "title": "Receiver Name"
+    },
+    "receiver_stable_id": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Stable business identifier for the receiver.",
+      "title": "Receiver Stable Id"
+    },
+    "sender_actor_id": {
+      "description": "URN-style actor identifier of the sender (chain identity).",
+      "minLength": 1,
+      "title": "Sender Actor Id",
+      "type": "string"
+    },
+    "sender_display_name": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Human-readable display name for the sender.",
+      "title": "Sender Display Name"
+    }
+  },
+  "required": [
+    "sender_actor_id"
+  ],
+  "title": "IntakeFacts",
+  "type": "object"
+}

@@ -318,3 +318,86 @@ class IntakeResult(BaseModel):
                 )
 
         return self
+
+
+# ============================================================================
+# Wrapped Input (intake)
+# ============================================================================
+
+from .base import VersionedContract
+from .envelope import MainFlowInput
+from .routing import RoutingContext
+from .enums import RoutingStage, BindingState
+from .enums import POST_INTAKE_STATUSES
+
+
+class IntakeInput(VersionedContract):
+    """Input wrapper for intake operations.
+
+    Combines MainFlowInput envelope with a routing context that has undergone
+    validation constraints specific to intake (INTAKE stage, no errors, appropriate bindings).
+    """
+
+    envelope: MainFlowInput
+    routing_context: RoutingContext
+
+    @model_validator(mode="after")
+    def validate_intake_constraints(self) -> "IntakeInput":
+        """Validate intake-specific routing context constraints."""
+        # Validate schema_version and correlation_id consistency
+        if self.schema_version != self.envelope.schema_version:
+            raise ValueError(
+                f"schema_version mismatch: wrapper={self.schema_version} "
+                f"envelope={self.envelope.schema_version}"
+            )
+        if self.correlation_id != self.envelope.correlation_id:
+            raise ValueError(
+                f"correlation_id mismatch: wrapper={self.correlation_id} "
+                f"envelope={self.envelope.correlation_id}"
+            )
+        if self.envelope.session_id != self.routing_context.session_id:
+            raise ValueError(
+                f"session_id mismatch: envelope={self.envelope.session_id} "
+                f"routing_context={self.routing_context.session_id}"
+            )
+
+        # IntakeInput requires INTAKE routing stage
+        if self.routing_context.routing_stage != RoutingStage.INTAKE:
+            raise ValueError(
+                f"IntakeInput requires INTAKE routing_stage, got {self.routing_context.routing_stage}"
+            )
+
+        # IntakeInput must not have routing errors
+        if self.routing_context.error is not None:
+            raise ValueError(
+                "IntakeInput must not have routing errors"
+            )
+
+        # Validate binding state constraints
+        if self.routing_context.binding_state == BindingState.ABSENT:
+            # No binding is OK (first message, new request will be created)
+            if self.routing_context.request_id or self.routing_context.request_status:
+                raise ValueError(
+                    "ABSENT binding must not have request_id or request_status"
+                )
+        elif self.routing_context.binding_state == BindingState.BOUND:
+            # One bound request must be in intake stages (NEW or NEEDS_CLARIFICATION)
+            if not self.routing_context.request_id:
+                raise ValueError(
+                    "BOUND binding must have request_id"
+                )
+            if not self.routing_context.request_status:
+                raise ValueError(
+                    "BOUND binding must have request_status"
+                )
+            if self.routing_context.request_status in POST_INTAKE_STATUSES:
+                raise ValueError(
+                    f"IntakeInput rejects post-intake status {self.routing_context.request_status}"
+                )
+        else:
+            # INCONSISTENT binding is rejected
+            raise ValueError(
+                f"IntakeInput rejects {self.routing_context.binding_state} binding state"
+            )
+
+        return self

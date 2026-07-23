@@ -17,11 +17,13 @@ from .enums import (
     POST_INTAKE_STATUSES,
 )
 from .errors import OperationalError, ERROR_POLICY
+from .envelope import MainFlowInput
 
 __all__ = [
     "RoutingLookupRecord",
     "RoutingContext",
     "RouterResult",
+    "RouterInput",
     "adapt_routing_lookup",
 ]
 
@@ -206,3 +208,34 @@ def adapt_routing_lookup(
         routing_stage=routing_stage,
         error=error,
     )
+
+
+class RouterInput(VersionedContract):
+    """Input wrapper for routing operations.
+
+    Combines MainFlowInput envelope with routing context lookup result.
+    Enforces matching schema_version, correlation_id, and session_id across wrapper and nested objects.
+    """
+
+    envelope: MainFlowInput
+    routing_context: RoutingContext
+
+    @model_validator(mode="after")
+    def validate_envelope_context_consistency(self) -> "RouterInput":
+        """Validate schema_version and correlation_id consistency."""
+        if self.schema_version != self.envelope.schema_version:
+            raise ValueError(
+                f"schema_version mismatch: wrapper={self.schema_version} "
+                f"envelope={self.envelope.schema_version}"
+            )
+        if self.correlation_id != self.envelope.correlation_id:
+            raise ValueError(
+                f"correlation_id mismatch: wrapper={self.correlation_id} "
+                f"envelope={self.envelope.correlation_id}"
+            )
+        if self.envelope.session_id != self.routing_context.session_id:
+            raise ValueError(
+                f"session_id mismatch: envelope={self.envelope.session_id} "
+                f"routing_context={self.routing_context.session_id}"
+            )
+        return self

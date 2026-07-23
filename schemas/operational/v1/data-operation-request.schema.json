@@ -1,0 +1,325 @@
+{
+  "$defs": {
+    "CreateDeliveryRequestRequest": {
+      "additionalProperties": false,
+      "description": "Create operation requires identifiers and facts; rejects timestamps.\n\nNeo4j owns both created_at and updated_at; a confirmed create result\nreturns equal authoritative timestamps.",
+      "properties": {
+        "actor_id": {
+          "title": "Actor Id",
+          "type": "string"
+        },
+        "caller": {
+          "title": "Caller",
+          "type": "string"
+        },
+        "correlation_id": {
+          "title": "Correlation Id",
+          "type": "string"
+        },
+        "facts": {
+          "additionalProperties": true,
+          "title": "Facts",
+          "type": "object"
+        },
+        "identifiers": {
+          "additionalProperties": true,
+          "title": "Identifiers",
+          "type": "object"
+        },
+        "operation": {
+          "const": "createDeliveryRequest",
+          "title": "Operation",
+          "type": "string"
+        },
+        "operation_id": {
+          "title": "Operation Id",
+          "type": "string"
+        },
+        "schema_version": {
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "session_id": {
+          "title": "Session Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "operation",
+        "operation_id",
+        "caller",
+        "session_id",
+        "actor_id",
+        "schema_version",
+        "correlation_id",
+        "identifiers",
+        "facts"
+      ],
+      "title": "CreateDeliveryRequestRequest",
+      "type": "object"
+    },
+    "GetRequestRoutingContextRequest": {
+      "additionalProperties": false,
+      "description": "Routing context operation requires empty payload beyond envelope.",
+      "properties": {
+        "actor_id": {
+          "title": "Actor Id",
+          "type": "string"
+        },
+        "caller": {
+          "title": "Caller",
+          "type": "string"
+        },
+        "correlation_id": {
+          "title": "Correlation Id",
+          "type": "string"
+        },
+        "operation": {
+          "const": "getRequestRoutingContext",
+          "title": "Operation",
+          "type": "string"
+        },
+        "operation_id": {
+          "title": "Operation Id",
+          "type": "string"
+        },
+        "schema_version": {
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "session_id": {
+          "title": "Session Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "operation",
+        "operation_id",
+        "caller",
+        "session_id",
+        "actor_id",
+        "schema_version",
+        "correlation_id"
+      ],
+      "title": "GetRequestRoutingContextRequest",
+      "type": "object"
+    },
+    "ReadDeliveryRequestRequest": {
+      "additionalProperties": false,
+      "description": "Read operation requires request_id only.",
+      "properties": {
+        "actor_id": {
+          "title": "Actor Id",
+          "type": "string"
+        },
+        "caller": {
+          "title": "Caller",
+          "type": "string"
+        },
+        "correlation_id": {
+          "title": "Correlation Id",
+          "type": "string"
+        },
+        "operation": {
+          "const": "readDeliveryRequest",
+          "title": "Operation",
+          "type": "string"
+        },
+        "operation_id": {
+          "title": "Operation Id",
+          "type": "string"
+        },
+        "request_id": {
+          "title": "Request Id",
+          "type": "string"
+        },
+        "schema_version": {
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "session_id": {
+          "title": "Session Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "operation",
+        "operation_id",
+        "caller",
+        "session_id",
+        "actor_id",
+        "schema_version",
+        "correlation_id",
+        "request_id"
+      ],
+      "title": "ReadDeliveryRequestRequest",
+      "type": "object"
+    },
+    "SetRequestStatusRequest": {
+      "additionalProperties": false,
+      "description": "Status operation requires four fields for concurrency-safe transition.\n\nrequest_id: target request\nexpected_updated_at: concurrency check timestamp\nexpected_status: current expected status\ntarget_status: desired status after transition",
+      "properties": {
+        "actor_id": {
+          "title": "Actor Id",
+          "type": "string"
+        },
+        "caller": {
+          "title": "Caller",
+          "type": "string"
+        },
+        "correlation_id": {
+          "title": "Correlation Id",
+          "type": "string"
+        },
+        "expected_status": {
+          "title": "Expected Status",
+          "type": "string"
+        },
+        "expected_updated_at": {
+          "title": "Expected Updated At",
+          "type": "string"
+        },
+        "operation": {
+          "const": "setRequestStatus",
+          "title": "Operation",
+          "type": "string"
+        },
+        "operation_id": {
+          "title": "Operation Id",
+          "type": "string"
+        },
+        "request_id": {
+          "title": "Request Id",
+          "type": "string"
+        },
+        "schema_version": {
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "session_id": {
+          "title": "Session Id",
+          "type": "string"
+        },
+        "target_status": {
+          "title": "Target Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "operation",
+        "operation_id",
+        "caller",
+        "session_id",
+        "actor_id",
+        "schema_version",
+        "correlation_id",
+        "request_id",
+        "expected_updated_at",
+        "expected_status",
+        "target_status"
+      ],
+      "title": "SetRequestStatusRequest",
+      "type": "object"
+    },
+    "UpdateDeliveryRequestRequest": {
+      "additionalProperties": false,
+      "description": "Update operation requires five fields for concurrency and patch.\n\nrequest_id: target request\nexpected_updated_at: concurrency check timestamp\nexpected_status: concurrency check status\nupdates: sparse patch dict\nidentifiers: additional identifiers if needed",
+      "properties": {
+        "actor_id": {
+          "title": "Actor Id",
+          "type": "string"
+        },
+        "caller": {
+          "title": "Caller",
+          "type": "string"
+        },
+        "correlation_id": {
+          "title": "Correlation Id",
+          "type": "string"
+        },
+        "expected_status": {
+          "title": "Expected Status",
+          "type": "string"
+        },
+        "expected_updated_at": {
+          "title": "Expected Updated At",
+          "type": "string"
+        },
+        "identifiers": {
+          "additionalProperties": true,
+          "title": "Identifiers",
+          "type": "object"
+        },
+        "operation": {
+          "const": "updateDeliveryRequest",
+          "title": "Operation",
+          "type": "string"
+        },
+        "operation_id": {
+          "title": "Operation Id",
+          "type": "string"
+        },
+        "request_id": {
+          "title": "Request Id",
+          "type": "string"
+        },
+        "schema_version": {
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "session_id": {
+          "title": "Session Id",
+          "type": "string"
+        },
+        "updates": {
+          "additionalProperties": true,
+          "title": "Updates",
+          "type": "object"
+        }
+      },
+      "required": [
+        "operation",
+        "operation_id",
+        "caller",
+        "session_id",
+        "actor_id",
+        "schema_version",
+        "correlation_id",
+        "request_id",
+        "expected_updated_at",
+        "expected_status",
+        "updates",
+        "identifiers"
+      ],
+      "title": "UpdateDeliveryRequestRequest",
+      "type": "object"
+    }
+  },
+  "discriminator": {
+    "mapping": {
+      "createDeliveryRequest": "#/$defs/CreateDeliveryRequestRequest",
+      "getRequestRoutingContext": "#/$defs/GetRequestRoutingContextRequest",
+      "readDeliveryRequest": "#/$defs/ReadDeliveryRequestRequest",
+      "setRequestStatus": "#/$defs/SetRequestStatusRequest",
+      "updateDeliveryRequest": "#/$defs/UpdateDeliveryRequestRequest"
+    },
+    "propertyName": "operation"
+  },
+  "oneOf": [
+    {
+      "$ref": "#/$defs/GetRequestRoutingContextRequest"
+    },
+    {
+      "$ref": "#/$defs/CreateDeliveryRequestRequest"
+    },
+    {
+      "$ref": "#/$defs/ReadDeliveryRequestRequest"
+    },
+    {
+      "$ref": "#/$defs/UpdateDeliveryRequestRequest"
+    },
+    {
+      "$ref": "#/$defs/SetRequestStatusRequest"
+    }
+  ]
+}

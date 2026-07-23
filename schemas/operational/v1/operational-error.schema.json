@@ -1,0 +1,108 @@
+{
+  "$defs": {
+    "ErrorCategory": {
+      "description": "Error category for logging.",
+      "enum": [
+        "input",
+        "contract",
+        "authorization",
+        "state",
+        "concurrency",
+        "dependency",
+        "internal"
+      ],
+      "title": "ErrorCategory",
+      "type": "string"
+    },
+    "ErrorCode": {
+      "description": "Operational error codes.",
+      "enum": [
+        "INVALID_INPUT",
+        "INVALID_CONTRACT",
+        "OPERATION_NOT_ALLOWED",
+        "BINDING_REQUEST_MISMATCH",
+        "GRAPH_CONTEXT_INCONSISTENT",
+        "UNSUPPORTED_PHASE1_STATUS",
+        "UNSUPPORTED_REQUEST_STATUS",
+        "INVALID_EXPECTED_STATUS",
+        "INVALID_STATUS_TRANSITION",
+        "CONCURRENT_MODIFICATION",
+        "AFFECTED_RECORD_COUNT_MISMATCH",
+        "MODEL_TRANSIENT_FAILURE",
+        "MODEL_AUTHENTICATION_FAILURE",
+        "MALFORMED_AGENT_RESULT",
+        "MCP_READ_TRANSIENT_FAILURE",
+        "MCP_WRITE_AMBIGUOUS",
+        "MCP_AUTHENTICATION_FAILURE",
+        "MCP_OPERATION_FAILURE",
+        "DEPENDENCY_UNAVAILABLE"
+      ],
+      "title": "ErrorCode",
+      "type": "string"
+    },
+    "FieldViolation": {
+      "maxItems": 2,
+      "minItems": 2,
+      "prefixItems": [
+        {
+          "title": "Field Path",
+          "type": "string"
+        },
+        {
+          "title": "Rule Id",
+          "type": "string"
+        }
+      ],
+      "type": "array"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Canonical operational error with enforced policy values.",
+  "properties": {
+    "category": {
+      "$ref": "#/$defs/ErrorCategory",
+      "description": "Error category (from policy)"
+    },
+    "code": {
+      "$ref": "#/$defs/ErrorCode",
+      "description": "Error code"
+    },
+    "correlation_id": {
+      "format": "uuid",
+      "title": "Correlation Id",
+      "type": "string"
+    },
+    "message": {
+      "description": "Safe user message (from policy)",
+      "title": "Message",
+      "type": "string"
+    },
+    "retryable": {
+      "description": "Whether error is retryable (from policy)",
+      "title": "Retryable",
+      "type": "boolean"
+    },
+    "schema_version": {
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "violations": {
+      "description": "Validation violations (field and rule ID only, no values)",
+      "items": {
+        "$ref": "#/$defs/FieldViolation"
+      },
+      "title": "Violations",
+      "type": "array"
+    }
+  },
+  "required": [
+    "correlation_id",
+    "code",
+    "category",
+    "message",
+    "retryable"
+  ],
+  "title": "OperationalError",
+  "type": "object"
+}
