@@ -19,7 +19,7 @@ packages = [
 
 [tool.poetry.dependencies]
 python = ">=3.10,<3.15"
-linkml = "1.9.5"
+linkml = ">=1.9.0,<1.9.5"
 pydantic = "2.12.5"
 
 [tool.poetry.group.langflow]
