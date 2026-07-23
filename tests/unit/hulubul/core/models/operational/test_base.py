@@ -33,7 +33,7 @@ class TestStrictModel:
 
         # Strict=True means no string-to-int coercion
         with pytest.raises(ValidationError):
-            Model(count="123")  # type: ignore[call-arg]
+            Model(count="123")  # type: ignore[arg-type]
 
     def test_strips_whitespace(self) -> None:
         """Whitespace is stripped from strings."""

@@ -149,7 +149,7 @@ class TestOperationalError:
         """OperationalError must reject message different from policy."""
         # Try to create with wrong message
         with pytest.raises(ValidationError):
-            OperationalError(
+            OperationalError(  # type: ignore[call-arg]
                 code=ErrorCode.INVALID_INPUT,
                 message="Wrong message",
                 correlation_id=UUID("12345678-1234-5678-1234-567812345678"),
@@ -159,7 +159,7 @@ class TestOperationalError:
         """OperationalError must reject category different from policy."""
         # Try to create with wrong category
         with pytest.raises(ValidationError):
-            OperationalError(
+            OperationalError(  # type: ignore[call-arg]
                 code=ErrorCode.INVALID_INPUT,
                 category=ErrorCategory.DEPENDENCY,  # Wrong category
                 message=ERROR_POLICY[ErrorCode.INVALID_INPUT].safe_message,
@@ -216,7 +216,7 @@ class TestValidationErrorConversion:
             count: int
 
         try:
-            TestModel(count="not-an-int")
+            TestModel(count="not-an-int")  # type: ignore[arg-type]
         except ValidationError as e:
             error = validation_error_to_operational_error(
                 e, correlation_id=UUID("12345678-1234-5678-1234-567812345678")
@@ -255,7 +255,7 @@ class TestValidationErrorConversion:
             count: int
 
         try:
-            TestModel(count="not-an-int")
+            TestModel(count="not-an-int")  # type: ignore[arg-type]
         except ValidationError as e:
             error = validation_error_to_operational_error(
                 e, correlation_id=UUID("12345678-1234-5678-1234-567812345678")
@@ -264,5 +264,5 @@ class TestValidationErrorConversion:
             # Should have no request_id or operation_id
             for violation in error.violations:
                 # These fields should be absent, not null
-                assert not hasattr(violation, "request_id") or violation.request_id is None
-                assert not hasattr(violation, "operation_id") or violation.operation_id is None
+                assert not hasattr(violation, "request_id") or violation.request_id is None  # type: ignore[attr-defined]
+                assert not hasattr(violation, "operation_id") or violation.operation_id is None  # type: ignore[attr-defined]

@@ -25,7 +25,7 @@ from hulubul.core.models.operational.routing import (
 
 
 # Test fixtures
-def valid_routing_metadata() -> None:
+def valid_routing_metadata() -> dict[str, Any]:
     """Return valid metadata for adapt_routing_lookup."""
     return {
         "schema_version": "1.0.0",
@@ -34,7 +34,7 @@ def valid_routing_metadata() -> None:
     }
 
 
-def no_binding_record() -> None:
+def no_binding_record() -> dict[str, Any]:
     """0/0/0 cardinality - no binding."""
     return {
         "binding_count": 0,
@@ -48,7 +48,7 @@ def one_bound_record(
     request_id: str | None = None,
     request_status_raw: str | None = None,
     closed_at: str | None = None,
-) -> None:
+) -> dict[str, Any]:
     """1/1/1 cardinality - one bound request."""
     if request_id is None:
         request_id = str(uuid4())

@@ -74,8 +74,9 @@ CONTRACT_MODEL_MAP = {
 def get_model_class(module_path: str, class_name: str) -> type[Any]:
     """Dynamically import and return a Pydantic model class."""
     try:
+        from typing import cast
         module = import_module(module_path)
-        return getattr(module, class_name)
+        return cast(type[Any], getattr(module, class_name))
     except (ImportError, AttributeError) as e:
         raise ValueError(f"Cannot import {class_name} from {module_path}: {e}") from e
 

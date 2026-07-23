@@ -71,7 +71,7 @@ class TestClarificationQuestions:
 
     def test_immutable_mapping(self) -> None:
         with pytest.raises(TypeError):
-            CLARIFICATION_QUESTIONS[IntakeField.PICKUP_LOCATION] = "changed"
+            CLARIFICATION_QUESTIONS[IntakeField.PICKUP_LOCATION] = "changed"  # type: ignore[index]
 
 
 # ============================================================================
@@ -288,7 +288,7 @@ class TestRenderStatusUpdate:
 
     def test_immutable_mapping(self) -> None:
         with pytest.raises(TypeError):
-            STATUS_UPDATE_MESSAGES[RequestStatus.NEW] = "changed"
+            STATUS_UPDATE_MESSAGES[RequestStatus.NEW] = "changed"  # type: ignore[index]
 
     def test_every_message_is_human_prose_ending_in_a_period(self) -> None:
         for text in STATUS_UPDATE_MESSAGES.values():

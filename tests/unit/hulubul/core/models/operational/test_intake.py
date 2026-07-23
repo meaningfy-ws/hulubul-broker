@@ -130,10 +130,10 @@ class TestIntakeFactsReceiverIdentity:
 class TestIntakeFactsSenderIdentity:
     """Test sender field contracts."""
 
-    def test_sender_actor_id_required(self) -> None:  # type: ignore[call-arg]
+    def test_sender_actor_id_required(self) -> None:
         """sender_actor_id is always required (from chain identity)."""
         with pytest.raises(ValidationError, match="sender_actor_id"):
-            IntakeFacts()
+            IntakeFacts()  # type: ignore[call-arg]
 
     def test_sender_actor_id_as_urn(self) -> None:
         """sender_actor_id stored and returned as-is (URN pattern)."""
@@ -173,10 +173,10 @@ class TestIntakeFactUpdates:
 class TestCompleteIntakeFacts:
     """Test that complete facts enforce all four required fields."""
 
-    def test_complete_facts_requires_all_four_required_fields(self) -> None:  # type: ignore[call-arg]
+    def test_complete_facts_requires_all_four_required_fields(self) -> None:
         """Complete facts require sender_actor_id, receiver, pickup, and drop_off."""
         with pytest.raises(ValidationError):
-            CompleteIntakeFacts(
+            CompleteIntakeFacts(  # type: ignore[call-arg]
                 sender_actor_id="urn:actor:alice",
                 pickup_location="123 Main St",
                 # missing receiver identity and drop_off
