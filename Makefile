@@ -71,8 +71,28 @@ help: ## Display available targets
 	@ echo "    install-git-hooks   - Install the local pre-commit secret scan hook"
 	@ echo ""
 	@ echo -e "  $(BUILD_PRINT)CI / Quality gates:$(END_BUILD_PRINT)"
-	@ echo "    install             - Install project dependencies via Poetry"
-	@ echo "    ci-static           - Run static quality gates (lint)"
+	@ echo "    install                  - Install project dependencies via Poetry"
+	@ echo "    lint-python              - Lint Python source with Ruff"
+	@ echo "    format-check-python      - Check Python formatting with Ruff (no changes)"
+	@ echo "    format-python            - Apply Ruff formatting to Python source"
+	@ echo "    typecheck                - Type-check with mypy"
+	@ echo "    test-unit                - Run unit tests with coverage (fails under 80%)"
+	@ echo "    check-architecture       - Enforce import boundaries with import-linter"
+	@ echo "    operational-schemas      - Generate operational JSON schemas"
+	@ echo "    check-model-generated    - Fail if model/generated is stale relative to the LinkML schema"
+	@ echo "    check-operational-schemas - Fail if operational schemas are stale"
+	@ echo "    check-secrets            - Scan tracked files for committed secrets"
+	@ echo "    check-flows              - Validate LangFlow flow assets (normalize, manifest, lfx checks)"
+	@ echo "    test-integration         - Run integration-marked tests"
+	@ echo "    test-system              - Run system-marked tests"
+	@ echo "    test-bdd                 - Run BDD step-definition tests"
+	@ echo "    test-evaluation-recorded - Run recorded-model evaluation tests (no live calls)"
+	@ echo "    test-evaluation-live     - Run live-model evaluation tests (opt-in, calls the real model)"
+	@ echo "    test-evaluation-judge    - Run the LLM-judge clarification evaluation (opt-in, calls the real model)"
+	@ echo "    ci-static                - Run static quality gates (lint)"
+	@ echo "    ci-acceptance            - Integration + system + BDD tests + evidence report"
+	@ echo "    ci                       - Full CI pipeline (static + acceptance)"
+	@ echo "    release-evidence         - Build the Change 1 release evidence report"
 	@ echo ""
 
 # Every artifact lands under a single tree: $(GEN)/<target>/...; all diagrams
@@ -302,8 +322,7 @@ check-architecture: ## Enforce import boundaries with import-linter
 operational-schemas: ## Generate operational JSON schemas
 	poetry run gen-operational-schemas --output schemas/operational/v1
 
-check-model-generated: ## Fail if model/generated is stale relative to the LinkML schema
-	$(MAKE) all
+check-model-generated: lint pydantic jsonschema erdiagram plantuml classdiagram neo4j-constraints neomodel ## Fail if model/generated is stale relative to the LinkML schema
 	git diff --exit-code -- model/generated ':(exclude)model/generated/owl/**' ':(exclude)model/generated/shacl/**'
 
 check-operational-schemas: ## Fail if operational schemas are stale

@@ -8,83 +8,100 @@ hlb:Feedback a sh:NodeShape ;
     rdfs:comment "A reified rating and/or comment left by one participation about another, optionally scoped to a delivery request." ;
     sh:closed true ;
     sh:ignoredProperties ( rdf:type ) ;
-    sh:property [ sh:class hlb:DeliveryRequest ;
-            sh:description "The delivery request the feedback concerns." ;
-            sh:maxCount 1 ;
-            sh:nodeKind sh:IRI ;
-            sh:order 5 ;
-            sh:path hlb:aboutRequest ],
-        [ sh:datatype xsd:integer ;
-            sh:description "Numeric score." ;
-            sh:maxCount 1 ;
-            sh:nodeKind sh:Literal ;
-            sh:order 1 ;
-            sh:path hlb:rating ],
-        [ sh:class hlb:AgentInRole ;
+    sh:property [ sh:class hlb:AgentInRole ;
             sh:description "The participation that authored the feedback." ;
             sh:maxCount 1 ;
             sh:minCount 1 ;
             sh:nodeKind sh:IRI ;
             sh:order 3 ;
             sh:path hlb:fromProvider ],
-        [ sh:description "Graph node identity for this instance (distinct from any business identifier)." ;
+        [ sh:datatype xsd:string ;
+            sh:description "Free-text remark." ;
             sh:maxCount 1 ;
-            sh:nodeKind sh:IRI ;
+            sh:nodeKind sh:Literal ;
+            sh:order 2 ;
+            sh:path hlb:comment ],
+        [ sh:datatype xsd:integer ;
+            sh:description "Numeric score." ;
+            sh:maxCount 1 ;
+            sh:nodeKind sh:Literal ;
+            sh:order 1 ;
+            sh:path hlb:rating ],
+        [ sh:datatype xsd:anyURI ;
+            sh:description "Graph node identity for this instance (distinct from any business identifier)." ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:nodeKind sh:Literal ;
             sh:order 0 ;
             sh:path hlb:id ],
+        [ sh:class hlb:DeliveryRequest ;
+            sh:description "The delivery request the feedback concerns." ;
+            sh:maxCount 1 ;
+            sh:nodeKind sh:IRI ;
+            sh:order 5 ;
+            sh:path hlb:aboutRequest ],
         [ sh:class hlb:AgentInRole ;
             sh:description "The participation the feedback is about." ;
             sh:maxCount 1 ;
             sh:minCount 1 ;
             sh:nodeKind sh:IRI ;
             sh:order 4 ;
-            sh:path hlb:toRecipient ],
-        [ sh:datatype xsd:string ;
-            sh:description "Free-text remark." ;
-            sh:maxCount 1 ;
-            sh:nodeKind sh:Literal ;
-            sh:order 2 ;
-            sh:path hlb:comment ] ;
+            sh:path hlb:toRecipient ] ;
     sh:targetClass hlb:Feedback .
 
 hlb:SpatialObject a sh:NodeShape ;
     rdfs:comment "Root of the spatial hierarchy (aligned to geo:SpatialObject). Anything with spatial identity that may carry a geometry." ;
     sh:closed false ;
-    sh:ignoredProperties ( hlb:locality rdf:type hlb:name hlb:county hlb:country hlb:street hlb:postCode hlb:withinArea hlb:number hlb:hasIdentifier hlb:hasType hlb:state ) ;
+    sh:ignoredProperties ( hlb:withinArea hlb:county hlb:locality hlb:state hlb:number rdf:type hlb:street hlb:country hlb:name hlb:postCode hlb:hasIdentifier hlb:hasType ) ;
     sh:property [ sh:datatype xsd:string ;
             sh:description "Free-text remark or annotation." ;
             sh:maxCount 1 ;
             sh:nodeKind sh:Literal ;
             sh:order 1 ;
             sh:path hlb:comment ],
-        [ sh:description "Graph node identity for this instance (distinct from any business identifier)." ;
-            sh:maxCount 1 ;
-            sh:nodeKind sh:IRI ;
-            sh:order 0 ;
-            sh:path hlb:id ],
         [ sh:class hlb:GeoCoordinates ;
             sh:description "The point geometry of this spatial object." ;
             sh:maxCount 1 ;
             sh:nodeKind sh:BlankNodeOrIRI ;
             sh:order 2 ;
-            sh:path hlb:hasCoordinates ] ;
+            sh:path hlb:hasCoordinates ],
+        [ sh:datatype xsd:anyURI ;
+            sh:description "Graph node identity for this instance (distinct from any business identifier)." ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:nodeKind sh:Literal ;
+            sh:order 0 ;
+            sh:path hlb:id ] ;
     sh:targetClass hlb:SpatialObject .
 
 hlb:DeliveryRequest a sh:NodeShape ;
     rdfs:comment "A request to move one or more parcels from a pickup location to a drop-off location, carrying its participants, status and lifecycle timestamps." ;
     sh:closed true ;
     sh:ignoredProperties ( rdf:type ) ;
-    sh:property [ sh:description "Graph node identity for this instance (distinct from any business identifier)." ;
+    sh:property [ sh:datatype xsd:dateTime ;
+            sh:description "When the request was created." ;
             sh:maxCount 1 ;
-            sh:nodeKind sh:IRI ;
-            sh:order 0 ;
-            sh:path hlb:id ],
-        [ sh:class hlb:Parcel ;
-            sh:description "The parcel(s) to be delivered." ;
             sh:minCount 1 ;
-            sh:nodeKind sh:IRI ;
-            sh:order 10 ;
-            sh:path hlb:hasDeliveryItem ],
+            sh:nodeKind sh:Literal ;
+            sh:order 3 ;
+            sh:path hlb:created ],
+        [ sh:datatype xsd:string ;
+            sh:description "Free-text notes attached to the request." ;
+            sh:nodeKind sh:Literal ;
+            sh:order 1 ;
+            sh:path hlb:requestNote ],
+        [ sh:datatype xsd:dateTime ;
+            sh:description "When the request was closed/terminated." ;
+            sh:maxCount 1 ;
+            sh:nodeKind sh:Literal ;
+            sh:order 5 ;
+            sh:path hlb:closed ],
+        [ sh:description "Where the parcel(s) are collected — an Address or a named Place." ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:or ( [ sh:class hlb:Address ] [ sh:class hlb:Place ] ) ;
+            sh:order 11 ;
+            sh:path hlb:hasPickUpLocation ],
         [ sh:datatype xsd:dateTime ;
             sh:description "When the request was last modified." ;
             sh:maxCount 1 ;
@@ -92,6 +109,13 @@ hlb:DeliveryRequest a sh:NodeShape ;
             sh:nodeKind sh:Literal ;
             sh:order 4 ;
             sh:path hlb:updated ],
+        [ sh:class hlb:Sender ;
+            sh:description "The sender participation for this request." ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:nodeKind sh:IRI ;
+            sh:order 6 ;
+            sh:path hlb:hasSender ],
         [ sh:description "An alternative drop-off location (Address or Place). Owner resolved to request-level per diagram 2 (a Receiver-level variant was drawn in diagram 3 — not modelled here)." ;
             sh:maxCount 1 ;
             sh:or ( [ sh:class hlb:Address ] [ sh:class hlb:Place ] ) ;
@@ -103,32 +127,31 @@ hlb:DeliveryRequest a sh:NodeShape ;
             sh:nodeKind sh:IRI ;
             sh:order 8 ;
             sh:path hlb:hasTransporter ],
-        [ sh:class hlb:Sender ;
-            sh:description "The sender participation for this request." ;
-            sh:maxCount 1 ;
-            sh:minCount 1 ;
-            sh:nodeKind sh:IRI ;
-            sh:order 6 ;
-            sh:path hlb:hasSender ],
         [ sh:description "Current lifecycle status." ;
             sh:in ( hlb:new hlb:needsClarification hlb:complete hlb:optionsProposed hlb:waitingResponse hlb:accepted hlb:rejected hlb:pickUpPlanned hlb:pickedUp hlb:delivered hlb:cancelled ) ;
             sh:maxCount 1 ;
             sh:minCount 1 ;
             sh:order 9 ;
             sh:path hlb:hasStatus ],
-        [ sh:datatype xsd:dateTime ;
-            sh:description "When the request was created." ;
+        [ sh:datatype xsd:string ;
+            sh:description "The requester's preferred timeframe (orientative, free text)." ;
+            sh:maxCount 1 ;
+            sh:nodeKind sh:Literal ;
+            sh:order 2 ;
+            sh:path hlb:preferredPeriod ],
+        [ sh:datatype xsd:anyURI ;
+            sh:description "Graph node identity for this instance (distinct from any business identifier)." ;
             sh:maxCount 1 ;
             sh:minCount 1 ;
             sh:nodeKind sh:Literal ;
-            sh:order 3 ;
-            sh:path hlb:created ],
-        [ sh:description "Where the parcel(s) are collected — an Address or a named Place." ;
-            sh:maxCount 1 ;
+            sh:order 0 ;
+            sh:path hlb:id ],
+        [ sh:class hlb:Parcel ;
+            sh:description "The parcel(s) to be delivered." ;
             sh:minCount 1 ;
-            sh:or ( [ sh:class hlb:Address ] [ sh:class hlb:Place ] ) ;
-            sh:order 11 ;
-            sh:path hlb:hasPickUpLocation ],
+            sh:nodeKind sh:IRI ;
+            sh:order 10 ;
+            sh:path hlb:hasDeliveryItem ],
         [ sh:description "Where the parcel(s) are delivered — an Address or a named Place." ;
             sh:maxCount 1 ;
             sh:minCount 1 ;
@@ -141,34 +164,31 @@ hlb:DeliveryRequest a sh:NodeShape ;
             sh:minCount 1 ;
             sh:nodeKind sh:IRI ;
             sh:order 7 ;
-            sh:path hlb:hasReceiver ],
-        [ sh:datatype xsd:dateTime ;
-            sh:description "When the request was closed/terminated." ;
-            sh:maxCount 1 ;
-            sh:nodeKind sh:Literal ;
-            sh:order 5 ;
-            sh:path hlb:closed ],
-        [ sh:datatype xsd:string ;
-            sh:description "Free-text notes attached to the request." ;
-            sh:nodeKind sh:Literal ;
-            sh:order 1 ;
-            sh:path hlb:requestNote ],
-        [ sh:datatype xsd:string ;
-            sh:description "The requester's preferred timeframe (orientative, free text)." ;
-            sh:maxCount 1 ;
-            sh:nodeKind sh:Literal ;
-            sh:order 2 ;
-            sh:path hlb:preferredPeriod ] ;
+            sh:path hlb:hasReceiver ] ;
     sh:targetClass hlb:DeliveryRequest .
 
 hlb:Parcel a sh:NodeShape ;
     rdfs:comment "A physical item to be delivered as part of a request." ;
     sh:closed true ;
     sh:ignoredProperties ( rdf:type ) ;
-    sh:property [ sh:description "URLs of photos of the parcel." ;
+    sh:property [ sh:datatype xsd:float ;
+            sh:description "Weight in kilograms." ;
+            sh:maxCount 1 ;
+            sh:nodeKind sh:Literal ;
+            sh:order 3 ;
+            sh:path hlb:weightKg ],
+        [ sh:datatype xsd:string ;
+            sh:description "Free-text dimensions (e.g. \"30x20x10 cm\")." ;
+            sh:maxCount 1 ;
+            sh:nodeKind sh:Literal ;
+            sh:order 4 ;
+            sh:path hlb:dimensions ],
+        [ sh:class hlb:Receiver ;
+            sh:description "An alternative receiver for this specific parcel." ;
+            sh:maxCount 1 ;
             sh:nodeKind sh:IRI ;
-            sh:order 2 ;
-            sh:path hlb:photoURL ],
+            sh:order 5 ;
+            sh:path hlb:hasAltReceiver ],
         [ sh:datatype xsd:string ;
             sh:description "The sender's declared description of contents." ;
             sh:maxCount 1 ;
@@ -176,104 +196,29 @@ hlb:Parcel a sh:NodeShape ;
             sh:nodeKind sh:Literal ;
             sh:order 1 ;
             sh:path hlb:declaredContent ],
-        [ sh:datatype xsd:float ;
-            sh:description "Weight in kilograms." ;
+        [ sh:datatype xsd:anyURI ;
+            sh:description "Graph node identity for this instance (distinct from any business identifier)." ;
             sh:maxCount 1 ;
+            sh:minCount 1 ;
             sh:nodeKind sh:Literal ;
-            sh:order 3 ;
-            sh:path hlb:weightKg ],
-        [ sh:class hlb:Receiver ;
-            sh:description "An alternative receiver for this specific parcel." ;
-            sh:maxCount 1 ;
-            sh:nodeKind sh:IRI ;
-            sh:order 5 ;
-            sh:path hlb:hasAltReceiver ],
-        [ sh:description "Graph node identity for this instance (distinct from any business identifier)." ;
-            sh:maxCount 1 ;
-            sh:nodeKind sh:IRI ;
             sh:order 0 ;
             sh:path hlb:id ],
-        [ sh:datatype xsd:string ;
-            sh:description "Free-text dimensions (e.g. \"30x20x10 cm\")." ;
-            sh:maxCount 1 ;
+        [ sh:datatype xsd:anyURI ;
+            sh:description "URLs of photos of the parcel." ;
             sh:nodeKind sh:Literal ;
-            sh:order 4 ;
-            sh:path hlb:dimensions ] ;
+            sh:order 2 ;
+            sh:path hlb:photoURL ] ;
     sh:targetClass hlb:Parcel .
 
 hlb:Sender a sh:NodeShape ;
     rdfs:comment "The role of the agent that initiates a delivery request and hands over the parcel(s). The sender also names the receiver." ;
     sh:closed true ;
     sh:ignoredProperties ( rdf:type ) ;
-    sh:property [ sh:class hlb:Agent ;
-            sh:description "The enduring agent enacting this role." ;
-            sh:maxCount 1 ;
-            sh:minCount 1 ;
-            sh:nodeKind sh:IRI ;
-            sh:order 1 ;
-            sh:path hlb:playedBy ],
-        [ sh:description "Graph node identity for this instance (distinct from any business identifier)." ;
-            sh:maxCount 1 ;
-            sh:nodeKind sh:IRI ;
-            sh:order 0 ;
-            sh:path hlb:id ],
-        [ sh:class hlb:Channel ;
-            sh:description "An alternative channel to use for this participation, overriding the agent's default." ;
-            sh:maxCount 1 ;
-            sh:nodeKind sh:IRI ;
-            sh:order 2 ;
-            sh:path hlb:hasAltContactPointInRole ] ;
-    sh:targetClass hlb:Sender .
-
-hlb:TransportService a sh:NodeShape ;
-    rdfs:comment "A standing, request-agnostic offering published by a transporter agent, declaring service types and its base and destination service areas." ;
-    sh:closed true ;
-    sh:ignoredProperties ( rdf:type ) ;
-    sh:property [ sh:datatype xsd:string ;
-            sh:description "Short title of the offering." ;
+    sh:property [ sh:datatype xsd:anyURI ;
+            sh:description "Graph node identity for this instance (distinct from any business identifier)." ;
             sh:maxCount 1 ;
             sh:minCount 1 ;
             sh:nodeKind sh:Literal ;
-            sh:order 2 ;
-            sh:path hlb:serviceTitle ],
-        [ sh:class hlb:ServiceOffer ;
-            sh:description "Pickup footprint — areas (with frequency) where the transporter can collect." ;
-            sh:minCount 1 ;
-            sh:nodeKind sh:IRI ;
-            sh:order 4 ;
-            sh:path hlb:hasBaseArea ],
-        [ sh:datatype xsd:string ;
-            sh:description "Free-text description." ;
-            sh:maxCount 1 ;
-            sh:minCount 1 ;
-            sh:nodeKind sh:Literal ;
-            sh:order 1 ;
-            sh:path hlb:description ],
-        [ sh:description "What the service carries (people and/or parcels)." ;
-            sh:in ( hlb:peopleTransport hlb:parcelTransport ) ;
-            sh:minCount 1 ;
-            sh:order 3 ;
-            sh:path hlb:serviceType ],
-        [ sh:class hlb:ServiceOffer ;
-            sh:description "Delivery reach — areas (with frequency) the transporter serves as destinations." ;
-            sh:minCount 1 ;
-            sh:nodeKind sh:IRI ;
-            sh:order 5 ;
-            sh:path hlb:hasDestinationArea ],
-        [ sh:description "Graph node identity for this instance (distinct from any business identifier)." ;
-            sh:maxCount 1 ;
-            sh:nodeKind sh:IRI ;
-            sh:order 0 ;
-            sh:path hlb:id ] ;
-    sh:targetClass hlb:TransportService .
-
-hlb:Transporter a sh:NodeShape ;
-    rdfs:comment "The role of the agent that carries the parcel(s) for a delivery request." ;
-    sh:closed true ;
-    sh:ignoredProperties ( rdf:type ) ;
-    sh:property [ sh:description "Graph node identity for this instance (distinct from any business identifier)." ;
-            sh:maxCount 1 ;
-            sh:nodeKind sh:IRI ;
             sh:order 0 ;
             sh:path hlb:id ],
         [ sh:class hlb:Agent ;
@@ -289,15 +234,61 @@ hlb:Transporter a sh:NodeShape ;
             sh:nodeKind sh:IRI ;
             sh:order 2 ;
             sh:path hlb:hasAltContactPointInRole ] ;
-    sh:targetClass hlb:Transporter .
+    sh:targetClass hlb:Sender .
 
-hlb:AgentInRole a sh:NodeShape ;
-    rdfs:comment "The episodic, situation-dependent role an Agent plays within a specific interaction; a reified participation. Anti-rigid: the same Agent plays different roles across different requests." ;
-    sh:closed false ;
-    sh:ignoredProperties ( rdf:type hlb:deliveryNote ) ;
-    sh:property [ sh:description "Graph node identity for this instance (distinct from any business identifier)." ;
-            sh:maxCount 1 ;
+hlb:TransportService a sh:NodeShape ;
+    rdfs:comment "A standing, request-agnostic offering published by a transporter agent, declaring service types and its base and destination service areas." ;
+    sh:closed true ;
+    sh:ignoredProperties ( rdf:type ) ;
+    sh:property [ sh:class hlb:ServiceOffer ;
+            sh:description "Pickup footprint — areas (with frequency) where the transporter can collect." ;
+            sh:minCount 1 ;
             sh:nodeKind sh:IRI ;
+            sh:order 4 ;
+            sh:path hlb:hasBaseArea ],
+        [ sh:class hlb:ServiceOffer ;
+            sh:description "Delivery reach — areas (with frequency) the transporter serves as destinations." ;
+            sh:minCount 1 ;
+            sh:nodeKind sh:IRI ;
+            sh:order 5 ;
+            sh:path hlb:hasDestinationArea ],
+        [ sh:datatype xsd:string ;
+            sh:description "Short title of the offering." ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:nodeKind sh:Literal ;
+            sh:order 2 ;
+            sh:path hlb:serviceTitle ],
+        [ sh:description "What the service carries (people and/or parcels)." ;
+            sh:in ( hlb:peopleTransport hlb:parcelTransport ) ;
+            sh:minCount 1 ;
+            sh:order 3 ;
+            sh:path hlb:serviceType ],
+        [ sh:datatype xsd:string ;
+            sh:description "Free-text description." ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:nodeKind sh:Literal ;
+            sh:order 1 ;
+            sh:path hlb:description ],
+        [ sh:datatype xsd:anyURI ;
+            sh:description "Graph node identity for this instance (distinct from any business identifier)." ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:nodeKind sh:Literal ;
+            sh:order 0 ;
+            sh:path hlb:id ] ;
+    sh:targetClass hlb:TransportService .
+
+hlb:Transporter a sh:NodeShape ;
+    rdfs:comment "The role of the agent that carries the parcel(s) for a delivery request." ;
+    sh:closed true ;
+    sh:ignoredProperties ( rdf:type ) ;
+    sh:property [ sh:datatype xsd:anyURI ;
+            sh:description "Graph node identity for this instance (distinct from any business identifier)." ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:nodeKind sh:Literal ;
             sh:order 0 ;
             sh:path hlb:id ],
         [ sh:class hlb:Channel ;
@@ -313,13 +304,45 @@ hlb:AgentInRole a sh:NodeShape ;
             sh:nodeKind sh:IRI ;
             sh:order 1 ;
             sh:path hlb:playedBy ] ;
+    sh:targetClass hlb:Transporter .
+
+hlb:AgentInRole a sh:NodeShape ;
+    rdfs:comment "The episodic, situation-dependent role an Agent plays within a specific interaction; a reified participation. Anti-rigid: the same Agent plays different roles across different requests." ;
+    sh:closed false ;
+    sh:ignoredProperties ( hlb:deliveryNote rdf:type ) ;
+    sh:property [ sh:class hlb:Channel ;
+            sh:description "An alternative channel to use for this participation, overriding the agent's default." ;
+            sh:maxCount 1 ;
+            sh:nodeKind sh:IRI ;
+            sh:order 2 ;
+            sh:path hlb:hasAltContactPointInRole ],
+        [ sh:datatype xsd:anyURI ;
+            sh:description "Graph node identity for this instance (distinct from any business identifier)." ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:nodeKind sh:Literal ;
+            sh:order 0 ;
+            sh:path hlb:id ],
+        [ sh:class hlb:Agent ;
+            sh:description "The enduring agent enacting this role." ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:nodeKind sh:IRI ;
+            sh:order 1 ;
+            sh:path hlb:playedBy ] ;
     sh:targetClass hlb:AgentInRole .
 
 hlb:Receiver a sh:NodeShape ;
     rdfs:comment "The role of the agent intended to take delivery of the parcel(s)." ;
     sh:closed true ;
     sh:ignoredProperties ( rdf:type ) ;
-    sh:property [ sh:datatype xsd:string ;
+    sh:property [ sh:class hlb:Channel ;
+            sh:description "An alternative channel to use for this participation, overriding the agent's default." ;
+            sh:maxCount 1 ;
+            sh:nodeKind sh:IRI ;
+            sh:order 3 ;
+            sh:path hlb:hasAltContactPointInRole ],
+        [ sh:datatype xsd:string ;
             sh:description "A note from or for the receiver regarding delivery (e.g. handover instructions)." ;
             sh:maxCount 1 ;
             sh:nodeKind sh:Literal ;
@@ -332,15 +355,11 @@ hlb:Receiver a sh:NodeShape ;
             sh:nodeKind sh:IRI ;
             sh:order 2 ;
             sh:path hlb:playedBy ],
-        [ sh:class hlb:Channel ;
-            sh:description "An alternative channel to use for this participation, overriding the agent's default." ;
+        [ sh:datatype xsd:anyURI ;
+            sh:description "Graph node identity for this instance (distinct from any business identifier)." ;
             sh:maxCount 1 ;
-            sh:nodeKind sh:IRI ;
-            sh:order 3 ;
-            sh:path hlb:hasAltContactPointInRole ],
-        [ sh:description "Graph node identity for this instance (distinct from any business identifier)." ;
-            sh:maxCount 1 ;
-            sh:nodeKind sh:IRI ;
+            sh:minCount 1 ;
+            sh:nodeKind sh:Literal ;
             sh:order 1 ;
             sh:path hlb:id ] ;
     sh:targetClass hlb:Receiver .
@@ -349,23 +368,18 @@ hlb:ServiceOffer a sh:NodeShape ;
     rdfs:comment "A served area paired with an orientative frequency. The same shape serves both base and destination offers; direction is given by which association (hasBaseArea vs hasDestinationArea) it sits under, not by a flag. Given an id (graph node) because it carries an outgoing edge to Area." ;
     sh:closed true ;
     sh:ignoredProperties ( rdf:type ) ;
-    sh:property [ sh:datatype xsd:string ;
-            sh:description "Free-text description." ;
-            sh:maxCount 1 ;
-            sh:minCount 1 ;
-            sh:nodeKind sh:Literal ;
-            sh:order 1 ;
-            sh:path hlb:description ],
-        [ sh:class hlb:Area ;
+    sh:property [ sh:class hlb:Area ;
             sh:description "The area this object sits within." ;
             sh:maxCount 1 ;
             sh:minCount 1 ;
             sh:nodeKind sh:IRI ;
             sh:order 2 ;
             sh:path hlb:withinArea ],
-        [ sh:description "Graph node identity for this instance (distinct from any business identifier)." ;
+        [ sh:datatype xsd:anyURI ;
+            sh:description "Graph node identity for this instance (distinct from any business identifier)." ;
             sh:maxCount 1 ;
-            sh:nodeKind sh:IRI ;
+            sh:minCount 1 ;
+            sh:nodeKind sh:Literal ;
             sh:order 0 ;
             sh:path hlb:id ],
         [ sh:description "How often the transporter is in/through the area (orientative)." ;
@@ -373,14 +387,39 @@ hlb:ServiceOffer a sh:NodeShape ;
             sh:maxCount 1 ;
             sh:minCount 1 ;
             sh:order 3 ;
-            sh:path hlb:withFrequency ] ;
+            sh:path hlb:withFrequency ],
+        [ sh:datatype xsd:string ;
+            sh:description "Free-text description." ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:nodeKind sh:Literal ;
+            sh:order 1 ;
+            sh:path hlb:description ] ;
     sh:targetClass hlb:ServiceOffer .
 
 hlb:Place a sh:NodeShape ;
     rdfs:comment "A named, typed point/place of interest (landmark, depot, pickup point) sitting within an Area. Distinct from coarse Area and precise Address." ;
     sh:closed true ;
     sh:ignoredProperties ( rdf:type ) ;
-    sh:property [ sh:datatype xsd:string ;
+    sh:property [ sh:class hlb:GeoCoordinates ;
+            sh:description "The point geometry of this spatial object." ;
+            sh:maxCount 1 ;
+            sh:nodeKind sh:BlankNodeOrIRI ;
+            sh:order 6 ;
+            sh:path hlb:hasCoordinates ],
+        [ sh:class hlb:Area ;
+            sh:description "The area this object sits within." ;
+            sh:maxCount 1 ;
+            sh:nodeKind sh:IRI ;
+            sh:order 0 ;
+            sh:path hlb:withinArea ],
+        [ sh:datatype xsd:string ;
+            sh:description "Free-text remark or annotation." ;
+            sh:maxCount 1 ;
+            sh:nodeKind sh:Literal ;
+            sh:order 5 ;
+            sh:path hlb:comment ],
+        [ sh:datatype xsd:string ;
             sh:description "Identifier of the place (e.g. gazetteer id)." ;
             sh:maxCount 1 ;
             sh:minCount 1 ;
@@ -388,48 +427,46 @@ hlb:Place a sh:NodeShape ;
             sh:order 2 ;
             sh:path hlb:hasIdentifier ],
         [ sh:datatype xsd:string ;
+            sh:description "Human-readable name of the place." ;
+            sh:maxCount 1 ;
+            sh:nodeKind sh:Literal ;
+            sh:order 1 ;
+            sh:path hlb:name ],
+        [ sh:datatype xsd:string ;
             sh:description "Type of the place (e.g. depot, landmark, pickup point)." ;
             sh:maxCount 1 ;
             sh:minCount 1 ;
             sh:nodeKind sh:Literal ;
             sh:order 3 ;
             sh:path hlb:hasType ],
-        [ sh:datatype xsd:string ;
-            sh:description "Human-readable name of the place." ;
+        [ sh:datatype xsd:anyURI ;
+            sh:description "Graph node identity for this instance (distinct from any business identifier)." ;
             sh:maxCount 1 ;
+            sh:minCount 1 ;
             sh:nodeKind sh:Literal ;
-            sh:order 1 ;
-            sh:path hlb:name ],
-        [ sh:class hlb:Area ;
-            sh:description "The area this object sits within." ;
-            sh:maxCount 1 ;
-            sh:nodeKind sh:IRI ;
-            sh:order 0 ;
-            sh:path hlb:withinArea ],
-        [ sh:class hlb:GeoCoordinates ;
-            sh:description "The point geometry of this spatial object." ;
-            sh:maxCount 1 ;
-            sh:nodeKind sh:BlankNodeOrIRI ;
-            sh:order 6 ;
-            sh:path hlb:hasCoordinates ],
-        [ sh:description "Graph node identity for this instance (distinct from any business identifier)." ;
-            sh:maxCount 1 ;
-            sh:nodeKind sh:IRI ;
             sh:order 4 ;
-            sh:path hlb:id ],
-        [ sh:datatype xsd:string ;
-            sh:description "Free-text remark or annotation." ;
-            sh:maxCount 1 ;
-            sh:nodeKind sh:Literal ;
-            sh:order 5 ;
-            sh:path hlb:comment ] ;
+            sh:path hlb:id ] ;
     sh:targetClass hlb:Place .
 
 hlb:Address a sh:NodeShape ;
     rdfs:comment "A precise, pin-level postal address." ;
     sh:closed true ;
     sh:ignoredProperties ( rdf:type ) ;
-    sh:property [ sh:datatype xsd:string ;
+    sh:property [ sh:class hlb:Area ;
+            sh:description "The area this object sits within." ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:nodeKind sh:IRI ;
+            sh:order 0 ;
+            sh:path hlb:withinArea ],
+        [ sh:datatype xsd:anyURI ;
+            sh:description "Graph node identity for this instance (distinct from any business identifier)." ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:nodeKind sh:Literal ;
+            sh:order 4 ;
+            sh:path hlb:id ],
+        [ sh:datatype xsd:string ;
             sh:description "House/building number." ;
             sh:maxCount 1 ;
             sh:minCount 1 ;
@@ -449,13 +486,6 @@ hlb:Address a sh:NodeShape ;
             sh:nodeKind sh:Literal ;
             sh:order 5 ;
             sh:path hlb:comment ],
-        [ sh:class hlb:Area ;
-            sh:description "The area this object sits within." ;
-            sh:maxCount 1 ;
-            sh:minCount 1 ;
-            sh:nodeKind sh:IRI ;
-            sh:order 0 ;
-            sh:path hlb:withinArea ],
         [ sh:class hlb:GeoCoordinates ;
             sh:description "The point geometry of this spatial object." ;
             sh:maxCount 1 ;
@@ -468,12 +498,7 @@ hlb:Address a sh:NodeShape ;
             sh:minCount 1 ;
             sh:nodeKind sh:Literal ;
             sh:order 2 ;
-            sh:path hlb:street ],
-        [ sh:description "Graph node identity for this instance (distinct from any business identifier)." ;
-            sh:maxCount 1 ;
-            sh:nodeKind sh:IRI ;
-            sh:order 4 ;
-            sh:path hlb:id ] ;
+            sh:path hlb:street ] ;
     sh:targetClass hlb:Address .
 
 hlb:Agent a sh:NodeShape ;
@@ -481,65 +506,67 @@ hlb:Agent a sh:NodeShape ;
     sh:closed true ;
     sh:ignoredProperties ( rdf:type ) ;
     sh:property [ sh:datatype xsd:string ;
-            sh:description "Human-readable name." ;
+            sh:description "Stable unique business identifier of the agent within Hulubul." ;
             sh:maxCount 1 ;
             sh:minCount 1 ;
             sh:nodeKind sh:Literal ;
-            sh:order 1 ;
-            sh:path hlb:name ],
-        [ sh:class hlb:Channel ;
-            sh:description "Communication channels through which the agent can be reached and, when validated, authenticated." ;
-            sh:nodeKind sh:IRI ;
-            sh:order 4 ;
-            sh:path hlb:hasContactPoint ],
-        [ sh:description "Graph node identity for this instance (distinct from any business identifier)." ;
-            sh:maxCount 1 ;
-            sh:nodeKind sh:IRI ;
-            sh:order 0 ;
-            sh:path hlb:id ],
-        [ sh:class hlb:Address ;
-            sh:description "The agent's principal location." ;
-            sh:maxCount 1 ;
-            sh:nodeKind sh:IRI ;
-            sh:order 6 ;
-            sh:path hlb:hasMainLocation ],
+            sh:order 3 ;
+            sh:path hlb:identifier ],
         [ sh:datatype xsd:string ;
             sh:description "Free-text description." ;
             sh:maxCount 1 ;
             sh:nodeKind sh:Literal ;
             sh:order 2 ;
             sh:path hlb:description ],
-        [ sh:class hlb:Channel ;
-            sh:description "The agent's primary/default channel; also the trusted login channel." ;
-            sh:maxCount 1 ;
-            sh:nodeKind sh:IRI ;
-            sh:order 5 ;
-            sh:path hlb:hasMainContactPoint ],
         [ sh:class hlb:TransportService ;
             sh:description "The standing, request-agnostic transport offering published by this agent (present only for transporters)." ;
             sh:maxCount 1 ;
             sh:nodeKind sh:IRI ;
             sh:order 7 ;
             sh:path hlb:providesService ],
+        [ sh:class hlb:Channel ;
+            sh:description "Communication channels through which the agent can be reached and, when validated, authenticated." ;
+            sh:nodeKind sh:IRI ;
+            sh:order 4 ;
+            sh:path hlb:hasContactPoint ],
+        [ sh:class hlb:Address ;
+            sh:description "The agent's principal location." ;
+            sh:maxCount 1 ;
+            sh:nodeKind sh:IRI ;
+            sh:order 6 ;
+            sh:path hlb:hasMainLocation ],
+        [ sh:class hlb:Channel ;
+            sh:description "The agent's primary/default channel; also the trusted login channel." ;
+            sh:maxCount 1 ;
+            sh:nodeKind sh:IRI ;
+            sh:order 5 ;
+            sh:path hlb:hasMainContactPoint ],
         [ sh:datatype xsd:string ;
-            sh:description "Stable unique business identifier of the agent within Hulubul." ;
+            sh:description "Human-readable name." ;
             sh:maxCount 1 ;
             sh:minCount 1 ;
             sh:nodeKind sh:Literal ;
-            sh:order 3 ;
-            sh:path hlb:identifier ] ;
+            sh:order 1 ;
+            sh:path hlb:name ],
+        [ sh:datatype xsd:anyURI ;
+            sh:description "Graph node identity for this instance (distinct from any business identifier)." ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:nodeKind sh:Literal ;
+            sh:order 0 ;
+            sh:path hlb:id ] ;
     sh:targetClass hlb:Agent .
 
 hlb:Area a sh:NodeShape ;
     rdfs:comment "A coarse administrative or geographic unit (locality, county, state, country) forming a nested containment hierarchy. Transporter service offers and matching operate on Area; exact pickup/delivery use Address." ;
     sh:closed true ;
     sh:ignoredProperties ( rdf:type ) ;
-    sh:property [ sh:class hlb:GeoCoordinates ;
-            sh:description "The point geometry of this spatial object." ;
+    sh:property [ sh:datatype xsd:string ;
+            sh:description "Country name." ;
             sh:maxCount 1 ;
-            sh:nodeKind sh:BlankNodeOrIRI ;
-            sh:order 7 ;
-            sh:path hlb:hasCoordinates ],
+            sh:nodeKind sh:Literal ;
+            sh:order 3 ;
+            sh:path hlb:country ],
         [ sh:datatype xsd:string ;
             sh:description "Free-text remark or annotation." ;
             sh:maxCount 1 ;
@@ -547,22 +574,17 @@ hlb:Area a sh:NodeShape ;
             sh:order 6 ;
             sh:path hlb:comment ],
         [ sh:datatype xsd:string ;
-            sh:description "County/district (raion)." ;
+            sh:description "Town/city/locality name." ;
             sh:maxCount 1 ;
             sh:nodeKind sh:Literal ;
-            sh:order 2 ;
-            sh:path hlb:county ],
-        [ sh:datatype xsd:string ;
-            sh:description "Country name." ;
+            sh:order 1 ;
+            sh:path hlb:locality ],
+        [ sh:class hlb:GeoCoordinates ;
+            sh:description "The point geometry of this spatial object." ;
             sh:maxCount 1 ;
-            sh:nodeKind sh:Literal ;
-            sh:order 3 ;
-            sh:path hlb:country ],
-        [ sh:description "Graph node identity for this instance (distinct from any business identifier)." ;
-            sh:maxCount 1 ;
-            sh:nodeKind sh:IRI ;
-            sh:order 5 ;
-            sh:path hlb:id ],
+            sh:nodeKind sh:BlankNodeOrIRI ;
+            sh:order 7 ;
+            sh:path hlb:hasCoordinates ],
         [ sh:class hlb:Area ;
             sh:description "The area this object sits within." ;
             sh:maxCount 1 ;
@@ -570,17 +592,24 @@ hlb:Area a sh:NodeShape ;
             sh:order 0 ;
             sh:path hlb:withinArea ],
         [ sh:datatype xsd:string ;
+            sh:description "County/district (raion)." ;
+            sh:maxCount 1 ;
+            sh:nodeKind sh:Literal ;
+            sh:order 2 ;
+            sh:path hlb:county ],
+        [ sh:datatype xsd:anyURI ;
+            sh:description "Graph node identity for this instance (distinct from any business identifier)." ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:nodeKind sh:Literal ;
+            sh:order 5 ;
+            sh:path hlb:id ],
+        [ sh:datatype xsd:string ;
             sh:description "State/region within country." ;
             sh:maxCount 1 ;
             sh:nodeKind sh:Literal ;
             sh:order 4 ;
-            sh:path hlb:state ],
-        [ sh:datatype xsd:string ;
-            sh:description "Town/city/locality name." ;
-            sh:maxCount 1 ;
-            sh:nodeKind sh:Literal ;
-            sh:order 1 ;
-            sh:path hlb:locality ] ;
+            sh:path hlb:state ] ;
     sh:targetClass hlb:Area .
 
 hlb:GeoCoordinates a sh:NodeShape ;
@@ -588,54 +617,56 @@ hlb:GeoCoordinates a sh:NodeShape ;
     sh:closed true ;
     sh:ignoredProperties ( rdf:type ) ;
     sh:property [ sh:datatype xsd:float ;
-            sh:description "WGS84 latitude." ;
-            sh:maxCount 1 ;
-            sh:minCount 1 ;
-            sh:nodeKind sh:Literal ;
-            sh:order 0 ;
-            sh:path hlb:latitude ],
-        [ sh:datatype xsd:float ;
             sh:description "WGS84 longitude." ;
             sh:maxCount 1 ;
             sh:minCount 1 ;
             sh:nodeKind sh:Literal ;
             sh:order 1 ;
-            sh:path hlb:longitude ] ;
+            sh:path hlb:longitude ],
+        [ sh:datatype xsd:float ;
+            sh:description "WGS84 latitude." ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:nodeKind sh:Literal ;
+            sh:order 0 ;
+            sh:path hlb:latitude ] ;
     sh:targetClass hlb:GeoCoordinates .
 
 hlb:Channel a sh:NodeShape ;
     rdfs:comment "A communication channel bound to a single agent — the endpoint through which the agent is reached and, when validated, authenticated." ;
     sh:closed true ;
     sh:ignoredProperties ( rdf:type ) ;
-    sh:property [ sh:datatype xsd:string ;
+    sh:property [ sh:description "Whether control of the channel has been verified." ;
+            sh:in ( hlb:valid hlb:invalid hlb:needsReview ) ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:order 7 ;
+            sh:path hlb:validationStatus ],
+        [ sh:datatype xsd:anyURI ;
+            sh:description "Graph node identity for this instance (distinct from any business identifier)." ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:nodeKind sh:Literal ;
+            sh:order 0 ;
+            sh:path hlb:id ],
+        [ sh:datatype xsd:string ;
             sh:description "Phone number, when the medium is phone-based." ;
             sh:maxCount 1 ;
             sh:nodeKind sh:Literal ;
             sh:order 5 ;
             sh:path hlb:telephone ],
-        [ sh:datatype xsd:string ;
-            sh:description "Email address, when the medium is email." ;
+        [ sh:description "The medium/platform of this channel." ;
+            sh:in ( hlb:GSM hlb:WhatsApp hlb:Telegram hlb:Viber hlb:email ) ;
             sh:maxCount 1 ;
-            sh:nodeKind sh:Literal ;
-            sh:order 4 ;
-            sh:path hlb:email ],
-        [ sh:description "Graph node identity for this instance (distinct from any business identifier)." ;
-            sh:maxCount 1 ;
-            sh:nodeKind sh:IRI ;
-            sh:order 0 ;
-            sh:path hlb:id ],
+            sh:minCount 1 ;
+            sh:order 6 ;
+            sh:path hlb:hasMedium ],
         [ sh:datatype xsd:string ;
             sh:description "Free-text description." ;
             sh:maxCount 1 ;
             sh:nodeKind sh:Literal ;
             sh:order 1 ;
             sh:path hlb:description ],
-        [ sh:description "Whether control of the channel has been verified." ;
-            sh:in ( hlb:valid hlb:invalid hlb:needsReview ) ;
-            sh:maxCount 1 ;
-            sh:minCount 1 ;
-            sh:order 7 ;
-            sh:path hlb:validationStatus ],
         [ sh:datatype xsd:string ;
             sh:description "Human label for the channel (e.g. \"mum's WhatsApp\")." ;
             sh:maxCount 1 ;
@@ -649,12 +680,12 @@ hlb:Channel a sh:NodeShape ;
             sh:nodeKind sh:Literal ;
             sh:order 3 ;
             sh:path hlb:systemID ],
-        [ sh:description "The medium/platform of this channel." ;
-            sh:in ( hlb:GSM hlb:WhatsApp hlb:Telegram hlb:Viber hlb:email ) ;
+        [ sh:datatype xsd:string ;
+            sh:description "Email address, when the medium is email." ;
             sh:maxCount 1 ;
-            sh:minCount 1 ;
-            sh:order 6 ;
-            sh:path hlb:hasMedium ] ;
+            sh:nodeKind sh:Literal ;
+            sh:order 4 ;
+            sh:path hlb:email ] ;
     sh:targetClass hlb:Channel .
 
 

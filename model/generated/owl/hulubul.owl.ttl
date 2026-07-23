@@ -16,43 +16,28 @@ hlb:hulubul.owl.ttl a owl:Ontology ;
 hlb:Feedback a owl:Class ;
     rdfs:label "Feedback" ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty hlb:id ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom hlb:AgentInRole ;
-            owl:onProperty hlb:fromProvider ],
-        [ a owl:Restriction ;
             owl:minCardinality 1 ;
             owl:onProperty hlb:toRecipient ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty hlb:comment ],
-        [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty hlb:fromProvider ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom xsd:anyURI ;
-            owl:onProperty hlb:id ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom hlb:DeliveryRequest ;
-            owl:onProperty hlb:aboutRequest ],
         [ a owl:Restriction ;
             owl:minCardinality 0 ;
             owl:onProperty hlb:rating ],
         [ a owl:Restriction ;
             owl:maxCardinality 1 ;
-            owl:onProperty hlb:comment ],
-        [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
             owl:onProperty hlb:toRecipient ],
         [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty hlb:aboutRequest ],
+            owl:allValuesFrom hlb:AgentInRole ;
+            owl:onProperty hlb:toRecipient ],
         [ a owl:Restriction ;
             owl:allValuesFrom xsd:integer ;
             owl:onProperty hlb:rating ],
         [ a owl:Restriction ;
+            owl:allValuesFrom xsd:anyURI ;
+            owl:onProperty hlb:id ],
+        [ a owl:Restriction ;
             owl:minCardinality 1 ;
+            owl:onProperty hlb:id ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
             owl:onProperty hlb:id ],
         [ a owl:Restriction ;
             owl:allValuesFrom xsd:string ;
@@ -62,13 +47,28 @@ hlb:Feedback a owl:Class ;
             owl:onProperty hlb:rating ],
         [ a owl:Restriction ;
             owl:minCardinality 0 ;
+            owl:onProperty hlb:comment ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom hlb:DeliveryRequest ;
             owl:onProperty hlb:aboutRequest ],
         [ a owl:Restriction ;
-            owl:allValuesFrom hlb:AgentInRole ;
-            owl:onProperty hlb:toRecipient ],
+            owl:maxCardinality 1 ;
+            owl:onProperty hlb:comment ],
         [ a owl:Restriction ;
             owl:minCardinality 1 ;
-            owl:onProperty hlb:fromProvider ] ;
+            owl:onProperty hlb:fromProvider ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
+            owl:onProperty hlb:aboutRequest ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
+            owl:onProperty hlb:fromProvider ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom hlb:AgentInRole ;
+            owl:onProperty hlb:fromProvider ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty hlb:aboutRequest ] ;
     skos:altLabel "Rating",
         "Review",
         "Testimonial" ;
@@ -79,8 +79,23 @@ hlb:Feedback a owl:Class ;
 hlb:Agent a owl:Class ;
     rdfs:label "Agent" ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:allValuesFrom xsd:string ;
+            owl:maxCardinality 1 ;
+            owl:onProperty hlb:id ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
+            owl:onProperty hlb:identifier ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
+            owl:onProperty hlb:hasMainLocation ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
             owl:onProperty hlb:description ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom xsd:anyURI ;
+            owl:onProperty hlb:id ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty hlb:hasContactPoint ],
         [ a owl:Restriction ;
             owl:maxCardinality 1 ;
             owl:onProperty hlb:providesService ],
@@ -91,62 +106,47 @@ hlb:Agent a owl:Class ;
             owl:allValuesFrom hlb:Address ;
             owl:onProperty hlb:hasMainLocation ],
         [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty hlb:providesService ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty hlb:hasContactPoint ],
+            owl:minCardinality 1 ;
+            owl:onProperty hlb:identifier ],
         [ a owl:Restriction ;
             owl:allValuesFrom xsd:string ;
-            owl:onProperty hlb:name ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom xsd:anyURI ;
-            owl:onProperty hlb:id ],
+            owl:onProperty hlb:identifier ],
         [ a owl:Restriction ;
             owl:minCardinality 1 ;
+            owl:onProperty hlb:name ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
             owl:onProperty hlb:name ],
         [ a owl:Restriction ;
             owl:allValuesFrom hlb:Channel ;
             owl:onProperty hlb:hasMainContactPoint ],
         [ a owl:Restriction ;
+            owl:allValuesFrom hlb:Channel ;
+            owl:onProperty hlb:hasContactPoint ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty hlb:hasMainContactPoint ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty hlb:providesService ],
+        [ a owl:Restriction ;
             owl:maxCardinality 1 ;
+            owl:onProperty hlb:description ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
+            owl:onProperty hlb:hasMainContactPoint ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom xsd:string ;
+            owl:onProperty hlb:description ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
             owl:onProperty hlb:hasMainLocation ],
         [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
+            owl:allValuesFrom xsd:string ;
             owl:onProperty hlb:name ],
-        [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty hlb:id ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty hlb:hasMainContactPoint ],
-        [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty hlb:hasMainContactPoint ],
-        [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty hlb:identifier ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty hlb:description ],
-        [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty hlb:description ],
         [ a owl:Restriction ;
             owl:allValuesFrom hlb:TransportService ;
-            owl:onProperty hlb:providesService ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom hlb:Channel ;
-            owl:onProperty hlb:hasContactPoint ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty hlb:hasMainLocation ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom xsd:string ;
-            owl:onProperty hlb:identifier ],
-        [ a owl:Restriction ;
-            owl:minCardinality 1 ;
-            owl:onProperty hlb:identifier ] ;
+            owl:onProperty hlb:providesService ] ;
     skos:altLabel "Actor",
         "Party" ;
     skos:definition "An enduring party — a person or an organisation — that participates in Hulubul. Holds stable identity, communication channels, an optional main location, and may publish a standing transport service and play episodic roles." ;
@@ -156,125 +156,125 @@ hlb:Agent a owl:Class ;
 hlb:DeliveryRequest a owl:Class ;
     rdfs:label "DeliveryRequest" ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:minCardinality 1 ;
-            owl:onProperty hlb:hasReceiver ],
+            owl:allValuesFrom hlb:Parcel ;
+            owl:onProperty hlb:hasDeliveryItem ],
         [ a owl:Restriction ;
             owl:allValuesFrom hlb:Transporter ;
             owl:onProperty hlb:hasTransporter ],
         [ a owl:Restriction ;
-            owl:allValuesFrom xsd:string ;
-            owl:onProperty hlb:preferredPeriod ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom [ owl:intersectionOf ( [ owl:unionOf ( hlb:Address hlb:Place ) ] hlb:SpatialObject ) ] ;
-            owl:onProperty hlb:hasPickUpLocation ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom hlb:Parcel ;
-            owl:onProperty hlb:hasDeliveryItem ],
-        [ a owl:Restriction ;
             owl:minCardinality 0 ;
-            owl:onProperty hlb:hasAltDropOffLocation ],
-        [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty hlb:closed ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom xsd:dateTime ;
-            owl:onProperty hlb:created ],
-        [ a owl:Restriction ;
-            owl:minCardinality 1 ;
-            owl:onProperty hlb:hasDeliveryItem ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty hlb:requestNote ],
-        [ a owl:Restriction ;
-            owl:minCardinality 1 ;
-            owl:onProperty hlb:updated ],
-        [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty hlb:updated ],
-        [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty hlb:hasPickUpLocation ],
-        [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty hlb:hasSender ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty hlb:closed ],
-        [ a owl:Restriction ;
-            owl:minCardinality 1 ;
-            owl:onProperty hlb:id ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom xsd:string ;
             owl:onProperty hlb:requestNote ],
         [ a owl:Restriction ;
             owl:allValuesFrom hlb:Sender ;
             owl:onProperty hlb:hasSender ],
         [ a owl:Restriction ;
-            owl:allValuesFrom hlb:Receiver ;
-            owl:onProperty hlb:hasReceiver ],
+            owl:allValuesFrom xsd:dateTime ;
+            owl:onProperty hlb:closed ],
+        [ a owl:Restriction ;
+            owl:minCardinality 1 ;
+            owl:onProperty hlb:hasPickUpLocation ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom xsd:dateTime ;
+            owl:onProperty hlb:created ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
+            owl:onProperty hlb:created ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
+            owl:onProperty hlb:hasDropOffLocation ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty hlb:closed ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom [ owl:intersectionOf ( [ owl:unionOf ( hlb:Address hlb:Place ) ] hlb:SpatialObject ) ] ;
+            owl:onProperty hlb:hasPickUpLocation ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
+            owl:onProperty hlb:hasAltDropOffLocation ],
+        [ a owl:Restriction ;
+            owl:minCardinality 1 ;
+            owl:onProperty hlb:hasDeliveryItem ],
         [ a owl:Restriction ;
             owl:minCardinality 0 ;
             owl:onProperty hlb:preferredPeriod ],
         [ a owl:Restriction ;
             owl:maxCardinality 1 ;
-            owl:onProperty hlb:hasStatus ],
+            owl:onProperty hlb:closed ],
         [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty hlb:hasTransporter ],
+            owl:allValuesFrom hlb:Receiver ;
+            owl:onProperty hlb:hasReceiver ],
         [ a owl:Restriction ;
             owl:maxCardinality 1 ;
-            owl:onProperty hlb:created ],
+            owl:onProperty hlb:hasSender ],
         [ a owl:Restriction ;
-            owl:allValuesFrom xsd:anyURI ;
+            owl:minCardinality 1 ;
             owl:onProperty hlb:id ],
         [ a owl:Restriction ;
-            owl:minCardinality 1 ;
-            owl:onProperty hlb:created ],
-        [ a owl:Restriction ;
-            owl:minCardinality 1 ;
-            owl:onProperty hlb:hasPickUpLocation ],
-        [ a owl:Restriction ;
             owl:maxCardinality 1 ;
-            owl:onProperty hlb:hasDropOffLocation ],
+            owl:onProperty hlb:preferredPeriod ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom xsd:string ;
+            owl:onProperty hlb:requestNote ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom xsd:string ;
+            owl:onProperty hlb:preferredPeriod ],
         [ a owl:Restriction ;
             owl:allValuesFrom hlb:RequestStatus ;
             owl:onProperty hlb:hasStatus ],
         [ a owl:Restriction ;
-            owl:allValuesFrom xsd:dateTime ;
-            owl:onProperty hlb:closed ],
-        [ a owl:Restriction ;
             owl:maxCardinality 1 ;
             owl:onProperty hlb:id ],
         [ a owl:Restriction ;
-            owl:allValuesFrom xsd:dateTime ;
+            owl:minCardinality 0 ;
+            owl:onProperty hlb:hasTransporter ],
+        [ a owl:Restriction ;
+            owl:minCardinality 1 ;
+            owl:onProperty hlb:hasReceiver ],
+        [ a owl:Restriction ;
+            owl:minCardinality 1 ;
             owl:onProperty hlb:updated ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom [ owl:intersectionOf ( [ owl:unionOf ( hlb:Address hlb:Place ) ] hlb:SpatialObject ) ] ;
+            owl:onProperty hlb:hasDropOffLocation ],
+        [ a owl:Restriction ;
+            owl:minCardinality 1 ;
+            owl:onProperty hlb:hasDropOffLocation ],
         [ a owl:Restriction ;
             owl:maxCardinality 1 ;
             owl:onProperty hlb:hasReceiver ],
         [ a owl:Restriction ;
             owl:minCardinality 1 ;
-            owl:onProperty hlb:hasSender ],
-        [ a owl:Restriction ;
-            owl:minCardinality 1 ;
             owl:onProperty hlb:hasStatus ],
         [ a owl:Restriction ;
-            owl:minCardinality 1 ;
-            owl:onProperty hlb:hasDropOffLocation ],
+            owl:allValuesFrom xsd:dateTime ;
+            owl:onProperty hlb:updated ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty hlb:hasAltDropOffLocation ],
         [ a owl:Restriction ;
             owl:maxCardinality 1 ;
-            owl:onProperty hlb:hasAltDropOffLocation ],
+            owl:onProperty hlb:updated ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
+            owl:onProperty hlb:hasPickUpLocation ],
         [ a owl:Restriction ;
             owl:maxCardinality 1 ;
             owl:onProperty hlb:hasTransporter ],
         [ a owl:Restriction ;
-            owl:allValuesFrom [ owl:intersectionOf ( [ owl:unionOf ( hlb:Address hlb:Place ) ] hlb:SpatialObject ) ] ;
-            owl:onProperty hlb:hasDropOffLocation ],
+            owl:minCardinality 1 ;
+            owl:onProperty hlb:hasSender ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
+            owl:onProperty hlb:hasStatus ],
         [ a owl:Restriction ;
             owl:allValuesFrom [ owl:intersectionOf ( [ owl:unionOf ( hlb:Address hlb:Place ) ] hlb:SpatialObject ) ] ;
             owl:onProperty hlb:hasAltDropOffLocation ],
         [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty hlb:preferredPeriod ] ;
+            owl:minCardinality 1 ;
+            owl:onProperty hlb:created ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom xsd:anyURI ;
+            owl:onProperty hlb:id ] ;
     skos:altLabel "ParcelRequest",
         "Shipment Request",
         "Transport Request" ;
@@ -290,62 +290,71 @@ hlb:GSM a owl:Class ;
 hlb:Parcel a owl:Class ;
     rdfs:label "Parcel" ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
+            owl:minCardinality 1 ;
             owl:onProperty hlb:id ],
         [ a owl:Restriction ;
-            owl:allValuesFrom xsd:string ;
-            owl:onProperty hlb:declaredContent ],
+            owl:minCardinality 0 ;
+            owl:onProperty hlb:dimensions ],
         [ a owl:Restriction ;
             owl:maxCardinality 1 ;
-            owl:onProperty hlb:hasAltReceiver ],
+            owl:onProperty hlb:declaredContent ],
         [ a owl:Restriction ;
             owl:minCardinality 1 ;
             owl:onProperty hlb:declaredContent ],
         [ a owl:Restriction ;
             owl:minCardinality 0 ;
-            owl:onProperty hlb:hasAltReceiver ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom xsd:string ;
-            owl:onProperty hlb:dimensions ],
-        [ a owl:Restriction ;
-            owl:minCardinality 1 ;
-            owl:onProperty hlb:id ],
+            owl:onProperty hlb:photoURL ],
         [ a owl:Restriction ;
             owl:allValuesFrom xsd:anyURI ;
             owl:onProperty hlb:id ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty hlb:weightKg ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty hlb:dimensions ],
         [ a owl:Restriction ;
             owl:allValuesFrom hlb:Receiver ;
             owl:onProperty hlb:hasAltReceiver ],
         [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
+            owl:onProperty hlb:weightKg ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
+            owl:onProperty hlb:hasAltReceiver ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty hlb:weightKg ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
+            owl:onProperty hlb:id ],
+        [ a owl:Restriction ;
             owl:allValuesFrom xsd:anyURI ;
             owl:onProperty hlb:photoURL ],
         [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty hlb:dimensions ],
+            owl:allValuesFrom xsd:string ;
+            owl:onProperty hlb:declaredContent ],
         [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty hlb:weightKg ],
+            owl:minCardinality 0 ;
+            owl:onProperty hlb:hasAltReceiver ],
         [ a owl:Restriction ;
             owl:allValuesFrom xsd:float ;
             owl:onProperty hlb:weightKg ],
         [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty hlb:declaredContent ],
+            owl:allValuesFrom xsd:string ;
+            owl:onProperty hlb:dimensions ],
         [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty hlb:photoURL ] ;
+            owl:maxCardinality 1 ;
+            owl:onProperty hlb:dimensions ] ;
     skos:altLabel "Item",
         "Package",
         "Shipment Item" ;
     skos:definition "A physical item to be delivered as part of a request." ;
     skos:exactMatch hlb:Parcel ;
     skos:inScheme hlb:request .
+
+hlb:Sender a owl:Class ;
+    rdfs:label "Sender" ;
+    rdfs:subClassOf hlb:AgentInRole ;
+    skos:altLabel "Consignor",
+        "Shipper" ;
+    skos:definition "The role of the agent that initiates a delivery request and hands over the parcel(s). The sender also names the receiver." ;
+    skos:exactMatch hlb:Sender ;
+    skos:inScheme hlb:agent .
 
 hlb:Telegram a owl:Class ;
     rdfs:label "Telegram" ;
@@ -355,29 +364,23 @@ hlb:Telegram a owl:Class ;
 hlb:TransportService a owl:Class ;
     rdfs:label "TransportService" ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty hlb:serviceTitle ],
-        [ a owl:Restriction ;
             owl:minCardinality 1 ;
-            owl:onProperty hlb:hasDestinationArea ],
-        [ a owl:Restriction ;
-            owl:minCardinality 1 ;
-            owl:onProperty hlb:description ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom hlb:ServiceOffer ;
-            owl:onProperty hlb:hasDestinationArea ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom hlb:ServiceType ;
             owl:onProperty hlb:serviceType ],
         [ a owl:Restriction ;
             owl:allValuesFrom xsd:string ;
             owl:onProperty hlb:description ],
         [ a owl:Restriction ;
-            owl:minCardinality 1 ;
-            owl:onProperty hlb:hasBaseArea ],
+            owl:allValuesFrom xsd:string ;
+            owl:onProperty hlb:serviceTitle ],
         [ a owl:Restriction ;
             owl:allValuesFrom hlb:ServiceOffer ;
             owl:onProperty hlb:hasBaseArea ],
+        [ a owl:Restriction ;
+            owl:minCardinality 1 ;
+            owl:onProperty hlb:hasDestinationArea ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom xsd:anyURI ;
+            owl:onProperty hlb:id ],
         [ a owl:Restriction ;
             owl:maxCardinality 1 ;
             owl:onProperty hlb:id ],
@@ -385,19 +388,25 @@ hlb:TransportService a owl:Class ;
             owl:maxCardinality 1 ;
             owl:onProperty hlb:description ],
         [ a owl:Restriction ;
-            owl:allValuesFrom xsd:string ;
+            owl:maxCardinality 1 ;
             owl:onProperty hlb:serviceTitle ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom hlb:ServiceOffer ;
+            owl:onProperty hlb:hasDestinationArea ],
+        [ a owl:Restriction ;
+            owl:minCardinality 1 ;
+            owl:onProperty hlb:description ],
+        [ a owl:Restriction ;
+            owl:minCardinality 1 ;
+            owl:onProperty hlb:serviceTitle ],
+        [ a owl:Restriction ;
+            owl:minCardinality 1 ;
+            owl:onProperty hlb:hasBaseArea ],
         [ a owl:Restriction ;
             owl:minCardinality 1 ;
             owl:onProperty hlb:id ],
         [ a owl:Restriction ;
-            owl:minCardinality 1 ;
-            owl:onProperty hlb:serviceTitle ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom xsd:anyURI ;
-            owl:onProperty hlb:id ],
-        [ a owl:Restriction ;
-            owl:minCardinality 1 ;
+            owl:allValuesFrom hlb:ServiceType ;
             owl:onProperty hlb:serviceType ] ;
     skos:altLabel "Offer Profile",
         "Service Offering",
@@ -405,6 +414,15 @@ hlb:TransportService a owl:Class ;
     skos:definition "A standing, request-agnostic offering published by a transporter agent, declaring service types and its base and destination service areas." ;
     skos:exactMatch hlb:TransportService ;
     skos:inScheme hlb:service .
+
+hlb:Transporter a owl:Class ;
+    rdfs:label "Transporter" ;
+    rdfs:subClassOf hlb:AgentInRole ;
+    skos:altLabel "Carrier",
+        "Courier" ;
+    skos:definition "The role of the agent that carries the parcel(s) for a delivery request." ;
+    skos:exactMatch hlb:Transporter ;
+    skos:inScheme hlb:agent .
 
 hlb:Viber a owl:Class ;
     rdfs:label "Viber" ;
@@ -559,23 +577,23 @@ hlb:weekly a owl:Class ;
 hlb:GeoCoordinates a owl:Class ;
     rdfs:label "GeoCoordinates" ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:allValuesFrom xsd:float ;
-            owl:onProperty hlb:longitude ],
-        [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty hlb:longitude ],
-        [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty hlb:latitude ],
-        [ a owl:Restriction ;
             owl:minCardinality 1 ;
             owl:onProperty hlb:latitude ],
         [ a owl:Restriction ;
             owl:minCardinality 1 ;
             owl:onProperty hlb:longitude ],
         [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
+            owl:onProperty hlb:latitude ],
+        [ a owl:Restriction ;
             owl:allValuesFrom xsd:float ;
-            owl:onProperty hlb:latitude ] ;
+            owl:onProperty hlb:longitude ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom xsd:float ;
+            owl:onProperty hlb:latitude ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
+            owl:onProperty hlb:longitude ] ;
     skos:altLabel "Coordinates",
         "Geometry",
         "LatLong",
@@ -584,44 +602,29 @@ hlb:GeoCoordinates a owl:Class ;
     skos:exactMatch hlb:GeoCoordinates ;
     skos:inScheme hlb:spatial .
 
-hlb:Sender a owl:Class ;
-    rdfs:label "Sender" ;
-    rdfs:subClassOf hlb:AgentInRole ;
-    skos:altLabel "Consignor",
-        "Shipper" ;
-    skos:definition "The role of the agent that initiates a delivery request and hands over the parcel(s). The sender also names the receiver." ;
-    skos:exactMatch hlb:Sender ;
+hlb:Receiver a owl:Class ;
+    rdfs:label "Receiver" ;
+    rdfs:subClassOf [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
+            owl:onProperty hlb:deliveryNote ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty hlb:deliveryNote ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom xsd:string ;
+            owl:onProperty hlb:deliveryNote ],
+        hlb:AgentInRole ;
+    skos:altLabel "Consignee",
+        "Recipient" ;
+    skos:definition "The role of the agent intended to take delivery of the parcel(s)." ;
+    skos:exactMatch hlb:Receiver ;
     skos:inScheme hlb:agent .
 
 hlb:ServiceOffer a owl:Class ;
     rdfs:label "ServiceOffer" ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:minCardinality 1 ;
-            owl:onProperty hlb:id ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom hlb:Area ;
-            owl:onProperty hlb:withinArea ],
-        [ a owl:Restriction ;
-            owl:minCardinality 1 ;
-            owl:onProperty hlb:withFrequency ],
-        [ a owl:Restriction ;
-            owl:minCardinality 1 ;
-            owl:onProperty hlb:description ],
-        [ a owl:Restriction ;
-            owl:minCardinality 1 ;
-            owl:onProperty hlb:withinArea ],
-        [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty hlb:withFrequency ],
-        [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty hlb:withinArea ],
-        [ a owl:Restriction ;
             owl:allValuesFrom hlb:Frequency ;
             owl:onProperty hlb:withFrequency ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom xsd:anyURI ;
-            owl:onProperty hlb:id ],
         [ a owl:Restriction ;
             owl:allValuesFrom xsd:string ;
             owl:onProperty hlb:description ],
@@ -630,7 +633,31 @@ hlb:ServiceOffer a owl:Class ;
             owl:onProperty hlb:id ],
         [ a owl:Restriction ;
             owl:maxCardinality 1 ;
-            owl:onProperty hlb:description ] ;
+            owl:onProperty hlb:withFrequency ],
+        [ a owl:Restriction ;
+            owl:minCardinality 1 ;
+            owl:onProperty hlb:description ],
+        [ a owl:Restriction ;
+            owl:minCardinality 1 ;
+            owl:onProperty hlb:id ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
+            owl:onProperty hlb:description ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom hlb:Area ;
+            owl:onProperty hlb:withinArea ],
+        [ a owl:Restriction ;
+            owl:minCardinality 1 ;
+            owl:onProperty hlb:withFrequency ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom xsd:anyURI ;
+            owl:onProperty hlb:id ],
+        [ a owl:Restriction ;
+            owl:minCardinality 1 ;
+            owl:onProperty hlb:withinArea ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
+            owl:onProperty hlb:withinArea ] ;
     skos:altLabel "Area Offer",
         "Service Area Offer",
         "ServiceLocationSchedule" ;
@@ -645,15 +672,6 @@ hlb:ServiceType a owl:Class ;
     skos:inScheme hlb:service ;
     linkml:permissible_values hlb:parcelTransport,
         hlb:peopleTransport .
-
-hlb:Transporter a owl:Class ;
-    rdfs:label "Transporter" ;
-    rdfs:subClassOf hlb:AgentInRole ;
-    skos:altLabel "Carrier",
-        "Courier" ;
-    skos:definition "The role of the agent that carries the parcel(s) for a delivery request." ;
-    skos:exactMatch hlb:Transporter ;
-    skos:inScheme hlb:agent .
 
 hlb:aboutRequest a owl:ObjectProperty ;
     rdfs:label "aboutRequest" ;
@@ -884,71 +902,71 @@ hlb:withFrequency a owl:ObjectProperty ;
 hlb:Channel a owl:Class ;
     rdfs:label "Channel" ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:allValuesFrom hlb:ChannelValidationStatus ;
-            owl:onProperty hlb:validationStatus ],
+            owl:minCardinality 1 ;
+            owl:onProperty hlb:hasMedium ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom xsd:string ;
+            owl:onProperty hlb:telephone ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
+            owl:onProperty hlb:telephone ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty hlb:alias ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty hlb:email ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom xsd:string ;
+            owl:onProperty hlb:email ],
         [ a owl:Restriction ;
             owl:allValuesFrom hlb:Medium ;
             owl:onProperty hlb:hasMedium ],
         [ a owl:Restriction ;
+            owl:minCardinality 1 ;
+            owl:onProperty hlb:validationStatus ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty hlb:description ],
+        [ a owl:Restriction ;
             owl:maxCardinality 1 ;
-            owl:onProperty hlb:alias ],
+            owl:onProperty hlb:email ],
         [ a owl:Restriction ;
             owl:minCardinality 1 ;
+            owl:onProperty hlb:systemID ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom hlb:ChannelValidationStatus ;
+            owl:onProperty hlb:validationStatus ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
             owl:onProperty hlb:hasMedium ],
         [ a owl:Restriction ;
             owl:maxCardinality 1 ;
             owl:onProperty hlb:id ],
         [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty hlb:telephone ],
-        [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty hlb:hasMedium ],
-        [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty hlb:validationStatus ],
-        [ a owl:Restriction ;
-            owl:minCardinality 1 ;
-            owl:onProperty hlb:validationStatus ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty hlb:email ],
-        [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty hlb:description ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom xsd:string ;
-            owl:onProperty hlb:telephone ],
-        [ a owl:Restriction ;
             owl:allValuesFrom xsd:string ;
             owl:onProperty hlb:description ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty hlb:description ],
-        [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty hlb:systemID ],
-        [ a owl:Restriction ;
-            owl:minCardinality 1 ;
-            owl:onProperty hlb:id ],
-        [ a owl:Restriction ;
-            owl:minCardinality 1 ;
-            owl:onProperty hlb:systemID ],
-        [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty hlb:email ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom xsd:string ;
-            owl:onProperty hlb:email ],
         [ a owl:Restriction ;
             owl:allValuesFrom xsd:string ;
             owl:onProperty hlb:alias ],
         [ a owl:Restriction ;
-            owl:minCardinality 0 ;
+            owl:maxCardinality 1 ;
+            owl:onProperty hlb:validationStatus ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
+            owl:onProperty hlb:description ],
+        [ a owl:Restriction ;
+            owl:minCardinality 1 ;
+            owl:onProperty hlb:id ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
             owl:onProperty hlb:alias ],
         [ a owl:Restriction ;
             owl:allValuesFrom xsd:anyURI ;
             owl:onProperty hlb:id ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
+            owl:onProperty hlb:systemID ],
         [ a owl:Restriction ;
             owl:minCardinality 0 ;
             owl:onProperty hlb:telephone ],
@@ -972,68 +990,95 @@ hlb:ChannelValidationStatus a owl:Class ;
         hlb:needsReview,
         hlb:valid .
 
-hlb:Receiver a owl:Class ;
-    rdfs:label "Receiver" ;
-    rdfs:subClassOf [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty hlb:deliveryNote ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty hlb:deliveryNote ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom xsd:string ;
-            owl:onProperty hlb:deliveryNote ],
-        hlb:AgentInRole ;
-    skos:altLabel "Consignee",
-        "Recipient" ;
-    skos:definition "The role of the agent intended to take delivery of the parcel(s)." ;
-    skos:exactMatch hlb:Receiver ;
-    skos:inScheme hlb:agent .
-
 hlb:Place a owl:Class ;
     rdfs:label "Place" ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:allValuesFrom xsd:string ;
-            owl:onProperty hlb:name ],
+            owl:maxCardinality 1 ;
+            owl:onProperty hlb:hasType ],
         [ a owl:Restriction ;
             owl:minCardinality 0 ;
             owl:onProperty hlb:withinArea ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty hlb:name ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
+            owl:onProperty hlb:hasIdentifier ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom xsd:string ;
+            owl:onProperty hlb:hasType ],
         [ a owl:Restriction ;
             owl:allValuesFrom hlb:Area ;
             owl:onProperty hlb:withinArea ],
         [ a owl:Restriction ;
-            owl:minCardinality 1 ;
-            owl:onProperty hlb:hasType ],
+            owl:allValuesFrom xsd:string ;
+            owl:onProperty hlb:hasIdentifier ],
         [ a owl:Restriction ;
             owl:minCardinality 1 ;
             owl:onProperty hlb:hasIdentifier ],
         [ a owl:Restriction ;
             owl:maxCardinality 1 ;
-            owl:onProperty hlb:hasType ],
-        [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
             owl:onProperty hlb:name ],
+        [ a owl:Restriction ;
+            owl:minCardinality 1 ;
+            owl:onProperty hlb:hasType ],
         [ a owl:Restriction ;
             owl:maxCardinality 1 ;
             owl:onProperty hlb:withinArea ],
         [ a owl:Restriction ;
-            owl:minCardinality 0 ;
+            owl:allValuesFrom xsd:string ;
             owl:onProperty hlb:name ],
-        [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty hlb:hasIdentifier ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom xsd:string ;
-            owl:onProperty hlb:hasType ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom xsd:string ;
-            owl:onProperty hlb:hasIdentifier ],
         hlb:SpatialObject ;
     skos:altLabel "Landmark",
         "Named Place",
         "Point of Interest" ;
     skos:definition "A named, typed point/place of interest (landmark, depot, pickup point) sitting within an Area. Distinct from coarse Area and precise Address." ;
     skos:exactMatch hlb:Place ;
+    skos:inScheme hlb:spatial .
+
+hlb:Address a owl:Class ;
+    rdfs:label "Address" ;
+    rdfs:subClassOf [ a owl:Restriction ;
+            owl:minCardinality 1 ;
+            owl:onProperty hlb:street ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom xsd:string ;
+            owl:onProperty hlb:number ],
+        [ a owl:Restriction ;
+            owl:minCardinality 1 ;
+            owl:onProperty hlb:number ],
+        [ a owl:Restriction ;
+            owl:minCardinality 1 ;
+            owl:onProperty hlb:postCode ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom hlb:Area ;
+            owl:onProperty hlb:withinArea ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
+            owl:onProperty hlb:number ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
+            owl:onProperty hlb:withinArea ],
+        [ a owl:Restriction ;
+            owl:minCardinality 1 ;
+            owl:onProperty hlb:withinArea ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
+            owl:onProperty hlb:street ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom xsd:string ;
+            owl:onProperty hlb:postCode ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom xsd:string ;
+            owl:onProperty hlb:street ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
+            owl:onProperty hlb:postCode ],
+        hlb:SpatialObject ;
+    skos:altLabel "Postal Address",
+        "Street Address" ;
+    skos:definition "A precise, pin-level postal address." ;
+    skos:exactMatch hlb:Address ;
     skos:inScheme hlb:spatial .
 
 hlb:email a owl:Class,
@@ -1044,77 +1089,31 @@ hlb:email a owl:Class,
         "Email." ;
     skos:inScheme hlb:channel .
 
-hlb:Address a owl:Class ;
-    rdfs:label "Address" ;
-    rdfs:subClassOf [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty hlb:postCode ],
-        [ a owl:Restriction ;
-            owl:minCardinality 1 ;
-            owl:onProperty hlb:street ],
-        [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty hlb:street ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom xsd:string ;
-            owl:onProperty hlb:postCode ],
-        [ a owl:Restriction ;
-            owl:minCardinality 1 ;
-            owl:onProperty hlb:number ],
-        [ a owl:Restriction ;
-            owl:minCardinality 1 ;
-            owl:onProperty hlb:postCode ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom xsd:string ;
-            owl:onProperty hlb:street ],
-        [ a owl:Restriction ;
-            owl:minCardinality 1 ;
-            owl:onProperty hlb:withinArea ],
-        [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty hlb:withinArea ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom xsd:string ;
-            owl:onProperty hlb:number ],
-        [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty hlb:number ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom hlb:Area ;
-            owl:onProperty hlb:withinArea ],
-        hlb:SpatialObject ;
-    skos:altLabel "Postal Address",
-        "Street Address" ;
-    skos:definition "A precise, pin-level postal address." ;
-    skos:exactMatch hlb:Address ;
-    skos:inScheme hlb:spatial .
-
 hlb:AgentInRole a owl:Class ;
     rdfs:label "AgentInRole" ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:minCardinality 1 ;
-            owl:onProperty hlb:id ],
-        [ owl:unionOf ( hlb:Receiver hlb:Sender hlb:Transporter ) ],
-        [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty hlb:id ],
-        [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty hlb:playedBy ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom hlb:Channel ;
-            owl:onProperty hlb:hasAltContactPointInRole ],
-        [ a owl:Restriction ;
             owl:maxCardinality 1 ;
             owl:onProperty hlb:hasAltContactPointInRole ],
         [ a owl:Restriction ;
             owl:minCardinality 1 ;
             owl:onProperty hlb:playedBy ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty hlb:hasAltContactPointInRole ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
+            owl:onProperty hlb:id ],
         [ a owl:Restriction ;
             owl:allValuesFrom hlb:Agent ;
             owl:onProperty hlb:playedBy ],
         [ a owl:Restriction ;
-            owl:minCardinality 0 ;
+            owl:maxCardinality 1 ;
+            owl:onProperty hlb:playedBy ],
+        [ a owl:Restriction ;
+            owl:minCardinality 1 ;
+            owl:onProperty hlb:id ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom hlb:Channel ;
             owl:onProperty hlb:hasAltContactPointInRole ],
         [ a owl:Restriction ;
             owl:allValuesFrom xsd:anyURI ;
@@ -1125,6 +1124,62 @@ hlb:AgentInRole a owl:Class ;
     skos:definition "The episodic, situation-dependent role an Agent plays within a specific interaction; a reified participation. Anti-rigid: the same Agent plays different roles across different requests." ;
     skos:exactMatch hlb:AgentInRole ;
     skos:inScheme hlb:agent .
+
+hlb:Area a owl:Class ;
+    rdfs:label "Area" ;
+    rdfs:subClassOf [ a owl:Restriction ;
+            owl:allValuesFrom hlb:Area ;
+            owl:onProperty hlb:withinArea ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty hlb:county ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
+            owl:onProperty hlb:withinArea ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty hlb:locality ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty hlb:country ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
+            owl:onProperty hlb:state ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
+            owl:onProperty hlb:country ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
+            owl:onProperty hlb:locality ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom xsd:string ;
+            owl:onProperty hlb:country ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom xsd:string ;
+            owl:onProperty hlb:locality ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty hlb:state ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom xsd:string ;
+            owl:onProperty hlb:state ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty hlb:withinArea ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
+            owl:onProperty hlb:county ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom xsd:string ;
+            owl:onProperty hlb:county ],
+        hlb:SpatialObject ;
+    skos:altLabel "Administrative Area",
+        "Locality",
+        "Region",
+        "Zone" ;
+    skos:definition "A coarse administrative or geographic unit (locality, county, state, country) forming a nested containment hierarchy. Transporter service offers and matching operate on Area; exact pickup/delivery use Address." ;
+    skos:exactMatch hlb:Area ;
+    skos:inScheme hlb:spatial .
 
 hlb:Frequency a owl:Class ;
     rdfs:label "Frequency" ;
@@ -1164,91 +1219,34 @@ hlb:name a owl:DatatypeProperty ;
     skos:inScheme hlb:common,
         hlb:spatial .
 
-hlb:Area a owl:Class ;
-    rdfs:label "Area" ;
-    rdfs:subClassOf [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty hlb:country ],
-        [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty hlb:county ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom xsd:string ;
-            owl:onProperty hlb:state ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom xsd:string ;
-            owl:onProperty hlb:country ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty hlb:county ],
-        [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty hlb:withinArea ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom xsd:string ;
-            owl:onProperty hlb:locality ],
-        [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty hlb:locality ],
-        [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty hlb:state ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom xsd:string ;
-            owl:onProperty hlb:county ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty hlb:locality ],
-        [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty hlb:country ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty hlb:withinArea ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty hlb:state ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom hlb:Area ;
-            owl:onProperty hlb:withinArea ],
-        hlb:SpatialObject ;
-    skos:altLabel "Administrative Area",
-        "Locality",
-        "Region",
-        "Zone" ;
-    skos:definition "A coarse administrative or geographic unit (locality, county, state, country) forming a nested containment hierarchy. Transporter service offers and matching operate on Area; exact pickup/delivery use Address." ;
-    skos:exactMatch hlb:Area ;
-    skos:inScheme hlb:spatial .
-
 hlb:SpatialObject a owl:Class ;
     rdfs:label "SpatialObject" ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty hlb:comment ],
-        [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty hlb:hasCoordinates ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty hlb:comment ],
-        [ owl:unionOf ( hlb:Address hlb:Area hlb:Place ) ],
-        [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty hlb:id ],
-        [ a owl:Restriction ;
             owl:allValuesFrom xsd:string ;
             owl:onProperty hlb:comment ],
-        [ a owl:Restriction ;
-            owl:minCardinality 1 ;
-            owl:onProperty hlb:id ],
         [ a owl:Restriction ;
             owl:allValuesFrom xsd:anyURI ;
             owl:onProperty hlb:id ],
         [ a owl:Restriction ;
-            owl:minCardinality 0 ;
+            owl:maxCardinality 1 ;
             owl:onProperty hlb:hasCoordinates ],
         [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
+            owl:onProperty hlb:comment ],
+        [ a owl:Restriction ;
             owl:allValuesFrom hlb:GeoCoordinates ;
+            owl:onProperty hlb:hasCoordinates ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
+            owl:onProperty hlb:id ],
+        [ a owl:Restriction ;
+            owl:minCardinality 1 ;
+            owl:onProperty hlb:id ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty hlb:comment ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
             owl:onProperty hlb:hasCoordinates ] ;
     skos:altLabel "Location",
         "Spatial Thing" ;

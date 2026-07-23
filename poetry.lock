@@ -2049,14 +2049,14 @@ opendsstar = ["opendsstar (==1.0.26) ; python_version >= \"3.11\" and python_ver
 
 [[package]]
 name = "linkml"
-version = "1.9.4"
+version = "1.10.0"
 description = "Linked Open Data Modeling Language"
 optional = false
-python-versions = ">=3.9"
+python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "linkml-1.9.4-py3-none-any.whl", hash = "sha256:ecc5cb73669da7d48340f689ae6ed8076b6b15099aef472668345fc9b5931b11"},
-    {file = "linkml-1.9.4.tar.gz", hash = "sha256:b5075a697bfdb6ef829e19e15046f6efc11a946352eb7f5024e89f710ebd96ca"},
+    {file = "linkml-1.10.0-py3-none-any.whl", hash = "sha256:2d4934f000977489352307336267a8a4270de3156187c3394d542a0a4b8130e5"},
+    {file = "linkml-1.10.0.tar.gz", hash = "sha256:ca70bba1474bc7de37edd33005a8a556d4718190584ab2c88f7c46d090477d55"},
 ]
 
 [package.dependencies]
@@ -2073,7 +2073,7 @@ openpyxl = "*"
 parse = "*"
 prefixcommons = ">=0.1.7"
 prefixmaps = ">=0.2.2"
-pydantic = ">=1.0.0,<3.0.0"
+pydantic = ">=2.0.0,<3.0.0"
 pyjsg = ">=0.11.6"
 pyshex = ">=0.7.20"
 pyshexc = ">=0.8.3"
@@ -2088,14 +2088,14 @@ watchdog = ">=0.9.0"
 
 [[package]]
 name = "linkml-runtime"
-version = "1.10.0"
+version = "1.9.5"
 description = "Runtime environment for LinkML, the Linked open data modeling language"
 optional = false
-python-versions = ">=3.10"
+python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "linkml_runtime-1.10.0-py3-none-any.whl", hash = "sha256:b7caf806e1b49bf62005d8f398b070c282742c5f6626469fdc1660add0c9da58"},
-    {file = "linkml_runtime-1.10.0.tar.gz", hash = "sha256:899889d584ce8056c5c44512b2d247bdc84a8484c3aa228aeb2db283e3a9d2ec"},
+    {file = "linkml_runtime-1.9.5-py3-none-any.whl", hash = "sha256:fece3e8aa25a4246165c6528b6a7fe83a929b985d2ce1951cc8a0f4da1a30b90"},
+    {file = "linkml_runtime-1.9.5.tar.gz", hash = "sha256:78dc1383adf11ad5f20bb11b6adde56ed566fbd2429a292d57699ad4596c738a"},
 ]
 
 [package.dependencies]
@@ -2113,9 +2113,6 @@ pydantic = ">=1.10.2,<3.0.0"
 pyyaml = "*"
 rdflib = ">=6.0.0"
 requests = "*"
-
-[package.extras]
-dev = ["coverage", "requests-cache"]
 
 [[package]]
 name = "loguru"
@@ -6043,4 +6040,4 @@ cffi = ["cffi (>=1.17,<2.0) ; platform_python_implementation != \"PyPy\" and pyt
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<3.15"
-content-hash = "a8ccaf67f6ebd1e358e58ca3cdf3d9d771900212565dbee834acf49ab75f65ca"
+content-hash = "4cc340290a6c3c77c1eeae534bff3faaba40cfe52a17e26f4cf4a8f508e60197"

@@ -5,17 +5,10 @@ Value objects (no identifier) are modelled as StructuredNodes reached by a
 relationship: neomodel has no inlining.
 """
 from neomodel import (
-    ArrayProperty,
-    DateTimeProperty,
-    FloatProperty,
-    IntegerProperty,
-    One,
-    OneOrMore,
-    RelationshipTo,
-    StringProperty,
     StructuredNode,
-    ZeroOrMore,
-    ZeroOrOne,
+    StringProperty, IntegerProperty, FloatProperty, BooleanProperty,
+    DateProperty, DateTimeProperty, ArrayProperty,
+    RelationshipTo, ZeroOrMore, ZeroOrOne, OneOrMore, One,
 )
 
 

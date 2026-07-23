@@ -1,17 +1,35 @@
 from __future__ import annotations
 
-from datetime import datetime
+import re
+import sys
+from datetime import (
+    date,
+    datetime,
+    time
+)
+from decimal import Decimal
 from enum import Enum
-from typing import Any, ClassVar
+from typing import (
+    Any,
+    ClassVar,
+    Literal,
+    Optional,
+    Union
+)
 
 from pydantic import (
     BaseModel,
     ConfigDict,
     Field,
     RootModel,
+    SerializationInfo,
+    SerializerFunctionWrapHandler,
+    field_validator,
+    model_serializer
 )
 
-metamodel_version = "1.11.0"
+
+metamodel_version = "1.7.0"
 version = "None"
 
 
@@ -71,7 +89,7 @@ linkml_meta = LinkMLMeta({'default_prefix': 'hlb',
      'name': 'hulubul',
      'prefixes': {'hlb': {'prefix_prefix': 'hlb',
                           'prefix_reference': 'http://meaningfy.ws/ontology/hulubul/'}},
-     'source_file': 'model/linkml/hulubul.yaml',
+     'source_file': '/home/greg/PROJECTS/hulubul-broker/model/linkml/hulubul.yaml',
      'title': 'Hulubul V1 Conceptual Model'} )
 
 class Medium(str, Enum):
@@ -228,8 +246,8 @@ class SpatialObject(ConfiguredBaseModel):
                        'DeliveryRequest',
                        'Parcel',
                        'Feedback']} })
-    comment: str | None = Field(default=None, description="""Free-text remark or annotation.""", json_schema_extra = { "linkml_meta": {'domain_of': ['SpatialObject', 'Feedback'], 'slot_uri': 'hlb:comment'} })
-    hasCoordinates: GeoCoordinates | None = Field(default=None, description="""The point geometry of this spatial object.""", json_schema_extra = { "linkml_meta": {'domain_of': ['SpatialObject'], 'slot_uri': 'hlb:hasCoordinates'} })
+    comment: Optional[str] = Field(default=None, description="""Free-text remark or annotation.""", json_schema_extra = { "linkml_meta": {'domain_of': ['SpatialObject', 'Feedback'], 'slot_uri': 'hlb:comment'} })
+    hasCoordinates: Optional[GeoCoordinates] = Field(default=None, description="""The point geometry of this spatial object.""", json_schema_extra = { "linkml_meta": {'domain_of': ['SpatialObject'], 'slot_uri': 'hlb:hasCoordinates'} })
 
 
 class Address(SpatialObject):
@@ -255,8 +273,8 @@ class Address(SpatialObject):
                        'DeliveryRequest',
                        'Parcel',
                        'Feedback']} })
-    comment: str | None = Field(default=None, description="""Free-text remark or annotation.""", json_schema_extra = { "linkml_meta": {'domain_of': ['SpatialObject', 'Feedback'], 'slot_uri': 'hlb:comment'} })
-    hasCoordinates: GeoCoordinates | None = Field(default=None, description="""The point geometry of this spatial object.""", json_schema_extra = { "linkml_meta": {'domain_of': ['SpatialObject'], 'slot_uri': 'hlb:hasCoordinates'} })
+    comment: Optional[str] = Field(default=None, description="""Free-text remark or annotation.""", json_schema_extra = { "linkml_meta": {'domain_of': ['SpatialObject', 'Feedback'], 'slot_uri': 'hlb:comment'} })
+    hasCoordinates: Optional[GeoCoordinates] = Field(default=None, description="""The point geometry of this spatial object.""", json_schema_extra = { "linkml_meta": {'domain_of': ['SpatialObject'], 'slot_uri': 'hlb:hasCoordinates'} })
 
 
 class Area(SpatialObject):
@@ -270,12 +288,12 @@ class Area(SpatialObject):
                                        'name': 'withinArea',
                                        'required': False}}})
 
-    withinArea: str | None = Field(default=None, description="""The area this object sits within.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Address', 'Area', 'Place', 'ServiceOffer'],
+    withinArea: Optional[str] = Field(default=None, description="""The area this object sits within.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Address', 'Area', 'Place', 'ServiceOffer'],
          'slot_uri': 'hlb:withinArea'} })
-    locality: str | None = Field(default=None, description="""Town/city/locality name.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Area'], 'slot_uri': 'hlb:locality'} })
-    county: str | None = Field(default=None, description="""County/district (raion).""", json_schema_extra = { "linkml_meta": {'domain_of': ['Area'], 'slot_uri': 'hlb:county'} })
-    country: str | None = Field(default=None, description="""Country name.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Area'], 'slot_uri': 'hlb:country'} })
-    state: str | None = Field(default=None, description="""State/region within country.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Area'], 'slot_uri': 'hlb:state'} })
+    locality: Optional[str] = Field(default=None, description="""Town/city/locality name.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Area'], 'slot_uri': 'hlb:locality'} })
+    county: Optional[str] = Field(default=None, description="""County/district (raion).""", json_schema_extra = { "linkml_meta": {'domain_of': ['Area'], 'slot_uri': 'hlb:county'} })
+    country: Optional[str] = Field(default=None, description="""Country name.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Area'], 'slot_uri': 'hlb:country'} })
+    state: Optional[str] = Field(default=None, description="""State/region within country.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Area'], 'slot_uri': 'hlb:state'} })
     id: str = Field(default=..., description="""Graph node identity for this instance (distinct from any business identifier).""", json_schema_extra = { "linkml_meta": {'domain_of': ['SpatialObject',
                        'Channel',
                        'Agent',
@@ -285,8 +303,8 @@ class Area(SpatialObject):
                        'DeliveryRequest',
                        'Parcel',
                        'Feedback']} })
-    comment: str | None = Field(default=None, description="""Free-text remark or annotation.""", json_schema_extra = { "linkml_meta": {'domain_of': ['SpatialObject', 'Feedback'], 'slot_uri': 'hlb:comment'} })
-    hasCoordinates: GeoCoordinates | None = Field(default=None, description="""The point geometry of this spatial object.""", json_schema_extra = { "linkml_meta": {'domain_of': ['SpatialObject'], 'slot_uri': 'hlb:hasCoordinates'} })
+    comment: Optional[str] = Field(default=None, description="""Free-text remark or annotation.""", json_schema_extra = { "linkml_meta": {'domain_of': ['SpatialObject', 'Feedback'], 'slot_uri': 'hlb:comment'} })
+    hasCoordinates: Optional[GeoCoordinates] = Field(default=None, description="""The point geometry of this spatial object.""", json_schema_extra = { "linkml_meta": {'domain_of': ['SpatialObject'], 'slot_uri': 'hlb:hasCoordinates'} })
 
 
 class Place(SpatialObject):
@@ -298,9 +316,9 @@ class Place(SpatialObject):
          'from_schema': 'http://meaningfy.ws/ontology/hulubul/spatial',
          'slot_usage': {'withinArea': {'name': 'withinArea', 'required': False}}})
 
-    withinArea: str | None = Field(default=None, description="""The area this object sits within.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Address', 'Area', 'Place', 'ServiceOffer'],
+    withinArea: Optional[str] = Field(default=None, description="""The area this object sits within.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Address', 'Area', 'Place', 'ServiceOffer'],
          'slot_uri': 'hlb:withinArea'} })
-    name: str | None = Field(default=None, description="""Human-readable name of the place.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Place', 'Agent'], 'slot_uri': 'hlb:name'} })
+    name: Optional[str] = Field(default=None, description="""Human-readable name of the place.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Place', 'Agent'], 'slot_uri': 'hlb:name'} })
     hasIdentifier: str = Field(default=..., description="""Identifier of the place (e.g. gazetteer id).""", json_schema_extra = { "linkml_meta": {'domain_of': ['Place'], 'slot_uri': 'hlb:hasIdentifier'} })
     hasType: str = Field(default=..., description="""Type of the place (e.g. depot, landmark, pickup point).""", json_schema_extra = { "linkml_meta": {'domain_of': ['Place'], 'slot_uri': 'hlb:hasType'} })
     id: str = Field(default=..., description="""Graph node identity for this instance (distinct from any business identifier).""", json_schema_extra = { "linkml_meta": {'domain_of': ['SpatialObject',
@@ -312,8 +330,8 @@ class Place(SpatialObject):
                        'DeliveryRequest',
                        'Parcel',
                        'Feedback']} })
-    comment: str | None = Field(default=None, description="""Free-text remark or annotation.""", json_schema_extra = { "linkml_meta": {'domain_of': ['SpatialObject', 'Feedback'], 'slot_uri': 'hlb:comment'} })
-    hasCoordinates: GeoCoordinates | None = Field(default=None, description="""The point geometry of this spatial object.""", json_schema_extra = { "linkml_meta": {'domain_of': ['SpatialObject'], 'slot_uri': 'hlb:hasCoordinates'} })
+    comment: Optional[str] = Field(default=None, description="""Free-text remark or annotation.""", json_schema_extra = { "linkml_meta": {'domain_of': ['SpatialObject', 'Feedback'], 'slot_uri': 'hlb:comment'} })
+    hasCoordinates: Optional[GeoCoordinates] = Field(default=None, description="""The point geometry of this spatial object.""", json_schema_extra = { "linkml_meta": {'domain_of': ['SpatialObject'], 'slot_uri': 'hlb:hasCoordinates'} })
 
 
 class GeoCoordinates(ConfiguredBaseModel):
@@ -345,12 +363,12 @@ class Channel(ConfiguredBaseModel):
                        'DeliveryRequest',
                        'Parcel',
                        'Feedback']} })
-    description: str | None = Field(default=None, description="""Free-text description.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Channel', 'Agent', 'TransportService', 'ServiceOffer'],
+    description: Optional[str] = Field(default=None, description="""Free-text description.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Channel', 'Agent', 'TransportService', 'ServiceOffer'],
          'slot_uri': 'hlb:description'} })
-    alias: str | None = Field(default=None, description="""Human label for the channel (e.g. \"mum's WhatsApp\").""", json_schema_extra = { "linkml_meta": {'domain_of': ['Channel'], 'slot_uri': 'hlb:alias'} })
+    alias: Optional[str] = Field(default=None, description="""Human label for the channel (e.g. \"mum's WhatsApp\").""", json_schema_extra = { "linkml_meta": {'domain_of': ['Channel'], 'slot_uri': 'hlb:alias'} })
     systemID: str = Field(default=..., description="""Provider/platform-issued identifier (e.g. Telegram chat/user id).""", json_schema_extra = { "linkml_meta": {'domain_of': ['Channel'], 'slot_uri': 'hlb:systemID'} })
-    email: str | None = Field(default=None, description="""Email address, when the medium is email.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Channel'], 'slot_uri': 'hlb:email'} })
-    telephone: str | None = Field(default=None, description="""Phone number, when the medium is phone-based.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Channel'], 'slot_uri': 'hlb:telephone'} })
+    email: Optional[str] = Field(default=None, description="""Email address, when the medium is email.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Channel'], 'slot_uri': 'hlb:email'} })
+    telephone: Optional[str] = Field(default=None, description="""Phone number, when the medium is phone-based.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Channel'], 'slot_uri': 'hlb:telephone'} })
     hasMedium: Medium = Field(default=..., description="""The medium/platform of this channel.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Channel'], 'slot_uri': 'hlb:hasMedium'} })
     validationStatus: ChannelValidationStatus = Field(default=..., description="""Whether control of the channel has been verified.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Channel'], 'slot_uri': 'hlb:validationStatus'} })
 
@@ -374,13 +392,13 @@ class Agent(ConfiguredBaseModel):
                        'Parcel',
                        'Feedback']} })
     name: str = Field(default=..., description="""Human-readable name.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Place', 'Agent'], 'slot_uri': 'hlb:name'} })
-    description: str | None = Field(default=None, description="""Free-text description.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Channel', 'Agent', 'TransportService', 'ServiceOffer'],
+    description: Optional[str] = Field(default=None, description="""Free-text description.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Channel', 'Agent', 'TransportService', 'ServiceOffer'],
          'slot_uri': 'hlb:description'} })
     identifier: str = Field(default=..., description="""Stable unique business identifier of the agent within Hulubul.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Agent'], 'slot_uri': 'hlb:identifier'} })
-    hasContactPoint: list[str] | None = Field(default=None, description="""Communication channels through which the agent can be reached and, when validated, authenticated.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Agent'], 'slot_uri': 'hlb:hasContactPoint'} })
-    hasMainContactPoint: str | None = Field(default=None, description="""The agent's primary/default channel; also the trusted login channel.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Agent'], 'slot_uri': 'hlb:hasMainContactPoint'} })
-    hasMainLocation: str | None = Field(default=None, description="""The agent's principal location.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Agent'], 'slot_uri': 'hlb:hasMainLocation'} })
-    providesService: str | None = Field(default=None, description="""The standing, request-agnostic transport offering published by this agent (present only for transporters).""", json_schema_extra = { "linkml_meta": {'domain_of': ['Agent'], 'slot_uri': 'hlb:providesService'} })
+    hasContactPoint: Optional[list[str]] = Field(default=None, description="""Communication channels through which the agent can be reached and, when validated, authenticated.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Agent'], 'slot_uri': 'hlb:hasContactPoint'} })
+    hasMainContactPoint: Optional[str] = Field(default=None, description="""The agent's primary/default channel; also the trusted login channel.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Agent'], 'slot_uri': 'hlb:hasMainContactPoint'} })
+    hasMainLocation: Optional[str] = Field(default=None, description="""The agent's principal location.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Agent'], 'slot_uri': 'hlb:hasMainLocation'} })
+    providesService: Optional[str] = Field(default=None, description="""The standing, request-agnostic transport offering published by this agent (present only for transporters).""", json_schema_extra = { "linkml_meta": {'domain_of': ['Agent'], 'slot_uri': 'hlb:providesService'} })
 
 
 class AgentInRole(ConfiguredBaseModel):
@@ -402,7 +420,7 @@ class AgentInRole(ConfiguredBaseModel):
                        'Parcel',
                        'Feedback']} })
     playedBy: str = Field(default=..., description="""The enduring agent enacting this role.""", json_schema_extra = { "linkml_meta": {'domain_of': ['AgentInRole'], 'slot_uri': 'hlb:playedBy'} })
-    hasAltContactPointInRole: str | None = Field(default=None, description="""An alternative channel to use for this participation, overriding the agent's default.""", json_schema_extra = { "linkml_meta": {'domain_of': ['AgentInRole'], 'slot_uri': 'hlb:hasAltContactPointInRole'} })
+    hasAltContactPointInRole: Optional[str] = Field(default=None, description="""An alternative channel to use for this participation, overriding the agent's default.""", json_schema_extra = { "linkml_meta": {'domain_of': ['AgentInRole'], 'slot_uri': 'hlb:hasAltContactPointInRole'} })
 
 
 class Transporter(AgentInRole):
@@ -423,7 +441,7 @@ class Transporter(AgentInRole):
                        'Parcel',
                        'Feedback']} })
     playedBy: str = Field(default=..., description="""The enduring agent enacting this role.""", json_schema_extra = { "linkml_meta": {'domain_of': ['AgentInRole'], 'slot_uri': 'hlb:playedBy'} })
-    hasAltContactPointInRole: str | None = Field(default=None, description="""An alternative channel to use for this participation, overriding the agent's default.""", json_schema_extra = { "linkml_meta": {'domain_of': ['AgentInRole'], 'slot_uri': 'hlb:hasAltContactPointInRole'} })
+    hasAltContactPointInRole: Optional[str] = Field(default=None, description="""An alternative channel to use for this participation, overriding the agent's default.""", json_schema_extra = { "linkml_meta": {'domain_of': ['AgentInRole'], 'slot_uri': 'hlb:hasAltContactPointInRole'} })
 
 
 class Sender(AgentInRole):
@@ -444,7 +462,7 @@ class Sender(AgentInRole):
                        'Parcel',
                        'Feedback']} })
     playedBy: str = Field(default=..., description="""The enduring agent enacting this role.""", json_schema_extra = { "linkml_meta": {'domain_of': ['AgentInRole'], 'slot_uri': 'hlb:playedBy'} })
-    hasAltContactPointInRole: str | None = Field(default=None, description="""An alternative channel to use for this participation, overriding the agent's default.""", json_schema_extra = { "linkml_meta": {'domain_of': ['AgentInRole'], 'slot_uri': 'hlb:hasAltContactPointInRole'} })
+    hasAltContactPointInRole: Optional[str] = Field(default=None, description="""An alternative channel to use for this participation, overriding the agent's default.""", json_schema_extra = { "linkml_meta": {'domain_of': ['AgentInRole'], 'slot_uri': 'hlb:hasAltContactPointInRole'} })
 
 
 class Receiver(AgentInRole):
@@ -455,7 +473,7 @@ class Receiver(AgentInRole):
          'class_uri': 'hlb:Receiver',
          'from_schema': 'http://meaningfy.ws/ontology/hulubul/agent'})
 
-    deliveryNote: str | None = Field(default=None, description="""A note from or for the receiver regarding delivery (e.g. handover instructions).""", json_schema_extra = { "linkml_meta": {'domain_of': ['Receiver'], 'slot_uri': 'hlb:deliveryNote'} })
+    deliveryNote: Optional[str] = Field(default=None, description="""A note from or for the receiver regarding delivery (e.g. handover instructions).""", json_schema_extra = { "linkml_meta": {'domain_of': ['Receiver'], 'slot_uri': 'hlb:deliveryNote'} })
     id: str = Field(default=..., description="""Graph node identity for this instance (distinct from any business identifier).""", json_schema_extra = { "linkml_meta": {'domain_of': ['SpatialObject',
                        'Channel',
                        'Agent',
@@ -466,7 +484,7 @@ class Receiver(AgentInRole):
                        'Parcel',
                        'Feedback']} })
     playedBy: str = Field(default=..., description="""The enduring agent enacting this role.""", json_schema_extra = { "linkml_meta": {'domain_of': ['AgentInRole'], 'slot_uri': 'hlb:playedBy'} })
-    hasAltContactPointInRole: str | None = Field(default=None, description="""An alternative channel to use for this participation, overriding the agent's default.""", json_schema_extra = { "linkml_meta": {'domain_of': ['AgentInRole'], 'slot_uri': 'hlb:hasAltContactPointInRole'} })
+    hasAltContactPointInRole: Optional[str] = Field(default=None, description="""An alternative channel to use for this participation, overriding the agent's default.""", json_schema_extra = { "linkml_meta": {'domain_of': ['AgentInRole'], 'slot_uri': 'hlb:hasAltContactPointInRole'} })
 
 
 class TransportService(ConfiguredBaseModel):
@@ -538,14 +556,14 @@ class DeliveryRequest(ConfiguredBaseModel):
                        'DeliveryRequest',
                        'Parcel',
                        'Feedback']} })
-    requestNote: list[str] | None = Field(default=None, description="""Free-text notes attached to the request.""", json_schema_extra = { "linkml_meta": {'domain_of': ['DeliveryRequest'], 'slot_uri': 'hlb:requestNote'} })
-    preferredPeriod: str | None = Field(default=None, description="""The requester's preferred timeframe (orientative, free text).""", json_schema_extra = { "linkml_meta": {'domain_of': ['DeliveryRequest'], 'slot_uri': 'hlb:preferredPeriod'} })
+    requestNote: Optional[list[str]] = Field(default=None, description="""Free-text notes attached to the request.""", json_schema_extra = { "linkml_meta": {'domain_of': ['DeliveryRequest'], 'slot_uri': 'hlb:requestNote'} })
+    preferredPeriod: Optional[str] = Field(default=None, description="""The requester's preferred timeframe (orientative, free text).""", json_schema_extra = { "linkml_meta": {'domain_of': ['DeliveryRequest'], 'slot_uri': 'hlb:preferredPeriod'} })
     created: datetime  = Field(default=..., description="""When the request was created.""", json_schema_extra = { "linkml_meta": {'domain_of': ['DeliveryRequest'], 'slot_uri': 'hlb:created'} })
     updated: datetime  = Field(default=..., description="""When the request was last modified.""", json_schema_extra = { "linkml_meta": {'domain_of': ['DeliveryRequest'], 'slot_uri': 'hlb:updated'} })
-    closed: datetime | None = Field(default=None, description="""When the request was closed/terminated.""", json_schema_extra = { "linkml_meta": {'domain_of': ['DeliveryRequest'], 'slot_uri': 'hlb:closed'} })
+    closed: Optional[datetime ] = Field(default=None, description="""When the request was closed/terminated.""", json_schema_extra = { "linkml_meta": {'domain_of': ['DeliveryRequest'], 'slot_uri': 'hlb:closed'} })
     hasSender: str = Field(default=..., description="""The sender participation for this request.""", json_schema_extra = { "linkml_meta": {'domain_of': ['DeliveryRequest'], 'slot_uri': 'hlb:hasSender'} })
     hasReceiver: str = Field(default=..., description="""The primary receiver participation.""", json_schema_extra = { "linkml_meta": {'domain_of': ['DeliveryRequest'], 'slot_uri': 'hlb:hasReceiver'} })
-    hasTransporter: str | None = Field(default=None, description="""The assigned transporter participation, once one is selected.""", json_schema_extra = { "linkml_meta": {'domain_of': ['DeliveryRequest'], 'slot_uri': 'hlb:hasTransporter'} })
+    hasTransporter: Optional[str] = Field(default=None, description="""The assigned transporter participation, once one is selected.""", json_schema_extra = { "linkml_meta": {'domain_of': ['DeliveryRequest'], 'slot_uri': 'hlb:hasTransporter'} })
     hasStatus: RequestStatus = Field(default=..., description="""Current lifecycle status.""", json_schema_extra = { "linkml_meta": {'domain_of': ['DeliveryRequest'], 'slot_uri': 'hlb:hasStatus'} })
     hasDeliveryItem: list[str] = Field(default=..., description="""The parcel(s) to be delivered.""", json_schema_extra = { "linkml_meta": {'domain_of': ['DeliveryRequest'], 'slot_uri': 'hlb:hasDeliveryItem'} })
     hasPickUpLocation: str = Field(default=..., description="""Where the parcel(s) are collected — an Address or a named Place.""", json_schema_extra = { "linkml_meta": {'any_of': [{'range': 'Address'}, {'range': 'Place'}],
@@ -554,7 +572,7 @@ class DeliveryRequest(ConfiguredBaseModel):
     hasDropOffLocation: str = Field(default=..., description="""Where the parcel(s) are delivered — an Address or a named Place.""", json_schema_extra = { "linkml_meta": {'any_of': [{'range': 'Address'}, {'range': 'Place'}],
          'domain_of': ['DeliveryRequest'],
          'slot_uri': 'hlb:hasDropOffLocation'} })
-    hasAltDropOffLocation: str | None = Field(default=None, description="""An alternative drop-off location (Address or Place). Owner resolved to request-level per diagram 2 (a Receiver-level variant was drawn in diagram 3 — not modelled here).""", json_schema_extra = { "linkml_meta": {'any_of': [{'range': 'Address'}, {'range': 'Place'}],
+    hasAltDropOffLocation: Optional[str] = Field(default=None, description="""An alternative drop-off location (Address or Place). Owner resolved to request-level per diagram 2 (a Receiver-level variant was drawn in diagram 3 — not modelled here).""", json_schema_extra = { "linkml_meta": {'any_of': [{'range': 'Address'}, {'range': 'Place'}],
          'domain_of': ['DeliveryRequest'],
          'slot_uri': 'hlb:hasAltDropOffLocation'} })
 
@@ -577,10 +595,10 @@ class Parcel(ConfiguredBaseModel):
                        'Parcel',
                        'Feedback']} })
     declaredContent: str = Field(default=..., description="""The sender's declared description of contents.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Parcel'], 'slot_uri': 'hlb:declaredContent'} })
-    photoURL: list[str] | None = Field(default=None, description="""URLs of photos of the parcel.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Parcel'], 'slot_uri': 'hlb:photoURL'} })
-    weightKg: float | None = Field(default=None, description="""Weight in kilograms.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Parcel'], 'slot_uri': 'hlb:weightKg'} })
-    dimensions: str | None = Field(default=None, description="""Free-text dimensions (e.g. \"30x20x10 cm\").""", json_schema_extra = { "linkml_meta": {'domain_of': ['Parcel'], 'slot_uri': 'hlb:dimensions'} })
-    hasAltReceiver: str | None = Field(default=None, description="""An alternative receiver for this specific parcel.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Parcel'], 'slot_uri': 'hlb:hasAltReceiver'} })
+    photoURL: Optional[list[str]] = Field(default=None, description="""URLs of photos of the parcel.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Parcel'], 'slot_uri': 'hlb:photoURL'} })
+    weightKg: Optional[float] = Field(default=None, description="""Weight in kilograms.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Parcel'], 'slot_uri': 'hlb:weightKg'} })
+    dimensions: Optional[str] = Field(default=None, description="""Free-text dimensions (e.g. \"30x20x10 cm\").""", json_schema_extra = { "linkml_meta": {'domain_of': ['Parcel'], 'slot_uri': 'hlb:dimensions'} })
+    hasAltReceiver: Optional[str] = Field(default=None, description="""An alternative receiver for this specific parcel.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Parcel'], 'slot_uri': 'hlb:hasAltReceiver'} })
 
 
 class Feedback(ConfiguredBaseModel):
@@ -600,11 +618,11 @@ class Feedback(ConfiguredBaseModel):
                        'DeliveryRequest',
                        'Parcel',
                        'Feedback']} })
-    rating: int | None = Field(default=None, description="""Numeric score.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Feedback'], 'slot_uri': 'hlb:rating'} })
-    comment: str | None = Field(default=None, description="""Free-text remark.""", json_schema_extra = { "linkml_meta": {'domain_of': ['SpatialObject', 'Feedback'], 'slot_uri': 'hlb:comment'} })
+    rating: Optional[int] = Field(default=None, description="""Numeric score.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Feedback'], 'slot_uri': 'hlb:rating'} })
+    comment: Optional[str] = Field(default=None, description="""Free-text remark.""", json_schema_extra = { "linkml_meta": {'domain_of': ['SpatialObject', 'Feedback'], 'slot_uri': 'hlb:comment'} })
     fromProvider: str = Field(default=..., description="""The participation that authored the feedback.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Feedback'], 'slot_uri': 'hlb:fromProvider'} })
     toRecipient: str = Field(default=..., description="""The participation the feedback is about.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Feedback'], 'slot_uri': 'hlb:toRecipient'} })
-    aboutRequest: str | None = Field(default=None, description="""The delivery request the feedback concerns.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Feedback'], 'slot_uri': 'hlb:aboutRequest'} })
+    aboutRequest: Optional[str] = Field(default=None, description="""The delivery request the feedback concerns.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Feedback'], 'slot_uri': 'hlb:aboutRequest'} })
 
 
 # Model rebuild

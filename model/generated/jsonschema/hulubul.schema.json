@@ -116,33 +116,6 @@
             "title": "Agent",
             "type": "object"
         },
-        "AgentInRole": {
-            "additionalProperties": false,
-            "description": "The episodic, situation-dependent role an Agent plays within a specific interaction; a reified participation. Anti-rigid: the same Agent plays different roles across different requests.",
-            "properties": {
-                "hasAltContactPointInRole": {
-                    "description": "An alternative channel to use for this participation, overriding the agent's default.",
-                    "type": [
-                        "string",
-                        "null"
-                    ]
-                },
-                "id": {
-                    "description": "Graph node identity for this instance (distinct from any business identifier).",
-                    "type": "string"
-                },
-                "playedBy": {
-                    "description": "The enduring agent enacting this role.",
-                    "type": "string"
-                }
-            },
-            "required": [
-                "id",
-                "playedBy"
-            ],
-            "title": "AgentInRole",
-            "type": "object"
-        },
         "Area": {
             "additionalProperties": false,
             "description": "A coarse administrative or geographic unit (locality, county, state, country) forming a nested containment hierarchy. Transporter service offers and matching operate on Area; exact pickup/delivery use Address.",
@@ -521,7 +494,6 @@
                 "photoURL": {
                     "description": "URLs of photos of the parcel.",
                     "items": {
-                        "format": "uri",
                         "type": "string"
                     },
                     "type": [
@@ -719,39 +691,6 @@
             "title": "ServiceType",
             "type": "string"
         },
-        "SpatialObject": {
-            "additionalProperties": false,
-            "description": "Root of the spatial hierarchy (aligned to geo:SpatialObject). Anything with spatial identity that may carry a geometry.",
-            "properties": {
-                "comment": {
-                    "description": "Free-text remark or annotation.",
-                    "type": [
-                        "string",
-                        "null"
-                    ]
-                },
-                "hasCoordinates": {
-                    "anyOf": [
-                        {
-                            "$ref": "#/$defs/GeoCoordinates"
-                        },
-                        {
-                            "type": "null"
-                        }
-                    ],
-                    "description": "The point geometry of this spatial object."
-                },
-                "id": {
-                    "description": "Graph node identity for this instance (distinct from any business identifier).",
-                    "type": "string"
-                }
-            },
-            "required": [
-                "id"
-            ],
-            "title": "SpatialObject",
-            "type": "object"
-        },
         "TransportService": {
             "additionalProperties": false,
             "description": "A standing, request-agnostic offering published by a transporter agent, declaring service types and its base and destination service areas.",
@@ -832,7 +771,7 @@
     "$id": "http://meaningfy.ws/ontology/hulubul/hulubul",
     "$schema": "https://json-schema.org/draft/2019-09/schema",
     "additionalProperties": true,
-    "metamodel_version": "1.11.0",
+    "metamodel_version": "1.7.0",
     "title": "hulubul",
     "type": "object",
     "version": null
