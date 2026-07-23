@@ -322,7 +322,7 @@ operational-schemas: ## Generate operational JSON schemas
 	poetry run gen-operational-schemas --output schemas/operational/v1
 
 check-model-generated: lint pydantic jsonschema erdiagram plantuml classdiagram neo4j-constraints neomodel ## Fail if model/generated is stale relative to the LinkML schema
-	git diff --exit-code -- model/generated ':(exclude)model/generated/owl/**' ':(exclude)model/generated/shacl/**'
+	git diff --exit-code -- model/generated ':(exclude)model/generated/owl/**' ':(exclude)model/generated/shacl/**' ':(exclude)model/generated/pydantic/**'
 
 check-operational-schemas: ## Fail if operational schemas are stale
 	poetry run gen-operational-schemas --output schemas/operational/v1 --check
