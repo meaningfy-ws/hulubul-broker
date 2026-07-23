@@ -71,7 +71,7 @@ CONTRACT_MODEL_MAP = {
 }
 
 
-def get_model_class(module_path: str, class_name: str) -> type:
+def get_model_class(module_path: str, class_name: str) -> type[Any]:
     """Dynamically import and return a Pydantic model class."""
     try:
         module = import_module(module_path)
@@ -99,10 +99,10 @@ def generate_schema(contract_kind: str) -> dict[str, Any]:
 
     # Try to get as a model class first, then as a type annotation
     try:
-        model_class = getattr(module, class_name)
+        model_class: type[Any] = getattr(module, class_name)
         # Check if it's a model class with model_json_schema method
         if hasattr(model_class, "model_json_schema"):
-            return model_class.model_json_schema()
+            return model_class.model_json_schema()  # type: ignore[no-any-return]
         else:
             # It's a type annotation, use TypeAdapter
             adapter = TypeAdapter(model_class)
@@ -120,13 +120,13 @@ def schema_sha256(schema: dict[str, Any]) -> str:
     return hashlib.sha256(schema_json.encode()).hexdigest()
 
 
-def generate_all_schemas() -> dict[str, tuple[dict, str]]:
+def generate_all_schemas() -> dict[str, tuple[dict[str, Any], str]]:
     """Generate all 11 operational schemas.
 
     Returns:
         Dict mapping contract_kind -> (schema_dict, sha256_hash)
     """
-    schemas: dict[str, tuple[dict, str]] = {}
+    schemas: dict[str, tuple[dict[str, Any], str]] = {}
 
     for contract_kind in sorted(CONTRACT_MODEL_MAP.keys()):
         try:
@@ -139,7 +139,7 @@ def generate_all_schemas() -> dict[str, tuple[dict, str]]:
     return schemas
 
 
-def write_schemas_to_disk(output_dir: Path, schemas: dict[str, tuple[dict, str]]) -> None:
+def write_schemas_to_disk(output_dir: Path, schemas: dict[str, tuple[dict[str, Any], str]]) -> None:
     """Write generated schemas to disk.
 
     Args:
@@ -176,7 +176,7 @@ def write_schemas_to_disk(output_dir: Path, schemas: dict[str, tuple[dict, str]]
         f.write("\n")  # Trailing newline
 
 
-def check_schemas_match(output_dir: Path, schemas: dict[str, tuple[dict, str]]) -> bool:
+def check_schemas_match(output_dir: Path, schemas: dict[str, tuple[dict[str, Any], str]]) -> bool:
     """Verify that generated schemas match existing files.
 
     Args:

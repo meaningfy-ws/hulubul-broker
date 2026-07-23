@@ -29,7 +29,7 @@ Usage:  python model/gen/gen_neo4j_constraints.py model/linkml/hulubul.yaml
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import ClassVar
+from typing import Any, ClassVar
 
 import click
 from linkml.utils.generator import Generator, shared_arguments  # type: ignore[import-untyped]
@@ -110,7 +110,7 @@ class Neo4jConstraintGenerator(Generator):  # type: ignore[misc]
             )
         return out
 
-    def serialize(self, **kwargs) -> str:
+    def serialize(self, **kwargs: Any) -> str:
         sv = self.schemaview
         header = [
             f"// Neo4j constraints generated from {self.schema.name}",
@@ -129,7 +129,7 @@ class Neo4jConstraintGenerator(Generator):  # type: ignore[misc]
 @shared_arguments(Neo4jConstraintGenerator)
 @click.command(name="gen-neo4j-constraints")
 @click.version_option(Neo4jConstraintGenerator.generatorversion, "-V", "--version")
-def cli(yamlfile, **kwargs):
+def cli(yamlfile: str, **kwargs: Any) -> None:
     """Generate Neo4j constraint DDL from a LinkML schema."""
     gen = Neo4jConstraintGenerator(yamlfile, **kwargs)
     print(gen.serialize())

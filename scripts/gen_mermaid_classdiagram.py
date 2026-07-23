@@ -19,7 +19,7 @@ Usage:  python scripts/gen_mermaid_classdiagram.py model/linkml/hulubul.yaml
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import ClassVar
+from typing import Any, ClassVar
 
 import click
 from linkml.utils.generator import Generator, shared_arguments  # type: ignore[import-untyped]
@@ -72,7 +72,7 @@ class MermaidClassDiagramGenerator(Generator):  # type: ignore[misc]
             attrs[cn] = lines
         return attrs, inheritance, associations
 
-    def serialize(self, **kwargs) -> str:
+    def serialize(self, **kwargs: Any) -> str:
         attrs, inheritance, associations = self._collect()
         class_decls: list[str] = []
         for cn in sorted(attrs):
@@ -94,7 +94,7 @@ class MermaidClassDiagramGenerator(Generator):  # type: ignore[misc]
 @shared_arguments(MermaidClassDiagramGenerator)
 @click.command(name="gen-mermaid-classdiagram")
 @click.version_option(MermaidClassDiagramGenerator.generatorversion, "-V", "--version")
-def cli(yamlfile, **kwargs):
+def cli(yamlfile: str, **kwargs: Any) -> None:
     """Generate a single whole-model Mermaid class diagram from a LinkML schema."""
     gen = MermaidClassDiagramGenerator(yamlfile, **kwargs)
     print(gen.serialize())

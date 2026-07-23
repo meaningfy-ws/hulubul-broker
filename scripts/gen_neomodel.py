@@ -28,10 +28,11 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass
-from typing import ClassVar
+from typing import Any, ClassVar
 
 import click
 from jinja2 import Template
+from linkml_runtime import SlotDefinition
 from linkml.utils.generator import Generator, shared_arguments  # type: ignore[import-untyped]
 
 # LinkML scalar range -> neomodel property class.
@@ -109,7 +110,7 @@ class NeomodelGenerator(Generator):  # type: ignore[misc]
         pairs = ", ".join(f"({v!r}, {v!r})" for v in pv)
         return f"choices=({pairs},)"
 
-    def _property_line(self, slot, id_name: str) -> str:
+    def _property_line(self, slot: SlotDefinition, id_name: str | None) -> str:
         name = slot.name
         if name == id_name:
             return f"{name} = StringProperty(unique_index=True, required=True)"
@@ -128,14 +129,14 @@ class NeomodelGenerator(Generator):  # type: ignore[misc]
             args.append("required=True")
         return f"{name} = {base}({', '.join(args)})"
 
-    def _relationship_line(self, slot) -> str:
+    def _relationship_line(self, slot: SlotDefinition) -> str:
         card = _cardinality(bool(slot.required), bool(slot.multivalued))
         return (
             f"{slot.name} = RelationshipTo('{slot.range}', "
             f"'{_rel_name(slot.name)}', cardinality={card})"
         )
 
-    def _class_dict(self, class_name: str) -> dict:
+    def _class_dict(self, class_name: str) -> dict[str, str | list[str]]:
         sv = self.schemaview
         class_names = set(sv.all_classes())
         id_slot = sv.get_identifier_slot(class_name)
@@ -151,7 +152,7 @@ class NeomodelGenerator(Generator):  # type: ignore[misc]
         doc = " ".join((sv.get_class(class_name).description or class_name).split())
         return {"name": class_name, "doc": doc, "lines": lines}
 
-    def serialize(self, **kwargs) -> str:
+    def serialize(self, **kwargs: Any) -> str:
         sv = self.schemaview
         classes = [
             self._class_dict(cn) for cn in sorted(sv.all_classes()) if not sv.get_class(cn).abstract
@@ -162,7 +163,7 @@ class NeomodelGenerator(Generator):  # type: ignore[misc]
 @shared_arguments(NeomodelGenerator)
 @click.command(name="gen-neomodel")
 @click.version_option(NeomodelGenerator.generatorversion, "-V", "--version")
-def cli(yamlfile, **kwargs):
+def cli(yamlfile: str, **kwargs: Any) -> None:
     """Generate neomodel OGM classes from a LinkML schema."""
     gen = NeomodelGenerator(yamlfile, **kwargs)
     print(gen.serialize())
