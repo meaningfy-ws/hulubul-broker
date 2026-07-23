@@ -84,7 +84,7 @@ class TestHumanSuppliedText:
             ("  x  ", True),
         ],
     )
-    def test_text_length_boundary(self, text, valid: str, valid: bool) -> None:
+    def test_text_length_boundary(self, text: str, valid: bool) -> None:
         """Text must be 1-4000 chars after stripping whitespace."""
 
         class Model(StrictModel):

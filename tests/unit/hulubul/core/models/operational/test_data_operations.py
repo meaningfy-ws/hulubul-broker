@@ -448,7 +448,7 @@ class TestAllOperationsRequireSharedFields:
             (ReadDeliveryRequestRequest, DataOperation.READ_DELIVERY_REQUEST),
         ],
     )
-    def test_shared_fields_required(self, operation_class, operation_kind: Any, operation_kind: Any) -> None:
+    def test_shared_fields_required(self, operation_class: Any, operation_kind: Any) -> None:
         """All operation requests must include operation_id, caller, session, and actor."""
         with pytest.raises(ValidationError):
             # Missing operation_id

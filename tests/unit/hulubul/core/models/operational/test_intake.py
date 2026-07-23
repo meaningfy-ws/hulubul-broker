@@ -6,6 +6,8 @@ and result outcome validation invariants per the plan (2.3).
 
 from __future__ import annotations
 
+from typing import Any
+
 import pytest
 from pydantic import ValidationError
 
@@ -34,7 +36,7 @@ class TestIntakeFactsSparseBoundaries:
             ("parcel_declared_content", ""),
         ],
     )
-    def test_human_text_rejects_empty_string(self, field_name, empty_value: str, empty_value: Any) -> None:
+    def test_human_text_rejects_empty_string(self, field_name: str, empty_value: Any) -> None:
         """Human-supplied text fields must reject empty strings (1-char minimum)."""
         with pytest.raises(ValidationError, match="at least 1 character"):
             IntakeFacts(sender_actor_id="urn:actor:alice", **{field_name: empty_value})
