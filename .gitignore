@@ -225,3 +225,6 @@ langflow.env
 # Agent local overrides (never committed)
 AGENTS.local.md
 .worktrees/
+
+# Generated evidence reports for Change 1 (Phase 1 request intake thread)
+reports/change1/
