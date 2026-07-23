@@ -187,4 +187,5 @@ def new_graph_identifiers(
         identifiers["drop_off_place_id"] = None
         identifiers["drop_off_place_identifier"] = None
 
-    return GraphIdentifiers(**identifiers)
+    request_id: str = identifiers.pop("request_id")  # type: ignore[assignment]
+    return GraphIdentifiers(request_id=request_id, **identifiers)

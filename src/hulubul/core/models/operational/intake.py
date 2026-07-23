@@ -11,7 +11,9 @@ Results carry outcomes, clarification needs, and user-safe messaging.
 
 from __future__ import annotations
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from typing import Any
+
+from pydantic import BaseModel, ConfigDict, Field, ValidationInfo, field_validator, model_validator
 
 from hulubul.core.models.operational.base import (
     ActorUrn,
@@ -333,7 +335,7 @@ class IntakeResult(BaseModel):
 
     @field_validator("missing_fields", mode="before")
     @classmethod
-    def ensure_tuple(cls, v):
+    def ensure_tuple(cls, v: Any) -> tuple[str, ...]:
         """Convert missing_fields to immutable tuple."""
         if isinstance(v, list | tuple):
             return tuple(v)
