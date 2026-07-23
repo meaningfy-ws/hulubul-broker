@@ -102,7 +102,8 @@ def generate_schema(contract_kind: str) -> dict[str, Any]:
         model_class: type[Any] = getattr(module, class_name)
         # Check if it's a model class with model_json_schema method
         if hasattr(model_class, "model_json_schema"):
-            return model_class.model_json_schema()  # type: ignore[no-any-return]
+            from typing import cast
+            return cast(dict[str, Any], model_class.model_json_schema())
         else:
             # It's a type annotation, use TypeAdapter
             adapter = TypeAdapter(model_class)

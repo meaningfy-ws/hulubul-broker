@@ -9,7 +9,7 @@ Per plan 2.3 (Locked Fact And Result Contracts), snapshots enforce:
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Any
+from typing import Any, cast
 
 from pydantic import BaseModel, ConfigDict, Field, ValidationInfo, field_validator
 
@@ -78,7 +78,7 @@ class DeliveryRequestSnapshot(BaseModel):
         """Convert missing_fields to immutable tuple."""
         if isinstance(v, list | tuple):
             return tuple(v)
-        return v
+        return cast(tuple[str, ...], v)
 
     @field_validator("facts", mode="after")
     @classmethod

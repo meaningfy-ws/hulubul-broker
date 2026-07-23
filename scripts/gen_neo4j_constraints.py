@@ -126,7 +126,7 @@ class Neo4jConstraintGenerator(Generator):  # type: ignore[misc]
         return "\n".join(header) + "\n\n".join(body) + "\n"
 
 
-@shared_arguments(Neo4jConstraintGenerator)
+@shared_arguments(Neo4jConstraintGenerator)  # type: ignore[misc]
 @click.command(name="gen-neo4j-constraints")
 @click.version_option(Neo4jConstraintGenerator.generatorversion, "-V", "--version")
 def cli(yamlfile: str, **kwargs: Any) -> None:

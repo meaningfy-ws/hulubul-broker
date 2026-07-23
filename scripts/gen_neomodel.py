@@ -32,7 +32,7 @@ from typing import Any, ClassVar
 
 import click
 from jinja2 import Template
-from linkml_runtime import SlotDefinition
+from linkml_runtime import SlotDefinition  # type: ignore[import-untyped]
 from linkml.utils.generator import Generator, shared_arguments  # type: ignore[import-untyped]
 
 # LinkML scalar range -> neomodel property class.
@@ -160,7 +160,7 @@ class NeomodelGenerator(Generator):  # type: ignore[misc]
         return _TEMPLATE.render(schema_name=self.schema.name, classes=classes)
 
 
-@shared_arguments(NeomodelGenerator)
+@shared_arguments(NeomodelGenerator)  # type: ignore[misc]
 @click.command(name="gen-neomodel")
 @click.version_option(NeomodelGenerator.generatorversion, "-V", "--version")
 def cli(yamlfile: str, **kwargs: Any) -> None:

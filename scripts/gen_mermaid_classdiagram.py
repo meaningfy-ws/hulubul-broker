@@ -91,7 +91,7 @@ class MermaidClassDiagramGenerator(Generator):  # type: ignore[misc]
         )
 
 
-@shared_arguments(MermaidClassDiagramGenerator)
+@shared_arguments(MermaidClassDiagramGenerator)  # type: ignore[misc]
 @click.command(name="gen-mermaid-classdiagram")
 @click.version_option(MermaidClassDiagramGenerator.generatorversion, "-V", "--version")
 def cli(yamlfile: str, **kwargs: Any) -> None:
