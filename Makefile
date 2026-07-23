@@ -253,7 +253,6 @@ mcp-restart: check-env ## Restart the MCP server
 	@ docker compose -f $(COMPOSE_FILE) --env-file $(ENV_FILE) restart mcp-neo4j
 
 #-----------------------------------------------------------------------------
-<<<<<<< HEAD
 # Git hooks
 #-----------------------------------------------------------------------------
 .PHONY: install-git-hooks
@@ -372,19 +371,6 @@ acceptance-down: ## Tear down the acceptance Docker stack and its volumes
 
 release-evidence: ## Build the Change 1 release evidence report
 	poetry run python scripts/build_change1_evidence.py --output reports/change1/release-evidence.json
-=======
-# CI / Quality gates
-#-----------------------------------------------------------------------------
-.PHONY: install ci-static
-
-install: ## Install project dependencies via Poetry
-	@ echo -e "$(BUILD_PRINT)$(ICON_PROGRESS) Installing dependencies$(END_BUILD_PRINT)"
-	@ poetry install
-	@ echo -e "$(BUILD_PRINT)$(ICON_DONE) Dependencies installed$(END_BUILD_PRINT)"
-
-ci-static: lint ## Run static quality gates
-	@ echo -e "$(BUILD_PRINT)$(ICON_DONE) Static quality checks passed$(END_BUILD_PRINT)"
->>>>>>> 3c92122 (fix(ci): add missing make targets and pin LinkML version)
 
 # Default target
 .DEFAULT_GOAL := help
