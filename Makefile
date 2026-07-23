@@ -338,7 +338,7 @@ test-evaluation-judge: ## Run the LLM-judge clarification evaluation (opt-in, ca
 
 # Static CI: schema + Python quality + fast tests (no comment on the target
 # line itself, so the prerequisite list stays exactly the canonical set).
-ci-static: lint check-model-generated lint-python format-check-python typecheck check-architecture check-secrets test-unit
+ci-static: lint check-model-generated lint-python format-check-python typecheck check-architecture check-operational-schemas check-secrets check-flows test-unit test-evaluation-recorded
 
 # Acceptance CI: integration + system + BDD tests + evidence report.
 ci-acceptance: test-integration test-system test-bdd release-evidence
