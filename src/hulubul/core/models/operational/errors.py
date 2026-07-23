@@ -1,17 +1,19 @@
 """Operational error handling and policy."""
-from dataclasses import dataclass
-from typing import Any, NamedTuple, Tuple
-from uuid import UUID
-from pydantic import BaseModel, Field, field_validator, ValidationError
 
-from .base import StrictModel, VersionedContract
-from .enums import ErrorCode, ErrorCategory, ErrorEscalation
+from dataclasses import dataclass
+from typing import Any, NamedTuple
+from uuid import UUID
+
+from pydantic import Field, ValidationError, field_validator
+
+from .base import VersionedContract
+from .enums import ErrorCategory, ErrorCode, ErrorEscalation
 
 __all__ = [
-    "OperationalError",
-    "FieldViolation",
-    "ErrorPolicy",
     "ERROR_POLICY",
+    "ErrorPolicy",
+    "FieldViolation",
+    "OperationalError",
     "validation_error_to_operational_error",
 ]
 
@@ -43,7 +45,14 @@ ERROR_POLICY = {
         retryable=False,
         safe_message="I could not process this message safely.",
         log_level="WARNING",
-        log_fields=("correlation_id", "session_id", "flow_id", "component_id", "error_code", "schema_version"),
+        log_fields=(
+            "correlation_id",
+            "session_id",
+            "flow_id",
+            "component_id",
+            "error_code",
+            "schema_version",
+        ),
         escalation=ErrorEscalation.NONE,
     ),
     ErrorCode.INVALID_CONTRACT: ErrorPolicy(
@@ -52,7 +61,15 @@ ERROR_POLICY = {
         retryable=False,
         safe_message="I could not produce a safe response.",
         log_level="ERROR",
-        log_fields=("correlation_id", "operation_id", "session_id", "flow_id", "component_id", "error_code", "schema_version"),
+        log_fields=(
+            "correlation_id",
+            "operation_id",
+            "session_id",
+            "flow_id",
+            "component_id",
+            "error_code",
+            "schema_version",
+        ),
         escalation=ErrorEscalation.HARD_GATE_FAILURE,
     ),
     ErrorCode.OPERATION_NOT_ALLOWED: ErrorPolicy(
@@ -61,7 +78,15 @@ ERROR_POLICY = {
         retryable=False,
         safe_message="This operation is not allowed.",
         log_level="WARNING",
-        log_fields=("correlation_id", "operation_id", "session_id", "flow_id", "component_id", "error_code", "schema_version"),
+        log_fields=(
+            "correlation_id",
+            "operation_id",
+            "session_id",
+            "flow_id",
+            "component_id",
+            "error_code",
+            "schema_version",
+        ),
         escalation=ErrorEscalation.HARD_GATE_FAILURE,
     ),
     ErrorCode.BINDING_REQUEST_MISMATCH: ErrorPolicy(
@@ -70,7 +95,15 @@ ERROR_POLICY = {
         retryable=False,
         safe_message="I could not resume this request safely.",
         log_level="ERROR",
-        log_fields=("correlation_id", "request_id", "session_id", "flow_id", "component_id", "error_code", "schema_version"),
+        log_fields=(
+            "correlation_id",
+            "request_id",
+            "session_id",
+            "flow_id",
+            "component_id",
+            "error_code",
+            "schema_version",
+        ),
         escalation=ErrorEscalation.HARD_GATE_FAILURE,
     ),
     ErrorCode.GRAPH_CONTEXT_INCONSISTENT: ErrorPolicy(
@@ -79,7 +112,15 @@ ERROR_POLICY = {
         retryable=False,
         safe_message="I could not resume this request safely.",
         log_level="ERROR",
-        log_fields=("correlation_id", "request_id", "session_id", "flow_id", "component_id", "error_code", "schema_version"),
+        log_fields=(
+            "correlation_id",
+            "request_id",
+            "session_id",
+            "flow_id",
+            "component_id",
+            "error_code",
+            "schema_version",
+        ),
         escalation=ErrorEscalation.HARD_GATE_FAILURE,
     ),
     ErrorCode.UNSUPPORTED_PHASE1_STATUS: ErrorPolicy(
@@ -88,7 +129,15 @@ ERROR_POLICY = {
         retryable=False,
         safe_message="This request cannot be handled by the current intake flow.",
         log_level="INFO",
-        log_fields=("correlation_id", "request_id", "session_id", "flow_id", "component_id", "error_code", "schema_version"),
+        log_fields=(
+            "correlation_id",
+            "request_id",
+            "session_id",
+            "flow_id",
+            "component_id",
+            "error_code",
+            "schema_version",
+        ),
         escalation=ErrorEscalation.NONE,
     ),
     ErrorCode.UNSUPPORTED_REQUEST_STATUS: ErrorPolicy(
@@ -97,7 +146,15 @@ ERROR_POLICY = {
         retryable=False,
         safe_message="I could not resume this request safely.",
         log_level="ERROR",
-        log_fields=("correlation_id", "request_id", "session_id", "flow_id", "component_id", "error_code", "schema_version"),
+        log_fields=(
+            "correlation_id",
+            "request_id",
+            "session_id",
+            "flow_id",
+            "component_id",
+            "error_code",
+            "schema_version",
+        ),
         escalation=ErrorEscalation.HARD_GATE_FAILURE,
     ),
     ErrorCode.INVALID_EXPECTED_STATUS: ErrorPolicy(
@@ -106,7 +163,16 @@ ERROR_POLICY = {
         retryable=False,
         safe_message="The request changed before this update could be applied.",
         log_level="INFO",
-        log_fields=("correlation_id", "operation_id", "request_id", "session_id", "flow_id", "component_id", "error_code", "schema_version"),
+        log_fields=(
+            "correlation_id",
+            "operation_id",
+            "request_id",
+            "session_id",
+            "flow_id",
+            "component_id",
+            "error_code",
+            "schema_version",
+        ),
         escalation=ErrorEscalation.NONE,
     ),
     ErrorCode.INVALID_STATUS_TRANSITION: ErrorPolicy(
@@ -115,7 +181,16 @@ ERROR_POLICY = {
         retryable=False,
         safe_message="This request update is not allowed.",
         log_level="WARNING",
-        log_fields=("correlation_id", "operation_id", "request_id", "session_id", "flow_id", "component_id", "error_code", "schema_version"),
+        log_fields=(
+            "correlation_id",
+            "operation_id",
+            "request_id",
+            "session_id",
+            "flow_id",
+            "component_id",
+            "error_code",
+            "schema_version",
+        ),
         escalation=ErrorEscalation.HARD_GATE_FAILURE,
     ),
     ErrorCode.CONCURRENT_MODIFICATION: ErrorPolicy(
@@ -124,7 +199,16 @@ ERROR_POLICY = {
         retryable=False,
         safe_message="The request changed before this update could be applied.",
         log_level="INFO",
-        log_fields=("correlation_id", "operation_id", "request_id", "session_id", "flow_id", "component_id", "error_code", "schema_version"),
+        log_fields=(
+            "correlation_id",
+            "operation_id",
+            "request_id",
+            "session_id",
+            "flow_id",
+            "component_id",
+            "error_code",
+            "schema_version",
+        ),
         escalation=ErrorEscalation.NONE,
     ),
     ErrorCode.AFFECTED_RECORD_COUNT_MISMATCH: ErrorPolicy(
@@ -133,7 +217,16 @@ ERROR_POLICY = {
         retryable=False,
         safe_message="I could not confirm the request update safely.",
         log_level="ERROR",
-        log_fields=("correlation_id", "operation_id", "request_id", "session_id", "flow_id", "component_id", "error_code", "schema_version"),
+        log_fields=(
+            "correlation_id",
+            "operation_id",
+            "request_id",
+            "session_id",
+            "flow_id",
+            "component_id",
+            "error_code",
+            "schema_version",
+        ),
         escalation=ErrorEscalation.HARD_GATE_FAILURE,
     ),
     ErrorCode.MODEL_TRANSIENT_FAILURE: ErrorPolicy(
@@ -142,7 +235,15 @@ ERROR_POLICY = {
         retryable=True,
         safe_message="I could not process this request right now.",
         log_level="ERROR",
-        log_fields=("correlation_id", "session_id", "flow_id", "component_id", "retry_attempt", "error_code", "schema_version"),
+        log_fields=(
+            "correlation_id",
+            "session_id",
+            "flow_id",
+            "component_id",
+            "retry_attempt",
+            "error_code",
+            "schema_version",
+        ),
         escalation=ErrorEscalation.HARD_GATE_FAILURE,
     ),
     ErrorCode.MODEL_AUTHENTICATION_FAILURE: ErrorPolicy(
@@ -151,7 +252,14 @@ ERROR_POLICY = {
         retryable=False,
         safe_message="I could not process this request right now.",
         log_level="ERROR",
-        log_fields=("correlation_id", "session_id", "flow_id", "component_id", "error_code", "schema_version"),
+        log_fields=(
+            "correlation_id",
+            "session_id",
+            "flow_id",
+            "component_id",
+            "error_code",
+            "schema_version",
+        ),
         escalation=ErrorEscalation.HARD_GATE_FAILURE,
     ),
     ErrorCode.MALFORMED_AGENT_RESULT: ErrorPolicy(
@@ -160,7 +268,16 @@ ERROR_POLICY = {
         retryable=False,
         safe_message="I could not produce a safe response.",
         log_level="ERROR",
-        log_fields=("correlation_id", "operation_id", "session_id", "flow_id", "component_id", "retry_attempt", "error_code", "schema_version"),
+        log_fields=(
+            "correlation_id",
+            "operation_id",
+            "session_id",
+            "flow_id",
+            "component_id",
+            "retry_attempt",
+            "error_code",
+            "schema_version",
+        ),
         escalation=ErrorEscalation.HARD_GATE_FAILURE,
     ),
     ErrorCode.MCP_READ_TRANSIENT_FAILURE: ErrorPolicy(
@@ -169,7 +286,17 @@ ERROR_POLICY = {
         retryable=True,
         safe_message="I could not load this request right now.",
         log_level="ERROR",
-        log_fields=("correlation_id", "operation_id", "request_id", "session_id", "flow_id", "component_id", "retry_attempt", "error_code", "schema_version"),
+        log_fields=(
+            "correlation_id",
+            "operation_id",
+            "request_id",
+            "session_id",
+            "flow_id",
+            "component_id",
+            "retry_attempt",
+            "error_code",
+            "schema_version",
+        ),
         escalation=ErrorEscalation.HARD_GATE_FAILURE,
     ),
     ErrorCode.MCP_WRITE_AMBIGUOUS: ErrorPolicy(
@@ -178,7 +305,16 @@ ERROR_POLICY = {
         retryable=False,
         safe_message="I could not confirm whether the request update was saved.",
         log_level="ERROR",
-        log_fields=("correlation_id", "operation_id", "request_id", "session_id", "flow_id", "component_id", "error_code", "schema_version"),
+        log_fields=(
+            "correlation_id",
+            "operation_id",
+            "request_id",
+            "session_id",
+            "flow_id",
+            "component_id",
+            "error_code",
+            "schema_version",
+        ),
         escalation=ErrorEscalation.MANUAL_AMBIGUOUS_WRITE_GRAPH_INSPECTION,
     ),
     ErrorCode.MCP_AUTHENTICATION_FAILURE: ErrorPolicy(
@@ -187,7 +323,15 @@ ERROR_POLICY = {
         retryable=False,
         safe_message="I could not access the request safely.",
         log_level="ERROR",
-        log_fields=("correlation_id", "operation_id", "session_id", "flow_id", "component_id", "error_code", "schema_version"),
+        log_fields=(
+            "correlation_id",
+            "operation_id",
+            "session_id",
+            "flow_id",
+            "component_id",
+            "error_code",
+            "schema_version",
+        ),
         escalation=ErrorEscalation.HARD_GATE_FAILURE,
     ),
     ErrorCode.MCP_OPERATION_FAILURE: ErrorPolicy(
@@ -196,7 +340,16 @@ ERROR_POLICY = {
         retryable=False,
         safe_message="I could not access the request safely.",
         log_level="ERROR",
-        log_fields=("correlation_id", "operation_id", "request_id", "session_id", "flow_id", "component_id", "error_code", "schema_version"),
+        log_fields=(
+            "correlation_id",
+            "operation_id",
+            "request_id",
+            "session_id",
+            "flow_id",
+            "component_id",
+            "error_code",
+            "schema_version",
+        ),
         escalation=ErrorEscalation.HARD_GATE_FAILURE,
     ),
     ErrorCode.DEPENDENCY_UNAVAILABLE: ErrorPolicy(
@@ -205,7 +358,15 @@ ERROR_POLICY = {
         retryable=True,
         safe_message="I could not process this request right now.",
         log_level="ERROR",
-        log_fields=("correlation_id", "session_id", "flow_id", "component_id", "retry_attempt", "error_code", "schema_version"),
+        log_fields=(
+            "correlation_id",
+            "session_id",
+            "flow_id",
+            "component_id",
+            "retry_attempt",
+            "error_code",
+            "schema_version",
+        ),
         escalation=ErrorEscalation.HARD_GATE_FAILURE,
     ),
 }
@@ -218,7 +379,7 @@ class OperationalError(VersionedContract):
     category: ErrorCategory = Field(description="Error category (from policy)")
     message: str = Field(description="Safe user message (from policy)")
     retryable: bool = Field(description="Whether error is retryable (from policy)")
-    violations: Tuple[FieldViolation, ...] = Field(
+    violations: tuple[FieldViolation, ...] = Field(
         default_factory=tuple,
         description="Validation violations (field and rule ID only, no values)",
     )
@@ -232,9 +393,7 @@ class OperationalError(VersionedContract):
             return value
         policy = ERROR_POLICY[code]
         if value != policy.category:
-            raise ValueError(
-                f"category must be {policy.category.value} for {code.value}"
-            )
+            raise ValueError(f"category must be {policy.category.value} for {code.value}")
         return value
 
     @field_validator("message", mode="before")
@@ -246,9 +405,7 @@ class OperationalError(VersionedContract):
             return value
         policy = ERROR_POLICY[code]
         if value != policy.safe_message:
-            raise ValueError(
-                f"message must be '{policy.safe_message}' for {code.value}"
-            )
+            raise ValueError(f"message must be '{policy.safe_message}' for {code.value}")
         return value
 
     @field_validator("retryable", mode="before")
@@ -260,9 +417,7 @@ class OperationalError(VersionedContract):
             return value
         policy = ERROR_POLICY[code]
         if value != policy.retryable:
-            raise ValueError(
-                f"retryable must be {policy.retryable} for {code.value}"
-            )
+            raise ValueError(f"retryable must be {policy.retryable} for {code.value}")
         return value
 
 

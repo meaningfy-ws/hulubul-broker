@@ -15,6 +15,7 @@ Usage (direct script):
 Make target:
   make check-operational-schemas
 """
+
 from __future__ import annotations
 
 import hashlib
@@ -27,20 +28,46 @@ from typing import Any
 
 import click
 
-
 # Mapping: ContractKind value -> (module_path, model_class_name)
 CONTRACT_MODEL_MAP = {
-    "main-flow-input": ("hulubul.core.models.operational.envelope", "MainFlowInput"),
+    "main-flow-input": (
+        "hulubul.core.models.operational.envelope",
+        "MainFlowInput",
+    ),
     "router-input": ("hulubul.core.models.operational.routing", "RouterInput"),
     "intake-input": ("hulubul.core.models.operational.intake", "IntakeInput"),
-    "routing-context": ("hulubul.core.models.operational.routing", "RoutingContext"),
-    "router-result": ("hulubul.core.models.operational.routing", "RouterResult"),
-    "intake-facts": ("hulubul.core.models.operational.intake", "IntakeFacts"),
-    "intake-result": ("hulubul.core.models.operational.intake", "IntakeResult"),
-    "data-operation-request": ("hulubul.core.models.operational.data_operations", "DataOperationRequest"),
-    "data-operation-result": ("hulubul.core.models.operational.data_operations", "DataOperationResult"),
-    "delivery-request-snapshot": ("hulubul.core.models.operational.snapshots", "DeliveryRequestSnapshot"),
-    "operational-error": ("hulubul.core.models.operational.errors", "OperationalError"),
+    "routing-context": (
+        "hulubul.core.models.operational.routing",
+        "RoutingContext",
+    ),
+    "router-result": (
+        "hulubul.core.models.operational.routing",
+        "RouterResult",
+    ),
+    "intake-facts": (
+        "hulubul.core.models.operational.intake",
+        "IntakeFacts",
+    ),
+    "intake-result": (
+        "hulubul.core.models.operational.intake",
+        "IntakeResult",
+    ),
+    "data-operation-request": (
+        "hulubul.core.models.operational.data_operations",
+        "DataOperationRequest",
+    ),
+    "data-operation-result": (
+        "hulubul.core.models.operational.data_operations",
+        "DataOperationResult",
+    ),
+    "delivery-request-snapshot": (
+        "hulubul.core.models.operational.snapshots",
+        "DeliveryRequestSnapshot",
+    ),
+    "operational-error": (
+        "hulubul.core.models.operational.errors",
+        "OperationalError",
+    ),
 }
 
 
@@ -50,9 +77,7 @@ def get_model_class(module_path: str, class_name: str) -> type:
         module = import_module(module_path)
         return getattr(module, class_name)
     except (ImportError, AttributeError) as e:
-        raise ValueError(
-            f"Cannot import {class_name} from {module_path}: {e}"
-        ) from e
+        raise ValueError(f"Cannot import {class_name} from {module_path}: {e}") from e
 
 
 def generate_schema(contract_kind: str) -> dict[str, Any]:
@@ -76,16 +101,14 @@ def generate_schema(contract_kind: str) -> dict[str, Any]:
     try:
         model_class = getattr(module, class_name)
         # Check if it's a model class with model_json_schema method
-        if hasattr(model_class, 'model_json_schema'):
+        if hasattr(model_class, "model_json_schema"):
             return model_class.model_json_schema()
         else:
             # It's a type annotation, use TypeAdapter
             adapter = TypeAdapter(model_class)
             return adapter.json_schema()
     except (ImportError, AttributeError) as e:
-        raise ValueError(
-            f"Cannot import {class_name} from {module_path}: {e}"
-        ) from e
+        raise ValueError(f"Cannot import {class_name} from {module_path}: {e}") from e
 
 
 def schema_sha256(schema: dict[str, Any]) -> str:
@@ -93,7 +116,7 @@ def schema_sha256(schema: dict[str, Any]) -> str:
 
     Uses JSON dump with sorted keys for deterministic output.
     """
-    schema_json = json.dumps(schema, sort_keys=True, separators=(',', ':'))
+    schema_json = json.dumps(schema, sort_keys=True, separators=(",", ":"))
     return hashlib.sha256(schema_json.encode()).hexdigest()
 
 
@@ -111,9 +134,7 @@ def generate_all_schemas() -> dict[str, tuple[dict, str]]:
             sha256 = schema_sha256(schema)
             schemas[contract_kind] = (schema, sha256)
         except Exception as e:
-            raise RuntimeError(
-                f"Failed to generate schema for {contract_kind}: {e}"
-            ) from e
+            raise RuntimeError(f"Failed to generate schema for {contract_kind}: {e}") from e
 
     return schemas
 
@@ -128,7 +149,7 @@ def write_schemas_to_disk(output_dir: Path, schemas: dict[str, tuple[dict, str]]
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    for contract_kind, (schema, sha256) in schemas.items():
+    for contract_kind, (schema, _sha256) in schemas.items():
         schema_file = output_dir / f"{contract_kind}.schema.json"
 
         # Write schema with indentation for readability
@@ -170,14 +191,14 @@ def check_schemas_match(output_dir: Path, schemas: dict[str, tuple[dict, str]]) 
     if not output_dir.exists():
         return False
 
-    for contract_kind, (schema, sha256) in schemas.items():
+    for contract_kind, (_schema, sha256) in schemas.items():
         schema_file = output_dir / f"{contract_kind}.schema.json"
 
         if not schema_file.exists():
             return False
 
         try:
-            with open(schema_file, "r") as f:
+            with open(schema_file) as f:
                 existing_schema = json.load(f)
 
             existing_sha256 = schema_sha256(existing_schema)
@@ -188,10 +209,7 @@ def check_schemas_match(output_dir: Path, schemas: dict[str, tuple[dict, str]]) 
 
     # Check manifest
     manifest_file = output_dir / "manifest.json"
-    if not manifest_file.exists():
-        return False
-
-    return True
+    return manifest_file.exists()
 
 
 @click.command(name="gen-operational-schemas")
@@ -223,7 +241,9 @@ def cli(output: Path, check: bool) -> None:
                 sys.exit(0)
             else:
                 click.echo("✗ Operational schemas are stale", err=True)
-                click.echo("  Run: gen-operational-schemas --output schemas/operational/v1", err=True)
+                click.echo(
+                    "  Run: gen-operational-schemas --output schemas/operational/v1", err=True
+                )
                 sys.exit(1)
         else:
             write_schemas_to_disk(output, schemas)

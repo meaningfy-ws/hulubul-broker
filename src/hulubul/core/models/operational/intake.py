@@ -8,9 +8,8 @@ Sparse facts allow up to 8 fields with nullable human-text inputs (1-4000 chars)
 Complete facts require four core fields and no missing markers.
 Results carry outcomes, clarification needs, and user-safe messaging.
 """
-from __future__ import annotations
 
-from typing import Optional, Tuple
+from __future__ import annotations
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
@@ -18,9 +17,16 @@ from hulubul.core.models.operational.base import (
     ActorUrn,
     HumanSuppliedText,
     NonBlankText,
+    VersionedContract,
 )
-from hulubul.core.models.operational.enums import IntakeOutcome
-
+from hulubul.core.models.operational.enums import (
+    POST_INTAKE_STATUSES,
+    BindingState,
+    IntakeOutcome,
+    RoutingStage,
+)
+from hulubul.core.models.operational.envelope import MainFlowInput
+from hulubul.core.models.operational.routing import RoutingContext
 
 # ============================================================================
 # Sparse Intake Facts (new, needsClarification states)
@@ -46,37 +52,37 @@ class IntakeFacts(BaseModel):
         description="URN-style actor identifier of the sender (chain identity).",
     )
 
-    sender_display_name: Optional[NonBlankText] = Field(
+    sender_display_name: NonBlankText | None = Field(
         default=None,
         description="Human-readable display name for the sender.",
     )
 
-    receiver_name: Optional[HumanSuppliedText] = Field(
+    receiver_name: HumanSuppliedText | None = Field(
         default=None,
         description="Human-supplied name of the receiver (1-4000 chars).",
     )
 
-    receiver_stable_id: Optional[NonBlankText] = Field(
+    receiver_stable_id: NonBlankText | None = Field(
         default=None,
         description="Stable business identifier for the receiver.",
     )
 
-    pickup_location: Optional[HumanSuppliedText] = Field(
+    pickup_location: HumanSuppliedText | None = Field(
         default=None,
         description="Human-supplied pickup location (1-4000 chars).",
     )
 
-    drop_off_location: Optional[HumanSuppliedText] = Field(
+    drop_off_location: HumanSuppliedText | None = Field(
         default=None,
         description="Human-supplied drop-off location (1-4000 chars).",
     )
 
-    parcel_declared_content: Optional[HumanSuppliedText] = Field(
+    parcel_declared_content: HumanSuppliedText | None = Field(
         default=None,
         description="Sender's declared description of contents (1-4000 chars).",
     )
 
-    preferred_period: Optional[HumanSuppliedText] = Field(
+    preferred_period: HumanSuppliedText | None = Field(
         default=None,
         description="Requester's preferred timeframe (orientative, free text, 1-4000 chars).",
     )
@@ -95,22 +101,19 @@ class IntakeFactUpdates(BaseModel):
         validate_default=True,
     )
 
-    sender_actor_id: Optional[ActorUrn] = None
-    sender_display_name: Optional[NonBlankText] = None
-    receiver_name: Optional[HumanSuppliedText] = None
-    receiver_stable_id: Optional[NonBlankText] = None
-    pickup_location: Optional[HumanSuppliedText] = None
-    drop_off_location: Optional[HumanSuppliedText] = None
-    parcel_declared_content: Optional[HumanSuppliedText] = None
-    preferred_period: Optional[HumanSuppliedText] = None
+    sender_actor_id: ActorUrn | None = None
+    sender_display_name: NonBlankText | None = None
+    receiver_name: HumanSuppliedText | None = None
+    receiver_stable_id: NonBlankText | None = None
+    pickup_location: HumanSuppliedText | None = None
+    drop_off_location: HumanSuppliedText | None = None
+    parcel_declared_content: HumanSuppliedText | None = None
+    preferred_period: HumanSuppliedText | None = None
 
     @model_validator(mode="after")
     def reject_empty_updates(self) -> IntakeFactUpdates:
         """Reject updates with all fields None."""
-        if not any(
-            getattr(self, field, None) is not None
-            for field in self.__class__.model_fields
-        ):
+        if not any(getattr(self, field, None) is not None for field in self.__class__.model_fields):
             raise ValueError("At least one field must be provided for update")
         return self
 
@@ -146,17 +149,17 @@ class CompleteIntakeFacts(BaseModel):
         description="URN-style actor identifier of the sender (required).",
     )
 
-    sender_display_name: Optional[NonBlankText] = Field(
+    sender_display_name: NonBlankText | None = Field(
         default=None,
         description="Human-readable display name for the sender.",
     )
 
-    receiver_name: Optional[HumanSuppliedText] = Field(
+    receiver_name: HumanSuppliedText | None = Field(
         default=None,
         description="Human-supplied name of the receiver (1-4000 chars).",
     )
 
-    receiver_stable_id: Optional[NonBlankText] = Field(
+    receiver_stable_id: NonBlankText | None = Field(
         default=None,
         description="Stable business identifier for the receiver.",
     )
@@ -171,12 +174,12 @@ class CompleteIntakeFacts(BaseModel):
         description="Human-supplied drop-off location (required, 1-4000 chars).",
     )
 
-    parcel_declared_content: Optional[HumanSuppliedText] = Field(
+    parcel_declared_content: HumanSuppliedText | None = Field(
         default=None,
         description="Sender's declared description of contents (1-4000 chars).",
     )
 
-    preferred_period: Optional[HumanSuppliedText] = Field(
+    preferred_period: HumanSuppliedText | None = Field(
         default=None,
         description="Requester's preferred timeframe (orientative, free text, 1-4000 chars).",
     )
@@ -185,9 +188,7 @@ class CompleteIntakeFacts(BaseModel):
     def receiver_name_or_stable_id_required(self) -> CompleteIntakeFacts:
         """Validate that at least one receiver identifier is present."""
         if not self.receiver_name and not self.receiver_stable_id:
-            raise ValueError(
-                "At least one of receiver_name or receiver_stable_id must be provided"
-            )
+            raise ValueError("At least one of receiver_name or receiver_stable_id must be provided")
         return self
 
 
@@ -206,12 +207,12 @@ class GraphIdentifiers(BaseModel):
         description="Graph node ID for the delivery request.",
     )
 
-    sender_id: Optional[str] = Field(
+    sender_id: str | None = Field(
         default=None,
         description="Graph node ID for the sender (optional).",
     )
 
-    receiver_id: Optional[str] = Field(
+    receiver_id: str | None = Field(
         default=None,
         description="Graph node ID for the receiver (optional).",
     )
@@ -236,37 +237,43 @@ class IntakeResult(BaseModel):
         description="Outcome classification: clarificationRequired, requestComplete, or failure.",
     )
 
-    request_id: Optional[str] = Field(
+    request_id: str | None = Field(
         default=None,
-        description="Graph node ID for created/updated request (clarificationRequired/requestComplete only).",
+        description=(
+            "Graph node ID for created/updated request "
+            "(clarificationRequired/requestComplete only)."
+        ),
     )
 
-    status: Optional[str] = Field(
+    status: str | None = Field(
         default=None,
         description="Request status when outcome is clarificationRequired or requestComplete.",
     )
 
-    facts: Optional[IntakeFacts] = Field(
+    facts: IntakeFacts | None = Field(
         default=None,
         description="Sparse facts captured (clarificationRequired/requestComplete only).",
     )
 
-    missing_fields: Tuple[str, ...] = Field(
+    missing_fields: tuple[str, ...] = Field(
         default_factory=tuple,
         description="Immutable tuple of field names not yet provided.",
     )
 
-    clarification_field: Optional[str] = Field(
+    clarification_field: str | None = Field(
         default=None,
-        description="Single field name requiring clarification (clarificationRequired outcome only).",
+        description=(
+            "Single field name requiring clarification "
+            "(clarificationRequired outcome only)."
+        ),
     )
 
-    safe_user_message: Optional[str] = Field(
+    safe_user_message: str | None = Field(
         default=None,
         description="User-safe message (not exposing internals).",
     )
 
-    error: Optional[str] = Field(
+    error: str | None = Field(
         default=None,
         description="Error message (failure outcome only).",
     )
@@ -275,7 +282,7 @@ class IntakeResult(BaseModel):
     @classmethod
     def ensure_tuple(cls, v):
         """Convert missing_fields to immutable tuple."""
-        if isinstance(v, (list, tuple)):
+        if isinstance(v, list | tuple):
             return tuple(v)
         return v
 
@@ -287,35 +294,23 @@ class IntakeResult(BaseModel):
         # Validate failure outcome
         if outcome == IntakeOutcome.FAILURE:
             if not self.error:
-                raise ValueError(
-                    "failure outcome must include error message"
-                )
+                raise ValueError("failure outcome must include error message")
             if self.request_id or self.facts:
-                raise ValueError(
-                    "failure outcome must not include request_id or facts"
-                )
+                raise ValueError("failure outcome must not include request_id or facts")
 
         # Validate requestComplete outcome
         elif outcome == IntakeOutcome.REQUEST_COMPLETE:
             if self.error:
-                raise ValueError(
-                    "requestComplete outcome must not include error"
-                )
+                raise ValueError("requestComplete outcome must not include error")
             if not self.request_id:
-                raise ValueError(
-                    "requestComplete outcome must include request_id"
-                )
+                raise ValueError("requestComplete outcome must include request_id")
 
         # Validate clarificationRequired outcome
         elif outcome == IntakeOutcome.CLARIFICATION_REQUIRED:
             if self.error:
-                raise ValueError(
-                    "clarificationRequired outcome must not include error"
-                )
+                raise ValueError("clarificationRequired outcome must not include error")
             if not self.clarification_field:
-                raise ValueError(
-                    "clarificationRequired outcome must include clarification_field"
-                )
+                raise ValueError("clarificationRequired outcome must include clarification_field")
 
         return self
 
@@ -323,12 +318,6 @@ class IntakeResult(BaseModel):
 # ============================================================================
 # Wrapped Input (intake)
 # ============================================================================
-
-from .base import VersionedContract
-from .envelope import MainFlowInput
-from .routing import RoutingContext
-from .enums import RoutingStage, BindingState
-from .enums import POST_INTAKE_STATUSES
 
 
 class IntakeInput(VersionedContract):
@@ -342,7 +331,7 @@ class IntakeInput(VersionedContract):
     routing_context: RoutingContext
 
     @model_validator(mode="after")
-    def validate_intake_constraints(self) -> "IntakeInput":
+    def validate_intake_constraints(self) -> IntakeInput:
         """Validate intake-specific routing context constraints."""
         # Validate schema_version and correlation_id consistency
         if self.schema_version != self.envelope.schema_version:
@@ -364,32 +353,25 @@ class IntakeInput(VersionedContract):
         # IntakeInput requires INTAKE routing stage
         if self.routing_context.routing_stage != RoutingStage.INTAKE:
             raise ValueError(
-                f"IntakeInput requires INTAKE routing_stage, got {self.routing_context.routing_stage}"
+                f"IntakeInput requires INTAKE routing_stage, "
+                f"got {self.routing_context.routing_stage}"
             )
 
         # IntakeInput must not have routing errors
         if self.routing_context.error is not None:
-            raise ValueError(
-                "IntakeInput must not have routing errors"
-            )
+            raise ValueError("IntakeInput must not have routing errors")
 
         # Validate binding state constraints
         if self.routing_context.binding_state == BindingState.ABSENT:
             # No binding is OK (first message, new request will be created)
             if self.routing_context.request_id or self.routing_context.request_status:
-                raise ValueError(
-                    "ABSENT binding must not have request_id or request_status"
-                )
+                raise ValueError("ABSENT binding must not have request_id or request_status")
         elif self.routing_context.binding_state == BindingState.BOUND:
             # One bound request must be in intake stages (NEW or NEEDS_CLARIFICATION)
             if not self.routing_context.request_id:
-                raise ValueError(
-                    "BOUND binding must have request_id"
-                )
+                raise ValueError("BOUND binding must have request_id")
             if not self.routing_context.request_status:
-                raise ValueError(
-                    "BOUND binding must have request_status"
-                )
+                raise ValueError("BOUND binding must have request_status")
             if self.routing_context.request_status in POST_INTAKE_STATUSES:
                 raise ValueError(
                     f"IntakeInput rejects post-intake status {self.routing_context.request_status}"
