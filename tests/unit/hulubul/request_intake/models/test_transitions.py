@@ -4,10 +4,10 @@ Tests the fixed four-edge state machine (None->NEW, NEW->NEEDS_CLARIFICATION,
 NEW->COMPLETE, NEEDS_CLARIFICATION->COMPLETE) and compare-and-set preconditions
 (actual status/timestamp must match expected values before transition is allowed).
 """
+
 from __future__ import annotations
 
 from datetime import datetime, timezone
-from uuid import uuid4
 
 import pytest
 
@@ -17,7 +17,6 @@ from hulubul.request_intake.models.transitions import (
     TransitionDecision,
     evaluate_transition,
 )
-
 
 # Fixture: a fixed timestamp for CAS checks.
 FIXED_TIMESTAMP = datetime(2026, 7, 23, 12, 0, 0, tzinfo=timezone.utc)
@@ -50,7 +49,7 @@ class TestAllowedTransitions:
 
     def test_allowed_transitions_is_immutable_frozenset(self):
         """Each ALLOWED_TRANSITIONS value must be a frozenset (immutable)."""
-        for source_status, targets in ALLOWED_TRANSITIONS.items():
+        for _, targets in ALLOWED_TRANSITIONS.items():
             assert isinstance(targets, frozenset)
 
 
@@ -70,16 +69,14 @@ class TestTransitionDecision:
 
     def test_rejected_decision_has_error_code(self):
         """A rejected transition must have a non-None error_code."""
-        decision = TransitionDecision(
-            allowed=False, error_code=ErrorCode.INVALID_STATUS_TRANSITION
-        )
+        decision = TransitionDecision(allowed=False, error_code=ErrorCode.INVALID_STATUS_TRANSITION)
         assert decision.allowed is False
         assert decision.error_code is ErrorCode.INVALID_STATUS_TRANSITION
 
     def test_transition_decision_is_immutable(self):
         """TransitionDecision must be frozen (immutable)."""
         decision = TransitionDecision(allowed=True, error_code=None)
-        with pytest.raises(Exception):  # Will raise FrozenInstanceError or AttributeError
+        with pytest.raises(AttributeError):
             decision.allowed = False  # type: ignore
 
 

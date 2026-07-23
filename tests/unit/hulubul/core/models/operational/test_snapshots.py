@@ -3,6 +3,7 @@
 Tests sparse/complete snapshot contradictions, timestamp handling,
 and nested schema equality per the plan (2.3).
 """
+
 from __future__ import annotations
 
 from datetime import datetime, timezone
@@ -36,7 +37,7 @@ class TestDeliveryRequestSnapshotTimestamps:
             created_at=now,
             updated_at=now,
             facts=IntakeFacts(sender_actor_id="urn:actor:alice"),
-            missing_fields=()
+            missing_fields=(),
         )
         assert snap.created_at == now
 
@@ -48,7 +49,7 @@ class TestDeliveryRequestSnapshotTimestamps:
             created_at=now,
             updated_at=now,
             facts=IntakeFacts(sender_actor_id="urn:actor:alice"),
-            missing_fields=()
+            missing_fields=(),
         )
         assert snap.updated_at == now
 
@@ -61,7 +62,7 @@ class TestDeliveryRequestSnapshotTimestamps:
             updated_at=now,
             closed_at=None,
             facts=IntakeFacts(sender_actor_id="urn:actor:alice"),
-            missing_fields=()
+            missing_fields=(),
         )
         assert snap.closed_at is None
 
@@ -75,7 +76,7 @@ class TestDeliveryRequestSnapshotTimestamps:
             updated_at=now,
             closed_at=closed,
             facts=IntakeFacts(sender_actor_id="urn:actor:alice"),
-            missing_fields=()
+            missing_fields=(),
         )
         assert snap.closed_at == closed
 
@@ -91,7 +92,7 @@ class TestDeliveryRequestSnapshotFacts:
             updated_at=datetime.now(timezone.utc),
             status="new",
             facts=IntakeFacts(sender_actor_id="urn:actor:alice"),
-            missing_fields=("receiver_name", "pickup_location")
+            missing_fields=("receiver_name", "pickup_location"),
         )
         assert snap.status == "new"
         assert snap.missing_fields == ("receiver_name", "pickup_location")
@@ -108,9 +109,9 @@ class TestDeliveryRequestSnapshotFacts:
                 sender_actor_id="urn:actor:alice",
                 receiver_name="Bob",
                 pickup_location="123 Main",
-                drop_off_location="456 Oak"
+                drop_off_location="456 Oak",
             ),
-            missing_fields=()
+            missing_fields=(),
         )
         assert snap.status == "complete"
         assert snap.missing_fields == ()
@@ -124,7 +125,7 @@ class TestDeliveryRequestSnapshotFacts:
                 updated_at=datetime.now(timezone.utc),
                 status="complete",
                 facts=IntakeFacts(sender_actor_id="urn:actor:alice"),
-                missing_fields=("receiver_name",)
+                missing_fields=("receiver_name",),
             )
 
     def test_snapshot_complete_status_rejects_sparse_facts(self):
@@ -137,7 +138,7 @@ class TestDeliveryRequestSnapshotFacts:
                 updated_at=datetime.now(timezone.utc),
                 status="complete",
                 facts=sparse,  # sparse, not CompleteIntakeFacts
-                missing_fields=()
+                missing_fields=(),
             )
 
 
@@ -151,7 +152,7 @@ class TestDeliveryRequestSnapshotMissingFields:
             created_at=datetime.now(timezone.utc),
             updated_at=datetime.now(timezone.utc),
             facts=IntakeFacts(sender_actor_id="urn:actor:alice"),
-            missing_fields=("receiver_name", "pickup_location")
+            missing_fields=("receiver_name", "pickup_location"),
         )
         assert isinstance(snap.missing_fields, tuple)
 
@@ -166,9 +167,9 @@ class TestDeliveryRequestSnapshotMissingFields:
                 sender_actor_id="urn:actor:alice",
                 receiver_name="Bob",
                 pickup_location="123 Main",
-                drop_off_location="456 Oak"
+                drop_off_location="456 Oak",
             ),
-            missing_fields=()
+            missing_fields=(),
         )
         assert snap.missing_fields == ()
 
@@ -184,14 +185,14 @@ class TestDeliveryRequestSnapshotEquality:
             created_at=now,
             updated_at=now,
             facts=IntakeFacts(sender_actor_id="urn:actor:alice"),
-            missing_fields=()
+            missing_fields=(),
         )
         snap2 = DeliveryRequestSnapshot(
             request_id="req-123",
             created_at=now,
             updated_at=now,
             facts=IntakeFacts(sender_actor_id="urn:actor:alice"),
-            missing_fields=()
+            missing_fields=(),
         )
         assert snap1 == snap2
 
@@ -203,14 +204,14 @@ class TestDeliveryRequestSnapshotEquality:
             created_at=now,
             updated_at=now,
             facts=IntakeFacts(sender_actor_id="urn:actor:alice"),
-            missing_fields=()
+            missing_fields=(),
         )
         snap2 = DeliveryRequestSnapshot(
             request_id="req-456",
             created_at=now,
             updated_at=now,
             facts=IntakeFacts(sender_actor_id="urn:actor:alice"),
-            missing_fields=()
+            missing_fields=(),
         )
         assert snap1 != snap2
 
@@ -232,10 +233,7 @@ class TestMutationConfirmation:
             updated_at=now,
             facts=IntakeFacts(sender_actor_id="urn:actor:alice"),
         )
-        confirm = MutationConfirmation(
-            snapshot=snap,
-            changes={"status": "needsClarification"}
-        )
+        confirm = MutationConfirmation(snapshot=snap, changes={"status": "needsClarification"})
         assert confirm.snapshot == snap
         assert confirm.changes == {"status": "needsClarification"}
 
@@ -255,8 +253,5 @@ class TestGraphIdentifiers:
 
     def test_graph_identifiers_sender_id_optional(self):
         """GraphIdentifiers allow optional sender_id."""
-        ids = GraphIdentifiers(
-            request_id="req-123",
-            sender_id="sender-456"
-        )
+        ids = GraphIdentifiers(request_id="req-123", sender_id="sender-456")
         assert ids.sender_id == "sender-456"

@@ -61,7 +61,7 @@ class TestErrorPolicy:
             assert code in ERROR_POLICY
 
     def test_policy_rows_have_required_fields(self):
-        """Each policy row must have category, retryable, message, log_level, log_fields, escalation."""
+        """Each policy row must have category, retryable, message, and escalation."""
         for code, policy in ERROR_POLICY.items():
             assert policy.code is code
             assert isinstance(policy.category, ErrorCategory)
@@ -103,10 +103,11 @@ class TestErrorPolicy:
 
         for policy in ERROR_POLICY.values():
             for field in policy.log_fields:
-                assert field in allowed_fields, f"Policy {policy.code} has disallowed field: {field}"
+                msg = f"Policy {policy.code} has disallowed field: {field}"
+                assert field in allowed_fields, msg
 
     def test_controlled_errors_have_required_fields_always_available(self):
-        """Controlled errors must always have correlation_id, flow_id, component_id, error_code, schema_version."""
+        """Controlled errors must always have correlation_id and error_code."""
         required_always = {
             "correlation_id",
             "error_code",
@@ -146,8 +147,6 @@ class TestOperationalError:
 
     def test_rejects_noncanonical_message(self):
         """OperationalError must reject message different from policy."""
-        ERROR_POLICY[ErrorCode.INVALID_INPUT].safe_message
-
         # Try to create with wrong message
         with pytest.raises(ValidationError):
             OperationalError(
@@ -211,7 +210,7 @@ class TestValidationErrorConversion:
     """validation_error_to_operational_error must convert Pydantic ValidationError correctly."""
 
     def test_converts_validation_error(self):
-        """validation_error_to_operational_error must convert ValidationError to OperationalError."""
+        """validation_error_to_operational_error converts ValidationError."""
 
         class TestModel(StrictModel):
             count: int
@@ -220,8 +219,7 @@ class TestValidationErrorConversion:
             TestModel(count="not-an-int")
         except ValidationError as e:
             error = validation_error_to_operational_error(
-                e,
-                correlation_id=UUID("12345678-1234-5678-1234-567812345678")
+                e, correlation_id=UUID("12345678-1234-5678-1234-567812345678")
             )
 
             assert isinstance(error, OperationalError)
@@ -238,8 +236,7 @@ class TestValidationErrorConversion:
             TestModel(text="")  # string_type validation
         except ValidationError as e:
             error = validation_error_to_operational_error(
-                e,
-                correlation_id=UUID("12345678-1234-5678-1234-567812345678")
+                e, correlation_id=UUID("12345678-1234-5678-1234-567812345678")
             )
 
             # Error should not contain the actual rejected value
@@ -261,8 +258,7 @@ class TestValidationErrorConversion:
             TestModel(count="not-an-int")
         except ValidationError as e:
             error = validation_error_to_operational_error(
-                e,
-                correlation_id=UUID("12345678-1234-5678-1234-567812345678")
+                e, correlation_id=UUID("12345678-1234-5678-1234-567812345678")
             )
 
             # Should have no request_id or operation_id

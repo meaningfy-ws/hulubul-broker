@@ -1,4 +1,5 @@
 """Operational vocabulary and semantic enumerations."""
+
 from enum import Enum
 
 __all__ = [

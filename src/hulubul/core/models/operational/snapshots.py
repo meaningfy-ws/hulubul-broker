@@ -5,6 +5,7 @@ Per plan 2.3 (Locked Fact And Result Contracts), snapshots enforce:
 - Immutable created_at, authoritative updated_at, nullable closed_at
 - Missing fields as locked tuple
 """
+
 from __future__ import annotations
 
 from datetime import datetime
@@ -99,9 +100,7 @@ class DeliveryRequestSnapshot(BaseModel):
                 )
             # Complete status must have empty missing_fields
             if missing_fields:
-                raise ValueError(
-                    "status='complete' must have empty missing_fields tuple"
-                )
+                raise ValueError("status='complete' must have empty missing_fields tuple")
 
         elif status in ("new", "needsClarification"):
             # These statuses allow sparse facts (may be any IntakeFacts variant)

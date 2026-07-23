@@ -24,7 +24,6 @@ from hulubul.request_intake.services.graph_identifiers import (
     new_graph_identifiers,
 )
 
-
 # Valid UUID v4 or v5 string pattern (36 chars: 8-4-4-4-12 hex digits + hyphens)
 UUID_PATTERN = re.compile(
     r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$", re.IGNORECASE
@@ -79,10 +78,7 @@ class TestGenerateRequestId:
 
     def test_deterministic_stability_multiple_calls(self):
         """Request ID is stable across many calls with same inputs."""
-        ids = [
-            generate_request_id("test_intent", "receiver_456")
-            for _ in range(5)
-        ]
+        ids = [generate_request_id("test_intent", "receiver_456") for _ in range(5)]
         assert all(id == ids[0] for id in ids), "Request ID must be stable across calls"
 
     def test_different_inputs_produce_different_ids(self):
@@ -103,9 +99,7 @@ class TestGenerateRequestId:
 
     def test_special_characters_in_inputs(self):
         """Special characters in inputs are handled safely."""
-        request_id = generate_request_id(
-            "intent@#$%^&*()", "receiver_!<>?/\\"
-        )
+        request_id = generate_request_id("intent@#$%^&*()", "receiver_!<>?/\\")
         assert isinstance(request_id, str)
         assert UUID_PATTERN.match(request_id)
         UUID(request_id)
@@ -142,10 +136,7 @@ class TestGenerateDeliveryId:
 
     def test_deterministic_stability_multiple_calls(self):
         """Delivery ID is stable across many calls with same inputs."""
-        ids = [
-            generate_delivery_id("req_123", "trans_456")
-            for _ in range(5)
-        ]
+        ids = [generate_delivery_id("req_123", "trans_456") for _ in range(5)]
         assert all(id == ids[0] for id in ids), "Delivery ID must be stable across calls"
 
     def test_different_inputs_produce_different_ids(self):
@@ -166,9 +157,7 @@ class TestGenerateDeliveryId:
 
     def test_special_characters_in_inputs(self):
         """Special characters in inputs are handled safely."""
-        delivery_id = generate_delivery_id(
-            "request@#$%^&*()", "transporter_!<>?/\\"
-        )
+        delivery_id = generate_delivery_id("request@#$%^&*()", "transporter_!<>?/\\")
         assert isinstance(delivery_id, str)
         assert UUID_PATTERN.match(delivery_id)
         UUID(delivery_id)
@@ -423,11 +412,11 @@ class TestNewGraphIdentifiers:
         "include_receiver,include_parcel,include_pickup,include_drop_off",
         [
             (False, False, False, False),  # Minimal: request + sender only
-            (True, False, False, False),   # With receiver
-            (False, True, False, False),   # With parcel
-            (False, False, True, False),   # With pickup
-            (False, False, False, True),   # With drop-off
-            (True, True, True, True),      # Full: all entities
+            (True, False, False, False),  # With receiver
+            (False, True, False, False),  # With parcel
+            (False, False, True, False),  # With pickup
+            (False, False, False, True),  # With drop-off
+            (True, True, True, True),  # Full: all entities
         ],
     )
     def test_sparse_combinations(

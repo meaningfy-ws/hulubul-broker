@@ -1,4 +1,5 @@
 """Strict base models and constrained types for operational contracts."""
+
 from collections.abc import Mapping
 from enum import Enum
 from typing import Annotated, Any, TypeVar
@@ -78,9 +79,7 @@ class ContractKind(str, Enum):
     OPERATIONAL_ERROR = "operational-error"
 
 
-def validate_json_mapping(
-    model_type: type[ModelT], value: Mapping[str, Any]
-) -> ModelT:
+def validate_json_mapping(model_type: type[ModelT], value: Mapping[str, Any]) -> ModelT:
     """Validate and parse a JSON mapping (dict) as a typed model.
 
     Args:

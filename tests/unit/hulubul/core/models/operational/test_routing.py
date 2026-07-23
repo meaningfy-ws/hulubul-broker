@@ -1,4 +1,5 @@
 """Tests for routing lookup validation and adaptation."""
+
 from uuid import uuid4
 
 import pytest
@@ -41,7 +42,11 @@ def no_binding_record():
     }
 
 
-def one_bound_record(request_id: str | None = None, request_status_raw: str | None = None, closed_at: str | None = None):
+def one_bound_record(
+    request_id: str | None = None,
+    request_status_raw: str | None = None,
+    closed_at: str | None = None,
+):
     """1/1/1 cardinality - one bound request."""
     if request_id is None:
         request_id = str(uuid4())
@@ -222,9 +227,7 @@ class TestAdaptRoutingLookup:
     def test_unknown_raw_status_text_never_copied_to_error(self):
         """Unknown raw status -> error has safe message, never contains raw text."""
         metadata = valid_routing_metadata()
-        record = RoutingLookupRecord(
-            **one_bound_record(request_status_raw="mysterystatus12345")
-        )
+        record = RoutingLookupRecord(**one_bound_record(request_status_raw="mysterystatus12345"))
         context = adapt_routing_lookup(record, **metadata)
         assert context.error is not None
         # Ensure raw text never appears in error code or structure
@@ -286,5 +289,5 @@ class TestRouterResult:
             safe_message="Test",
             error=None,
         )
-        with pytest.raises(Exception):
+        with pytest.raises(ValidationError):
             result.outcome = RouterOutcome.FAILURE

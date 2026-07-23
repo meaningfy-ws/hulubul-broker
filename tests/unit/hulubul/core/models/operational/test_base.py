@@ -1,4 +1,5 @@
 """Tests for strict base models and constrained types."""
+
 from uuid import uuid4
 
 import pytest
@@ -50,7 +51,7 @@ class TestStrictModel:
             value: str
 
         m = Model(value="test")
-        with pytest.raises(Exception):
+        with pytest.raises(ValidationError):
             m.value = "changed"
 
 

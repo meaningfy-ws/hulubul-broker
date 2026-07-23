@@ -25,12 +25,14 @@ Mapping rules (mirror the linkml-store Neo4j mapping documented in the Makefile)
 Usage:  python model/gen/gen_neo4j_constraints.py model/linkml/hulubul.yaml
    or:  gen-neo4j-constraints model/linkml/hulubul.yaml   (once installed)
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import ClassVar
 
 import click
-from linkml.utils.generator import Generator, shared_arguments
+from linkml.utils.generator import Generator, shared_arguments  # type: ignore[import-untyped]
 
 # LinkML scalar range -> Neo4j property type (for `IS :: <TYPE>` constraints).
 NEO4J_TYPES = {
@@ -51,14 +53,14 @@ NEO4J_TYPES = {
 
 
 @dataclass
-class Neo4jConstraintGenerator(Generator):
+class Neo4jConstraintGenerator(Generator):  # type: ignore[misc]
     """Generate Neo4j constraint DDL (Cypher) for the enforceable LinkML subset."""
 
-    generatorname = "gen-neo4j-constraints"
-    generatorversion = "1.0.0"
-    valid_formats = ["cypher"]
-    file_extension = "cypher"
-    uses_schemaloader = False  # we drive everything through self.schemaview
+    generatorname: ClassVar[str] = "gen-neo4j-constraints"
+    generatorversion: ClassVar[str] = "1.0.0"
+    valid_formats: ClassVar[list[str]] = ["cypher"]
+    file_extension: ClassVar[str] = "cypher"
+    uses_schemaloader: ClassVar[bool] = False  # we drive everything through self.schemaview
 
     def _is_entity(self, class_name: str) -> bool:
         """A class becomes a Neo4j node iff it is concrete and has an identifier."""

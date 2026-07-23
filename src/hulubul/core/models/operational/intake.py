@@ -317,8 +317,7 @@ class IntakeResult(BaseModel):
     clarification_field: str | None = Field(
         default=None,
         description=(
-            "Single field name requiring clarification "
-            "(clarificationRequired outcome only)."
+            "Single field name requiring clarification (clarificationRequired outcome only)."
         ),
     )
 

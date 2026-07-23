@@ -5,6 +5,7 @@ Contracts): exactly five operations with strict payload validation, discriminate
 union validation before capability policy, and result invariants that enforce
 consistent operation/outcome combinations.
 """
+
 from __future__ import annotations
 
 from typing import Any
@@ -169,7 +170,7 @@ class TestReadDeliveryRequestPayload:
 
 
 class TestUpdateDeliveryRequestPayload:
-    """Update operation requires request_id, expected_updated_at, expected_status, updates, identifiers."""
+    """Update operation requires request_id, expected_updated_at, expected_status, and updates."""
 
     def test_update_accepts_all_required_fields(self):
         """Update payload requires all five fields."""
@@ -440,12 +441,15 @@ class TestTypeAdapterValidation:
 class TestAllOperationsRequireSharedFields:
     """Every operation request requires shared wrapper fields."""
 
-    @pytest.mark.parametrize("operation_class,operation_kind", [
-        (GetRequestRoutingContextRequest, DataOperation.GET_REQUEST_ROUTING_CONTEXT),
-        (ReadDeliveryRequestRequest, DataOperation.READ_DELIVERY_REQUEST),
-    ])
+    @pytest.mark.parametrize(
+        "operation_class,operation_kind",
+        [
+            (GetRequestRoutingContextRequest, DataOperation.GET_REQUEST_ROUTING_CONTEXT),
+            (ReadDeliveryRequestRequest, DataOperation.READ_DELIVERY_REQUEST),
+        ],
+    )
     def test_shared_fields_required(self, operation_class, operation_kind):
-        """All operation requests must include operation_id, caller, session, actor, schema version, correlation."""
+        """All operation requests must include operation_id, caller, session, and actor."""
         with pytest.raises(ValidationError):
             # Missing operation_id
             operation_class(

@@ -15,12 +15,14 @@ via the inheritance edge.
 Usage:  python scripts/gen_mermaid_classdiagram.py model/linkml/hulubul.yaml
    or:  gen-mermaid-classdiagram model/linkml/hulubul.yaml   (once installed)
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import ClassVar
 
 import click
-from linkml.utils.generator import Generator, shared_arguments
+from linkml.utils.generator import Generator, shared_arguments  # type: ignore[import-untyped]
 
 
 def _cardinality(required: bool, multivalued: bool) -> str:
@@ -30,14 +32,14 @@ def _cardinality(required: bool, multivalued: bool) -> str:
 
 
 @dataclass
-class MermaidClassDiagramGenerator(Generator):
+class MermaidClassDiagramGenerator(Generator):  # type: ignore[misc]
     """Emit one Mermaid classDiagram covering every class in the schema."""
 
-    generatorname = "gen-mermaid-classdiagram"
-    generatorversion = "1.0.0"
-    valid_formats = ["markdown"]
-    file_extension = "md"
-    uses_schemaloader = False
+    generatorname: ClassVar[str] = "gen-mermaid-classdiagram"
+    generatorversion: ClassVar[str] = "1.0.0"
+    valid_formats: ClassVar[list[str]] = ["markdown"]
+    file_extension: ClassVar[str] = "md"
+    uses_schemaloader: ClassVar[bool] = False
 
     def _collect(self) -> tuple[dict[str, list[str]], list[str], list[str]]:
         """Return per-class attribute lines, inheritance edges and association edges.

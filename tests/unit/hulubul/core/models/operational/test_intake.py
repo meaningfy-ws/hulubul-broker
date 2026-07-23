@@ -3,6 +3,7 @@
 Tests sparse/complete fact contradictions, field boundaries,
 and result outcome validation invariants per the plan (2.3).
 """
+
 from __future__ import annotations
 
 import pytest
@@ -36,10 +37,7 @@ class TestIntakeFactsSparseBoundaries:
     def test_human_text_rejects_empty_string(self, field_name, empty_value):
         """Human-supplied text fields must reject empty strings (1-char minimum)."""
         with pytest.raises(ValidationError, match="at least 1 character"):
-            IntakeFacts(
-                sender_actor_id="urn:actor:alice",
-                **{field_name: empty_value}
-            )
+            IntakeFacts(sender_actor_id="urn:actor:alice", **{field_name: empty_value})
 
     @pytest.mark.parametrize(
         "field_name",
@@ -52,10 +50,7 @@ class TestIntakeFactsSparseBoundaries:
     )
     def test_human_text_accepts_1_character(self, field_name):
         """Human-supplied text fields must accept 1 character."""
-        facts = IntakeFacts(
-            sender_actor_id="urn:actor:alice",
-            **{field_name: "x"}
-        )
+        facts = IntakeFacts(sender_actor_id="urn:actor:alice", **{field_name: "x"})
         assert getattr(facts, field_name) == "x"
 
     @pytest.mark.parametrize(
@@ -69,10 +64,7 @@ class TestIntakeFactsSparseBoundaries:
     )
     def test_human_text_accepts_4000_characters(self, field_name):
         """Human-supplied text fields must accept 4000 characters."""
-        facts = IntakeFacts(
-            sender_actor_id="urn:actor:alice",
-            **{field_name: "x" * 4000}
-        )
+        facts = IntakeFacts(sender_actor_id="urn:actor:alice", **{field_name: "x" * 4000})
         assert len(getattr(facts, field_name)) == 4000
 
     @pytest.mark.parametrize(
@@ -87,10 +79,7 @@ class TestIntakeFactsSparseBoundaries:
     def test_human_text_rejects_4001_characters(self, field_name):
         """Human-supplied text fields must reject 4001+ characters."""
         with pytest.raises(ValidationError, match="at most 4000"):
-            IntakeFacts(
-                sender_actor_id="urn:actor:alice",
-                **{field_name: "x" * 4001}
-            )
+            IntakeFacts(sender_actor_id="urn:actor:alice", **{field_name: "x" * 4001})
 
     def test_preferred_period_is_always_optional(self):
         """preferred_period is text but always optional (no required case)."""
@@ -99,10 +88,7 @@ class TestIntakeFactsSparseBoundaries:
 
     def test_preferred_period_accepts_4000_characters(self):
         """preferred_period also subject to 1-4000 when present."""
-        facts = IntakeFacts(
-            sender_actor_id="urn:actor:alice",
-            preferred_period="x" * 4000
-        )
+        facts = IntakeFacts(sender_actor_id="urn:actor:alice", preferred_period="x" * 4000)
         assert len(facts.preferred_period) == 4000
 
 
@@ -111,19 +97,13 @@ class TestIntakeFactsReceiverIdentity:
 
     def test_receiver_name_only_allowed(self):
         """Sparse facts allow receiver_name without receiver_stable_id."""
-        facts = IntakeFacts(
-            sender_actor_id="urn:actor:alice",
-            receiver_name="Bob Smith"
-        )
+        facts = IntakeFacts(sender_actor_id="urn:actor:alice", receiver_name="Bob Smith")
         assert facts.receiver_name == "Bob Smith"
         assert facts.receiver_stable_id is None
 
     def test_receiver_stable_id_only_allowed(self):
         """Sparse facts allow receiver_stable_id without receiver_name."""
-        facts = IntakeFacts(
-            sender_actor_id="urn:actor:alice",
-            receiver_stable_id="stable-bob-123"
-        )
+        facts = IntakeFacts(sender_actor_id="urn:actor:alice", receiver_stable_id="stable-bob-123")
         assert facts.receiver_stable_id == "stable-bob-123"
         assert facts.receiver_name is None
 
@@ -132,7 +112,7 @@ class TestIntakeFactsReceiverIdentity:
         facts = IntakeFacts(
             sender_actor_id="urn:actor:alice",
             receiver_name="Bob Smith",
-            receiver_stable_id="stable-bob-123"
+            receiver_stable_id="stable-bob-123",
         )
         assert facts.receiver_name == "Bob Smith"
         assert facts.receiver_stable_id == "stable-bob-123"
@@ -191,7 +171,7 @@ class TestCompleteIntakeFacts:
     """Test that complete facts enforce all four required fields."""
 
     def test_complete_facts_requires_all_four_required_fields(self):
-        """Complete facts require: sender_actor_id, receiver_name or receiver_stable_id, pickup_location, drop_off_location."""
+        """Complete facts require sender_actor_id, receiver, pickup, and drop_off."""
         with pytest.raises(ValidationError):
             CompleteIntakeFacts(
                 sender_actor_id="urn:actor:alice",
@@ -205,7 +185,7 @@ class TestCompleteIntakeFacts:
             sender_actor_id="urn:actor:alice",
             receiver_name="Bob Smith",
             pickup_location="123 Main St",
-            drop_off_location="456 Oak Ave"
+            drop_off_location="456 Oak Ave",
         )
         assert facts.sender_actor_id == "urn:actor:alice"
         assert facts.receiver_name == "Bob Smith"
@@ -218,7 +198,7 @@ class TestCompleteIntakeFacts:
             sender_actor_id="urn:actor:alice",
             receiver_stable_id="stable-bob-123",
             pickup_location="123 Main St",
-            drop_off_location="456 Oak Ave"
+            drop_off_location="456 Oak Ave",
         )
         assert facts.receiver_stable_id == "stable-bob-123"
 
@@ -239,7 +219,7 @@ class TestIntakeResultOutcome:
             status="new",
             facts=IntakeFacts(sender_actor_id="urn:actor:alice"),
             missing_fields=("receiver_name", "pickup_location"),
-            safe_user_message="Please provide receiver details"
+            safe_user_message="Please provide receiver details",
         )
         assert result.outcome == IntakeOutcome.REQUEST_COMPLETE
         assert result.request_id == "req-123"
@@ -254,17 +234,14 @@ class TestIntakeResultOutcome:
             facts=IntakeFacts(sender_actor_id="urn:actor:alice"),
             missing_fields=("receiver_name",),
             clarification_field="receiver_name",
-            safe_user_message="Please confirm receiver name"
+            safe_user_message="Please confirm receiver name",
         )
         assert result.outcome == IntakeOutcome.CLARIFICATION_REQUIRED
         assert result.clarification_field == "receiver_name"
 
     def test_intake_result_failure_outcome(self):
         """IntakeResult with failure outcome carries error message."""
-        result = IntakeResult(
-            outcome=IntakeOutcome.FAILURE,
-            error="Invalid sender_actor_id format"
-        )
+        result = IntakeResult(outcome=IntakeOutcome.FAILURE, error="Invalid sender_actor_id format")
         assert result.outcome == IntakeOutcome.FAILURE
         assert result.error == "Invalid sender_actor_id format"
 

@@ -231,3 +231,4 @@ reports/change1/
 reports/junit-unit.xml
 .gitnexus/kuzu
 .gitnexus/meta.json
+.vscode/settings.json

@@ -4,6 +4,7 @@ Tests the fixed missing-field order, single-clarification-field selection
 (including invalid-field priority), and complete-facts validation per plan
 Task 10 (original task ID 3.1).
 """
+
 from __future__ import annotations
 
 import pytest
@@ -120,30 +121,39 @@ class TestSelectClarificationField:
         assert select_clarification_field(missing) is IntakeField.RECEIVER_IDENTITY
 
     def test_selection_follows_fixed_order_as_fields_are_resolved(self):
-        assert select_clarification_field(
-            (
-                IntakeField.PICKUP_LOCATION,
-                IntakeField.DROP_OFF_LOCATION,
-                IntakeField.PARCEL_DECLARED_CONTENT,
+        assert (
+            select_clarification_field(
+                (
+                    IntakeField.PICKUP_LOCATION,
+                    IntakeField.DROP_OFF_LOCATION,
+                    IntakeField.PARCEL_DECLARED_CONTENT,
+                )
             )
-        ) is IntakeField.PICKUP_LOCATION
-        assert select_clarification_field(
-            (IntakeField.DROP_OFF_LOCATION, IntakeField.PARCEL_DECLARED_CONTENT)
-        ) is IntakeField.DROP_OFF_LOCATION
-        assert select_clarification_field(
-            (IntakeField.PARCEL_DECLARED_CONTENT,)
-        ) is IntakeField.PARCEL_DECLARED_CONTENT
+            is IntakeField.PICKUP_LOCATION
+        )
+        assert (
+            select_clarification_field(
+                (IntakeField.DROP_OFF_LOCATION, IntakeField.PARCEL_DECLARED_CONTENT)
+            )
+            is IntakeField.DROP_OFF_LOCATION
+        )
+        assert (
+            select_clarification_field((IntakeField.PARCEL_DECLARED_CONTENT,))
+            is IntakeField.PARCEL_DECLARED_CONTENT
+        )
 
     def test_invalid_field_takes_priority_over_fixed_order(self):
         missing = missing_required_fields(sender_only_facts())
-        assert select_clarification_field(
-            missing, invalid_field=IntakeField.DROP_OFF_LOCATION
-        ) is IntakeField.DROP_OFF_LOCATION
+        assert (
+            select_clarification_field(missing, invalid_field=IntakeField.DROP_OFF_LOCATION)
+            is IntakeField.DROP_OFF_LOCATION
+        )
 
     def test_invalid_field_takes_priority_even_when_nothing_is_missing(self):
-        assert select_clarification_field(
-            (), invalid_field=IntakeField.PARCEL_DECLARED_CONTENT
-        ) is IntakeField.PARCEL_DECLARED_CONTENT
+        assert (
+            select_clarification_field((), invalid_field=IntakeField.PARCEL_DECLARED_CONTENT)
+            is IntakeField.PARCEL_DECLARED_CONTENT
+        )
 
 
 # ============================================================================

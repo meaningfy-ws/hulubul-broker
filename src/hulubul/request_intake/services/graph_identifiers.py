@@ -8,23 +8,23 @@ Provides:
 - Request-scoped identifiers (request, sender role, receiver role, parcel, places)
 - Sparse allocation (only allocate IDs for entities actually present in the request)
 
-All UUIDs are prefixed per design DEC-010: req-, ag-, s-, r-, p-, pl-, urn:uuid:, urn:hulubul:phase1:receiver:
+All UUIDs are prefixed per design DEC-010: req-, ag-, s-, r-, p-, pl-,
+urn:uuid:, urn:hulubul:phase1:receiver:
 All outputs are strings in RFC 4122 UUID format.
 """
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-from typing import Callable
+from collections.abc import Callable
 from uuid import NAMESPACE_DNS, NAMESPACE_URL, uuid4, uuid5
 
 from hulubul.core.models.operational.intake import GraphIdentifiers
 
 __all__ = [
-    "generate_session_id",
-    "generate_request_id",
-    "generate_delivery_id",
     "enduring_agent_id",
+    "generate_delivery_id",
+    "generate_request_id",
+    "generate_session_id",
     "new_graph_identifiers",
 ]
 

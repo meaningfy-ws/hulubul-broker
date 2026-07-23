@@ -349,7 +349,7 @@
     }
   },
   "additionalProperties": false,
-  "description": "Input wrapper for routing operations.\n\nCombines MainFlowInput envelope with routing context lookup result.\nEnforces matching schema_version, correlation_id, and session_id across wrapper and nested objects.",
+  "description": "Input wrapper for routing operations.\n\nCombines MainFlowInput envelope with routing context lookup result.\nEnforces matching schema_version, correlation_id, and session_id across\nwrapper and nested objects.",
   "properties": {
     "correlation_id": {
       "format": "uuid",

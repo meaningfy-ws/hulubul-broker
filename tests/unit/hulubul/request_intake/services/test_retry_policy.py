@@ -8,6 +8,7 @@ result gets one tool-less repair attempt instead of a replay. The service
 never decides to replay a dispatched write; callers own that prohibition
 using the write-scoped result they already hold.
 """
+
 from __future__ import annotations
 
 from uuid import uuid4

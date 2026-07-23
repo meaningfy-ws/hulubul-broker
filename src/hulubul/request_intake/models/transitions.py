@@ -7,10 +7,11 @@ The evaluate_transition function enforces compare-and-set preconditions
 
 Pure domain logic: no I/O, no framework dependencies.
 """
+
 from __future__ import annotations
 
-from datetime import datetime
 from dataclasses import dataclass
+from datetime import datetime
 
 from hulubul.core.models.operational.enums import ErrorCode, RequestStatus
 
@@ -23,13 +24,17 @@ __all__ = [
 
 ALLOWED_TRANSITIONS: dict[RequestStatus | None, frozenset[RequestStatus]] = {
     None: frozenset([RequestStatus.NEW]),
-    RequestStatus.NEW: frozenset([
-        RequestStatus.NEEDS_CLARIFICATION,
-        RequestStatus.COMPLETE,
-    ]),
-    RequestStatus.NEEDS_CLARIFICATION: frozenset([
-        RequestStatus.COMPLETE,
-    ]),
+    RequestStatus.NEW: frozenset(
+        [
+            RequestStatus.NEEDS_CLARIFICATION,
+            RequestStatus.COMPLETE,
+        ]
+    ),
+    RequestStatus.NEEDS_CLARIFICATION: frozenset(
+        [
+            RequestStatus.COMPLETE,
+        ]
+    ),
 }
 """Fixed state-machine table: exactly four allowed edges."""
 

@@ -1,4 +1,5 @@
 """Pytest configuration and fixtures."""
+
 import sys
 from pathlib import Path
 
@@ -9,7 +10,7 @@ if src_path not in sys.path:
     sys.path.insert(0, src_path)
 
 # Verify import works
-from hulubul.core.models.operational.base import StrictModel  # noqa: F401
+from hulubul.core.models.operational.base import StrictModel  # noqa: E402, F401
 
 
 def pytest_configure(config):

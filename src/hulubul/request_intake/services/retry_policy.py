@@ -34,6 +34,7 @@ reclassified from it; codes that represent an already-exhausted retry cycle
 than being reinterpreted as "still retryable", which would violate the
 one-retry-only rule.
 """
+
 from __future__ import annotations
 
 from hulubul.core.models.operational.enums import ErrorCode, FailureKind, RetryAction

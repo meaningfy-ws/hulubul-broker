@@ -10,6 +10,7 @@ corrected immediately.
 
 Pure domain logic: no I/O, no framework dependencies.
 """
+
 from __future__ import annotations
 
 from hulubul.core.models.operational.enums import IntakeField

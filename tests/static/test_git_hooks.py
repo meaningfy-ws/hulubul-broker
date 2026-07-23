@@ -1,4 +1,5 @@
 """Static tests for the local pre-commit secret-scan hook wiring."""
+
 from __future__ import annotations
 
 import stat

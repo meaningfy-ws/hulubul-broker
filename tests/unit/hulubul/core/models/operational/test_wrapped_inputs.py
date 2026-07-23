@@ -89,7 +89,7 @@ class TestMainFlowInputFactory:
         actor=None,
         source=None,
         message=None,
-        schema_version="1.0.0"
+        schema_version="1.0.0",
     ):
         """Create a valid MainFlowInput with sensible defaults."""
         if correlation_id is None:
@@ -99,10 +99,7 @@ class TestMainFlowInputFactory:
         if session_id is None:
             session_id = "session-123"
         if actor is None:
-            actor = ActorContext(
-                actor_id="actor-123",
-                display_name="Test User"
-            )
+            actor = ActorContext(actor_id="actor-123", display_name="Test User")
         if source is None:
             source = InvocationSource.API
         if message is None:
@@ -115,7 +112,7 @@ class TestMainFlowInputFactory:
             session_id=session_id,
             actor=actor,
             source=source,
-            message=message
+            message=message,
         )
 
     def test_factory_creates_valid_input(self):

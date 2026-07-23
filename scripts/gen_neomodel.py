@@ -23,14 +23,16 @@ relationship rather than embedded. Noted in the generated header.
 Usage:  python scripts/gen_neomodel.py model/linkml/hulubul.yaml
    or:  gen-neomodel model/linkml/hulubul.yaml   (once installed)
 """
+
 from __future__ import annotations
 
 import re
 from dataclasses import dataclass
+from typing import ClassVar
 
 import click
 from jinja2 import Template
-from linkml.utils.generator import Generator, shared_arguments
+from linkml.utils.generator import Generator, shared_arguments  # type: ignore[import-untyped]
 
 # LinkML scalar range -> neomodel property class.
 NEOMODEL_PROP = {
@@ -93,14 +95,14 @@ def _cardinality(required: bool, multivalued: bool) -> str:
 
 
 @dataclass
-class NeomodelGenerator(Generator):
+class NeomodelGenerator(Generator):  # type: ignore[misc]
     """Generate neomodel OGM classes for the LinkML entity/value-object classes."""
 
-    generatorname = "gen-neomodel"
-    generatorversion = "1.0.0"
-    valid_formats = ["python"]
-    file_extension = "py"
-    uses_schemaloader = False
+    generatorname: ClassVar[str] = "gen-neomodel"
+    generatorversion: ClassVar[str] = "1.0.0"
+    valid_formats: ClassVar[list[str]] = ["python"]
+    file_extension: ClassVar[str] = "py"
+    uses_schemaloader: ClassVar[bool] = False
 
     def _choices_arg(self, enum_name: str) -> str:
         pv = self.schemaview.get_enum(enum_name).permissible_values
@@ -152,9 +154,7 @@ class NeomodelGenerator(Generator):
     def serialize(self, **kwargs) -> str:
         sv = self.schemaview
         classes = [
-            self._class_dict(cn)
-            for cn in sorted(sv.all_classes())
-            if not sv.get_class(cn).abstract
+            self._class_dict(cn) for cn in sorted(sv.all_classes()) if not sv.get_class(cn).abstract
         ]
         return _TEMPLATE.render(schema_name=self.schema.name, classes=classes)
 
