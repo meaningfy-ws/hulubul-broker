@@ -26,3 +26,13 @@ jobs:
 
       - name: Run static quality gates
         run: make ci-static
+
+      - name: Upload sanitized reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase-1-static-reports
+          path: |
+            reports/
+            .coverage
+          retention-days: 30

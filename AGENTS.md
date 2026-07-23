@@ -62,15 +62,19 @@ build-up plan.
 - **Commit messages** follow [Conventional Commits 1.0.0](https://www.conventionalcommits.org/en/v1.0.0/)
   (e.g. `docs:`, `feat(scope):`, `fix:`).
 
-## What could not be established
+## Project foundation (Phase 1, Tasks 1–4)
 
-- `src/hulubul/` is empty — the actual Python application layout is not yet
-  written.
-- No `tests/` directory exists at repo root; the testing strategy is documented
-  in `architecture/verification-testing-and-evaluation-strategy.md` but not yet
-  implemented.
-- No CI workflows, `make install`, `make test`, or `make ci` targets exist yet —
-  only model-generation, Docker, and Neo4j/MCP targets.
+The following infrastructure is now in place:
+
+- **Python application package** — `src/hulubul/` is structured and importable via Poetry.
+- **Testing infrastructure** — `tests/` directory with unit, static, and BDD test structure.
+- **Dependency management** — `pyproject.toml` with base and optional groups (test, quality, integration, langflow).
+- **Linting & type checking** — ruff, mypy, import-linter configured.
+- **Test automation** — pytest with 80% coverage enforcement, tox for multi-environment testing.
+- **CI/CD pipeline** — `.github/workflows/ci.yaml` runs on every push/PR, executing `make ci-static`.
+- **Makefile targets** — Python testing, linting, type checking, architecture checks, full CI.
+
+Remaining work (Tasks 2–12) — operational contracts, intake policy, LangFlow flows, BDD tests, evaluation framework.
 
 ## Local developer overrides
 
