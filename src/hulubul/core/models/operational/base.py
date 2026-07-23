@@ -1,18 +1,20 @@
 """Strict base models and constrained types for operational contracts."""
-from typing import Annotated, Any, Mapping, TypeVar
+from collections.abc import Mapping
 from enum import Enum
+from typing import Annotated, Any, TypeVar
 from uuid import UUID
+
 from pydantic import BaseModel, ConfigDict, Field, StringConstraints
 
 __all__ = [
-    "StrictModel",
-    "VersionedContract",
+    "ActorUrn",
+    "ContractKind",
     "HumanSuppliedText",
     "NonBlankText",
-    "SessionId",
-    "ActorUrn",
     "RequestId",
-    "ContractKind",
+    "SessionId",
+    "StrictModel",
+    "VersionedContract",
     "validate_json_mapping",
 ]
 

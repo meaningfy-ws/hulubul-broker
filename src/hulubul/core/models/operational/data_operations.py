@@ -17,8 +17,9 @@ operation_id, caller, session_id, actor_id, schema_version, correlation_id.
 """
 from __future__ import annotations
 
+from collections.abc import Mapping
 from datetime import datetime
-from typing import Annotated, Any, Literal, Mapping, TypeVar
+from typing import Annotated, Any, Literal, TypeVar
 
 from pydantic import BaseModel, ConfigDict, Field, TypeAdapter, field_validator
 

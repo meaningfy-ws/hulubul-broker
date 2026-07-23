@@ -11,6 +11,7 @@ if src_path not in sys.path:
 # Verify import works
 from hulubul.core.models.operational.base import StrictModel  # noqa: F401
 
+
 def pytest_configure(config):
     """Pytest hook called before test collection."""
     if src_path not in sys.path:

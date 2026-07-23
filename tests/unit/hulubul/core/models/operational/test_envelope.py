@@ -1,13 +1,15 @@
 """Tests for operational envelope models (trusted metadata)."""
 
-import pytest
 from uuid import UUID
+
+import pytest
 from pydantic import ValidationError
+
+from hulubul.core.models.operational.enums import ActorRole, IdentityAssurance, InvocationSource
 from hulubul.core.models.operational.envelope import (
     ActorContext,
     MainFlowInput,
 )
-from hulubul.core.models.operational.enums import ActorRole, IdentityAssurance, InvocationSource
 
 
 class TestActorContext:

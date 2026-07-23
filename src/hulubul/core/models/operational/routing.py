@@ -1,29 +1,29 @@
 """Routing lookup validation and context adaptation."""
-from typing import Optional, List, Dict, Any
 from datetime import datetime
+from typing import Any
 from uuid import UUID
 
 from pydantic import model_validator
 
-from .base import StrictModel, RequestId, SessionId, VersionedContract
+from .base import RequestId, SessionId, StrictModel, VersionedContract
 from .enums import (
-    RequestStatus,
-    ErrorCode,
+    POST_INTAKE_STATUSES,
     BindingState,
-    RoutingStage,
+    ErrorCode,
+    RequestStatus,
     RouterOutcome,
     RouterTarget,
     RoutingReason,
-    POST_INTAKE_STATUSES,
+    RoutingStage,
 )
-from .errors import OperationalError, ERROR_POLICY
 from .envelope import MainFlowInput
+from .errors import ERROR_POLICY, OperationalError
 
 __all__ = [
-    "RoutingLookupRecord",
-    "RoutingContext",
-    "RouterResult",
     "RouterInput",
+    "RouterResult",
+    "RoutingContext",
+    "RoutingLookupRecord",
     "adapt_routing_lookup",
 ]
 
@@ -34,7 +34,7 @@ class RoutingLookupRecord(StrictModel):
     binding_count: int
     active_relationship_count: int
     active_target_count: int
-    requests: List[Dict[str, Any]] = []
+    requests: list[dict[str, Any]] = []
 
     @model_validator(mode="after")
     def validate_cardinality(self) -> "RoutingLookupRecord":
@@ -75,11 +75,11 @@ class RoutingContext(VersionedContract):
     binding_count: int
     active_relationship_count: int
     active_target_count: int
-    request_id: Optional[RequestId] = None
-    request_status: Optional[RequestStatus] = None
-    closed_at: Optional[datetime] = None
+    request_id: RequestId | None = None
+    request_status: RequestStatus | None = None
+    closed_at: datetime | None = None
     routing_stage: RoutingStage
-    error: Optional[OperationalError] = None
+    error: OperationalError | None = None
 
 
 class RouterResult(VersionedContract):
@@ -88,9 +88,9 @@ class RouterResult(VersionedContract):
     outcome: RouterOutcome
     target: RouterTarget
     reason: RoutingReason
-    request_id: Optional[RequestId] = None
+    request_id: RequestId | None = None
     safe_message: str
-    error: Optional[OperationalError] = None
+    error: OperationalError | None = None
 
 
 def adapt_routing_lookup(
@@ -167,10 +167,7 @@ def adapt_routing_lookup(
                     if request_status in POST_INTAKE_STATUSES:
                         routing_stage = RoutingStage.UNSUPPORTED
                         error = None
-                    elif request_status == RequestStatus.NEW:
-                        routing_stage = RoutingStage.INTAKE
-                        error = None
-                    elif request_status == RequestStatus.NEEDS_CLARIFICATION:
+                    elif request_status == RequestStatus.NEW or request_status == RequestStatus.NEEDS_CLARIFICATION:
                         routing_stage = RoutingStage.INTAKE
                         error = None
                     elif request_status == RequestStatus.COMPLETE:

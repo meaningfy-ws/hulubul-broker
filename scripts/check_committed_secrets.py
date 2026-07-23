@@ -18,11 +18,10 @@ import subprocess
 import sys
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Tuple
 
 RULE_ID_CREDENTIAL_PATTERN = "credential-pattern"
 
-_CREDENTIAL_NAME_SUFFIXES: Tuple[str, ...] = (
+_CREDENTIAL_NAME_SUFFIXES: tuple[str, ...] = (
     "API_KEY",
     "APIKEY",
     "SECRET",
@@ -78,7 +77,7 @@ def _file_has_credential_assignment(contents: str) -> bool:
     return False
 
 
-def _list_tracked_files(repo: Path) -> Tuple[str, ...]:
+def _list_tracked_files(repo: Path) -> tuple[str, ...]:
     result = subprocess.run(
         ["git", "ls-files", "-z"],
         cwd=repo,
@@ -89,7 +88,7 @@ def _list_tracked_files(repo: Path) -> Tuple[str, ...]:
     return tuple(path for path in raw_paths if path)
 
 
-def scan_tracked_files(repo: Path) -> Tuple[SecretFinding, ...]:
+def scan_tracked_files(repo: Path) -> tuple[SecretFinding, ...]:
     """Scan every git-tracked file under ``repo`` for literal credential values.
 
     Binary or otherwise undecodable files are skipped. The returned findings

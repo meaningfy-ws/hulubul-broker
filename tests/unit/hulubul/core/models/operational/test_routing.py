@@ -1,16 +1,24 @@
 """Tests for routing lookup validation and adaptation."""
-import pytest
-from datetime import datetime
 from uuid import uuid4
+
+import pytest
 from pydantic import ValidationError
 
-from hulubul.core.models.operational.enums import RequestStatus, ErrorCode, RoutingStage, BindingState, RouterOutcome, RouterTarget, RoutingReason
+from hulubul.core.models.operational.base import RequestId, SessionId
+from hulubul.core.models.operational.enums import (
+    BindingState,
+    ErrorCode,
+    RequestStatus,
+    RouterOutcome,
+    RouterTarget,
+    RoutingReason,
+    RoutingStage,
+)
 from hulubul.core.models.operational.routing import (
+    RouterResult,
     RoutingLookupRecord,
     adapt_routing_lookup,
-    RouterResult,
 )
-from hulubul.core.models.operational.base import RequestId, SessionId
 
 
 # Test fixtures
@@ -33,7 +41,7 @@ def no_binding_record():
     }
 
 
-def one_bound_record(request_id: str = None, request_status_raw: str = None, closed_at: str = None):
+def one_bound_record(request_id: str | None = None, request_status_raw: str | None = None, closed_at: str | None = None):
     """1/1/1 cardinality - one bound request."""
     if request_id is None:
         request_id = str(uuid4())

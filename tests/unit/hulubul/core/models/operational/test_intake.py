@@ -5,21 +5,16 @@ and result outcome validation invariants per the plan (2.3).
 """
 from __future__ import annotations
 
-from datetime import datetime, timezone
-from typing import Optional
-
 import pytest
 from pydantic import ValidationError
 
+from hulubul.core.models.operational.enums import IntakeOutcome
 from hulubul.core.models.operational.intake import (
     CompleteIntakeFacts,
-    GraphIdentifiers,
     IntakeFacts,
     IntakeFactUpdates,
     IntakeResult,
 )
-from hulubul.core.models.operational.enums import IntakeOutcome
-
 
 # ============================================================================
 # SPARSE FACTS TESTS (new, needsClarification states)

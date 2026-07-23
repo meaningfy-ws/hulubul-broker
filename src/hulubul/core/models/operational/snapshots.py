@@ -8,7 +8,7 @@ Per plan 2.3 (Locked Fact And Result Contracts), snapshots enforce:
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Any, Optional, Tuple, Union
+from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
@@ -16,7 +16,6 @@ from hulubul.core.models.operational.intake import (
     CompleteIntakeFacts,
     IntakeFacts,
 )
-
 
 # ============================================================================
 # Delivery Request Snapshot
@@ -52,22 +51,22 @@ class DeliveryRequestSnapshot(BaseModel):
         description="When the request was last modified (authoritative).",
     )
 
-    closed_at: Optional[datetime] = Field(
+    closed_at: datetime | None = Field(
         default=None,
         description="When the request was closed/terminated (nullable).",
     )
 
-    status: Optional[str] = Field(
+    status: str | None = Field(
         default=None,
         description="Request lifecycle status (new, needsClarification, complete, etc.).",
     )
 
-    facts: Union[IntakeFacts, CompleteIntakeFacts] = Field(
+    facts: IntakeFacts | CompleteIntakeFacts = Field(
         ...,
         description="Sparse or complete intake facts depending on status.",
     )
 
-    missing_fields: Tuple[str, ...] = Field(
+    missing_fields: tuple[str, ...] = Field(
         default_factory=tuple,
         description="Immutable tuple of field names not yet provided.",
     )
@@ -76,7 +75,7 @@ class DeliveryRequestSnapshot(BaseModel):
     @classmethod
     def ensure_tuple(cls, v):
         """Convert missing_fields to immutable tuple."""
-        if isinstance(v, (list, tuple)):
+        if isinstance(v, list | tuple):
             return tuple(v)
         return v
 

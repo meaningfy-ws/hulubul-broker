@@ -1,15 +1,17 @@
 """Tests for operational error codes and error policy."""
 
+from uuid import UUID
+
 import pytest
 from pydantic import ValidationError
-from hulubul.core.models.operational.enums import ErrorCode, ErrorCategory, ErrorEscalation
+
+from hulubul.core.models.operational.base import StrictModel
+from hulubul.core.models.operational.enums import ErrorCategory, ErrorCode, ErrorEscalation
 from hulubul.core.models.operational.errors import (
     ERROR_POLICY,
     OperationalError,
     validation_error_to_operational_error,
 )
-from hulubul.core.models.operational.base import StrictModel, VersionedContract
-from uuid import UUID
 
 
 class TestErrorCodeEnum:
@@ -144,7 +146,7 @@ class TestOperationalError:
 
     def test_rejects_noncanonical_message(self):
         """OperationalError must reject message different from policy."""
-        canonical_message = ERROR_POLICY[ErrorCode.INVALID_INPUT].safe_message
+        ERROR_POLICY[ErrorCode.INVALID_INPUT].safe_message
 
         # Try to create with wrong message
         with pytest.raises(ValidationError):

@@ -10,16 +10,15 @@ from datetime import datetime, timezone
 import pytest
 from pydantic import ValidationError
 
+from hulubul.core.models.operational.intake import (
+    CompleteIntakeFacts,
+    GraphIdentifiers,
+    IntakeFacts,
+)
 from hulubul.core.models.operational.snapshots import (
     DeliveryRequestSnapshot,
     MutationConfirmation,
 )
-from hulubul.core.models.operational.intake import (
-    CompleteIntakeFacts,
-    IntakeFacts,
-    GraphIdentifiers,
-)
-
 
 # ============================================================================
 # DELIVERY REQUEST SNAPSHOT TESTS

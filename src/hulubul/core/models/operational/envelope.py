@@ -1,7 +1,14 @@
 """Trusted actor context and main flow input envelope."""
 from uuid import UUID
 
-from .base import StrictModel, HumanSuppliedText, SessionId, ActorUrn, NonBlankText, VersionedContract
+from .base import (
+    ActorUrn,
+    HumanSuppliedText,
+    NonBlankText,
+    SessionId,
+    StrictModel,
+    VersionedContract,
+)
 from .enums import ActorRole, IdentityAssurance, InvocationSource
 
 __all__ = [

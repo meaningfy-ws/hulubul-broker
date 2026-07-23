@@ -15,15 +15,14 @@ from pydantic import ValidationError
 
 from hulubul.core.models.operational import (
     DATA_OPERATION_ADAPTER,
+    CreateDeliveryRequestRequest,
     DataOperation,
     DataOperationOutcome,
-    DataOperationRequest,
     DataOperationResult,
-    CreateDeliveryRequestRequest,
     GetRequestRoutingContextRequest,
     ReadDeliveryRequestRequest,
-    UpdateDeliveryRequestRequest,
     SetRequestStatusRequest,
+    UpdateDeliveryRequestRequest,
     validate_data_operation_request,
 )
 
