@@ -31,7 +31,7 @@ from hulubul.core.models.operational import (
 class TestDataOperationEnumLocked:
     """Guard exactly five data operations are declared; no sixth."""
 
-    def test_exactly_five_operations_are_declared(self):
+    def test_exactly_five_operations_are_declared(self) -> None:
         """Verify the locked set of five operation kinds."""
         assert {member.value for member in DataOperation} == {
             "getRequestRoutingContext",
@@ -41,7 +41,7 @@ class TestDataOperationEnumLocked:
             "setRequestStatus",
         }
 
-    def test_data_operation_members_match_order(self):
+    def test_data_operation_members_match_order(self) -> None:
         """Verify enum members match specification."""
         assert DataOperation.GET_REQUEST_ROUTING_CONTEXT.value == "getRequestRoutingContext"
         assert DataOperation.CREATE_DELIVERY_REQUEST.value == "createDeliveryRequest"
@@ -53,7 +53,7 @@ class TestDataOperationEnumLocked:
 class TestRoutingContextRequestPayload:
     """Routing context operation requires empty payload."""
 
-    def test_routing_context_accepts_minimal_envelope(self):
+    def test_routing_context_accepts_minimal_envelope(self) -> None:
         """Routing context payload is empty dict."""
         request = GetRequestRoutingContextRequest(
             operation=DataOperation.GET_REQUEST_ROUTING_CONTEXT,
@@ -66,7 +66,7 @@ class TestRoutingContextRequestPayload:
         )
         assert request.operation == DataOperation.GET_REQUEST_ROUTING_CONTEXT
 
-    def test_routing_context_rejects_extra_fields(self):
+    def test_routing_context_rejects_extra_fields(self) -> None:
         """Any extra field in routing context request fails."""
         with pytest.raises(ValidationError):
             GetRequestRoutingContextRequest(
@@ -84,7 +84,7 @@ class TestRoutingContextRequestPayload:
 class TestCreateDeliveryRequestPayload:
     """Create operation requires identifiers and facts; rejects timestamps."""
 
-    def test_create_accepts_identifiers_and_facts(self):
+    def test_create_accepts_identifiers_and_facts(self) -> None:
         """Create payload requires identifiers and facts fields."""
         request = CreateDeliveryRequestRequest(
             operation=DataOperation.CREATE_DELIVERY_REQUEST,
@@ -101,7 +101,7 @@ class TestCreateDeliveryRequestPayload:
         assert request.identifiers == {}
         assert request.facts == {}
 
-    def test_create_rejects_created_at(self):
+    def test_create_rejects_created_at(self) -> None:
         """Create payload cannot include created_at; Neo4j owns timestamp."""
         with pytest.raises(ValidationError):
             CreateDeliveryRequestRequest(
@@ -117,7 +117,7 @@ class TestCreateDeliveryRequestPayload:
                 created_at="2026-01-01T00:00:00Z",
             )
 
-    def test_create_rejects_updated_at(self):
+    def test_create_rejects_updated_at(self) -> None:
         """Create payload cannot include updated_at; Neo4j owns timestamp."""
         with pytest.raises(ValidationError):
             CreateDeliveryRequestRequest(
@@ -137,7 +137,7 @@ class TestCreateDeliveryRequestPayload:
 class TestReadDeliveryRequestPayload:
     """Read operation requires request_id only."""
 
-    def test_read_accepts_request_id(self):
+    def test_read_accepts_request_id(self) -> None:
         """Read payload requires request_id."""
         request_id = str(uuid4())
         request = ReadDeliveryRequestRequest(
@@ -153,7 +153,7 @@ class TestReadDeliveryRequestPayload:
         assert request.operation == DataOperation.READ_DELIVERY_REQUEST
         assert request.request_id == request_id
 
-    def test_read_rejects_extra_fields(self):
+    def test_read_rejects_extra_fields(self) -> None:
         """Read rejects extra fields beyond request_id."""
         with pytest.raises(ValidationError):
             ReadDeliveryRequestRequest(
@@ -172,7 +172,7 @@ class TestReadDeliveryRequestPayload:
 class TestUpdateDeliveryRequestPayload:
     """Update operation requires request_id, expected_updated_at, expected_status, and updates."""
 
-    def test_update_accepts_all_required_fields(self):
+    def test_update_accepts_all_required_fields(self) -> None:
         """Update payload requires all five fields."""
         request = UpdateDeliveryRequestRequest(
             operation=DataOperation.UPDATE_DELIVERY_REQUEST,
@@ -192,7 +192,7 @@ class TestUpdateDeliveryRequestPayload:
         assert request.updates == {}
         assert request.identifiers == {}
 
-    def test_update_rejects_missing_expected_updated_at(self):
+    def test_update_rejects_missing_expected_updated_at(self) -> None:
         """Update requires expected_updated_at for concurrency check."""
         with pytest.raises(ValidationError):
             UpdateDeliveryRequestRequest(
@@ -213,7 +213,7 @@ class TestUpdateDeliveryRequestPayload:
 class TestSetRequestStatusPayload:
     """Status operation requires request_id, expected_updated_at, expected_status, target_status."""
 
-    def test_status_accepts_all_required_fields(self):
+    def test_status_accepts_all_required_fields(self) -> None:
         """Status payload requires four fields."""
         request = SetRequestStatusRequest(
             operation=DataOperation.SET_REQUEST_STATUS,
@@ -235,7 +235,7 @@ class TestSetRequestStatusPayload:
 class TestDiscriminatedUnionValidation:
     """Discriminated union rejects malformed operations before capability policy."""
 
-    def test_union_accepts_routing_context_request(self):
+    def test_union_accepts_routing_context_request(self) -> None:
         """Valid routing context passes union validation."""
         mapping = {
             "operation": "getRequestRoutingContext",
@@ -249,7 +249,7 @@ class TestDiscriminatedUnionValidation:
         request = validate_data_operation_request(mapping)
         assert isinstance(request, GetRequestRoutingContextRequest)
 
-    def test_union_rejects_raw_cypher_field(self):
+    def test_union_rejects_raw_cypher_field(self) -> None:
         """Raw cypher field fails contract validation."""
         mapping = {
             "operation": "getRequestRoutingContext",
@@ -266,7 +266,7 @@ class TestDiscriminatedUnionValidation:
         # Error should come from union validation, not from capability policy
         assert "cypher" in str(exc_info.value).lower()
 
-    def test_union_rejects_raw_query_field(self):
+    def test_union_rejects_raw_query_field(self) -> None:
         """Raw query field fails contract validation."""
         mapping = {
             "operation": "getRequestRoutingContext",
@@ -282,7 +282,7 @@ class TestDiscriminatedUnionValidation:
             validate_data_operation_request(mapping)
         assert "query" in str(exc_info.value).lower()
 
-    def test_union_rejects_undeclared_field(self):
+    def test_union_rejects_undeclared_field(self) -> None:
         """Undeclared field fails contract validation."""
         mapping = {
             "operation": "getRequestRoutingContext",
@@ -298,7 +298,7 @@ class TestDiscriminatedUnionValidation:
             validate_data_operation_request(mapping)
         assert "undeclared" in str(exc_info.value).lower()
 
-    def test_union_rejects_unknown_operation(self):
+    def test_union_rejects_unknown_operation(self) -> None:
         """Unknown operation value fails contract validation."""
         mapping = {
             "operation": "unknownOperation",
@@ -312,7 +312,7 @@ class TestDiscriminatedUnionValidation:
         with pytest.raises(ValidationError):
             validate_data_operation_request(mapping)
 
-    def test_operation_payload_mismatch_fails(self):
+    def test_operation_payload_mismatch_fails(self) -> None:
         """Operation type mismatch with payload fails validation."""
         mapping = {
             "operation": "createDeliveryRequest",
@@ -331,7 +331,7 @@ class TestDiscriminatedUnionValidation:
 class TestDataOperationResultInvariants:
     """Result invariants enforce consistent operation/outcome combinations."""
 
-    def test_confirmed_write_result_requires_dispatch_true(self):
+    def test_confirmed_write_result_requires_dispatch_true(self) -> None:
         """Confirmed write must have dispatch=True."""
         # A confirmed create must indicate it was dispatched
         result = DataOperationResult(
@@ -344,7 +344,7 @@ class TestDataOperationResultInvariants:
         )
         assert result.write_dispatched is True
 
-    def test_confirmed_create_requires_equal_timestamps(self):
+    def test_confirmed_create_requires_equal_timestamps(self) -> None:
         """Confirmed create requires created_at == updated_at from Neo4j."""
         from datetime import datetime, timezone
 
@@ -360,7 +360,7 @@ class TestDataOperationResultInvariants:
         )
         assert result.created_at == result.updated_at
 
-    def test_confirmed_read_result_requires_dispatch_false(self):
+    def test_confirmed_read_result_requires_dispatch_false(self) -> None:
         """Confirmed read must have dispatch=False."""
         result = DataOperationResult(
             operation=DataOperation.READ_DELIVERY_REQUEST,
@@ -370,7 +370,7 @@ class TestDataOperationResultInvariants:
         )
         assert result.write_dispatched is False
 
-    def test_rejected_result_cannot_claim_success(self):
+    def test_rejected_result_cannot_claim_success(self) -> None:
         """Rejected result must have success=False."""
         result = DataOperationResult(
             operation=DataOperation.READ_DELIVERY_REQUEST,
@@ -379,7 +379,7 @@ class TestDataOperationResultInvariants:
         )
         assert result.success is False
 
-    def test_ambiguous_write_result_requires_specific_outcome(self):
+    def test_ambiguous_write_result_requires_specific_outcome(self) -> None:
         """Ambiguous result must be a dispatched write with no count/result/status."""
         result = DataOperationResult(
             operation=DataOperation.UPDATE_DELIVERY_REQUEST,
@@ -396,7 +396,7 @@ class TestDataOperationResultInvariants:
 class TestTypeAdapterValidation:
     """TypeAdapter enforces strict validation before capability policy."""
 
-    def test_type_adapter_validates_discriminated_union(self):
+    def test_type_adapter_validates_discriminated_union(self) -> None:
         """DATA_OPERATION_ADAPTER validates the full union."""
         mapping = {
             "operation": "readDeliveryRequest",
@@ -411,7 +411,7 @@ class TestTypeAdapterValidation:
         request = DATA_OPERATION_ADAPTER.validate_python(mapping)
         assert isinstance(request, ReadDeliveryRequestRequest)
 
-    def test_type_adapter_rejects_malformed_mapping(self):
+    def test_type_adapter_rejects_malformed_mapping(self) -> None:
         """TypeAdapter rejects malformed mappings."""
         mapping = {
             "operation": "readDeliveryRequest",
@@ -426,7 +426,7 @@ class TestTypeAdapterValidation:
         with pytest.raises(ValidationError):
             DATA_OPERATION_ADAPTER.validate_python(mapping)
 
-    def test_type_adapter_mode_rejects_stringified_booleans(self):
+    def test_type_adapter_mode_rejects_stringified_booleans(self) -> None:
         """TypeAdapter strict mode rejects stringified booleans."""
         result = DataOperationResult(
             operation=DataOperation.READ_DELIVERY_REQUEST,
@@ -448,7 +448,7 @@ class TestAllOperationsRequireSharedFields:
             (ReadDeliveryRequestRequest, DataOperation.READ_DELIVERY_REQUEST),
         ],
     )
-    def test_shared_fields_required(self, operation_class, operation_kind):
+    def test_shared_fields_required(self, operation_class, operation_kind: Any, operation_kind: Any) -> None:
         """All operation requests must include operation_id, caller, session, and actor."""
         with pytest.raises(ValidationError):
             # Missing operation_id

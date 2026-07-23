@@ -23,7 +23,7 @@ from hulubul.core.models.operational.routing import (
 
 
 # Test fixtures
-def valid_routing_metadata():
+def valid_routing_metadata() -> None:
     """Return valid metadata for adapt_routing_lookup."""
     return {
         "schema_version": "1.0.0",
@@ -32,7 +32,7 @@ def valid_routing_metadata():
     }
 
 
-def no_binding_record():
+def no_binding_record() -> None:
     """0/0/0 cardinality - no binding."""
     return {
         "binding_count": 0,
@@ -46,7 +46,7 @@ def one_bound_record(
     request_id: str | None = None,
     request_status_raw: str | None = None,
     closed_at: str | None = None,
-):
+) -> None:
     """1/1/1 cardinality - one bound request."""
     if request_id is None:
         request_id = str(uuid4())
@@ -68,21 +68,21 @@ def one_bound_record(
 class TestRoutingLookupRecordValidation:
     """Test RoutingLookupRecord cardinality validation."""
 
-    def test_no_binding_accepts_zero_cardinality(self):
+    def test_no_binding_accepts_zero_cardinality(self) -> None:
         """0/0/0 is valid."""
         record = RoutingLookupRecord(**no_binding_record())
         assert record.binding_count == 0
         assert record.active_relationship_count == 0
         assert record.active_target_count == 0
 
-    def test_one_binding_one_relationship_one_target_valid(self):
+    def test_one_binding_one_relationship_one_target_valid(self) -> None:
         """1/1/1 is valid."""
         record = RoutingLookupRecord(**one_bound_record())
         assert record.binding_count == 1
         assert record.active_relationship_count == 1
         assert record.active_target_count == 1
 
-    def test_duplicate_binding_fails(self):
+    def test_duplicate_binding_fails(self) -> None:
         """2/x/x fails with GRAPH_CONTEXT_INCONSISTENT."""
         data = no_binding_record()
         data["binding_count"] = 2
@@ -91,7 +91,7 @@ class TestRoutingLookupRecordValidation:
         # Validation error should capture the contradiction
         assert "cardinality" in str(exc_info.value).lower()
 
-    def test_mismatched_cardinality_binding_relationship_fails(self):
+    def test_mismatched_cardinality_binding_relationship_fails(self) -> None:
         """1/0/1 fails with GRAPH_CONTEXT_INCONSISTENT."""
         data = no_binding_record()
         data["binding_count"] = 1
@@ -99,7 +99,7 @@ class TestRoutingLookupRecordValidation:
         with pytest.raises(ValidationError):
             RoutingLookupRecord(**data)
 
-    def test_mismatched_cardinality_binding_target_fails(self):
+    def test_mismatched_cardinality_binding_target_fails(self) -> None:
         """1/1/0 fails with GRAPH_CONTEXT_INCONSISTENT."""
         data = no_binding_record()
         data["binding_count"] = 1
@@ -107,7 +107,7 @@ class TestRoutingLookupRecordValidation:
         with pytest.raises(ValidationError):
             RoutingLookupRecord(**data)
 
-    def test_requests_mismatch_target_count_fails(self):
+    def test_requests_mismatch_target_count_fails(self) -> None:
         """requests list length != active_target_count fails."""
         data = one_bound_record()
         data["active_target_count"] = 2  # But only 1 request
@@ -118,7 +118,7 @@ class TestRoutingLookupRecordValidation:
 class TestAdaptRoutingLookup:
     """Test adapt_routing_lookup conversion logic."""
 
-    def test_no_binding_returns_absent_state(self):
+    def test_no_binding_returns_absent_state(self) -> None:
         """No binding -> BindingState.ABSENT, no request."""
         metadata = valid_routing_metadata()
         context = adapt_routing_lookup(
@@ -129,7 +129,7 @@ class TestAdaptRoutingLookup:
         assert context.request_id is None
         assert context.request_status is None
 
-    def test_recognized_status_adapts_to_enum_identity(self):
+    def test_recognized_status_adapts_to_enum_identity(self) -> None:
         """Every RequestStatus value -> same enum identity."""
         metadata = valid_routing_metadata()
         for status in RequestStatus:
@@ -137,7 +137,7 @@ class TestAdaptRoutingLookup:
             context = adapt_routing_lookup(record, **metadata)
             assert context.request_status == status
 
-    def test_null_status_on_open_request_becomes_none(self):
+    def test_null_status_on_open_request_becomes_none(self) -> None:
         """requestStatusRaw=None, closed=None -> request_status=None, no error."""
         metadata = valid_routing_metadata()
         record = RoutingLookupRecord(**one_bound_record(request_status_raw=None, closed_at=None))
@@ -145,7 +145,7 @@ class TestAdaptRoutingLookup:
         assert context.request_status is None
         assert context.error is None
 
-    def test_unknown_status_on_open_request_fails_closed(self):
+    def test_unknown_status_on_open_request_fails_closed(self) -> None:
         """Unknown requestStatusRaw, closed=None -> UNSUPPORTED_REQUEST_STATUS error."""
         metadata = valid_routing_metadata()
         record = RoutingLookupRecord(
@@ -156,7 +156,7 @@ class TestAdaptRoutingLookup:
         assert context.error.code == ErrorCode.UNSUPPORTED_REQUEST_STATUS
         assert context.request_status is None
 
-    def test_closed_timestamp_precedence_over_status(self):
+    def test_closed_timestamp_precedence_over_status(self) -> None:
         """closed!=None -> RoutingStage.CLOSED, regardless of status."""
         metadata = valid_routing_metadata()
 
@@ -182,7 +182,7 @@ class TestAdaptRoutingLookup:
         context = adapt_routing_lookup(record, **metadata)
         assert context.routing_stage == RoutingStage.CLOSED
 
-    def test_post_intake_status_produces_unsupported_stage(self):
+    def test_post_intake_status_produces_unsupported_stage(self) -> None:
         """Post-intake statuses (optionsProposed, etc.) -> UNSUPPORTED, no error."""
         metadata = valid_routing_metadata()
         post_intake_statuses = [
@@ -202,7 +202,7 @@ class TestAdaptRoutingLookup:
             assert context.error is None
             assert context.request_status == status
 
-    def test_new_status_produces_intake_stage(self):
+    def test_new_status_produces_intake_stage(self) -> None:
         """new -> RoutingStage.INTAKE."""
         metadata = valid_routing_metadata()
         record = RoutingLookupRecord(**one_bound_record(request_status_raw="new"))
@@ -210,21 +210,21 @@ class TestAdaptRoutingLookup:
         assert context.routing_stage == RoutingStage.INTAKE
         assert context.request_status == RequestStatus.NEW
 
-    def test_needsclarification_produces_intake_stage(self):
+    def test_needsclarification_produces_intake_stage(self) -> None:
         """needsClarification -> RoutingStage.INTAKE."""
         metadata = valid_routing_metadata()
         record = RoutingLookupRecord(**one_bound_record(request_status_raw="needsClarification"))
         context = adapt_routing_lookup(record, **metadata)
         assert context.routing_stage == RoutingStage.INTAKE
 
-    def test_complete_produces_complete_stage(self):
+    def test_complete_produces_complete_stage(self) -> None:
         """complete -> RoutingStage.COMPLETE."""
         metadata = valid_routing_metadata()
         record = RoutingLookupRecord(**one_bound_record(request_status_raw="complete"))
         context = adapt_routing_lookup(record, **metadata)
         assert context.routing_stage == RoutingStage.COMPLETE
 
-    def test_unknown_raw_status_text_never_copied_to_error(self):
+    def test_unknown_raw_status_text_never_copied_to_error(self) -> None:
         """Unknown raw status -> error has safe message, never contains raw text."""
         metadata = valid_routing_metadata()
         record = RoutingLookupRecord(**one_bound_record(request_status_raw="mysterystatus12345"))
@@ -239,7 +239,7 @@ class TestAdaptRoutingLookup:
 class TestRouterResult:
     """Test RouterResult invariants."""
 
-    def test_routed_result_has_request_id(self):
+    def test_routed_result_has_request_id(self) -> None:
         """RouterOutcome.ROUTED requires request_id."""
         result = RouterResult(
             correlation_id=uuid4(),
@@ -252,7 +252,7 @@ class TestRouterResult:
         )
         assert result.request_id is not None
 
-    def test_failure_result_targets_none(self):
+    def test_failure_result_targets_none(self) -> None:
         """RouterOutcome.FAILURE targets RouterTarget.NONE."""
         result = RouterResult(
             correlation_id=uuid4(),
@@ -265,7 +265,7 @@ class TestRouterResult:
         )
         assert result.target == RouterTarget.NONE
 
-    def test_informational_result_targets_none(self):
+    def test_informational_result_targets_none(self) -> None:
         """RouterOutcome.INFORMATIONAL targets RouterTarget.NONE."""
         result = RouterResult(
             correlation_id=uuid4(),
@@ -278,7 +278,7 @@ class TestRouterResult:
         )
         assert result.target == RouterTarget.NONE
 
-    def test_frozen_immutable(self):
+    def test_frozen_immutable(self) -> None:
         """RouterResult is frozen/immutable."""
         result = RouterResult(
             correlation_id=uuid4(),

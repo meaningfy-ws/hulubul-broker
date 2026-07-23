@@ -40,7 +40,7 @@ def run_scan_on_tracked_fixture(tmp_path: Path, secret_value: str) -> SecretFind
     return findings[0]
 
 
-def test_secret_scan_reports_path_and_rule_without_matching_value(tmp_path):
+def test_secret_scan_reports_path_and_rule_without_matching_value(tmp_path: Path) -> None:
     finding = run_scan_on_tracked_fixture(tmp_path, "synthetic-provider-token")
 
     assert finding.path.endswith("tracked.txt")
@@ -48,7 +48,7 @@ def test_secret_scan_reports_path_and_rule_without_matching_value(tmp_path):
     assert "synthetic-provider-token" not in repr(finding)
 
 
-def test_secret_scan_ignores_empty_and_placeholder_values(tmp_path):
+def test_secret_scan_ignores_empty_and_placeholder_values(tmp_path: Path) -> None:
     repo = tmp_path / "repo"
     repo.mkdir()
     _init_git_repo(repo)
@@ -65,7 +65,7 @@ def test_secret_scan_ignores_empty_and_placeholder_values(tmp_path):
     assert findings == ()
 
 
-def test_safe_langflow_example_file_produces_no_findings():
+def test_safe_langflow_example_file_produces_no_findings() -> None:
     findings = scan_tracked_files(Path(__file__).resolve().parents[2])
 
     assert findings == ()

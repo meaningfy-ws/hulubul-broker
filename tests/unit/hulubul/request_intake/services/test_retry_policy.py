@@ -67,10 +67,10 @@ def _operational_error(code: ErrorCode) -> OperationalError:
 class TestExhaustiveFailureKindCoverage:
     """The decision matrix explicitly handles every FailureKind, no defaults."""
 
-    def test_every_failure_kind_has_an_explicit_retry_action(self):
+    def test_every_failure_kind_has_an_explicit_retry_action(self) -> None:
         assert set(RETRY_ACTION_BY_FAILURE_KIND) == set(FailureKind)
 
-    def test_transient_repair_and_permanent_sets_partition_every_failure_kind(self):
+    def test_transient_repair_and_permanent_sets_partition_every_failure_kind(self) -> None:
         classified = (
             set(TRANSIENT_FAILURE_KINDS)
             | set(TOOL_LESS_REPAIR_FAILURE_KINDS)
@@ -94,15 +94,15 @@ class TestRetryAction:
     """Each failure kind maps to exactly one RetryAction."""
 
     @pytest.mark.parametrize("failure_kind", TRANSIENT_FAILURE_KINDS)
-    def test_transient_failures_map_to_retry(self, failure_kind):
+    def test_transient_failures_map_to_retry(self, failure_kind: FailureKind) -> None:
         assert retry_action(failure_kind) is RetryAction.RETRY
 
     @pytest.mark.parametrize("failure_kind", TOOL_LESS_REPAIR_FAILURE_KINDS)
-    def test_malformed_result_maps_to_repair_raw_result(self, failure_kind):
+    def test_malformed_result_maps_to_repair_raw_result(self, failure_kind: FailureKind) -> None:
         assert retry_action(failure_kind) is RetryAction.REPAIR_RAW_RESULT
 
     @pytest.mark.parametrize("failure_kind", PERMANENT_FAILURE_KINDS)
-    def test_permanent_failures_map_to_fail(self, failure_kind):
+    def test_permanent_failures_map_to_fail(self, failure_kind: FailureKind) -> None:
         assert retry_action(failure_kind) is RetryAction.FAIL
 
 
@@ -117,11 +117,11 @@ class TestShouldRetry:
     @pytest.mark.parametrize(
         "failure_kind", TRANSIENT_FAILURE_KINDS + TOOL_LESS_REPAIR_FAILURE_KINDS
     )
-    def test_retryable_and_repairable_kinds_should_retry(self, failure_kind):
+    def test_retryable_and_repairable_kinds_should_retry(self, failure_kind: FailureKind) -> None:
         assert should_retry(failure_kind) is True
 
     @pytest.mark.parametrize("failure_kind", PERMANENT_FAILURE_KINDS)
-    def test_permanent_kinds_should_not_retry(self, failure_kind):
+    def test_permanent_kinds_should_not_retry(self, failure_kind: FailureKind) -> None:
         assert should_retry(failure_kind) is False
 
 
@@ -134,15 +134,15 @@ class TestMaxRetries:
     """Transient and repair kinds allow exactly one further attempt."""
 
     @pytest.mark.parametrize("failure_kind", TRANSIENT_FAILURE_KINDS)
-    def test_transient_failures_allow_exactly_one_retry(self, failure_kind):
+    def test_transient_failures_allow_exactly_one_retry(self, failure_kind: FailureKind) -> None:
         assert max_retries(failure_kind) == 1
 
     @pytest.mark.parametrize("failure_kind", TOOL_LESS_REPAIR_FAILURE_KINDS)
-    def test_malformed_result_allows_exactly_one_repair_attempt(self, failure_kind):
+    def test_malformed_result_allows_exactly_one_repair_attempt(self, failure_kind: FailureKind) -> None:
         assert max_retries(failure_kind) == 1
 
     @pytest.mark.parametrize("failure_kind", PERMANENT_FAILURE_KINDS)
-    def test_permanent_failures_allow_zero_retries(self, failure_kind):
+    def test_permanent_failures_allow_zero_retries(self, failure_kind: FailureKind) -> None:
         assert max_retries(failure_kind) == 0
 
 
@@ -154,19 +154,19 @@ class TestMaxRetries:
 class TestClassifyFailureFromExceptions:
     """Raw exceptions surfaced by adapter calls classify into a FailureKind."""
 
-    def test_timeout_error_classifies_as_timeout(self):
+    def test_timeout_error_classifies_as_timeout(self) -> None:
         assert classify_failure(TimeoutError("slow")) is FailureKind.TIMEOUT
 
-    def test_connection_error_classifies_as_connection(self):
+    def test_connection_error_classifies_as_connection(self) -> None:
         assert classify_failure(ConnectionError("refused")) is FailureKind.CONNECTION
 
-    def test_permission_error_classifies_as_authentication(self):
+    def test_permission_error_classifies_as_authentication(self) -> None:
         assert classify_failure(PermissionError("denied")) is FailureKind.AUTHENTICATION
 
-    def test_value_error_classifies_as_validation(self):
+    def test_value_error_classifies_as_validation(self) -> None:
         assert classify_failure(ValueError("bad payload")) is FailureKind.VALIDATION
 
-    def test_unrecognized_exception_type_raises_value_error(self):
+    def test_unrecognized_exception_type_raises_value_error(self) -> None:
         with pytest.raises(ValueError):
             classify_failure(RuntimeError("unclassified"))
 
@@ -179,20 +179,20 @@ class TestClassifyFailureFromExceptions:
 class TestClassifyFailureFromOperationalError:
     """Only unambiguous, always-non-retryable codes classify from OperationalError."""
 
-    def test_model_authentication_failure_classifies_as_authentication(self):
+    def test_model_authentication_failure_classifies_as_authentication(self) -> None:
         error = _operational_error(ErrorCode.MODEL_AUTHENTICATION_FAILURE)
         assert classify_failure(error) is FailureKind.AUTHENTICATION
 
-    def test_mcp_authentication_failure_classifies_as_authentication(self):
+    def test_mcp_authentication_failure_classifies_as_authentication(self) -> None:
         error = _operational_error(ErrorCode.MCP_AUTHENTICATION_FAILURE)
         assert classify_failure(error) is FailureKind.AUTHENTICATION
 
-    def test_unsupported_operational_error_code_raises_value_error(self):
+    def test_unsupported_operational_error_code_raises_value_error(self) -> None:
         error = _operational_error(ErrorCode.INVALID_INPUT)
         with pytest.raises(ValueError):
             classify_failure(error)
 
-    def test_exhausted_retry_terminal_code_raises_value_error(self):
+    def test_exhausted_retry_terminal_code_raises_value_error(self) -> None:
         """MODEL_TRANSIENT_FAILURE is a post-retry terminal code; reclassifying
         it as still-retryable would violate the one-retry-only rule."""
         error = _operational_error(ErrorCode.MODEL_TRANSIENT_FAILURE)
@@ -208,7 +208,7 @@ class TestClassifyFailureFromOperationalError:
 class TestNeverReplayDispatchedWrite:
     """MCP write ambiguity is never modeled as a retryable FailureKind."""
 
-    def test_no_failure_kind_action_implies_write_replay(self):
+    def test_no_failure_kind_action_implies_write_replay(self) -> None:
         """Every action is RETRY, REPAIR_RAW_RESULT, or FAIL; REPAIR_RAW_RESULT
         (the only "try again" action besides RETRY) is reserved for the
         tool-less MALFORMED_RESULT repair, never for re-dispatching a write."""

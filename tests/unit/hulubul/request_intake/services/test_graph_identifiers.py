@@ -33,23 +33,23 @@ UUID_PATTERN = re.compile(
 class TestGenerateSessionId:
     """Test random session ID generation (UUID4) — backward compat."""
 
-    def test_returns_string(self):
+    def test_returns_string(self) -> None:
         """Session ID is returned as a string."""
         session_id = generate_session_id()
         assert isinstance(session_id, str)
 
-    def test_valid_uuid_format(self):
+    def test_valid_uuid_format(self) -> None:
         """Session ID is a valid UUID string format."""
         session_id = generate_session_id()
         assert UUID_PATTERN.match(session_id), f"Invalid UUID format: {session_id}"
         UUID(session_id)
 
-    def test_uniqueness_on_multiple_calls(self):
+    def test_uniqueness_on_multiple_calls(self) -> None:
         """Multiple calls to generate_session_id produce unique UUIDs."""
         ids = {generate_session_id() for _ in range(10)}
         assert len(ids) == 10, "Session IDs must be unique across calls"
 
-    def test_multiple_calls_produce_different_results(self):
+    def test_multiple_calls_produce_different_results(self) -> None:
         """Specifically test that two consecutive calls differ."""
         id1 = generate_session_id()
         id2 = generate_session_id()
@@ -59,29 +59,29 @@ class TestGenerateSessionId:
 class TestGenerateRequestId:
     """Test deterministic request ID generation (UUID5) — backward compat."""
 
-    def test_returns_string(self):
+    def test_returns_string(self) -> None:
         """Request ID is returned as a string."""
         request_id = generate_request_id("intent_value", "receiver_123")
         assert isinstance(request_id, str)
 
-    def test_valid_uuid_format(self):
+    def test_valid_uuid_format(self) -> None:
         """Request ID is a valid UUID string format."""
         request_id = generate_request_id("intent_value", "receiver_123")
         assert UUID_PATTERN.match(request_id), f"Invalid UUID format: {request_id}"
         UUID(request_id)
 
-    def test_deterministic_same_inputs(self):
+    def test_deterministic_same_inputs(self) -> None:
         """Identical inputs produce identical request IDs."""
         id1 = generate_request_id("intent_value", "receiver_123")
         id2 = generate_request_id("intent_value", "receiver_123")
         assert id1 == id2, "Request ID must be deterministic (same inputs → same output)"
 
-    def test_deterministic_stability_multiple_calls(self):
+    def test_deterministic_stability_multiple_calls(self) -> None:
         """Request ID is stable across many calls with same inputs."""
         ids = [generate_request_id("test_intent", "receiver_456") for _ in range(5)]
         assert all(id == ids[0] for id in ids), "Request ID must be stable across calls"
 
-    def test_different_inputs_produce_different_ids(self):
+    def test_different_inputs_produce_different_ids(self) -> None:
         """Different inputs produce different request IDs."""
         id1 = generate_request_id("intent_1", "receiver_A")
         id2 = generate_request_id("intent_2", "receiver_A")
@@ -90,21 +90,21 @@ class TestGenerateRequestId:
         assert id1 != id3, "Different receiver_id should produce different IDs"
         assert id2 != id3, "Different inputs should produce different IDs"
 
-    def test_empty_string_inputs(self):
+    def test_empty_string_inputs(self) -> None:
         """Empty strings are handled and produce valid UUIDs."""
         request_id = generate_request_id("", "")
         assert isinstance(request_id, str)
         assert UUID_PATTERN.match(request_id)
         UUID(request_id)
 
-    def test_special_characters_in_inputs(self):
+    def test_special_characters_in_inputs(self) -> None:
         """Special characters in inputs are handled safely."""
         request_id = generate_request_id("intent@#$%^&*()", "receiver_!<>?/\\")
         assert isinstance(request_id, str)
         assert UUID_PATTERN.match(request_id)
         UUID(request_id)
 
-    def test_long_input_strings(self):
+    def test_long_input_strings(self) -> None:
         """Very long input strings are handled."""
         long_intent = "x" * 10000
         long_receiver = "y" * 10000
@@ -117,29 +117,29 @@ class TestGenerateRequestId:
 class TestGenerateDeliveryId:
     """Test deterministic delivery ID generation (UUID5)."""
 
-    def test_returns_string(self):
+    def test_returns_string(self) -> None:
         """Delivery ID is returned as a string."""
         delivery_id = generate_delivery_id("request_id_value", "transporter_123")
         assert isinstance(delivery_id, str)
 
-    def test_valid_uuid_format(self):
+    def test_valid_uuid_format(self) -> None:
         """Delivery ID is a valid UUID string format."""
         delivery_id = generate_delivery_id("request_id_value", "transporter_123")
         assert UUID_PATTERN.match(delivery_id), f"Invalid UUID format: {delivery_id}"
         UUID(delivery_id)
 
-    def test_deterministic_same_inputs(self):
+    def test_deterministic_same_inputs(self) -> None:
         """Identical inputs produce identical delivery IDs."""
         id1 = generate_delivery_id("request_xyz", "transporter_001")
         id2 = generate_delivery_id("request_xyz", "transporter_001")
         assert id1 == id2, "Delivery ID must be deterministic (same inputs → same output)"
 
-    def test_deterministic_stability_multiple_calls(self):
+    def test_deterministic_stability_multiple_calls(self) -> None:
         """Delivery ID is stable across many calls with same inputs."""
         ids = [generate_delivery_id("req_123", "trans_456") for _ in range(5)]
         assert all(id == ids[0] for id in ids), "Delivery ID must be stable across calls"
 
-    def test_different_inputs_produce_different_ids(self):
+    def test_different_inputs_produce_different_ids(self) -> None:
         """Different inputs produce different delivery IDs."""
         id1 = generate_delivery_id("request_1", "transporter_A")
         id2 = generate_delivery_id("request_2", "transporter_A")
@@ -148,21 +148,21 @@ class TestGenerateDeliveryId:
         assert id1 != id3, "Different transporter_id should produce different IDs"
         assert id2 != id3, "Different inputs should produce different IDs"
 
-    def test_empty_string_inputs(self):
+    def test_empty_string_inputs(self) -> None:
         """Empty strings are handled and produce valid UUIDs."""
         delivery_id = generate_delivery_id("", "")
         assert isinstance(delivery_id, str)
         assert UUID_PATTERN.match(delivery_id)
         UUID(delivery_id)
 
-    def test_special_characters_in_inputs(self):
+    def test_special_characters_in_inputs(self) -> None:
         """Special characters in inputs are handled safely."""
         delivery_id = generate_delivery_id("request@#$%^&*()", "transporter_!<>?/\\")
         assert isinstance(delivery_id, str)
         assert UUID_PATTERN.match(delivery_id)
         UUID(delivery_id)
 
-    def test_long_input_strings(self):
+    def test_long_input_strings(self) -> None:
         """Very long input strings are handled."""
         long_request = "r" * 10000
         long_transporter = "t" * 10000
@@ -175,13 +175,13 @@ class TestGenerateDeliveryId:
 class TestIdConsistency:
     """Test consistency across different ID generation functions."""
 
-    def test_session_ids_differ_from_request_ids(self):
+    def test_session_ids_differ_from_request_ids(self) -> None:
         """Session IDs and request IDs are independent."""
         session_ids = {generate_session_id() for _ in range(3)}
         request_ids = {generate_request_id(f"intent_{i}", f"receiver_{i}") for i in range(3)}
         assert session_ids.isdisjoint(request_ids)
 
-    def test_request_ids_differ_from_delivery_ids(self):
+    def test_request_ids_differ_from_delivery_ids(self) -> None:
         """Request IDs and delivery IDs are independent."""
         id1 = generate_request_id("intent", "receiver")
         id2 = generate_delivery_id("request_base", "transporter")
@@ -191,36 +191,36 @@ class TestIdConsistency:
 class TestEnduringAgentId:
     """Test stable enduring Agent ID generation."""
 
-    def test_returns_string(self):
+    def test_returns_string(self) -> None:
         """Agent ID is returned as a string."""
         agent_id = enduring_agent_id("sender@example.com")
         assert isinstance(agent_id, str)
 
-    def test_has_agent_prefix(self):
+    def test_has_agent_prefix(self) -> None:
         """Agent ID has ag- prefix."""
         agent_id = enduring_agent_id("sender@example.com")
         assert agent_id.startswith("ag-"), f"Agent ID must start with 'ag-': {agent_id}"
 
-    def test_contains_valid_uuid(self):
+    def test_contains_valid_uuid(self) -> None:
         """Agent ID contains valid UUID after ag- prefix."""
         agent_id = enduring_agent_id("sender@example.com")
         uuid_part = agent_id[3:]  # Remove "ag-" prefix
         assert UUID_PATTERN.match(uuid_part), f"Invalid UUID after prefix: {uuid_part}"
         UUID(uuid_part)
 
-    def test_deterministic_same_identifier(self):
+    def test_deterministic_same_identifier(self) -> None:
         """Same identifier produces same Agent ID (deterministic)."""
         id1 = enduring_agent_id("stable_sender_123")
         id2 = enduring_agent_id("stable_sender_123")
         assert id1 == id2, "Agent ID must be deterministic (same input → same output)"
 
-    def test_different_identifiers_produce_different_ids(self):
+    def test_different_identifiers_produce_different_ids(self) -> None:
         """Different identifiers produce different Agent IDs."""
         id1 = enduring_agent_id("sender_A")
         id2 = enduring_agent_id("sender_B")
         assert id1 != id2, "Different identifiers must produce different Agent IDs"
 
-    def test_stability_across_multiple_calls(self):
+    def test_stability_across_multiple_calls(self) -> None:
         """Agent ID is stable across many calls with same identifier."""
         ids = [enduring_agent_id("persistent_identifier") for _ in range(5)]
         assert all(id == ids[0] for id in ids), "Agent ID must be stable across calls"
@@ -229,7 +229,7 @@ class TestEnduringAgentId:
 class TestNewGraphIdentifiers:
     """Test sparse allocation of graph node identifiers."""
 
-    def test_returns_graph_identifiers_model(self):
+    def test_returns_graph_identifiers_model(self) -> None:
         """new_graph_identifiers returns a GraphIdentifiers instance."""
         identifiers = new_graph_identifiers(
             actor_id="sender_123",
@@ -237,7 +237,7 @@ class TestNewGraphIdentifiers:
         )
         assert isinstance(identifiers, GraphIdentifiers)
 
-    def test_request_id_always_allocated(self):
+    def test_request_id_always_allocated(self) -> None:
         """Request ID is always allocated with req- prefix."""
         identifiers = new_graph_identifiers(
             actor_id="sender_123",
@@ -246,7 +246,7 @@ class TestNewGraphIdentifiers:
         assert identifiers.request_id is not None
         assert identifiers.request_id.startswith("req-")
 
-    def test_sender_always_allocated(self):
+    def test_sender_always_allocated(self) -> None:
         """Sender role ID and enduring agent ID are always allocated."""
         identifiers = new_graph_identifiers(
             actor_id="sender@example.com",
@@ -257,7 +257,7 @@ class TestNewGraphIdentifiers:
         assert identifiers.sender_agent_id is not None
         assert identifiers.sender_agent_id.startswith("ag-")
 
-    def test_sparse_allocation_receiver(self):
+    def test_sparse_allocation_receiver(self) -> None:
         """Receiver IDs only allocated when include_receiver=True."""
         # Without receiver
         ids_no_receiver = new_graph_identifiers(
@@ -280,7 +280,7 @@ class TestNewGraphIdentifiers:
         assert ids_with_receiver.receiver_agent_id is not None
         assert ids_with_receiver.receiver_agent_id.startswith("ag-")
 
-    def test_sparse_allocation_parcel(self):
+    def test_sparse_allocation_parcel(self) -> None:
         """Parcel ID only allocated when include_parcel=True."""
         # Without parcel
         ids_no_parcel = new_graph_identifiers(
@@ -299,7 +299,7 @@ class TestNewGraphIdentifiers:
         assert ids_with_parcel.parcel_id is not None
         assert ids_with_parcel.parcel_id.startswith("p-")
 
-    def test_sparse_allocation_pickup_place(self):
+    def test_sparse_allocation_pickup_place(self) -> None:
         """Pickup place IDs only allocated when include_pickup=True."""
         # Without pickup
         ids_no_pickup = new_graph_identifiers(
@@ -321,7 +321,7 @@ class TestNewGraphIdentifiers:
         assert ids_with_pickup.pickup_place_identifier is not None
         assert ids_with_pickup.pickup_place_identifier.startswith("urn:uuid:")
 
-    def test_sparse_allocation_drop_off_place(self):
+    def test_sparse_allocation_drop_off_place(self) -> None:
         """Drop-off place IDs only allocated when include_drop_off=True."""
         # Without drop-off
         ids_no_drop = new_graph_identifiers(
@@ -343,7 +343,7 @@ class TestNewGraphIdentifiers:
         assert ids_with_drop.drop_off_place_identifier is not None
         assert ids_with_drop.drop_off_place_identifier.startswith("urn:uuid:")
 
-    def test_receiver_fallback_name_only(self):
+    def test_receiver_fallback_name_only(self) -> None:
         """Name-only receiver (no stable_id) gets request-scoped URN."""
         identifiers = new_graph_identifiers(
             actor_id="sender_123",
@@ -358,7 +358,7 @@ class TestNewGraphIdentifiers:
         assert identifiers.receiver_agent_identifier is not None
         assert identifiers.receiver_agent_identifier.startswith("urn:hulubul:phase1:receiver:")
 
-    def test_receiver_with_stable_id(self):
+    def test_receiver_with_stable_id(self) -> None:
         """Receiver with stable_id gets enduring agent ID."""
         identifiers = new_graph_identifiers(
             actor_id="sender_123",
@@ -370,7 +370,7 @@ class TestNewGraphIdentifiers:
         assert identifiers.receiver_agent_id.startswith("ag-")
         assert identifiers.receiver_agent_identifier == "receiver@example.com"
 
-    def test_deterministic_with_injected_uuid_factory(self):
+    def test_deterministic_with_injected_uuid_factory(self) -> None:
         """Allocation is deterministic when uuid_factory is controlled."""
         call_count = [0]
 
@@ -425,7 +425,7 @@ class TestNewGraphIdentifiers:
         include_parcel: bool,
         include_pickup: bool,
         include_drop_off: bool,
-    ):
+    ) -> None:
         """Test various sparse allocation combinations."""
         identifiers = new_graph_identifiers(
             actor_id="sender_123",

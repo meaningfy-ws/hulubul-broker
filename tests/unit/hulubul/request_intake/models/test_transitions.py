@@ -31,7 +31,7 @@ DIFFERENT_TIMESTAMP = datetime(2026, 7, 23, 13, 0, 0, tzinfo=timezone.utc)
 class TestAllowedTransitions:
     """The transition table is fixed, finite, and locked."""
 
-    def test_allowed_transitions_exactly_four_edges(self):
+    def test_allowed_transitions_exactly_four_edges(self) -> None:
         """ALLOWED_TRANSITIONS must contain exactly four allowed edges."""
         all_transitions = set()
         for source_status, targets in ALLOWED_TRANSITIONS.items():
@@ -47,7 +47,7 @@ class TestAllowedTransitions:
 
         assert all_transitions == expected_edges
 
-    def test_allowed_transitions_is_immutable_frozenset(self):
+    def test_allowed_transitions_is_immutable_frozenset(self) -> None:
         """Each ALLOWED_TRANSITIONS value must be a frozenset (immutable)."""
         for _, targets in ALLOWED_TRANSITIONS.items():
             assert isinstance(targets, frozenset)
@@ -61,19 +61,19 @@ class TestAllowedTransitions:
 class TestTransitionDecision:
     """TransitionDecision must be immutable and enforce allowed/error_code contract."""
 
-    def test_allowed_decision_has_no_error_code(self):
+    def test_allowed_decision_has_no_error_code(self) -> None:
         """An allowed transition must have error_code=None."""
         decision = TransitionDecision(allowed=True, error_code=None)
         assert decision.allowed is True
         assert decision.error_code is None
 
-    def test_rejected_decision_has_error_code(self):
+    def test_rejected_decision_has_error_code(self) -> None:
         """A rejected transition must have a non-None error_code."""
         decision = TransitionDecision(allowed=False, error_code=ErrorCode.INVALID_STATUS_TRANSITION)
         assert decision.allowed is False
         assert decision.error_code is ErrorCode.INVALID_STATUS_TRANSITION
 
-    def test_transition_decision_is_immutable(self):
+    def test_transition_decision_is_immutable(self) -> None:
         """TransitionDecision must be frozen (immutable)."""
         decision = TransitionDecision(allowed=True, error_code=None)
         with pytest.raises(AttributeError):
@@ -99,7 +99,7 @@ class TestEvaluateTransitionPositive:
     )
     def test_allowed_edges_when_cas_matches(
         self, source_status: RequestStatus | None, target_status: RequestStatus
-    ):
+    ) -> None:
         """Each of the four allowed edges must be allowed when CAS checks pass."""
         decision = evaluate_transition(
             actual_status=source_status,
@@ -120,7 +120,7 @@ class TestEvaluateTransitionPositive:
 class TestEvaluateTransitionPreconditionFailures:
     """CAS preconditions must be checked before edge validation."""
 
-    def test_stale_status_rejected_with_invalid_expected_status(self):
+    def test_stale_status_rejected_with_invalid_expected_status(self) -> None:
         """If actual_status != expected_status, return INVALID_EXPECTED_STATUS."""
         decision = evaluate_transition(
             actual_status=RequestStatus.NEW,
@@ -132,7 +132,7 @@ class TestEvaluateTransitionPreconditionFailures:
         assert decision.allowed is False
         assert decision.error_code is ErrorCode.INVALID_EXPECTED_STATUS
 
-    def test_stale_timestamp_rejected_with_concurrent_modification(self):
+    def test_stale_timestamp_rejected_with_concurrent_modification(self) -> None:
         """If actual_updated_at != expected_updated_at, return CONCURRENT_MODIFICATION."""
         decision = evaluate_transition(
             actual_status=RequestStatus.NEW,
@@ -144,7 +144,7 @@ class TestEvaluateTransitionPreconditionFailures:
         assert decision.allowed is False
         assert decision.error_code is ErrorCode.CONCURRENT_MODIFICATION
 
-    def test_invalid_status_takes_priority_over_timestamp(self):
+    def test_invalid_status_takes_priority_over_timestamp(self) -> None:
         """Invalid status is checked before timestamp."""
         decision = evaluate_transition(
             actual_status=RequestStatus.COMPLETE,  # Wrong status
@@ -166,7 +166,7 @@ class TestEvaluateTransitionPreconditionFailures:
 class TestEvaluateTransitionEdgeValidation:
     """After CAS passes, edge must be in ALLOWED_TRANSITIONS."""
 
-    def test_disallowed_edge_rejected_with_invalid_status_transition(self):
+    def test_disallowed_edge_rejected_with_invalid_status_transition(self) -> None:
         """If edge is not in ALLOWED_TRANSITIONS, return INVALID_STATUS_TRANSITION."""
         decision = evaluate_transition(
             actual_status=RequestStatus.NEEDS_CLARIFICATION,
@@ -178,7 +178,7 @@ class TestEvaluateTransitionEdgeValidation:
         assert decision.allowed is False
         assert decision.error_code is ErrorCode.INVALID_STATUS_TRANSITION
 
-    def test_backward_transition_rejected(self):
+    def test_backward_transition_rejected(self) -> None:
         """Transitioning backward (COMPLETE -> NEW) is not allowed."""
         decision = evaluate_transition(
             actual_status=RequestStatus.COMPLETE,
@@ -190,7 +190,7 @@ class TestEvaluateTransitionEdgeValidation:
         assert decision.allowed is False
         assert decision.error_code is ErrorCode.INVALID_STATUS_TRANSITION
 
-    def test_skip_step_rejected(self):
+    def test_skip_step_rejected(self) -> None:
         """Skipping a step (NEW -> COMPLETE via NEEDS_CLARIFICATION) is allowed."""
         # Actually, this IS allowed per the spec
         decision = evaluate_transition(
@@ -202,7 +202,7 @@ class TestEvaluateTransitionEdgeValidation:
         )
         assert decision.allowed is True
 
-    def test_post_intake_status_transition_not_allowed(self):
+    def test_post_intake_status_transition_not_allowed(self) -> None:
         """Transitioning from intake to post-intake status is not allowed."""
         decision = evaluate_transition(
             actual_status=RequestStatus.COMPLETE,
@@ -223,7 +223,7 @@ class TestEvaluateTransitionEdgeValidation:
 class TestEvaluateTransitionCreation:
     """Creation uses None as the source status (atomic)."""
 
-    def test_creation_none_to_new_when_cas_matches(self):
+    def test_creation_none_to_new_when_cas_matches(self) -> None:
         """Creation (None -> NEW) is allowed when CAS checks pass."""
         decision = evaluate_transition(
             actual_status=None,
@@ -235,7 +235,7 @@ class TestEvaluateTransitionCreation:
         assert decision.allowed is True
         assert decision.error_code is None
 
-    def test_creation_rejected_if_cas_fails(self):
+    def test_creation_rejected_if_cas_fails(self) -> None:
         """Creation fails if CAS doesn't match (request already exists)."""
         decision = evaluate_transition(
             actual_status=RequestStatus.NEW,  # Request already exists
