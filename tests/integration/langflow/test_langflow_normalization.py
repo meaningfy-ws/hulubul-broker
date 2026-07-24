@@ -18,11 +18,7 @@ def sample_langflow_flow():
                 {
                     "id": "node1-id",
                     "type": "ChatInput",
-                    "data": {
-                        "outputs": [
-                            {"name": "text", "type": "str"}
-                        ]
-                    },
+                    "data": {"outputs": [{"name": "text", "type": "str"}]},
                     "position": [100, 100],
                 },
                 {

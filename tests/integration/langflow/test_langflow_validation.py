@@ -55,8 +55,7 @@ class TestManifestValidation:
 
         for flow_name, expected_id in expected_ids.items():
             assert manifest["flows"][flow_name]["id"] == expected_id, (
-                f"Flow {flow_name} has unexpected ID: "
-                f"{manifest['flows'][flow_name]['id']}"
+                f"Flow {flow_name} has unexpected ID: {manifest['flows'][flow_name]['id']}"
             )
 
     def test_manifest_deployment_order(self):
@@ -138,13 +137,10 @@ class TestTopologyValidation:
         with open(MANIFEST_PATH) as f:
             manifest = yaml.safe_load(f)
 
-        manifest_flows = {
-            flow["file"] for flow in manifest["flows"].values()
-        }
+        manifest_flows = {flow["file"] for flow in manifest["flows"].values()}
 
         # List all .json files in flows directory
-        actual_flows = set(f.relative_to(FLOWS_DIR).as_posix()
-                          for f in FLOWS_DIR.glob("*.json"))
+        actual_flows = set(f.relative_to(FLOWS_DIR).as_posix() for f in FLOWS_DIR.glob("*.json"))
 
         # Any flow file not in manifest is a UI-only flow (error condition)
         ui_only = actual_flows - manifest_flows
@@ -169,9 +165,8 @@ class TestTopologyValidation:
             if flow_file.parent.exists() and not flow_file.exists():
                 # If flows directory exists, we can check for missing files
                 pytest.skip(
-                    f"Flow file {flow_info['file']} not yet created "
-                    "(expected in Checkpoint 8)"
-                    )
+                    f"Flow file {flow_info['file']} not yet created (expected in Checkpoint 8)"
+                )
 
     def test_manifest_references_valid_file_paths(self):
         """All file paths in manifest should be relative to flows/ directory."""
@@ -183,12 +178,9 @@ class TestTopologyValidation:
         for flow_name, flow_info in manifest["flows"].items():
             file_path = flow_info["file"]
             assert file_path.startswith("flows/"), (
-                f"Flow {flow_name} has invalid file path: {file_path} "
-                "(must start with 'flows/')"
+                f"Flow {flow_name} has invalid file path: {file_path} (must start with 'flows/')"
             )
-            assert file_path.endswith(".json"), (
-                f"Flow {flow_name} file must be JSON: {file_path}"
-            )
+            assert file_path.endswith(".json"), f"Flow {flow_name} file must be JSON: {file_path}"
 
 
 class TestValidationScriptBasics:
@@ -207,9 +199,7 @@ class TestValidationScriptBasics:
             text=True,
             timeout=10,
         )
-        assert result.returncode == 0, (
-            f"Script help failed: {result.stderr}"
-        )
+        assert result.returncode == 0, f"Script help failed: {result.stderr}"
         assert "manifest" in result.stdout.lower()
 
     def test_script_validates_manifest_when_given_path(self):
@@ -224,11 +214,9 @@ class TestValidationScriptBasics:
         # Should either pass (exit 0) or fail with clear validation error
         # We don't assert specific exit code here because flows may not exist yet
         output = (result.stdout + result.stderr).lower()
-        assert (
-            "validation" in output
-            or "manifest" in output
-            or "topology" in output
-        ), f"Expected validation output, got stdout: {result.stdout}, stderr: {result.stderr}"
+        assert "validation" in output or "manifest" in output or "topology" in output, (
+            f"Expected validation output, got stdout: {result.stdout}, stderr: {result.stderr}"
+        )
 
 
 class TestFlowFilesWhenPresent:
@@ -290,9 +278,7 @@ class TestValidationScriptOutput:
     def test_script_provides_clear_error_messages(self):
         """When validation fails, script should provide clear error messages."""
         # Create a malformed manifest to test error reporting
-        with tempfile.NamedTemporaryFile(
-            mode="w", suffix=".yaml", delete=False
-        ) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as f:
             f.write("broken: yaml: content:")
             bad_manifest = f.name
 
