@@ -1,0 +1,9 @@
+local:
+  langflow_url: LANGFLOW_URL
+  neo4j_mcp_url: NEO4J_MCP_URL
+  recorded_model_endpoint: RECORDED_MODEL_ENDPOINT
+
+ci:
+  langflow_url: LANGFLOW_URL
+  neo4j_mcp_url: NEO4J_MCP_URL
+  recorded_model_endpoint: RECORDED_MODEL_ENDPOINT
