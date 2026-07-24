@@ -1,5 +1,5 @@
 {
-  "generated": "2026-07-23T10:59:04.254290Z",
+  "generated": "2026-07-23T21:21:00.913029Z",
   "schemas": {
     "data-operation-request": {
       "file": "data-operation-request.schema.json",
@@ -35,7 +35,7 @@
     },
     "router-input": {
       "file": "router-input.schema.json",
-      "sha256": "cc83c6279e79ce1824d54a8433730728d7361d5ad72643d9d871c4f15c5bba4f"
+      "sha256": "3e4ca45ac138d432c1364f3de70f06ab718546a5fdc3b4d4e2302769e6e362fd"
     },
     "router-result": {
       "file": "router-result.schema.json",

@@ -11,6 +11,7 @@ Findings never carry the matched value: ``SecretFinding`` only records the
 relative path and the id of the rule that fired, so it is always safe to
 print, log, or assert on.
 """
+
 from __future__ import annotations
 
 import re
@@ -102,9 +103,7 @@ def scan_tracked_files(repo: Path) -> tuple[SecretFinding, ...]:
         except (UnicodeDecodeError, OSError):
             continue
         if _file_has_credential_assignment(contents):
-            findings.append(
-                SecretFinding(path=relative_path, rule_id=RULE_ID_CREDENTIAL_PATTERN)
-            )
+            findings.append(SecretFinding(path=relative_path, rule_id=RULE_ID_CREDENTIAL_PATTERN))
     return tuple(findings)
 
 

@@ -1,4 +1,5 @@
 """Tests for strict base models and constrained types."""
+
 from uuid import uuid4
 
 import pytest
@@ -15,16 +16,16 @@ from hulubul.core.models.operational.base import (
 class TestStrictModel:
     """StrictModel enforces strict validation."""
 
-    def test_forbids_extra_fields(self):
+    def test_forbids_extra_fields(self) -> None:
         """Extra fields are forbidden."""
 
         class Model(StrictModel):
             value: str
 
         with pytest.raises(ValidationError):
-            Model(value="test", extra="not_allowed")
+            Model(value="test", extra="not_allowed")  # type: ignore[call-arg]
 
-    def test_strict_type_checking(self):
+    def test_strict_type_checking(self) -> None:
         """Strict mode rejects type coercion."""
 
         class Model(StrictModel):
@@ -32,9 +33,9 @@ class TestStrictModel:
 
         # Strict=True means no string-to-int coercion
         with pytest.raises(ValidationError):
-            Model(count="123")
+            Model(count="123")  # type: ignore[arg-type]
 
-    def test_strips_whitespace(self):
+    def test_strips_whitespace(self) -> None:
         """Whitespace is stripped from strings."""
 
         class Model(StrictModel):
@@ -43,29 +44,29 @@ class TestStrictModel:
         m = Model(text="  hello  ")
         assert m.text == "hello"
 
-    def test_frozen(self):
+    def test_frozen(self) -> None:
         """Models are immutable."""
 
         class Model(StrictModel):
             value: str
 
         m = Model(value="test")
-        with pytest.raises(Exception):
+        with pytest.raises(ValidationError):
             m.value = "changed"
 
 
 class TestVersionedContract:
     """VersionedContract adds schema version and correlation ID."""
 
-    def test_has_schema_version(self):
+    def test_has_schema_version(self) -> None:
         """Schema version defaults to 1.0.0."""
         contract = VersionedContract(correlation_id=uuid4())
         assert contract.schema_version == "1.0.0"
 
-    def test_requires_correlation_id(self):
+    def test_requires_correlation_id(self) -> None:
         """Correlation ID is required."""
         with pytest.raises(ValidationError):
-            VersionedContract()
+            VersionedContract()  # type: ignore[call-arg]
 
 
 class TestHumanSuppliedText:
@@ -83,7 +84,7 @@ class TestHumanSuppliedText:
             ("  x  ", True),
         ],
     )
-    def test_text_length_boundary(self, text, valid):
+    def test_text_length_boundary(self, text: str, valid: bool) -> None:
         """Text must be 1-4000 chars after stripping whitespace."""
 
         class Model(StrictModel):
@@ -100,7 +101,7 @@ class TestHumanSuppliedText:
 class TestNonBlankText:
     """NonBlankText is 1+ chars, not whitespace-only."""
 
-    def test_rejects_empty(self):
+    def test_rejects_empty(self) -> None:
         """Empty string is invalid."""
 
         class Model(StrictModel):
@@ -109,7 +110,7 @@ class TestNonBlankText:
         with pytest.raises(ValidationError):
             Model(text="")
 
-    def test_rejects_whitespace_only(self):
+    def test_rejects_whitespace_only(self) -> None:
         """Whitespace-only is invalid after stripping."""
 
         class Model(StrictModel):
@@ -118,7 +119,7 @@ class TestNonBlankText:
         with pytest.raises(ValidationError):
             Model(text="   ")
 
-    def test_accepts_nonempty(self):
+    def test_accepts_nonempty(self) -> None:
         """Non-empty text is valid."""
 
         class Model(StrictModel):
@@ -131,7 +132,7 @@ class TestNonBlankText:
 class TestContractKind:
     """ContractKind enumeration has exact 11 values."""
 
-    def test_contract_kind_inventory(self):
+    def test_contract_kind_inventory(self) -> None:
         """ContractKind has exactly 11 values."""
         from hulubul.core.models.operational.base import ContractKind
 

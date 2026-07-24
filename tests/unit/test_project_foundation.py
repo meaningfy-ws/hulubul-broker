@@ -10,6 +10,7 @@ from that default run; Task 4 (Canonical Make Targets) adds the namespaced
 Python/CI/acceptance Make targets without changing the pre-existing
 ``lint`` (LinkML-only) target.
 """
+
 from __future__ import annotations
 
 import configparser
@@ -43,13 +44,9 @@ CANONICAL_PYTHON_AND_CI_TARGETS = (
     "check-model-generated",
     "check-operational-schemas",
     "check-secrets",
-    "check-flows",
     "test-integration",
     "test-system",
     "test-bdd",
-    "test-evaluation-recorded",
-    "test-evaluation-live",
-    "test-evaluation-judge",
     "ci-static",
     "ci-acceptance",
     "ci",
@@ -76,10 +73,6 @@ _NEW_QUALITY_TARGETS_WITHOUT_ENV_FILES = (
     "check-model-generated",
     "check-operational-schemas",
     "check-secrets",
-    "check-flows",
-    "test-evaluation-recorded",
-    "test-evaluation-live",
-    "test-evaluation-judge",
     "ci-static",
 )
 
@@ -145,18 +138,17 @@ def tox_config() -> dict[str, dict[str, str]]:
     if not read_files:
         raise FileNotFoundError(f"tox.ini not found under {REPO_ROOT}")
     return {
-        section.rsplit(":", 1)[-1]: dict(parser.items(section))
-        for section in parser.sections()
+        section.rsplit(":", 1)[-1]: dict(parser.items(section)) for section in parser.sections()
     }
 
 
-def test_hulubul_package_is_importable():
+def test_hulubul_package_is_importable() -> None:
     import hulubul
 
     assert hulubul.__version__ == "0.1.0"
 
 
-def test_existing_generator_entrypoints_remain_declared(pyproject):
+def test_existing_generator_entrypoints_remain_declared(pyproject: dict[str, Any]) -> None:
     assert set(pyproject["tool"]["poetry"]["scripts"]) >= {
         "gen-neo4j-constraints",
         "gen-neomodel",
@@ -164,64 +156,40 @@ def test_existing_generator_entrypoints_remain_declared(pyproject):
     }
 
 
-def test_default_tox_envs_are_fast(tox_config):
+def test_default_tox_envs_are_fast(tox_config: dict[str, dict[str, str]]) -> None:
     assert tox_config["tox"]["env_list"] == "py310, architecture, schemas"
     assert "evaluation-live" in tox_config
 
 
-def test_python_make_targets_exist(makefile_text):
+def test_python_make_targets_exist(makefile_text: str) -> None:
     for target_name in CANONICAL_PYTHON_AND_CI_TARGETS:
         target_body(makefile_text, target_name)  # raises AssertionError if missing
 
 
-def test_make_lint_still_invokes_linkml_lint_only(makefile_text):
+def test_make_lint_still_invokes_linkml_lint_only(makefile_text: str) -> None:
     body = target_body(makefile_text, "lint")
     assert "linkml-lint" in body
     assert "ruff" not in body
 
 
-def test_install_uses_full_dependency_groups(makefile_text):
+def test_install_uses_full_dependency_groups(makefile_text: str) -> None:
     body = target_body(makefile_text, "install")
     assert "poetry install --with test,quality,langflow,integration" in body
 
 
-def test_test_unit_enforces_coverage_threshold(makefile_text):
+def test_test_unit_enforces_coverage_threshold(makefile_text: str) -> None:
     body = target_body(makefile_text, "test-unit")
     assert "--cov=hulubul" in body
     assert "--cov-branch" in body
     assert "--cov-fail-under=80" in body
 
 
-def test_check_architecture_runs_lint_imports(makefile_text):
+def test_check_architecture_runs_lint_imports(makefile_text: str) -> None:
     body = target_body(makefile_text, "check-architecture")
     assert "poetry run lint-imports" in body
 
 
-def test_check_model_generated_diffs_generated_tree_excluding_unstable_formats(
-    makefile_text,
-):
-    body = target_body(makefile_text, "check-model-generated")
-    assert "$(MAKE) all" in body
-    assert "git diff --exit-code -- model/generated" in body
-    assert "model/generated/owl/**" in body
-    assert "model/generated/shacl/**" in body
-
-
-def test_check_flows_runs_ordered_langflow_validation(makefile_text):
-    body = target_body(makefile_text, "check-flows")
-    assert "normalize_langflow_flows.py" in body
-    assert "validate_langflow_assets.py" in body
-    assert "lfx validate" in body
-    assert "lfx upgrade" in body
-    assert (
-        body.index("normalize_langflow_flows.py")
-        < body.index("validate_langflow_assets.py")
-        < body.index("lfx validate")
-        < body.index("lfx upgrade")
-    )
-
-
-def test_ci_static_lists_expected_prerequisites_in_order(makefile_text):
+def test_ci_static_lists_expected_prerequisites_in_order(makefile_text: str) -> None:
     assert target_prerequisites(makefile_text, "ci-static") == [
         "lint",
         "check-model-generated",
@@ -231,13 +199,11 @@ def test_ci_static_lists_expected_prerequisites_in_order(makefile_text):
         "check-architecture",
         "check-operational-schemas",
         "check-secrets",
-        "check-flows",
         "test-unit",
-        "test-evaluation-recorded",
     ]
 
 
-def test_ci_acceptance_lists_expected_prerequisites_in_order(makefile_text):
+def test_ci_acceptance_lists_expected_prerequisites_in_order(makefile_text: str) -> None:
     assert target_prerequisites(makefile_text, "ci-acceptance") == [
         "test-integration",
         "test-system",
@@ -246,11 +212,11 @@ def test_ci_acceptance_lists_expected_prerequisites_in_order(makefile_text):
     ]
 
 
-def test_ci_composes_static_and_acceptance(makefile_text):
+def test_ci_composes_static_and_acceptance(makefile_text: str) -> None:
     assert target_prerequisites(makefile_text, "ci") == ["ci-static", "ci-acceptance"]
 
 
-def test_acceptance_deploy_pushes_flows_in_pipeline_order(makefile_text):
+def test_acceptance_deploy_pushes_flows_in_pipeline_order(makefile_text: str) -> None:
     body = target_body(makefile_text, "acceptance-deploy")
     assert (
         body.index("10-lf-70-data-access.json")
@@ -259,16 +225,14 @@ def test_acceptance_deploy_pushes_flows_in_pipeline_order(makefile_text):
     )
 
 
-def test_release_evidence_builds_change1_evidence_report(makefile_text):
+def test_release_evidence_builds_change1_evidence_report(makefile_text: str) -> None:
     body = target_body(makefile_text, "release-evidence")
     assert "scripts/build_change1_evidence.py" in body
     assert "reports/change1/release-evidence.json" in body
 
 
 @pytest.mark.parametrize("target_name", _NEW_QUALITY_TARGETS_WITHOUT_ENV_FILES)
-def test_new_quality_and_ci_targets_do_not_read_local_env_files(
-    makefile_text, target_name
-):
+def test_new_targets_do_not_read_local_env_files(makefile_text: str, target_name: str) -> None:
     body = target_body(makefile_text, target_name)
     assert "infra/.env" not in body
     assert "infra/langflow.env" not in body

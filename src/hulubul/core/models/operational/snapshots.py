@@ -5,12 +5,13 @@ Per plan 2.3 (Locked Fact And Result Contracts), snapshots enforce:
 - Immutable created_at, authoritative updated_at, nullable closed_at
 - Missing fields as locked tuple
 """
+
 from __future__ import annotations
 
 from datetime import datetime
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, ValidationInfo, field_validator
 
 from hulubul.core.models.operational.intake import (
     CompleteIntakeFacts,
@@ -73,15 +74,15 @@ class DeliveryRequestSnapshot(BaseModel):
 
     @field_validator("missing_fields", mode="before")
     @classmethod
-    def ensure_tuple(cls, v):
+    def ensure_tuple(cls, v: Any) -> tuple[str, ...]:
         """Convert missing_fields to immutable tuple."""
         if isinstance(v, list | tuple):
             return tuple(v)
-        return v
+        raise ValueError("missing_fields must be a list or tuple of field names")
 
     @field_validator("facts", mode="after")
     @classmethod
-    def validate_status_fact_consistency(cls, v, info):
+    def validate_status_fact_consistency(cls, v: Any, info: ValidationInfo) -> Any:
         """Enforce nested schema equality between status and facts type.
 
         For 'complete' status: facts must be CompleteIntakeFacts, no missing fields.
@@ -99,9 +100,7 @@ class DeliveryRequestSnapshot(BaseModel):
                 )
             # Complete status must have empty missing_fields
             if missing_fields:
-                raise ValueError(
-                    "status='complete' must have empty missing_fields tuple"
-                )
+                raise ValueError("status='complete' must have empty missing_fields tuple")
 
         elif status in ("new", "needsClarification"):
             # These statuses allow sparse facts (may be any IntakeFacts variant)

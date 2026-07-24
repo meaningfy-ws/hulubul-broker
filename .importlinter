@@ -1,0 +1,62 @@
+; =============================================================================
+; Import Linter — Cosmic Python Layering Guardrails
+; =============================================================================
+; Spec: plan.md — "strict operational Pydantic contracts in hulubul.core.models,
+; pure intake decisions in hulubul.request_intake.models and services."
+;
+; Principle: lower layers (core.models) must not import higher layers
+; (request_intake). Dependency direction: entrypoints → services → models,
+; and adapters → models. Core is inward-facing only.
+
+[importlinter]
+root_packages =
+    hulubul
+
+; --- Core is inward-facing only ---
+; core.models is the single authoritative domain contract. All outward
+; modules import inward toward core, never the reverse.
+;
+[importlinter:contract:core-isolation]
+name = Core must not import any business module
+type = forbidden
+source_modules =
+    hulubul.core
+forbidden_modules =
+    hulubul.request_intake
+
+; --- Core models have no internal layer dependencies ---
+; Prevent core from accidentally depending on service or entrypoint patterns.
+;
+[importlinter:contract:core-models-isolation]
+name = Core models must not import core.services or core.entrypoints
+type = forbidden
+source_modules =
+    hulubul.core.models
+forbidden_modules =
+    hulubul.core.services
+    hulubul.core.adapters
+    hulubul.core.entrypoints
+
+; --- Request intake models are pure (no services/entrypoints) ---
+; Separate domain models from orchestration logic.
+;
+[importlinter:contract:intake-models-isolation]
+name = Request intake models must not import services or entrypoints
+type = forbidden
+source_modules =
+    hulubul.request_intake.models
+forbidden_modules =
+    hulubul.request_intake.services
+    hulubul.request_intake.entrypoints
+
+; --- Request intake services do not import entrypoints ---
+; Services orchestrate models and adapters; entrypoints call services,
+; never vice versa.
+;
+[importlinter:contract:intake-services-isolation]
+name = Request intake services must not import entrypoints
+type = forbidden
+source_modules =
+    hulubul.request_intake.services
+forbidden_modules =
+    hulubul.request_intake.entrypoints

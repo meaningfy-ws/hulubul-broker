@@ -25,12 +25,14 @@ Mapping rules (mirror the linkml-store Neo4j mapping documented in the Makefile)
 Usage:  python model/gen/gen_neo4j_constraints.py model/linkml/hulubul.yaml
    or:  gen-neo4j-constraints model/linkml/hulubul.yaml   (once installed)
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import Any, ClassVar
 
 import click
-from linkml.utils.generator import Generator, shared_arguments
+from linkml.utils.generator import Generator, shared_arguments  # type: ignore[import-untyped]
 
 # LinkML scalar range -> Neo4j property type (for `IS :: <TYPE>` constraints).
 NEO4J_TYPES = {
@@ -51,14 +53,14 @@ NEO4J_TYPES = {
 
 
 @dataclass
-class Neo4jConstraintGenerator(Generator):
+class Neo4jConstraintGenerator(Generator):  # type: ignore[misc]
     """Generate Neo4j constraint DDL (Cypher) for the enforceable LinkML subset."""
 
-    generatorname = "gen-neo4j-constraints"
-    generatorversion = "1.0.0"
-    valid_formats = ["cypher"]
-    file_extension = "cypher"
-    uses_schemaloader = False  # we drive everything through self.schemaview
+    generatorname: ClassVar[str] = "gen-neo4j-constraints"
+    generatorversion: ClassVar[str] = "1.0.0"
+    valid_formats: ClassVar[list[str]] = ["cypher"]
+    file_extension: ClassVar[str] = "cypher"
+    uses_schemaloader: ClassVar[bool] = False  # we drive everything through self.schemaview
 
     def _is_entity(self, class_name: str) -> bool:
         """A class becomes a Neo4j node iff it is concrete and has an identifier."""
@@ -108,7 +110,7 @@ class Neo4jConstraintGenerator(Generator):
             )
         return out
 
-    def serialize(self, **kwargs) -> str:
+    def serialize(self, **kwargs: Any) -> str:
         sv = self.schemaview
         header = [
             f"// Neo4j constraints generated from {self.schema.name}",
@@ -124,10 +126,10 @@ class Neo4jConstraintGenerator(Generator):
         return "\n".join(header) + "\n\n".join(body) + "\n"
 
 
-@shared_arguments(Neo4jConstraintGenerator)
+@shared_arguments(Neo4jConstraintGenerator)  # type: ignore[misc]
 @click.command(name="gen-neo4j-constraints")
 @click.version_option(Neo4jConstraintGenerator.generatorversion, "-V", "--version")
-def cli(yamlfile, **kwargs):
+def cli(yamlfile: str, **kwargs: Any) -> None:
     """Generate Neo4j constraint DDL from a LinkML schema."""
     gen = Neo4jConstraintGenerator(yamlfile, **kwargs)
     print(gen.serialize())

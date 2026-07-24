@@ -15,6 +15,7 @@ Create payload rejects both created_at and updated_at; Neo4j owns both
 timestamps. All operation requests require shared envelope fields:
 operation_id, caller, session_id, actor_id, schema_version, correlation_id.
 """
+
 from __future__ import annotations
 
 from collections.abc import Mapping
@@ -169,8 +170,8 @@ class DataOperationResult(BaseModel):
         if isinstance(v, str):
             try:
                 DataOperationOutcome(v)
-            except ValueError:
-                raise ValueError(f"Invalid outcome: {v}")
+            except ValueError as err:
+                raise ValueError(f"Invalid outcome: {v}") from err
         return v
 
     @field_validator("success")
@@ -195,39 +196,31 @@ class DataOperationResult(BaseModel):
                 and operation == DataOperation.READ_DELIVERY_REQUEST
                 and v
             ):
-                raise ValueError(
-                    "Confirmed read operations must have write_dispatched=False"
-                )
+                raise ValueError("Confirmed read operations must have write_dispatched=False")
         return v
 
     @field_validator("created_at", "updated_at")
     @classmethod
     def confirmed_create_equal_timestamps(cls, v: Any, info: Any) -> Any:
         """Confirmed create requires created_at == updated_at."""
-        if "outcome" in info.data and "operation" in info.data:
-            outcome = info.data.get("outcome")
-            operation = info.data.get("operation")
-            if (
-                outcome == DataOperationOutcome.CONFIRMED
-                and operation == DataOperation.CREATE_DELIVERY_REQUEST
-            ):
-                # If this is the last field being validated, check equality
-                if field_name := info.field_name:
-                    if field_name == "updated_at" and "created_at" in info.data:
-                        created = info.data.get("created_at")
-                        if created and v and created != v:
-                            raise ValueError(
-                                "Confirmed create must have created_at == updated_at"
-                            )
+        if (
+            "outcome" in info.data
+            and "operation" in info.data
+            and info.data.get("outcome") == DataOperationOutcome.CONFIRMED
+            and info.data.get("operation") == DataOperation.CREATE_DELIVERY_REQUEST
+            and info.field_name == "updated_at"
+            and "created_at" in info.data
+        ):
+            created = info.data.get("created_at")
+            if created and v and created != v:
+                raise ValueError("Confirmed create must have created_at == updated_at")
         return v
 
 
 # TypeAdapter for strict validation before capability policy.
 # Validates the discriminated union and rejects unknown discriminators,
 # raw cypher/query, and undeclared fields as INVALID_CONTRACT.
-DATA_OPERATION_ADAPTER: TypeAdapter[DataOperationRequest] = TypeAdapter(
-    DataOperationRequest
-)
+DATA_OPERATION_ADAPTER: TypeAdapter[DataOperationRequest] = TypeAdapter(DataOperationRequest)
 
 
 def validate_data_operation_request(value: Mapping[str, Any]) -> DataOperationRequest:

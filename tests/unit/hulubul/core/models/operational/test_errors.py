@@ -17,7 +17,7 @@ from hulubul.core.models.operational.errors import (
 class TestErrorCodeEnum:
     """ErrorCode must contain all 21 required error codes."""
 
-    def test_has_all_required_codes(self):
+    def test_has_all_required_codes(self) -> None:
         """ErrorCode must have exactly the 21 required codes."""
         required_codes = {
             "INVALID_INPUT",
@@ -45,7 +45,7 @@ class TestErrorCodeEnum:
         assert error_codes == required_codes
 
     @pytest.mark.parametrize("code", tuple(ErrorCode))
-    def test_every_error_code_has_policy(self, code):
+    def test_every_error_code_has_policy(self, code: ErrorCode) -> None:
         """Every ErrorCode must have one policy row in ERROR_POLICY."""
         assert code in ERROR_POLICY
         policy = ERROR_POLICY[code]
@@ -55,13 +55,13 @@ class TestErrorCodeEnum:
 class TestErrorPolicy:
     """ERROR_POLICY must contain exhaustive, immutable, canonical row data."""
 
-    def test_policy_dict_is_complete(self):
+    def test_policy_dict_is_complete(self) -> None:
         """ERROR_POLICY must have a policy for every ErrorCode."""
         for code in ErrorCode:
             assert code in ERROR_POLICY
 
-    def test_policy_rows_have_required_fields(self):
-        """Each policy row must have category, retryable, message, log_level, log_fields, escalation."""
+    def test_policy_rows_have_required_fields(self) -> None:
+        """Each policy row must have category, retryable, message, and escalation."""
         for code, policy in ERROR_POLICY.items():
             assert policy.code is code
             assert isinstance(policy.category, ErrorCategory)
@@ -75,19 +75,19 @@ class TestErrorPolicy:
             assert all(isinstance(f, str) for f in policy.log_fields)
             assert isinstance(policy.escalation, ErrorEscalation)
 
-    def test_policy_category_values_are_valid(self):
+    def test_policy_category_values_are_valid(self) -> None:
         """All category values must be from ErrorCategory enum."""
         valid_categories = set(ErrorCategory)
         for policy in ERROR_POLICY.values():
             assert policy.category in valid_categories
 
-    def test_policy_escalation_values_are_valid(self):
+    def test_policy_escalation_values_are_valid(self) -> None:
         """All escalation values must be from ErrorEscalation enum."""
         valid_escalations = set(ErrorEscalation)
         for policy in ERROR_POLICY.values():
             assert policy.escalation in valid_escalations
 
-    def test_policy_log_fields_from_allowlist(self):
+    def test_policy_log_fields_from_allowlist(self) -> None:
         """All log fields must come from the allowed set."""
         allowed_fields = {
             "correlation_id",
@@ -103,10 +103,11 @@ class TestErrorPolicy:
 
         for policy in ERROR_POLICY.values():
             for field in policy.log_fields:
-                assert field in allowed_fields, f"Policy {policy.code} has disallowed field: {field}"
+                msg = f"Policy {policy.code} has disallowed field: {field}"
+                assert field in allowed_fields, msg
 
-    def test_controlled_errors_have_required_fields_always_available(self):
-        """Controlled errors must always have correlation_id, flow_id, component_id, error_code, schema_version."""
+    def test_controlled_errors_have_required_fields_always_available(self) -> None:
+        """Controlled errors must always have correlation_id and error_code."""
         required_always = {
             "correlation_id",
             "error_code",
@@ -119,7 +120,7 @@ class TestErrorPolicy:
                     f"Policy {policy.code} missing required field: {field}"
                 )
 
-    def test_specific_error_code_policies(self):
+    def test_specific_error_code_policies(self) -> None:
         """Test specific error codes have correct policy data."""
         # INVALID_INPUT
         invalid_input = ERROR_POLICY[ErrorCode.INVALID_INPUT]
@@ -144,30 +145,28 @@ class TestErrorPolicy:
 class TestOperationalError:
     """OperationalError enforces strict contract."""
 
-    def test_rejects_noncanonical_message(self):
+    def test_rejects_noncanonical_message(self) -> None:
         """OperationalError must reject message different from policy."""
-        ERROR_POLICY[ErrorCode.INVALID_INPUT].safe_message
-
         # Try to create with wrong message
         with pytest.raises(ValidationError):
-            OperationalError(
+            OperationalError(  # type: ignore[call-arg]
                 code=ErrorCode.INVALID_INPUT,
                 message="Wrong message",
                 correlation_id=UUID("12345678-1234-5678-1234-567812345678"),
             )
 
-    def test_rejects_noncanonical_category(self):
+    def test_rejects_noncanonical_category(self) -> None:
         """OperationalError must reject category different from policy."""
         # Try to create with wrong category
         with pytest.raises(ValidationError):
-            OperationalError(
+            OperationalError(  # type: ignore[call-arg]
                 code=ErrorCode.INVALID_INPUT,
                 category=ErrorCategory.DEPENDENCY,  # Wrong category
                 message=ERROR_POLICY[ErrorCode.INVALID_INPUT].safe_message,
                 correlation_id=UUID("12345678-1234-5678-1234-567812345678"),
             )
 
-    def test_rejects_noncanonical_retryable(self):
+    def test_rejects_noncanonical_retryable(self) -> None:
         """OperationalError must reject retryable different from policy."""
         # Try to create with wrong retryable value
         with pytest.raises(ValidationError):
@@ -179,7 +178,7 @@ class TestOperationalError:
                 correlation_id=UUID("12345678-1234-5678-1234-567812345678"),
             )
 
-    def test_accepts_canonical_error(self):
+    def test_accepts_canonical_error(self) -> None:
         """OperationalError must accept canonical policy values."""
         policy = ERROR_POLICY[ErrorCode.INVALID_INPUT]
         error = OperationalError(
@@ -192,7 +191,7 @@ class TestOperationalError:
         assert error.code == ErrorCode.INVALID_INPUT
         assert error.message == policy.safe_message
 
-    def test_is_frozen(self):
+    def test_is_frozen(self) -> None:
         """OperationalError must be frozen."""
         policy = ERROR_POLICY[ErrorCode.INVALID_INPUT]
         error = OperationalError(
@@ -210,25 +209,24 @@ class TestOperationalError:
 class TestValidationErrorConversion:
     """validation_error_to_operational_error must convert Pydantic ValidationError correctly."""
 
-    def test_converts_validation_error(self):
-        """validation_error_to_operational_error must convert ValidationError to OperationalError."""
+    def test_converts_validation_error(self) -> None:
+        """validation_error_to_operational_error converts ValidationError."""
 
         class TestModel(StrictModel):
             count: int
 
         try:
-            TestModel(count="not-an-int")
+            TestModel(count="not-an-int")  # type: ignore[arg-type]
         except ValidationError as e:
             error = validation_error_to_operational_error(
-                e,
-                correlation_id=UUID("12345678-1234-5678-1234-567812345678")
+                e, correlation_id=UUID("12345678-1234-5678-1234-567812345678")
             )
 
             assert isinstance(error, OperationalError)
             assert error.code == ErrorCode.INVALID_CONTRACT
             assert error.correlation_id == UUID("12345678-1234-5678-1234-567812345678")
 
-    def test_records_pydantic_rule_ids_only(self):
+    def test_records_pydantic_rule_ids_only(self) -> None:
         """Conversion must record only Pydantic rule IDs, never rejected values."""
 
         class TestModel(StrictModel):
@@ -238,8 +236,7 @@ class TestValidationErrorConversion:
             TestModel(text="")  # string_type validation
         except ValidationError as e:
             error = validation_error_to_operational_error(
-                e,
-                correlation_id=UUID("12345678-1234-5678-1234-567812345678")
+                e, correlation_id=UUID("12345678-1234-5678-1234-567812345678")
             )
 
             # Error should not contain the actual rejected value
@@ -249,24 +246,23 @@ class TestValidationErrorConversion:
                 # Rule ID should be present (e.g., "string_type", "value_error")
                 assert violation.rule_id is not None
                 # Violated value should not be stored
-                assert violation.violated_value is None
+                assert not hasattr(violation, "violated_value")
 
-    def test_omits_unavailable_identifiers_from_violations(self):
+    def test_omits_unavailable_identifiers_from_violations(self) -> None:
         """Violations must not fabricate unavailable identifiers."""
 
         class TestModel(StrictModel):
             count: int
 
         try:
-            TestModel(count="not-an-int")
+            TestModel(count="not-an-int")  # type: ignore[arg-type]
         except ValidationError as e:
             error = validation_error_to_operational_error(
-                e,
-                correlation_id=UUID("12345678-1234-5678-1234-567812345678")
+                e, correlation_id=UUID("12345678-1234-5678-1234-567812345678")
             )
 
             # Should have no request_id or operation_id
             for violation in error.violations:
                 # These fields should be absent, not null
-                assert not hasattr(violation, "request_id") or violation.request_id is None
-                assert not hasattr(violation, "operation_id") or violation.operation_id is None
+                assert not hasattr(violation, "request_id") or violation.request_id is None  # type: ignore[attr-defined]
+                assert not hasattr(violation, "operation_id") or violation.operation_id is None  # type: ignore[attr-defined]

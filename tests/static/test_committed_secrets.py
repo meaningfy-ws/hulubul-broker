@@ -4,6 +4,7 @@ These tests never assert on a real credential value: fixtures use a
 synthetic token, and the scanner's own contract (``SecretFinding``) is
 designed to carry only a path and a rule id, never the matched value.
 """
+
 from __future__ import annotations
 
 import subprocess
@@ -16,9 +17,7 @@ RULE_ID_CREDENTIAL_PATTERN = "credential-pattern"
 
 def _init_git_repo(repo: Path) -> None:
     subprocess.run(["git", "init", "-q"], cwd=repo, check=True)
-    subprocess.run(
-        ["git", "config", "user.email", "test@example.invalid"], cwd=repo, check=True
-    )
+    subprocess.run(["git", "config", "user.email", "test@example.invalid"], cwd=repo, check=True)
     subprocess.run(["git", "config", "user.name", "Test"], cwd=repo, check=True)
 
 
@@ -34,16 +33,14 @@ def run_scan_on_tracked_fixture(tmp_path: Path, secret_value: str) -> SecretFind
     tracked_file = repo / "tracked.txt"
     tracked_file.write_text(f"HULUBUL_LLM_API_KEY={secret_value}\n")
     subprocess.run(["git", "add", "tracked.txt"], cwd=repo, check=True)
-    subprocess.run(
-        ["git", "commit", "-q", "-m", "add tracked fixture"], cwd=repo, check=True
-    )
+    subprocess.run(["git", "commit", "-q", "-m", "add tracked fixture"], cwd=repo, check=True)
 
     findings = scan_tracked_files(repo)
     assert len(findings) == 1
     return findings[0]
 
 
-def test_secret_scan_reports_path_and_rule_without_matching_value(tmp_path):
+def test_secret_scan_reports_path_and_rule_without_matching_value(tmp_path: Path) -> None:
     finding = run_scan_on_tracked_fixture(tmp_path, "synthetic-provider-token")
 
     assert finding.path.endswith("tracked.txt")
@@ -51,28 +48,24 @@ def test_secret_scan_reports_path_and_rule_without_matching_value(tmp_path):
     assert "synthetic-provider-token" not in repr(finding)
 
 
-def test_secret_scan_ignores_empty_and_placeholder_values(tmp_path):
+def test_secret_scan_ignores_empty_and_placeholder_values(tmp_path: Path) -> None:
     repo = tmp_path / "repo"
     repo.mkdir()
     _init_git_repo(repo)
 
     tracked_file = repo / "tracked.txt"
     tracked_file.write_text(
-        "HULUBUL_LLM_API_KEY=\n"
-        "POSTGRES_PASSWORD=changeme\n"
-        "NEO4J_PASSWORD=changeme123\n"
+        "HULUBUL_LLM_API_KEY=\nPOSTGRES_PASSWORD=changeme\nNEO4J_PASSWORD=changeme123\n"
     )
     subprocess.run(["git", "add", "tracked.txt"], cwd=repo, check=True)
-    subprocess.run(
-        ["git", "commit", "-q", "-m", "add safe fixture"], cwd=repo, check=True
-    )
+    subprocess.run(["git", "commit", "-q", "-m", "add safe fixture"], cwd=repo, check=True)
 
     findings = scan_tracked_files(repo)
 
     assert findings == ()
 
 
-def test_safe_langflow_example_file_produces_no_findings():
+def test_safe_langflow_example_file_produces_no_findings() -> None:
     findings = scan_tracked_files(Path(__file__).resolve().parents[2])
 
     assert findings == ()

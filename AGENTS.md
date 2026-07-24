@@ -76,6 +76,16 @@ The following infrastructure is now in place:
 
 Remaining work (Tasks 2–12) — operational contracts, intake policy, LangFlow flows, BDD tests, evaluation framework.
 
+## Git workflow: PR-only merges
+
+**CRITICAL:** All changes to `develop` and `main` branches **MUST** go through
+pull requests with human review. No direct pushes allowed.
+
+- **Never push directly** to `develop` or `main`
+- **Always create a PR** for review before merging
+- Wait for explicit human approval before merging
+- This is the only merge path; no exceptions
+
 ## Local developer overrides
 
 An optional, git-ignored tier of instructions is imported below. If the file

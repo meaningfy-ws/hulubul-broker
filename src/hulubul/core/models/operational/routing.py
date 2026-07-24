@@ -1,9 +1,10 @@
 """Routing lookup validation and context adaptation."""
+
 from datetime import datetime
 from typing import Any
 from uuid import UUID
 
-from pydantic import model_validator
+from pydantic import Field, model_validator
 
 from .base import RequestId, SessionId, StrictModel, VersionedContract
 from .enums import (
@@ -34,7 +35,7 @@ class RoutingLookupRecord(StrictModel):
     binding_count: int
     active_relationship_count: int
     active_target_count: int
-    requests: list[dict[str, Any]] = []
+    requests: list[dict[str, Any]] = Field(default_factory=list)
 
     @model_validator(mode="after")
     def validate_cardinality(self) -> "RoutingLookupRecord":
@@ -48,7 +49,8 @@ class RoutingLookupRecord(StrictModel):
                 or len(self.requests) != 0
             ):
                 raise ValueError(
-                    "Cardinality inconsistent: 0 bindings but non-zero relationships/targets/requests"
+                    "Cardinality inconsistent: 0 bindings but non-zero "
+                    "relationships/targets/requests"
                 )
         elif self.binding_count == 1:
             # One binding case
@@ -58,7 +60,8 @@ class RoutingLookupRecord(StrictModel):
                 or len(self.requests) != 1
             ):
                 raise ValueError(
-                    "Cardinality inconsistent: 1 binding requires 1 relationship, 1 target, 1 request"
+                    "Cardinality inconsistent: 1 binding requires 1 relationship, "
+                    "1 target, 1 request"
                 )
         else:
             # Invalid: >1 bindings
@@ -167,7 +170,7 @@ def adapt_routing_lookup(
                     if request_status in POST_INTAKE_STATUSES:
                         routing_stage = RoutingStage.UNSUPPORTED
                         error = None
-                    elif request_status == RequestStatus.NEW or request_status == RequestStatus.NEEDS_CLARIFICATION:
+                    elif request_status in (RequestStatus.NEW, RequestStatus.NEEDS_CLARIFICATION):
                         routing_stage = RoutingStage.INTAKE
                         error = None
                     elif request_status == RequestStatus.COMPLETE:
@@ -211,7 +214,8 @@ class RouterInput(VersionedContract):
     """Input wrapper for routing operations.
 
     Combines MainFlowInput envelope with routing context lookup result.
-    Enforces matching schema_version, correlation_id, and session_id across wrapper and nested objects.
+    Enforces matching schema_version, correlation_id, and session_id across
+    wrapper and nested objects.
     """
 
     envelope: MainFlowInput
