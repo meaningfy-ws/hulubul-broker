@@ -19,19 +19,15 @@ import pytest
 from lfx.schema.message import Message
 
 from hulubul.core.models.operational import (
-    ErrorCategory,
     ErrorCode,
-    IntakeFacts,
     IntakeField,
     IntakeOutcome,
     IntakeResult,
     OperationalError,
-    RequestStatus,
     RouterOutcome,
     RouterResult,
     RouterTarget,
     RoutingReason,
-    RoutingStage,
 )
 from hulubul.core.models.operational.errors import ERROR_POLICY
 from hulubul.request_intake.entrypoints.langflow.components.hulubul.deterministic_renderer import (
@@ -49,7 +45,7 @@ from hulubul.request_intake.services.rendering import (
 
 
 @pytest.fixture
-def renderer_component():
+def renderer_component() -> DeterministicRendererComponent:
     """Create a DeterministicRendererComponent."""
     return DeterministicRendererComponent()
 
@@ -62,7 +58,9 @@ def renderer_component():
 class TestIntakeResultRendering:
     """Test rendering of IntakeResult with all outcome types."""
 
-    def test_clarification_required_outcome(self, renderer_component):
+    def test_clarification_required_outcome(
+        self, renderer_component: DeterministicRendererComponent
+    ) -> None:
         """Component renders IntakeResult with CLARIFICATION_REQUIRED outcome.
 
         - Dispatches on outcome discriminator
@@ -70,8 +68,6 @@ class TestIntakeResultRendering:
         - Returns canonical clarification question
         """
         result = IntakeResult(
-            schema_version="1.0.0",
-            correlation_id=uuid4(),
             outcome=IntakeOutcome.CLARIFICATION_REQUIRED,
             clarification_field=IntakeField.RECEIVER_IDENTITY,
             safe_user_message="Who should receive the parcel?",
@@ -81,12 +77,15 @@ class TestIntakeResultRendering:
         message = renderer_component.build_message()
 
         assert isinstance(message, Message)
+        assert isinstance(message.text, str)
         # Verify matches pure renderer
         expected_text = render_intake_result(result)
         assert message.text == expected_text
         assert "Who should receive the parcel?" in message.text
 
-    def test_request_complete_outcome(self, renderer_component):
+    def test_request_complete_outcome(
+        self, renderer_component: DeterministicRendererComponent
+    ) -> None:
         """Component renders IntakeResult with REQUEST_COMPLETE outcome.
 
         - Dispatches on outcome discriminator
@@ -95,8 +94,6 @@ class TestIntakeResultRendering:
         """
         request_id = "req-12345678"
         result = IntakeResult(
-            schema_version="1.0.0",
-            correlation_id=uuid4(),
             outcome=IntakeOutcome.REQUEST_COMPLETE,
             request_id=request_id,
             safe_user_message="Your parcel request is confirmed.",
@@ -106,13 +103,14 @@ class TestIntakeResultRendering:
         message = renderer_component.build_message()
 
         assert isinstance(message, Message)
+        assert isinstance(message.text, str)
         # Verify matches pure renderer
         expected_text = render_intake_result(result)
         assert message.text == expected_text
         assert request_id in message.text
         assert "confirmed" in message.text
 
-    def test_failure_outcome(self, renderer_component):
+    def test_failure_outcome(self, renderer_component: DeterministicRendererComponent) -> None:
         """Component renders IntakeResult with FAILURE outcome.
 
         - Dispatches on outcome discriminator
@@ -130,8 +128,6 @@ class TestIntakeResultRendering:
         )
 
         result = IntakeResult(
-            schema_version="1.0.0",
-            correlation_id=uuid4(),
             outcome=IntakeOutcome.FAILURE,
             error=error.model_dump_json(),
             safe_user_message="An error occurred",
@@ -141,6 +137,7 @@ class TestIntakeResultRendering:
         message = renderer_component.build_message()
 
         assert isinstance(message, Message)
+        assert isinstance(message.text, str)
         # Verify matches pure renderer
         expected_text = render_intake_result(result)
         assert message.text == expected_text
@@ -156,7 +153,7 @@ class TestIntakeResultRendering:
 class TestRouterResultRendering:
     """Test rendering of RouterResult with all outcome types."""
 
-    def test_routed_outcome(self, renderer_component):
+    def test_routed_outcome(self, renderer_component: DeterministicRendererComponent) -> None:
         """Component renders RouterResult with ROUTED outcome.
 
         - Dispatches on outcome discriminator
@@ -175,12 +172,15 @@ class TestRouterResultRendering:
         message = renderer_component.build_message()
 
         assert isinstance(message, Message)
+        assert isinstance(message.text, str)
         # Verify matches pure renderer
         expected_text = render_router_result(result)
         assert message.text == expected_text
         assert "intake flow" in message.text
 
-    def test_informational_outcome(self, renderer_component):
+    def test_informational_outcome(
+        self, renderer_component: DeterministicRendererComponent
+    ) -> None:
         """Component renders RouterResult with INFORMATIONAL outcome.
 
         - Dispatches on outcome discriminator
@@ -199,11 +199,14 @@ class TestRouterResultRendering:
         message = renderer_component.build_message()
 
         assert isinstance(message, Message)
+        assert isinstance(message.text, str)
         # Verify matches pure renderer
         expected_text = render_router_result(result)
         assert message.text == expected_text
 
-    def test_failure_outcome_with_error(self, renderer_component):
+    def test_failure_outcome_with_error(
+        self, renderer_component: DeterministicRendererComponent
+    ) -> None:
         """Component renders RouterResult with FAILURE outcome and error.
 
         - Dispatches on outcome discriminator
@@ -234,6 +237,7 @@ class TestRouterResultRendering:
         message = renderer_component.build_message()
 
         assert isinstance(message, Message)
+        assert isinstance(message.text, str)
         # Verify matches pure renderer
         expected_text = render_router_result(result)
         assert message.text == expected_text
@@ -249,7 +253,9 @@ class TestRouterResultRendering:
 class TestOperationalErrorRendering:
     """Test rendering of OperationalError directly."""
 
-    def test_operational_error_direct_rendering(self, renderer_component):
+    def test_operational_error_direct_rendering(
+        self, renderer_component: DeterministicRendererComponent
+    ) -> None:
         """Component renders OperationalError with canonical safe message.
 
         - Validates OperationalError structure
@@ -270,6 +276,7 @@ class TestOperationalErrorRendering:
         message = renderer_component.build_message()
 
         assert isinstance(message, Message)
+        assert isinstance(message.text, str)
         # Verify matches pure renderer
         expected_text = render_operational_error(error)
         assert message.text == expected_text
@@ -283,7 +290,9 @@ class TestOperationalErrorRendering:
 class TestInputValidation:
     """Test that renderer validates input and rejects free text."""
 
-    def test_rejects_free_text_as_result(self, renderer_component):
+    def test_rejects_free_text_as_result(
+        self, renderer_component: DeterministicRendererComponent
+    ) -> None:
         """Component rejects plain free-text strings as results.
 
         Renderer must receive validated typed contracts, not Agent prose.
@@ -293,7 +302,9 @@ class TestInputValidation:
         with pytest.raises((ValueError, KeyError, AttributeError, TypeError)):
             renderer_component.build_message()
 
-    def test_rejects_invalid_outcome_discriminator(self, renderer_component):
+    def test_rejects_invalid_outcome_discriminator(
+        self, renderer_component: DeterministicRendererComponent
+    ) -> None:
         """Component rejects results with invalid outcome discriminators."""
         invalid_result = {
             "schema_version": "1.0.0",
@@ -307,22 +318,24 @@ class TestInputValidation:
         with pytest.raises((ValueError, KeyError)):
             renderer_component.build_message()
 
-    def test_rejects_malformed_result(self, renderer_component):
+    def test_rejects_malformed_result(
+        self, renderer_component: DeterministicRendererComponent
+    ) -> None:
         """Component rejects malformed result objects."""
         renderer_component.result = {"malformed": "object"}
 
         with pytest.raises((ValueError, KeyError)):
             renderer_component.build_message()
 
-    def test_accepts_only_validated_contracts(self, renderer_component):
+    def test_accepts_only_validated_contracts(
+        self, renderer_component: DeterministicRendererComponent
+    ) -> None:
         """Component only accepts IntakeResult, RouterResult, or OperationalError.
 
         Never accepts Agent free text, unvalidated prose, or raw dicts.
         """
         # Valid contract succeeds
         valid_result = IntakeResult(
-            schema_version="1.0.0",
-            correlation_id=uuid4(),
             outcome=IntakeOutcome.CLARIFICATION_REQUIRED,
             clarification_field=IntakeField.RECEIVER_IDENTITY,
             safe_user_message="Who?",
@@ -332,6 +345,7 @@ class TestInputValidation:
         message = renderer_component.build_message()
 
         assert isinstance(message, Message)
+        assert isinstance(message.text, str)
         assert message.text is not None
 
 
@@ -343,11 +357,9 @@ class TestInputValidation:
 class TestResponseStructure:
     """Test response structure and typing."""
 
-    def test_response_is_message(self, renderer_component):
+    def test_response_is_message(self, renderer_component: DeterministicRendererComponent) -> None:
         """Response is typed Message, not raw dict."""
         result = IntakeResult(
-            schema_version="1.0.0",
-            correlation_id=uuid4(),
             outcome=IntakeOutcome.CLARIFICATION_REQUIRED,
             clarification_field=IntakeField.RECEIVER_IDENTITY,
             safe_user_message="Who?",
@@ -357,13 +369,14 @@ class TestResponseStructure:
         message = renderer_component.build_message()
 
         assert isinstance(message, Message)
+        assert isinstance(message.text, str)
         assert hasattr(message, "text")
 
-    def test_message_text_is_string(self, renderer_component):
+    def test_message_text_is_string(
+        self, renderer_component: DeterministicRendererComponent
+    ) -> None:
         """Message text is a string, not raw JSON."""
         result = IntakeResult(
-            schema_version="1.0.0",
-            correlation_id=uuid4(),
             outcome=IntakeOutcome.CLARIFICATION_REQUIRED,
             clarification_field=IntakeField.RECEIVER_IDENTITY,
             safe_user_message="Who?",
@@ -384,12 +397,10 @@ class TestResponseStructure:
 class TestComponentPurity:
     """Test that component does not perform prohibited operations."""
 
-    def test_no_model_calls(self, renderer_component):
+    def test_no_model_calls(self, renderer_component: DeterministicRendererComponent) -> None:
         """Component does not invoke language models."""
         # Component should only call pure rendering functions
         result = IntakeResult(
-            schema_version="1.0.0",
-            correlation_id=uuid4(),
             outcome=IntakeOutcome.CLARIFICATION_REQUIRED,
             clarification_field=IntakeField.RECEIVER_IDENTITY,
             safe_user_message="Who?",
@@ -401,12 +412,10 @@ class TestComponentPurity:
         # If it got here without exception, no model calls were made
         assert message is not None
 
-    def test_no_credential_access(self, renderer_component):
+    def test_no_credential_access(self, renderer_component: DeterministicRendererComponent) -> None:
         """Component does not read secrets or credentials."""
         # Verified by code inspection: component only calls pure rendering
         result = IntakeResult(
-            schema_version="1.0.0",
-            correlation_id=uuid4(),
             outcome=IntakeOutcome.CLARIFICATION_REQUIRED,
             clarification_field=IntakeField.RECEIVER_IDENTITY,
             safe_user_message="Who?",
@@ -417,11 +426,9 @@ class TestComponentPurity:
 
         assert message is not None
 
-    def test_deterministic_output(self, renderer_component):
+    def test_deterministic_output(self, renderer_component: DeterministicRendererComponent) -> None:
         """Same input always produces same output (no randomness)."""
         result = IntakeResult(
-            schema_version="1.0.0",
-            correlation_id=uuid4(),
             outcome=IntakeOutcome.CLARIFICATION_REQUIRED,
             clarification_field=IntakeField.RECEIVER_IDENTITY,
             safe_user_message="Who?",
@@ -444,21 +451,17 @@ class TestComponentPurity:
 class TestExhaustiveOutcomeCoverage:
     """Verify all outcome types are handled."""
 
-    def test_all_intake_outcomes(self, renderer_component):
+    def test_all_intake_outcomes(self, renderer_component: DeterministicRendererComponent) -> None:
         """Every IntakeOutcome variant produces a valid message."""
         for outcome in IntakeOutcome:
             if outcome == IntakeOutcome.CLARIFICATION_REQUIRED:
                 result = IntakeResult(
-                    schema_version="1.0.0",
-                    correlation_id=uuid4(),
                     outcome=outcome,
                     clarification_field=IntakeField.RECEIVER_IDENTITY,
                     safe_user_message="test",
                 )
             elif outcome == IntakeOutcome.REQUEST_COMPLETE:
                 result = IntakeResult(
-                    schema_version="1.0.0",
-                    correlation_id=uuid4(),
                     outcome=outcome,
                     request_id="req-123",
                     safe_user_message="test",
@@ -474,8 +477,6 @@ class TestExhaustiveOutcomeCoverage:
                     retryable=policy.retryable,
                 )
                 result = IntakeResult(
-                    schema_version="1.0.0",
-                    correlation_id=uuid4(),
                     outcome=outcome,
                     error=error.model_dump_json(),
                     safe_user_message="test",
@@ -485,9 +486,10 @@ class TestExhaustiveOutcomeCoverage:
             message = renderer_component.build_message()
 
             assert isinstance(message, Message)
+            assert isinstance(message.text, str)
             assert message.text is not None
 
-    def test_all_router_outcomes(self, renderer_component):
+    def test_all_router_outcomes(self, renderer_component: DeterministicRendererComponent) -> None:
         """Every RouterOutcome variant produces a valid message."""
         for outcome in RouterOutcome:
             if outcome == RouterOutcome.FAILURE:
@@ -523,4 +525,5 @@ class TestExhaustiveOutcomeCoverage:
             message = renderer_component.build_message()
 
             assert isinstance(message, Message)
+            assert isinstance(message.text, str)
             assert message.text is not None

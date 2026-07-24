@@ -1,6 +1,7 @@
 """Tests for data operation boundary components: validation, authorization, serialization."""
 
 from datetime import datetime
+from typing import Any
 from uuid import uuid4
 
 import pytest
@@ -9,18 +10,10 @@ from lfx.schema.message import Message
 
 from hulubul.core.models.operational import (
     CallerFlow,
-    CreateDeliveryRequestRequest,
     DataOperation,
     DataOperationOutcome,
-    DataOperationRequest,
-    DataOperationResult,
     ErrorCode,
-    GetRequestRoutingContextRequest,
-    OperationalError,
-    ReadDeliveryRequestRequest,
     RequestStatus,
-    SetRequestStatusRequest,
-    UpdateDeliveryRequestRequest,
     validate_data_operation_request,
 )
 from hulubul.request_intake.entrypoints.langflow.components.hulubul.data_operation_boundary import (
@@ -39,7 +32,7 @@ FIXED_OPERATION_ID = "op-12345678-1234-4000-8000-000000000000"
 FIXED_REQUEST_ID = "req-12345678-1234-4000-8000-000000000000"
 
 
-def lf00_get_routing_context_request():
+def lf00_get_routing_context_request() -> dict[str, Any]:
     """Create a valid LF-00 GET_REQUEST_ROUTING_CONTEXT request."""
     return {
         "operation": DataOperation.GET_REQUEST_ROUTING_CONTEXT.value,
@@ -52,7 +45,7 @@ def lf00_get_routing_context_request():
     }
 
 
-def lf00_create_request():
+def lf00_create_request() -> dict[str, Any]:
     """Create a LF-00 CREATE_DELIVERY_REQUEST request (invalid for LF-00)."""
     return {
         "operation": DataOperation.CREATE_DELIVERY_REQUEST.value,
@@ -67,7 +60,7 @@ def lf00_create_request():
     }
 
 
-def lf10_create_request():
+def lf10_create_request() -> dict[str, Any]:
     """Create a valid LF-10 CREATE_DELIVERY_REQUEST request."""
     return {
         "operation": DataOperation.CREATE_DELIVERY_REQUEST.value,
@@ -82,7 +75,7 @@ def lf10_create_request():
     }
 
 
-def lf70_create_request():
+def lf70_create_request() -> dict[str, Any]:
     """Create a valid LF-70 CREATE_DELIVERY_REQUEST request."""
     return {
         "operation": DataOperation.CREATE_DELIVERY_REQUEST.value,
@@ -97,7 +90,7 @@ def lf70_create_request():
     }
 
 
-def lf10_set_status_request():
+def lf10_set_status_request() -> dict[str, Any]:
     """Create a valid LF-10 SET_REQUEST_STATUS request."""
     return {
         "operation": DataOperation.SET_REQUEST_STATUS.value,
@@ -114,7 +107,7 @@ def lf10_set_status_request():
     }
 
 
-def lf70_read_request():
+def lf70_read_request() -> dict[str, Any]:
     """Create a valid LF-70 READ_DELIVERY_REQUEST request."""
     return {
         "operation": DataOperation.READ_DELIVERY_REQUEST.value,
@@ -128,28 +121,28 @@ def lf70_read_request():
     }
 
 
-def malformed_with_raw_query():
+def malformed_with_raw_query() -> dict[str, Any]:
     """Create a malformed request with raw 'query' field (MCP-specific)."""
     req = lf00_get_routing_context_request()
     req["query"] = "RETURN 1"
     return req
 
 
-def malformed_with_extra_fields():
+def malformed_with_extra_fields() -> dict[str, Any]:
     """Create a malformed request with undeclared fields."""
     req = lf00_get_routing_context_request()
     req["undeclared_field"] = "should not be here"
     return req
 
 
-def malformed_with_invalid_operation():
+def malformed_with_invalid_operation() -> dict[str, Any]:
     """Create a malformed request with unknown operation."""
     req = lf00_get_routing_context_request()
     req["operation"] = "INVALID_OPERATION_123"
     return req
 
 
-def malformed_create_missing_identifiers():
+def malformed_create_missing_identifiers() -> dict[str, Any]:
     """Create request missing required identifiers."""
     return {
         "operation": DataOperation.CREATE_DELIVERY_REQUEST.value,
@@ -165,13 +158,13 @@ def malformed_create_missing_identifiers():
 
 
 @pytest.fixture
-def request_boundary():
+def request_boundary() -> DataOperationRequestBoundaryComponent:
     """Create a DataOperationRequestBoundaryComponent."""
     return DataOperationRequestBoundaryComponent()
 
 
 @pytest.fixture
-def result_boundary():
+def result_boundary() -> DataOperationResultBoundaryComponent:
     """Create a DataOperationResultBoundaryComponent."""
     return DataOperationResultBoundaryComponent()
 
@@ -184,7 +177,9 @@ def result_boundary():
 class TestValidationBeforeAuthorization:
     """Test that validation failures are reported before authorization failures."""
 
-    def test_malformed_is_invalid_contract_not_authorization(self, request_boundary):
+    def test_malformed_is_invalid_contract_not_authorization(
+        self, request_boundary: DataOperationRequestBoundaryComponent
+    ) -> None:
         """Malformed request → INVALID_CONTRACT, not authorization error."""
         raw_value = malformed_with_raw_query()
         result = request_boundary.validate_request_value(raw_value)
@@ -194,7 +189,9 @@ class TestValidationBeforeAuthorization:
         assert data["code"] == ErrorCode.INVALID_CONTRACT.value
         assert data["category"] == "contract"
 
-    def test_unknown_operation_is_invalid_contract(self, request_boundary):
+    def test_unknown_operation_is_invalid_contract(
+        self, request_boundary: DataOperationRequestBoundaryComponent
+    ) -> None:
         """Unknown operation → INVALID_CONTRACT before capability check."""
         raw_value = malformed_with_invalid_operation()
         result = request_boundary.validate_request_value(raw_value)
@@ -203,7 +200,9 @@ class TestValidationBeforeAuthorization:
         data = result.data
         assert data["code"] == ErrorCode.INVALID_CONTRACT.value
 
-    def test_extra_fields_is_invalid_contract(self, request_boundary):
+    def test_extra_fields_is_invalid_contract(
+        self, request_boundary: DataOperationRequestBoundaryComponent
+    ) -> None:
         """Extra undeclared fields → INVALID_CONTRACT."""
         raw_value = malformed_with_extra_fields()
         result = request_boundary.validate_request_value(raw_value)
@@ -212,7 +211,9 @@ class TestValidationBeforeAuthorization:
         data = result.data
         assert data["code"] == ErrorCode.INVALID_CONTRACT.value
 
-    def test_missing_required_fields_is_invalid_contract(self, request_boundary):
+    def test_missing_required_fields_is_invalid_contract(
+        self, request_boundary: DataOperationRequestBoundaryComponent
+    ) -> None:
         """Missing required fields → INVALID_CONTRACT."""
         raw_value = malformed_create_missing_identifiers()
         result = request_boundary.validate_request_value(raw_value)
@@ -230,7 +231,9 @@ class TestValidationBeforeAuthorization:
 class TestLF00Authorization:
     """Test LF-00 authorization: only GET_REQUEST_ROUTING_CONTEXT allowed."""
 
-    def test_lf00_get_routing_context_allowed(self, request_boundary):
+    def test_lf00_get_routing_context_allowed(
+        self, request_boundary: DataOperationRequestBoundaryComponent
+    ) -> None:
         """LF-00 GET_REQUEST_ROUTING_CONTEXT is allowed."""
         raw_value = lf00_get_routing_context_request()
         result = request_boundary.validate_request_value(raw_value)
@@ -240,7 +243,9 @@ class TestLF00Authorization:
         parsed = validate_data_operation_request(raw_value)
         assert parsed.operation == DataOperation.GET_REQUEST_ROUTING_CONTEXT
 
-    def test_lf00_create_denied(self, request_boundary):
+    def test_lf00_create_denied(
+        self, request_boundary: DataOperationRequestBoundaryComponent
+    ) -> None:
         """LF-00 CREATE_DELIVERY_REQUEST is denied."""
         raw_value = lf00_create_request()
         result = request_boundary.validate_request_value(raw_value)
@@ -249,7 +254,9 @@ class TestLF00Authorization:
         data = result.data
         assert data["code"] == ErrorCode.OPERATION_NOT_ALLOWED.value
 
-    def test_lf00_update_denied(self, request_boundary):
+    def test_lf00_update_denied(
+        self, request_boundary: DataOperationRequestBoundaryComponent
+    ) -> None:
         """LF-00 UPDATE_DELIVERY_REQUEST is denied."""
         raw_value = lf00_get_routing_context_request()
         raw_value["operation"] = DataOperation.UPDATE_DELIVERY_REQUEST.value
@@ -265,7 +272,9 @@ class TestLF00Authorization:
         data = result.data
         assert data["code"] == ErrorCode.OPERATION_NOT_ALLOWED.value
 
-    def test_lf00_read_denied(self, request_boundary):
+    def test_lf00_read_denied(
+        self, request_boundary: DataOperationRequestBoundaryComponent
+    ) -> None:
         """LF-00 READ_DELIVERY_REQUEST is denied."""
         raw_value = lf00_get_routing_context_request()
         raw_value["operation"] = DataOperation.READ_DELIVERY_REQUEST.value
@@ -277,7 +286,9 @@ class TestLF00Authorization:
         data = result.data
         assert data["code"] == ErrorCode.OPERATION_NOT_ALLOWED.value
 
-    def test_lf00_set_status_denied(self, request_boundary):
+    def test_lf00_set_status_denied(
+        self, request_boundary: DataOperationRequestBoundaryComponent
+    ) -> None:
         """LF-00 SET_REQUEST_STATUS is denied."""
         raw_value = lf00_get_routing_context_request()
         raw_value["operation"] = DataOperation.SET_REQUEST_STATUS.value
@@ -301,7 +312,9 @@ class TestLF00Authorization:
 class TestLF10Authorization:
     """Test LF-10 authorization: CREATE, READ, UPDATE, SET_REQUEST_STATUS allowed."""
 
-    def test_lf10_create_allowed(self, request_boundary):
+    def test_lf10_create_allowed(
+        self, request_boundary: DataOperationRequestBoundaryComponent
+    ) -> None:
         """LF-10 CREATE_DELIVERY_REQUEST is allowed."""
         raw_value = lf10_create_request()
         result = request_boundary.validate_request_value(raw_value)
@@ -310,7 +323,9 @@ class TestLF10Authorization:
         parsed = validate_data_operation_request(raw_value)
         assert parsed.operation == DataOperation.CREATE_DELIVERY_REQUEST
 
-    def test_lf10_read_allowed(self, request_boundary):
+    def test_lf10_read_allowed(
+        self, request_boundary: DataOperationRequestBoundaryComponent
+    ) -> None:
         """LF-10 READ_DELIVERY_REQUEST is allowed."""
         raw_value = lf10_create_request()
         raw_value["operation"] = DataOperation.READ_DELIVERY_REQUEST.value
@@ -322,7 +337,9 @@ class TestLF10Authorization:
 
         assert isinstance(result, Message)
 
-    def test_lf10_update_allowed(self, request_boundary):
+    def test_lf10_update_allowed(
+        self, request_boundary: DataOperationRequestBoundaryComponent
+    ) -> None:
         """LF-10 UPDATE_DELIVERY_REQUEST is allowed."""
         raw_value = lf10_create_request()
         raw_value["operation"] = DataOperation.UPDATE_DELIVERY_REQUEST.value
@@ -337,14 +354,18 @@ class TestLF10Authorization:
 
         assert isinstance(result, Message)
 
-    def test_lf10_set_status_allowed(self, request_boundary):
+    def test_lf10_set_status_allowed(
+        self, request_boundary: DataOperationRequestBoundaryComponent
+    ) -> None:
         """LF-10 SET_REQUEST_STATUS is allowed."""
         raw_value = lf10_set_status_request()
         result = request_boundary.validate_request_value(raw_value)
 
         assert isinstance(result, Message)
 
-    def test_lf10_get_routing_context_denied(self, request_boundary):
+    def test_lf10_get_routing_context_denied(
+        self, request_boundary: DataOperationRequestBoundaryComponent
+    ) -> None:
         """LF-10 GET_REQUEST_ROUTING_CONTEXT is denied."""
         raw_value = lf10_create_request()
         raw_value["operation"] = DataOperation.GET_REQUEST_ROUTING_CONTEXT.value
@@ -366,7 +387,9 @@ class TestLF10Authorization:
 class TestLF70Authorization:
     """Test LF-70 authorization: all five operations allowed."""
 
-    def test_lf70_get_routing_context_allowed(self, request_boundary):
+    def test_lf70_get_routing_context_allowed(
+        self, request_boundary: DataOperationRequestBoundaryComponent
+    ) -> None:
         """LF-70 GET_REQUEST_ROUTING_CONTEXT is allowed."""
         raw_value = lf70_create_request()
         raw_value["operation"] = DataOperation.GET_REQUEST_ROUTING_CONTEXT.value
@@ -377,21 +400,27 @@ class TestLF70Authorization:
 
         assert isinstance(result, Message)
 
-    def test_lf70_create_allowed(self, request_boundary):
+    def test_lf70_create_allowed(
+        self, request_boundary: DataOperationRequestBoundaryComponent
+    ) -> None:
         """LF-70 CREATE_DELIVERY_REQUEST is allowed."""
         raw_value = lf70_create_request()
         result = request_boundary.validate_request_value(raw_value)
 
         assert isinstance(result, Message)
 
-    def test_lf70_read_allowed(self, request_boundary):
+    def test_lf70_read_allowed(
+        self, request_boundary: DataOperationRequestBoundaryComponent
+    ) -> None:
         """LF-70 READ_DELIVERY_REQUEST is allowed."""
         raw_value = lf70_read_request()
         result = request_boundary.validate_request_value(raw_value)
 
         assert isinstance(result, Message)
 
-    def test_lf70_update_allowed(self, request_boundary):
+    def test_lf70_update_allowed(
+        self, request_boundary: DataOperationRequestBoundaryComponent
+    ) -> None:
         """LF-70 UPDATE_DELIVERY_REQUEST is allowed."""
         raw_value = lf70_create_request()
         raw_value["operation"] = DataOperation.UPDATE_DELIVERY_REQUEST.value
@@ -406,7 +435,9 @@ class TestLF70Authorization:
 
         assert isinstance(result, Message)
 
-    def test_lf70_set_status_allowed(self, request_boundary):
+    def test_lf70_set_status_allowed(
+        self, request_boundary: DataOperationRequestBoundaryComponent
+    ) -> None:
         """LF-70 SET_REQUEST_STATUS is allowed."""
         raw_value = lf70_create_request()
         raw_value["operation"] = DataOperation.SET_REQUEST_STATUS.value
@@ -430,7 +461,9 @@ class TestLF70Authorization:
 class TestPreconditionsValidation:
     """Test precondition validation for state transitions."""
 
-    def test_set_status_valid_transition(self, request_boundary):
+    def test_set_status_valid_transition(
+        self, request_boundary: DataOperationRequestBoundaryComponent
+    ) -> None:
         """Valid status transition passes preconditions."""
         raw_value = lf10_set_status_request()
         result = request_boundary.validate_request_value(raw_value)
@@ -438,7 +471,9 @@ class TestPreconditionsValidation:
         # Should succeed (not error)
         assert isinstance(result, Message)
 
-    def test_set_status_invalid_transition(self, request_boundary):
+    def test_set_status_invalid_transition(
+        self, request_boundary: DataOperationRequestBoundaryComponent
+    ) -> None:
         """Invalid status transition fails preconditions."""
         raw_value = lf10_set_status_request()
         # Use an invalid transition (COMPLETE -> NEW is not allowed)
@@ -451,7 +486,9 @@ class TestPreconditionsValidation:
         data = result.data
         assert data["code"] == ErrorCode.INVALID_STATUS_TRANSITION.value
 
-    def test_set_status_invalid_expected_timestamp_format(self, request_boundary):
+    def test_set_status_invalid_expected_timestamp_format(
+        self, request_boundary: DataOperationRequestBoundaryComponent
+    ) -> None:
         """Invalid timestamp format fails validation."""
         raw_value = lf10_set_status_request()
         raw_value["expected_updated_at"] = "not-a-valid-timestamp"
@@ -462,7 +499,9 @@ class TestPreconditionsValidation:
         data = result.data
         assert data["code"] == ErrorCode.INVALID_CONTRACT.value
 
-    def test_set_status_invalid_status_value(self, request_boundary):
+    def test_set_status_invalid_status_value(
+        self, request_boundary: DataOperationRequestBoundaryComponent
+    ) -> None:
         """Invalid status value fails validation."""
         raw_value = lf10_set_status_request()
         raw_value["expected_status"] = "INVALID_STATUS_123"
@@ -482,7 +521,9 @@ class TestPreconditionsValidation:
 class TestResultPostconditionsValidation:
     """Test result postcondition validation."""
 
-    def test_confirmed_write_result_valid(self, result_boundary):
+    def test_confirmed_write_result_valid(
+        self, result_boundary: DataOperationResultBoundaryComponent
+    ) -> None:
         """Confirmed write result with dispatch=true and count=1 is valid."""
         request_dict = lf10_create_request()
 
@@ -508,7 +549,9 @@ class TestResultPostconditionsValidation:
         # Should succeed (have outcome field, not error code)
         assert data.get("outcome") is not None or data.get("success") is not None
 
-    def test_mismatched_operation_fails_postcondition(self, result_boundary):
+    def test_mismatched_operation_fails_postcondition(
+        self, result_boundary: DataOperationResultBoundaryComponent
+    ) -> None:
         """Mismatched operation between request and result fails."""
         request_dict = lf10_create_request()
 
@@ -526,7 +569,9 @@ class TestResultPostconditionsValidation:
         data = output.data
         assert data["code"] == ErrorCode.INVALID_CONTRACT.value
 
-    def test_write_affected_count_mismatch_fails(self, result_boundary):
+    def test_write_affected_count_mismatch_fails(
+        self, result_boundary: DataOperationResultBoundaryComponent
+    ) -> None:
         """Write with affected count != 1 fails postcondition."""
         request_dict = lf10_create_request()
 
@@ -559,7 +604,9 @@ class TestResultPostconditionsValidation:
 class TestNoRawDictOutput:
     """Test that output is always typed Message/JSON, never raw dict."""
 
-    def test_valid_request_returns_message(self, request_boundary):
+    def test_valid_request_returns_message(
+        self, request_boundary: DataOperationRequestBoundaryComponent
+    ) -> None:
         """Valid request returns typed Message."""
         raw_value = lf10_create_request()
         result = request_boundary.validate_request_value(raw_value)
@@ -567,7 +614,9 @@ class TestNoRawDictOutput:
         assert isinstance(result, Message)
         assert not isinstance(result, dict)
 
-    def test_invalid_request_returns_json(self, request_boundary):
+    def test_invalid_request_returns_json(
+        self, request_boundary: DataOperationRequestBoundaryComponent
+    ) -> None:
         """Invalid request returns typed JSON with error."""
         raw_value = malformed_with_raw_query()
         result = request_boundary.validate_request_value(raw_value)
@@ -575,7 +624,9 @@ class TestNoRawDictOutput:
         assert isinstance(result, JSON)
         assert not isinstance(result, dict)
 
-    def test_result_returns_json(self, result_boundary):
+    def test_result_returns_json(
+        self, result_boundary: DataOperationResultBoundaryComponent
+    ) -> None:
         """Result validation returns typed JSON."""
         request_dict = lf10_create_request()
 
@@ -602,7 +653,9 @@ class TestNoRawDictOutput:
 class TestCorrelationIdPatching:
     """Test that boundary patches actual correlation_id into errors."""
 
-    def test_error_has_request_correlation_id(self, request_boundary):
+    def test_error_has_request_correlation_id(
+        self, request_boundary: DataOperationRequestBoundaryComponent
+    ) -> None:
         """Error response includes request's correlation_id, not fabricated."""
         raw_value = lf00_create_request()
         result = request_boundary.validate_request_value(raw_value)
@@ -612,7 +665,9 @@ class TestCorrelationIdPatching:
         # Should use request's correlation_id
         assert str(data["correlation_id"]) == str(FIXED_CORRELATION_ID)
 
-    def test_error_has_result_correlation_id(self, result_boundary):
+    def test_error_has_result_correlation_id(
+        self, result_boundary: DataOperationResultBoundaryComponent
+    ) -> None:
         """Result error uses result's correlation_id if available."""
         request_dict = lf10_create_request()
 

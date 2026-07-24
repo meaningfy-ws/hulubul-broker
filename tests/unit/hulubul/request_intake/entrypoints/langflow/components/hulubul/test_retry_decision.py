@@ -30,7 +30,7 @@ from hulubul.request_intake.services.retry_policy import (
 
 
 @pytest.fixture
-def retry_component():
+def retry_component() -> RetryDecisionComponent:
     """Create a RetryDecisionComponent."""
     return RetryDecisionComponent()
 
@@ -54,7 +54,9 @@ class TestRetryableFailures:
             FailureKind.SERVICE_UNAVAILABLE,
         ],
     )
-    def test_retryable_failure_delegation(self, retry_component, failure_kind):
+    def test_retryable_failure_delegation(
+        self, retry_component: RetryDecisionComponent, failure_kind: FailureKind
+    ) -> None:
         """Component output matches pure policy for retryable failures.
 
         Retryable failures get:
@@ -79,7 +81,7 @@ class TestRetryableFailures:
 class TestRepairFailures:
     """Test tool-less repair (one repair attempt) failures."""
 
-    def test_malformed_result_delegation(self, retry_component):
+    def test_malformed_result_delegation(self, retry_component: RetryDecisionComponent) -> None:
         """Component output matches pure policy for malformed result.
 
         Malformed result gets:
@@ -117,7 +119,9 @@ class TestPermanentFailures:
             FailureKind.AFFECTED_COUNT,
         ],
     )
-    def test_permanent_failure_delegation(self, retry_component, failure_kind):
+    def test_permanent_failure_delegation(
+        self, retry_component: RetryDecisionComponent, failure_kind: FailureKind
+    ) -> None:
         """Component output matches pure policy for permanent failures.
 
         Permanent failures get:
@@ -147,7 +151,7 @@ class TestPermanentFailures:
 class TestInputValidation:
     """Test component input validation."""
 
-    def test_failure_kind_as_enum(self, retry_component):
+    def test_failure_kind_as_enum(self, retry_component: RetryDecisionComponent) -> None:
         """Component accepts FailureKind enum directly."""
         retry_component.failure_kind = FailureKind.TIMEOUT
         result = retry_component.build_decision()
@@ -155,7 +159,7 @@ class TestInputValidation:
         assert isinstance(result, JSON)
         assert result.data["action"] == RetryAction.RETRY.value
 
-    def test_failure_kind_as_string(self, retry_component):
+    def test_failure_kind_as_string(self, retry_component: RetryDecisionComponent) -> None:
         """Component accepts FailureKind as string value."""
         retry_component.failure_kind = "timeout"
         result = retry_component.build_decision()
@@ -163,14 +167,14 @@ class TestInputValidation:
         assert isinstance(result, JSON)
         assert result.data["action"] == RetryAction.RETRY.value
 
-    def test_invalid_failure_kind_rejection(self, retry_component):
+    def test_invalid_failure_kind_rejection(self, retry_component: RetryDecisionComponent) -> None:
         """Component rejects invalid FailureKind values."""
         retry_component.failure_kind = "invalid_failure_kind"
 
         with pytest.raises(ValueError):
             retry_component.build_decision()
 
-    def test_none_failure_kind_rejection(self, retry_component):
+    def test_none_failure_kind_rejection(self, retry_component: RetryDecisionComponent) -> None:
         """Component rejects None failure_kind."""
         retry_component.failure_kind = None
 
@@ -186,7 +190,7 @@ class TestInputValidation:
 class TestResponseStructure:
     """Test response structure and typing."""
 
-    def test_response_is_json(self, retry_component):
+    def test_response_is_json(self, retry_component: RetryDecisionComponent) -> None:
         """Response is typed JSON, not raw dict."""
         retry_component.failure_kind = FailureKind.TIMEOUT
         result = retry_component.build_decision()
@@ -194,7 +198,9 @@ class TestResponseStructure:
         assert isinstance(result, JSON)
         assert hasattr(result, "data")
 
-    def test_response_contains_required_fields(self, retry_component):
+    def test_response_contains_required_fields(
+        self, retry_component: RetryDecisionComponent
+    ) -> None:
         """Response contains all required decision fields."""
         retry_component.failure_kind = FailureKind.TIMEOUT
         result = retry_component.build_decision()
@@ -203,7 +209,7 @@ class TestResponseStructure:
         assert "should_retry" in result.data
         assert "max_retries" in result.data
 
-    def test_response_field_types(self, retry_component):
+    def test_response_field_types(self, retry_component: RetryDecisionComponent) -> None:
         """Response fields have correct types."""
         retry_component.failure_kind = FailureKind.TIMEOUT
         result = retry_component.build_decision()
@@ -212,7 +218,9 @@ class TestResponseStructure:
         assert isinstance(result.data["should_retry"], bool)
         assert isinstance(result.data["max_retries"], int)
 
-    def test_response_action_is_valid_enum_value(self, retry_component):
+    def test_response_action_is_valid_enum_value(
+        self, retry_component: RetryDecisionComponent
+    ) -> None:
         """Response action is a valid RetryAction enum value."""
         retry_component.failure_kind = FailureKind.TIMEOUT
         result = retry_component.build_decision()
@@ -229,7 +237,7 @@ class TestResponseStructure:
 class TestComponentPurity:
     """Test that component does not perform prohibited operations."""
 
-    def test_no_sleep(self, retry_component):
+    def test_no_sleep(self, retry_component: RetryDecisionComponent) -> None:
         """Component does not sleep or delay."""
         # This is a behavior test - we verify by execution time
         retry_component.failure_kind = FailureKind.TIMEOUT
@@ -242,7 +250,7 @@ class TestComponentPurity:
         # Should complete in < 100ms (generous for CI)
         assert elapsed < 0.1
 
-    def test_no_external_io(self, retry_component):
+    def test_no_external_io(self, retry_component: RetryDecisionComponent) -> None:
         """Component performs no external I/O (verified by mocking)."""
         # Component should only call pure functions; no file I/O, network, etc.
         # This is implicit in the fact that it only calls retry_policy functions
@@ -261,7 +269,7 @@ class TestComponentPurity:
 class TestExhaustiveMatrix:
     """Verify component handles all FailureKind variants."""
 
-    def test_all_failure_kinds_covered(self, retry_component):
+    def test_all_failure_kinds_covered(self, retry_component: RetryDecisionComponent) -> None:
         """Every FailureKind variant produces a valid decision."""
         for failure_kind in FailureKind:
             retry_component.failure_kind = failure_kind

@@ -67,7 +67,6 @@ __all__ = [
     "DATA_OPERATION_ADAPTER",
     "ERROR_POLICY",
     "POST_INTAKE_STATUSES",
-    # Envelope
     "ActorContext",
     "ActorRole",
     "ActorUrn",
@@ -78,11 +77,10 @@ __all__ = [
     "CreateDeliveryRequestRequest",
     "DataOperation",
     "DataOperationOutcome",
-    # Data Operations (Task 8)
     "DataOperationRequest",
     "DataOperationResult",
-    "DependencyKind",
     "DeliveryRequestSnapshot",
+    "DependencyKind",
     "ErrorCategory",
     "ErrorCode",
     "ErrorEscalation",
@@ -101,11 +99,9 @@ __all__ = [
     "MainFlowInput",
     "MutationConfirmation",
     "NonBlankText",
-    # Errors
     "OperationalError",
     "ReadDeliveryRequestRequest",
     "RequestId",
-    # Enums
     "RequestStatus",
     "RetryAction",
     "RouterInput",
@@ -113,13 +109,11 @@ __all__ = [
     "RouterResult",
     "RouterTarget",
     "RoutingContext",
-    # Routing
     "RoutingLookupRecord",
     "RoutingReason",
     "RoutingStage",
     "SessionId",
     "SetRequestStatusRequest",
-    # Base
     "StrictModel",
     "UpdateDeliveryRequestRequest",
     "VersionedContract",

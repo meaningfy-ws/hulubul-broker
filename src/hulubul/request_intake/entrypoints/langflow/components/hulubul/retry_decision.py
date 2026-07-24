@@ -10,6 +10,8 @@ The component performs no orchestration, no retries, no delays, no I/O,
 and makes no model calls. It is a thin, deterministic adapter.
 """
 
+from typing import Any
+
 from lfx.custom.custom_component.component import Component
 from lfx.schema.data import JSON
 
@@ -30,7 +32,7 @@ class RetryDecisionComponent(Component):
     containing action, should_retry bool, and max_retries int.
     """
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """Initialize the RetryDecisionComponent."""
         super().__init__(**kwargs)
         self.failure_kind: str | FailureKind | None = None
@@ -65,7 +67,8 @@ class RetryDecisionComponent(Component):
         # Validate that we received a FailureKind enum
         if not isinstance(failure_kind, FailureKind):
             raise ValueError(
-                f"INVALID_INPUT: failure_kind must be FailureKind enum or string, got {type(failure_kind)}"
+                "INVALID_INPUT: failure_kind must be FailureKind enum or string, "
+                f"got {type(failure_kind)}"
             )
 
         # Delegate to pure policy functions

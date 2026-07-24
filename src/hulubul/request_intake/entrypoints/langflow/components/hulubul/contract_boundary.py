@@ -17,13 +17,12 @@ from typing import Any
 from uuid import uuid4
 
 from lfx.custom.custom_component.component import Component
-from lfx.schema.data import Data, JSON
+from lfx.schema.data import JSON
 from lfx.schema.message import Message
 from pydantic import BaseModel, TypeAdapter, ValidationError
 
 from hulubul.core.models.operational import (
     ContractKind,
-    DataOperationRequest,
     DataOperationResult,
     DeliveryRequestSnapshot,
     ErrorCode,
@@ -40,10 +39,10 @@ from hulubul.core.models.operational.data_operations import DATA_OPERATION_ADAPT
 from hulubul.core.models.operational.errors import ERROR_POLICY
 
 __all__ = [
-    "RouterInputBoundaryComponent",
-    "IntakeInputBoundaryComponent",
-    "ContractResultBoundaryComponent",
     "CONTRACT_TYPES",
+    "ContractResultBoundaryComponent",
+    "IntakeInputBoundaryComponent",
+    "RouterInputBoundaryComponent",
 ]
 
 # ============================================================================
@@ -65,9 +64,9 @@ CONTRACT_TYPES = {
 }
 
 # Verify registry contains all 11 ContractKind values
-assert set(CONTRACT_TYPES.keys()) == set(
-    ContractKind
-), "Registry missing or has extra ContractKind values"
+assert set(CONTRACT_TYPES.keys()) == set(ContractKind), (
+    "Registry missing or has extra ContractKind values"
+)
 
 
 class RouterInputBoundaryComponent(Component):
@@ -77,7 +76,7 @@ class RouterInputBoundaryComponent(Component):
     They cannot be overridden by user input, model output, prose, or tweaks.
     """
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """Initialize the RouterInputBoundaryComponent."""
         super().__init__(**kwargs)
         self.envelope: MainFlowInput | None = None
@@ -117,7 +116,7 @@ class IntakeInputBoundaryComponent(Component):
     They cannot be overridden by user input, model output, prose, or tweaks.
     """
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """Initialize the IntakeInputBoundaryComponent."""
         super().__init__(**kwargs)
         self.envelope: MainFlowInput | None = None
@@ -151,14 +150,14 @@ class IntakeInputBoundaryComponent(Component):
 
 
 class ContractResultBoundaryComponent(Component):
-    """Validates and serializes contract results (OperationalError, RouterResult, IntakeResult, etc.).
+    """Validates and serializes contract results (OperationalError, RouterResult, IntakeResult).
 
     Uses registry-driven conversion for all 11 ContractKind values. Validates/type-translates
     only declared LFX Data/JSON values. Catches validation/type failures → INVALID_CONTRACT.
     Unexpected programming errors remain exceptions.
     """
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """Initialize the ContractResultBoundaryComponent."""
         super().__init__(**kwargs)
 
@@ -184,15 +183,17 @@ class ContractResultBoundaryComponent(Component):
             return self._make_error_response(ErrorCode.INVALID_CONTRACT)
 
         # Try to validate against each registered contract type
-        last_error = None
-
-        for contract_kind, model_type in CONTRACT_TYPES.items():
+        for _contract_kind, model_type in CONTRACT_TYPES.items():
             try:
                 # Handle TypeAdapter (for DATA_OPERATION_REQUEST)
                 if isinstance(model_type, TypeAdapter):
                     instance = model_type.validate_python(value)
                     # Success: return as JSON
-                    return JSON(data=instance.model_dump() if hasattr(instance, 'model_dump') else dict(instance))
+                    if hasattr(instance, "model_dump"):
+                        data = instance.model_dump()
+                    else:
+                        data = dict(instance)
+                    return JSON(data=data)
                 # Handle BaseModel classes
                 elif isinstance(model_type, type) and issubclass(model_type, BaseModel):
                     instance = model_type.model_validate(value)
@@ -201,9 +202,8 @@ class ContractResultBoundaryComponent(Component):
                 else:
                     # Unknown type, skip
                     continue
-            except ValidationError as e:
-                # Track error for debugging, continue to next type
-                last_error = e
+            except ValidationError:
+                # Validation failure, continue to next type
                 continue
             except (TypeError, ValueError, AttributeError):
                 # Other validation issues, continue

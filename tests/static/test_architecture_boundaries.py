@@ -51,7 +51,9 @@ import hulubul.core.models.operational
 print('langflow' in sys.modules)
 """
         output = run_python_isolated(code)
-        assert output == "False", f"langflow was loaded when importing core.models.operational: {output}"
+        assert output == "False", (
+            f"langflow was loaded when importing core.models.operational: {output}"
+        )
 
     def test_core_models_package_does_not_load_lfx(self) -> None:
         """Importing core.models package must not load lfx."""
@@ -95,4 +97,6 @@ import hulubul.request_intake.services
 print('langflow' in sys.modules)
 """
         output = run_python_isolated(code)
-        assert output == "False", f"langflow was loaded when importing request_intake.services: {output}"
+        assert output == "False", (
+            f"langflow was loaded when importing request_intake.services: {output}"
+        )

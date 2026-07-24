@@ -38,7 +38,7 @@ class DeterministicRendererComponent(Component):
     or unvalidated prose.
     """
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """Initialize the DeterministicRendererComponent."""
         super().__init__(**kwargs)
         self.result: dict[str, Any] | Any = None
@@ -63,8 +63,7 @@ class DeterministicRendererComponent(Component):
 
         if not isinstance(self.result, dict):
             raise ValueError(
-                "INVALID_INPUT: result must be a dict (validated contract), "
-                "not raw text or prose"
+                "INVALID_INPUT: result must be a dict (validated contract), not raw text or prose"
             )
 
         # Attempt to detect and validate contract type
@@ -92,9 +91,7 @@ class DeterministicRendererComponent(Component):
         outcome_value = result_dict.get("outcome")
 
         # Try IntakeResult if outcome is IntakeOutcome value
-        if isinstance(outcome_value, str) and outcome_value in {
-            e.value for e in IntakeOutcome
-        }:
+        if isinstance(outcome_value, str) and outcome_value in {e.value for e in IntakeOutcome}:
             try:
                 intake_result = IntakeResult.model_validate(result_dict)
                 return render_intake_result(intake_result)
@@ -102,9 +99,7 @@ class DeterministicRendererComponent(Component):
                 pass
 
         # Try RouterResult if outcome is RouterOutcome value
-        if isinstance(outcome_value, str) and outcome_value in {
-            e.value for e in RouterOutcome
-        }:
+        if isinstance(outcome_value, str) and outcome_value in {e.value for e in RouterOutcome}:
             try:
                 router_result = RouterResult.model_validate(result_dict)
                 return render_router_result(router_result)

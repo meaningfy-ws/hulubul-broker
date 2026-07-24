@@ -1,6 +1,7 @@
 """Trusted execution envelope component: user prose isolation and session normalization."""
 
 import os
+from typing import Any
 from uuid import UUID, uuid4
 
 from lfx.custom.custom_component.component import Component
@@ -32,7 +33,7 @@ class ExecutionEnvelopeComponent(Component):
     - Generates unique message_id, correlation_id per call
     """
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         """Initialize the ExecutionEnvelopeComponent."""
         super().__init__(**kwargs)
         # Message is the only required input; no caller-controlled actor/role/assurance/source
@@ -73,7 +74,10 @@ class ExecutionEnvelopeComponent(Component):
             display_name = "User"
 
         # Validate and normalize session_id
-        session_id = self._normalize_and_validate_session(self.message.session_id)
+        raw_session = self.message.session_id
+        if isinstance(raw_session, UUID):
+            raw_session = str(raw_session)
+        session_id = self._normalize_and_validate_session(raw_session)
 
         # Generate unique message_id and correlation_id
         message_id = uuid4()
@@ -88,12 +92,15 @@ class ExecutionEnvelopeComponent(Component):
         )
 
         # Build the main flow input
+        message_text = self.message.text
+        if not isinstance(message_text, str):
+            raise ValueError("INVALID_INPUT: message.text must be a string")
         envelope = MainFlowInput(
             message_id=message_id,
             session_id=session_id,
             actor=actor,
             source=source,
-            message=self.message.text,
+            message=message_text,
             correlation_id=correlation_id,
         )
 
@@ -127,7 +134,9 @@ class ExecutionEnvelopeComponent(Component):
         try:
             # LangFlow passes global variables through the component's ctx or variables
             if "HULUBUL_PHASE1_ACTOR_ID" in self.ctx:
-                return self.ctx["HULUBUL_PHASE1_ACTOR_ID"]
+                actor_id = self.ctx["HULUBUL_PHASE1_ACTOR_ID"]
+                if isinstance(actor_id, str):
+                    return actor_id
         except (AttributeError, KeyError):
             pass
 
@@ -135,14 +144,17 @@ class ExecutionEnvelopeComponent(Component):
         return os.environ.get("HULUBUL_PHASE1_ACTOR_ID")
 
     def _get_api_display_name(self) -> str | None:
-        """Read display name from API header (X-LANGFLOW-GLOBAL-VAR-HULUBUL_PHASE1_ACTOR_DISPLAY_NAME).
+        """Read display name from API header (X-LANGFLOW-GLOBAL-VAR-
+        HULUBUL_PHASE1_ACTOR_DISPLAY_NAME).
 
         Returns:
             Display name string or None if not provided (optional field)
         """
         try:
             if "HULUBUL_PHASE1_ACTOR_DISPLAY_NAME" in self.ctx:
-                return self.ctx["HULUBUL_PHASE1_ACTOR_DISPLAY_NAME"]
+                display_name = self.ctx["HULUBUL_PHASE1_ACTOR_DISPLAY_NAME"]
+                if isinstance(display_name, str):
+                    return display_name
         except (AttributeError, KeyError):
             pass
 
@@ -157,7 +169,8 @@ class ExecutionEnvelopeComponent(Component):
         return os.environ.get("HULUBUL_PHASE1_PLAYGROUND_ACTOR_ID")
 
     def _get_playground_display_name(self) -> str | None:
-        """Read display name from Playground environment variable (HULUBUL_PHASE1_PLAYGROUND_ACTOR_DISPLAY_NAME).
+        """Read display name from Playground environment variable
+        (HULUBUL_PHASE1_PLAYGROUND_ACTOR_DISPLAY_NAME).
 
         Returns:
             Display name string or None if not provided (optional field)
@@ -176,13 +189,19 @@ class ExecutionEnvelopeComponent(Component):
         # Try to get from component's flow/graph context
         try:
             if "session_id" in self.ctx:
-                return self.ctx["session_id"]
+                session_id = self.ctx["session_id"]
+                if isinstance(session_id, str):
+                    return session_id
         except (AttributeError, KeyError):
             pass
 
         # Try Message's session_id as fallback if graph context doesn't have it
         if self.message and self.message.session_id:
-            return self.message.session_id
+            raw_session = self.message.session_id
+            if isinstance(raw_session, UUID):
+                return str(raw_session)
+            if isinstance(raw_session, str):
+                return raw_session
 
         return None
 
@@ -217,16 +236,14 @@ class ExecutionEnvelopeComponent(Component):
         normalized = session_id.lower().strip()
 
         # Remove p1- prefix if present
-        if normalized.startswith("p1-"):
-            uuid_part = normalized[3:]
-        else:
-            uuid_part = normalized
+        uuid_part = normalized[3:] if normalized.startswith("p1-") else normalized
 
         # Validate UUID format
         try:
             UUID(uuid_part)
-        except ValueError:
-            raise ValueError(f"INVALID_INPUT: session_id must be a valid UUID, got '{session_id}'")
+        except ValueError as err:
+            msg = f"INVALID_INPUT: session_id must be a valid UUID, got '{session_id}'"
+            raise ValueError(msg) from err
 
         # Return in canonical form
         canonical_session = f"p1-{uuid_part}"
