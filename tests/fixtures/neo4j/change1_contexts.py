@@ -42,6 +42,7 @@ def _create_binding_and_sparse_request(
         """
         result = session.run(query, session_id=session_id, request_id=request_id, status=status)
         record = result.single()
+        assert record is not None
         return record.get("b"), record.get("request_id")
     finally:
         session.close()
@@ -101,6 +102,7 @@ def _create_binding_and_complete_request(
             dropoff_place_id=dropoff_place_id,
         )
         record = result.single()
+        assert record is not None
         return record.get("b"), record.get("request_id")
     finally:
         session.close()
@@ -230,7 +232,8 @@ def create_duplicate_active_request_rels(driver: Driver, session_id: str) -> str
         """
         result = session.run(query, session_id=session_id, request_id=request_id, status="new")
         record = result.single()
-        return record.get("request_id")
+        assert record is not None
+        return str(record.get("request_id"))
     finally:
         session.close()
 
@@ -267,6 +270,7 @@ def create_duplicate_active_targets(driver: Driver, session_id: str) -> list[str
             status="new",
         )
         record = result.single()
+        assert record is not None
         return [record.get("id1"), record.get("id2")]
     finally:
         session.close()
@@ -312,7 +316,8 @@ def create_orphan_request(driver: Driver, namespace: str) -> str:
         """
         result = session.run(query, request_id=request_id, status="new")
         record = result.single()
-        return record.get("request_id")
+        assert record is not None
+        return str(record.get("request_id"))
     finally:
         session.close()
 

@@ -66,7 +66,7 @@ class GraphProbe:
         """
         result = self.driver.execute_query(query, session_id=session_id)
         if result.records:
-            return result.records[0]["count"]
+            return int(result.records[0]["count"])
         return 0
 
     def binding_count_for_session(self, session_id: str) -> int:
@@ -86,7 +86,7 @@ class GraphProbe:
         """
         result = self.driver.execute_query(query, session_id=session_id)
         if result.records:
-            return result.records[0]["count"]
+            return int(result.records[0]["count"])
         return 0
 
     def orphan_request_ids(self, namespace: str) -> frozenset[str]:

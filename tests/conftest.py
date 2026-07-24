@@ -1,9 +1,15 @@
 """Pytest configuration and fixtures."""
 
+import contextlib
 import sys
+from collections.abc import Iterator
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import pytest
+
+if TYPE_CHECKING:
+    from neo4j import Driver, Session
 
 # Add src directory to Python path BEFORE any imports
 repo_root = Path(__file__).parent.parent
@@ -49,7 +55,7 @@ def neo4j_env() -> dict[str, str]:
 
 
 @pytest.fixture(scope="session")
-def neo4j_driver(neo4j_env):
+def neo4j_driver(neo4j_env: dict[str, str]) -> Iterator["Driver"]:
     """Create a Neo4j driver connected to the running container."""
     try:
         from neo4j import GraphDatabase
@@ -84,48 +90,39 @@ def neo4j_driver(neo4j_env):
     driver.close()
 
 
-@pytest.fixture(scope="function")
-def neo4j_session_with_schema(neo4j_driver):
-    """
-    Fixture that provides a Neo4j session with domain and operational schemas applied.
-
-    Creates a fresh session, applies the domain schema from infra/cypher/schema.cypher,
-    then applies the operational schema from infra/cypher/operational-schema.cypher (if it exists),
-    and yields the session for test use. Cleans up after the test.
-    """
-    session = neo4j_driver.session()
-
-    # Read and apply domain schema
-    schema_file = repo_root / "infra" / "cypher" / "schema.cypher"
-    if not schema_file.exists():
-        raise RuntimeError(f"Schema file not found: {schema_file}")
-
-    with open(schema_file) as f:
-        schema = f.read()
-
-    # Apply domain schema statements
-    import contextlib
-
-    for stmt in schema.split(";"):
+def _apply_statements(session: "Session", cypher_text: str) -> None:
+    """Apply each statement of a Cypher script, skipping comments and empty lines."""
+    for stmt in cypher_text.split(";"):
         stmt = stmt.strip()
         if stmt and not stmt.startswith("//"):
             with contextlib.suppress(Exception):
                 # Some statements may fail if they're comments or incomplete
                 session.run(stmt)
 
-    # Read and apply operational schema if it exists
+
+def _apply_domain_and_operational_schemas(session: "Session") -> None:
+    """Apply the domain schema, then the operational schema (if present)."""
+    schema_file = repo_root / "infra" / "cypher" / "schema.cypher"
+    if not schema_file.exists():
+        raise RuntimeError(f"Schema file not found: {schema_file}")
+    _apply_statements(session, schema_file.read_text())
+
     operational_schema_file = repo_root / "infra" / "cypher" / "operational-schema.cypher"
     if operational_schema_file.exists():
-        with open(operational_schema_file) as f:
-            operational_schema = f.read()
+        _apply_statements(session, operational_schema_file.read_text())
 
-        # Apply operational schema statements
-        for stmt in operational_schema.split(";"):
-            stmt = stmt.strip()
-            if stmt and not stmt.startswith("//"):
-                with contextlib.suppress(Exception):
-                    # Some statements may fail if they're comments or incomplete
-                    session.run(stmt)
+
+@pytest.fixture(scope="function")
+def neo4j_session_with_schema(neo4j_driver: "Driver") -> Iterator["Session"]:
+    """
+    Fixture that provides a Neo4j session with domain and operational schemas applied.
+
+    Creates a fresh session, applies both schemas, and yields the session for test
+    use. Cleans up after the test. Use neo4j_driver_with_schema instead when the
+    code under test expects a Driver (e.g. GraphProbe, the Change 1 context factories).
+    """
+    session = neo4j_driver.session()
+    _apply_domain_and_operational_schemas(session)
 
     yield session
 
@@ -136,3 +133,26 @@ def neo4j_session_with_schema(neo4j_driver):
         pass
     finally:
         session.close()
+
+
+@pytest.fixture(scope="function")
+def neo4j_driver_with_schema(neo4j_driver: "Driver") -> Iterator["Driver"]:
+    """
+    Fixture that applies domain and operational schemas, then yields the Driver.
+
+    Use this (not neo4j_session_with_schema) for code that expects a Driver rather
+    than a Session, e.g. GraphProbe or the Change 1 context factories, which call
+    driver.session()/driver.execute_query() internally.
+    """
+    session = neo4j_driver.session()
+    try:
+        _apply_domain_and_operational_schemas(session)
+    finally:
+        session.close()
+
+    yield neo4j_driver
+
+    # Clean up: delete all nodes and relationships
+    with neo4j_driver.session() as session:
+        with contextlib.suppress(Exception):
+            session.run("MATCH (n) DETACH DELETE n")

@@ -1,13 +1,20 @@
 """Tests for operational schema constraints and bindings."""
 
+from typing import TYPE_CHECKING
+
 import pytest
+
+if TYPE_CHECKING:
+    from neo4j import Session
 
 
 @pytest.mark.integration
 class TestOperationalConversationBinding:
     """Test OperationalConversationBinding schema and constraints."""
 
-    def test_session_id_uniqueness_constraint_enforced(self, neo4j_session_with_schema):
+    def test_session_id_uniqueness_constraint_enforced(
+        self, neo4j_session_with_schema: "Session"
+    ) -> None:
         """
         RED: Test that duplicate sessionId values are rejected by the constraint.
 
@@ -40,7 +47,9 @@ class TestOperationalConversationBinding:
             f"Expected constraint violation, got: {exc_info.value}"
         )
 
-    def test_binding_uses_relationship_only_linking(self, neo4j_session_with_schema):
+    def test_binding_uses_relationship_only_linking(
+        self, neo4j_session_with_schema: "Session"
+    ) -> None:
         """
         Test that OperationalConversationBinding uses relationship-only linking
         to the active request (no activeRequestId property).
@@ -60,7 +69,9 @@ class TestOperationalConversationBinding:
             RETURN b
             """
         )
-        binding = binding_result.single()[0]
+        binding_record = binding_result.single()
+        assert binding_record is not None
+        binding = binding_record[0]
 
         # Verify the binding has no activeRequestId property
         binding_props = dict(binding)
@@ -88,4 +99,5 @@ class TestOperationalConversationBinding:
             """
         )
         rel = rel_result.single()
+        assert rel is not None
         assert rel["rel_type"] == "BINDS_ACTIVE_REQUEST"

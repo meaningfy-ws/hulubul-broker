@@ -17,7 +17,7 @@ class ContextGraphSnapshot:
     request_ids: frozenset[str]
     statuses: frozenset[str | None]
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Validate snapshot invariants."""
         if self.binding_count < 0:
             raise ValueError("binding_count cannot be negative")
@@ -34,7 +34,7 @@ class ContextFactoryResult:
     namespace: str
     snapshot: ContextGraphSnapshot
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Validate that namespace is non-empty."""
         if not self.namespace:
             raise ValueError("namespace must be non-empty")
