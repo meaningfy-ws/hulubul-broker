@@ -168,13 +168,13 @@ def mcp_client(neo4j_testcontainer_info: Neo4jTestcontainerInfo) -> Generator[An
     - Starts it on the SAME network as neo4j_testcontainer_info
     - Configures MCP to connect to Neo4j via the network alias (never localhost)
     - Sets NEO4J_MCP_SERVER_ALLOWED_HOSTS to include the test network alias
-    - Initializes MCP protocol (real SSE + HTTP POST handshake)
+    - Initializes MCP protocol (real HTTP POST JSON-RPC handshake)
     - Yields an MCPClient with verified tool inventory
     - Cleans up: stops the MCP container
 
     This fixture proves:
     - MCP service runs on disposable Neo4j test network (not localhost)
-    - Protocol initialization works (real SSE + HTTP, not TCP-only)
+    - Protocol initialization works (real HTTP, not TCP-only)
     - Tool inventory is exactly {"get_neo4j_schema", "read_neo4j_cypher", "write_neo4j_cypher"}
 
     Use this fixture for tests verifying MCP readiness and protocol compliance.
@@ -182,6 +182,7 @@ def mcp_client(neo4j_testcontainer_info: Neo4jTestcontainerInfo) -> Generator[An
     """
     try:
         from testcontainers.core.container import DockerContainer  # type: ignore
+        from testcontainers.core.image import DockerImage  # type: ignore
     except ImportError:
         pytest.skip("testcontainers not installed; run: poetry install --with integration")
 
@@ -190,14 +191,14 @@ def mcp_client(neo4j_testcontainer_info: Neo4jTestcontainerInfo) -> Generator[An
 
     session_id = str(uuid.uuid4())[:8]
 
-    # Build MCP image from Dockerfile (from_build_context builds from local Dockerfile)
-    # For testcontainers, we use a generic container with the image name
-    # The image will be pulled/built by Docker based on local Dockerfile
+    # Build MCP image from infra/mcp/Dockerfile, tagged uniquely per session
+    # so concurrent test runs never collide on a shared image name.
     image_name = f"hulubul-mcp-test-{session_id}:latest"
+    repo_root = Path(__file__).parent.parent.parent
+    image = DockerImage(path=str(repo_root / "infra" / "mcp"), tag=image_name)
+    image.build()
 
     # Start MCP container on the SAME network as Neo4j
-    # Note: In local dev, you may need to pre-build the image with:
-    #   docker build -t hulubul-mcp-test:latest infra/mcp/
     mcp_container = (
         DockerContainer(image_name)
         .with_network(neo4j_testcontainer_info.network)
@@ -246,6 +247,9 @@ def mcp_client(neo4j_testcontainer_info: Neo4jTestcontainerInfo) -> Generator[An
         with contextlib.suppress(Exception):
             mcp_container.stop()
 
+        with contextlib.suppress(Exception):
+            image.remove()
+
 
 @pytest.fixture(scope="session")
 def mcp_client_localhost_only(
@@ -265,6 +269,7 @@ def mcp_client_localhost_only(
     """
     try:
         from testcontainers.core.container import DockerContainer
+        from testcontainers.core.image import DockerImage
     except ImportError:
         pytest.skip("testcontainers not installed; run: poetry install --with integration")
 
@@ -273,6 +278,9 @@ def mcp_client_localhost_only(
 
     session_id = str(uuid.uuid4())[:8]
     image_name = f"hulubul-mcp-test-{session_id}:latest"
+    repo_root = Path(__file__).parent.parent.parent
+    image = DockerImage(path=str(repo_root / "infra" / "mcp"), tag=image_name)
+    image.build()
 
     # Start MCP container with RESTRICTED allowed-hosts (localhost only)
     mcp_container = (
@@ -304,3 +312,6 @@ def mcp_client_localhost_only(
         # Cleanup: stop MCP container
         with contextlib.suppress(Exception):
             mcp_container.stop()
+
+        with contextlib.suppress(Exception):
+            image.remove()
