@@ -235,9 +235,7 @@ def mcp_client(neo4j_testcontainer_info: Neo4jTestcontainerInfo) -> Generator[An
                     break
             except Exception:
                 if attempt == max_retries - 1:
-                    raise RuntimeError(
-                        "MCP container failed to start after 60 retries"
-                    ) from None
+                    raise RuntimeError("MCP container failed to start after 60 retries") from None
                 time.sleep(1)
 
         yield client
@@ -280,7 +278,8 @@ def mcp_client_localhost_only(
 
     # Start MCP container with RESTRICTED allowed-hosts (localhost only)
     mcp_container = (
-        DockerContainer(image_name)        .with_network(neo4j_testcontainer_info.network)
+        DockerContainer(image_name)
+        .with_network(neo4j_testcontainer_info.network)
         .with_network_aliases(f"test-mcp-restricted-{session_id}")
         .with_env("NEO4J_URL", f"bolt://{neo4j_testcontainer_info.network_alias}:7687")
         .with_env("NEO4J_USERNAME", "neo4j")

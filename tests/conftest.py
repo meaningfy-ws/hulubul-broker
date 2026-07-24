@@ -1,6 +1,5 @@
 """Pytest configuration and fixtures."""
 
-import os
 import sys
 from pathlib import Path
 
@@ -31,18 +30,15 @@ def _load_neo4j_env() -> dict[str, str]:
     """Load Neo4j credentials from infra/.env."""
     env_file = repo_root / "infra" / ".env"
     if not env_file.exists():
-        raise RuntimeError(
-            f"Missing {env_file}. Run: cp infra/.env.example infra/.env"
-        )
+        raise RuntimeError(f"Missing {env_file}. Run: cp infra/.env.example infra/.env")
 
     env = {}
     with open(env_file) as f:
         for line in f:
             line = line.strip()
-            if line and not line.startswith("#"):
-                if "=" in line:
-                    key, val = line.split("=", 1)
-                    env[key.strip()] = val.strip()
+            if line and not line.startswith("#") and "=" in line:
+                key, val = line.split("=", 1)
+                env[key.strip()] = val.strip()
     return env
 
 
@@ -81,6 +77,7 @@ def neo4j_driver(neo4j_env):
                 driver.close()
                 pytest.skip("Neo4j not ready after 60 attempts")
             import time
+
             time.sleep(1)
 
     yield driver
@@ -107,14 +104,14 @@ def neo4j_session_with_schema(neo4j_driver):
         schema = f.read()
 
     # Apply domain schema statements
+    import contextlib
+
     for stmt in schema.split(";"):
         stmt = stmt.strip()
         if stmt and not stmt.startswith("//"):
-            try:
-                session.run(stmt)
-            except Exception:
+            with contextlib.suppress(Exception):
                 # Some statements may fail if they're comments or incomplete
-                pass
+                session.run(stmt)
 
     # Read and apply operational schema if it exists
     operational_schema_file = repo_root / "infra" / "cypher" / "operational-schema.cypher"
@@ -126,11 +123,9 @@ def neo4j_session_with_schema(neo4j_driver):
         for stmt in operational_schema.split(";"):
             stmt = stmt.strip()
             if stmt and not stmt.startswith("//"):
-                try:
-                    session.run(stmt)
-                except Exception:
+                with contextlib.suppress(Exception):
                     # Some statements may fail if they're comments or incomplete
-                    pass
+                    session.run(stmt)
 
     yield session
 

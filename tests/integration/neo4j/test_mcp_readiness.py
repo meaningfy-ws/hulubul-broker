@@ -1,4 +1,5 @@
 """Tests for isolated MCP protocol readiness on disposable Neo4j network."""
+
 from typing import Any
 
 import pytest

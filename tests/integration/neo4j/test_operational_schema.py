@@ -18,10 +18,7 @@ class TestOperationalConversationBinding:
         session = neo4j_session_with_schema
 
         # Create a request node to link to
-        request_result = session.run(
-            "CREATE (r:ParcelRequest {id: 'req-001'}) RETURN r.id as id"
-        )
-        request_id = request_result.single()["id"]
+        session.run("CREATE (r:ParcelRequest {id: 'req-001'})")
 
         # Create first binding with sessionId
         session.run(
