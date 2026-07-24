@@ -315,3 +315,30 @@ def mcp_client_localhost_only(
 
         with contextlib.suppress(Exception):
             image.remove()
+
+
+@pytest.fixture(scope="session")
+def langflow_client() -> "Generator[Any, None, None]":
+    """
+    Session-scoped fixture: Provide a LangFlow client for integration tests.
+
+    This fixture creates a typed LangFlowClient that connects to a local
+    LangFlow instance (via docker-compose or similar). The client reads
+    the API key from environment variables or uses None for unauthenticated
+    testing.
+
+    Yields an LangFlowClient configured with:
+    - Base URL from environment (default: http://localhost:7860)
+    - API key from environment (default: None for testing unauthenticated access)
+
+    Use this fixture for tests verifying API key enforcement and actor context.
+    """
+    import os
+
+    from tests.support.langflow_client import LangFlowClient
+
+    langflow_url = os.getenv("LANGFLOW_URL", "http://localhost:7860")
+    langflow_api_key = os.getenv("LANGFLOW_API_KEY", None)
+
+    client = LangFlowClient(base_url=langflow_url, api_key=langflow_api_key)
+    yield client
