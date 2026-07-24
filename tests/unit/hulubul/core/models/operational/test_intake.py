@@ -262,3 +262,13 @@ class TestIntakeResultMissingFields:
         )
         assert isinstance(result.missing_fields, tuple)
         assert result.missing_fields == ("receiver_name", "pickup_location")
+
+    def test_result_missing_fields_rejects_non_sequence(self) -> None:
+        """A string must not be silently coerced into a tuple of characters."""
+        with pytest.raises(ValidationError, match="list or tuple"):
+            IntakeResult(
+                outcome=IntakeOutcome.REQUEST_COMPLETE,
+                request_id="req-123",
+                missing_fields="receiver_name",  # type: ignore[arg-type]
+                facts=IntakeFacts(sender_actor_id="urn:actor:alice"),
+            )

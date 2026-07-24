@@ -11,7 +11,7 @@ Results carry outcomes, clarification needs, and user-safe messaging.
 
 from __future__ import annotations
 
-from typing import Any, cast
+from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
@@ -339,7 +339,7 @@ class IntakeResult(BaseModel):
         """Convert missing_fields to immutable tuple."""
         if isinstance(v, list | tuple):
             return tuple(v)
-        return cast(tuple[str, ...], v)
+        raise ValueError("missing_fields must be a list or tuple of field names")
 
     @model_validator(mode="after")
     def validate_outcome_invariants(self) -> IntakeResult:

@@ -8,9 +8,10 @@ Provides:
 - Request-scoped identifiers (request, sender role, receiver role, parcel, places)
 - Sparse allocation (only allocate IDs for entities actually present in the request)
 
-All UUIDs are prefixed per design DEC-010: req-, ag-, s-, r-, p-, pl-,
-urn:uuid:, urn:hulubul:phase1:receiver:
-All outputs are strings in RFC 4122 UUID format.
+Every generated UUID is a valid RFC 4122 UUID, but outputs are strings that
+combine that UUID with a fixed prefix per design DEC-010: req-, ag-, s-, r-,
+p-, pl-, urn:uuid:, urn:hulubul:phase1:receiver:. Outputs are therefore
+prefixed identifiers, not bare RFC 4122 UUID strings.
 """
 
 from __future__ import annotations

@@ -113,12 +113,15 @@ def render_intake_result(result: IntakeResult) -> str:
     result. ``safe_user_message`` is never trusted as free text.
     """
     if result.outcome is IntakeOutcome.CLARIFICATION_REQUIRED:
-        assert result.clarification_field is not None
+        if result.clarification_field is None:
+            raise ValueError("clarificationRequired outcome must include clarification_field")
         return render_clarification_message(IntakeField(result.clarification_field))
     if result.outcome is IntakeOutcome.REQUEST_COMPLETE:
-        assert result.request_id is not None
+        if result.request_id is None:
+            raise ValueError("requestComplete outcome must include request_id")
         return render_complete_message(result.request_id)
-    assert result.error is not None
+    if result.error is None:
+        raise ValueError("failure outcome must include error")
     return result.error
 
 

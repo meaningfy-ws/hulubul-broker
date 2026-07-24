@@ -291,8 +291,7 @@ install-git-hooks: ## Install the local pre-commit secret scan hook
 .PHONY: install lint-python format-check-python typecheck test-unit \
 	check-architecture operational-schemas format-python check-model-generated \
 	check-operational-schemas check-secrets test-integration \
-	test-system test-bdd test-evaluation-recorded test-evaluation-live \
-	test-evaluation-judge ci-static ci-acceptance ci acceptance-up \
+	test-system test-bdd ci-static ci-acceptance ci acceptance-up \
 	acceptance-ready acceptance-deploy preflight-langflow-1-10-2 \
 	acceptance-diagnostics acceptance-down release-evidence
 
@@ -373,7 +372,7 @@ acceptance-up: ## Start the acceptance Docker stack (Postgres, Neo4j, MCP, recor
 acceptance-ready: ## Wait for the acceptance stack to report ready, in dependency order
 	poetry run pytest tests/integration/runtime/test_readiness_order.py -q
 
-acceptance-deploy: ## Push validated LangFlow flows to the acceptance environment
+acceptance-deploy: ## Push LangFlow flows to the acceptance environment (no validation step yet)
 	cd langflow && lfx push --env ci --no-normalize --keep-secrets flows/10-lf-70-data-access.json
 	cd langflow && lfx push --env ci --no-normalize --keep-secrets flows/20-lf-10-request-intake.json
 	cd langflow && lfx push --env ci --no-normalize --keep-secrets flows/30-lf-00-main-router.json

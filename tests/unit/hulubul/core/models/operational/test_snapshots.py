@@ -156,6 +156,17 @@ class TestDeliveryRequestSnapshotMissingFields:
         )
         assert isinstance(snap.missing_fields, tuple)
 
+    def test_snapshot_missing_fields_rejects_non_sequence(self) -> None:
+        """A string must not be silently coerced into a tuple of characters."""
+        with pytest.raises(ValidationError, match="list or tuple"):
+            DeliveryRequestSnapshot(
+                request_id="req-123",
+                created_at=datetime.now(timezone.utc),
+                updated_at=datetime.now(timezone.utc),
+                facts=IntakeFacts(sender_actor_id="urn:actor:alice"),
+                missing_fields="receiver_name",  # type: ignore[arg-type]
+            )
+
     def test_snapshot_missing_fields_empty_for_complete(self) -> None:
         """Snapshot missing_fields is empty tuple for 'complete' status."""
         snap = DeliveryRequestSnapshot(
