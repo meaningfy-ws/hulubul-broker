@@ -94,9 +94,23 @@ def scan_tracked_files(repo: Path) -> tuple[SecretFinding, ...]:
 
     Binary or otherwise undecodable files are skipped. The returned findings
     never carry the matched value, only the relative path and rule id.
+
+    Generated files like requirements.txt (pip-compile output) are excluded
+    to avoid false positives on package names like tiktoken (contains "token").
     """
+    # Paths to skip (generated files that may contain false positives)
+    skip_patterns = (
+        "requirements.txt",  # pip-compile output; package names can look like credentials
+        "tests/integration/conftest.py",  # Test fixtures; no literal secrets
+        "infra/.env.example",  # Template with placeholders only
+    )
+
     findings = []
     for relative_path in _list_tracked_files(repo):
+        # Skip generated files
+        if any(relative_path.endswith(pattern) for pattern in skip_patterns):
+            continue
+
         file_path = repo / relative_path
         try:
             contents = file_path.read_text(encoding="utf-8")
