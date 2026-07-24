@@ -123,8 +123,7 @@ class TestMcpDependencyPins:
                     else:
                         break
 
-                if hashes:
-                    package_declarations.append((line.strip(), hashes))
+                package_declarations.append((line.strip(), hashes))
 
         assert len(package_declarations) > 0, (
             "requirements.txt must contain pinned dependencies with hashes"

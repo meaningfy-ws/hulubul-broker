@@ -117,8 +117,9 @@ services:
 
     restart: unless-stopped
 
-  # Neo4j schema setup job (one-shot) — runs after neo4j is healthy,
-  # ensures schema is initialized before MCP can use the graph.
+  # Neo4j schema setup job (one-shot) — placeholder that starts after neo4j is
+  # healthy but does not yet apply the schema (command is a no-op); real
+  # schema application is a later task (see `make neo4j-schema`).
   neo4j-schema:
     image: neo4j:5.26-community@sha256:362542416de6c09a971484d1893878016cc3b5cdec166e54b1c824a220ecd6b9
 

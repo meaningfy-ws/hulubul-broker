@@ -51,7 +51,7 @@ def test_missing_api_key_is_rejected_before_mutation(
     """
     client_no_key = LangFlowClient(base_url=langflow_client.base_url, api_key=None)
     response = client_no_key.run_without_key(flow_id="lf-00", input_data={"message": "test"})
-    if response.status_code == 500 and "Connection refused" in (response.error or ""):
+    if response.status_code == 500 and (response.error or "").startswith("Connection error:"):
         pytest.skip("LangFlow server not running")
     # "No graph mutations" relies on LangFlow rejecting the request at its own
     # auth gate before reaching flow execution; this test does not independently
@@ -69,9 +69,8 @@ def test_wrong_api_key_is_rejected_before_mutation(
 
     Skipped if LangFlow is not running (integration test).
     """
-    client_wrong_key = LangFlowClient(base_url=langflow_client.base_url, api_key="wrong-key-12345")
-    response = client_wrong_key.run_without_key(flow_id="lf-00", input_data={"message": "test"})
-    if response.status_code == 500 and "Connection refused" in (response.error or ""):
+    response = langflow_client.run_with_wrong_key(flow_id="lf-00", input_data={"message": "test"})
+    if response.status_code == 500 and (response.error or "").startswith("Connection error:"):
         pytest.skip("LangFlow server not running")
     # Same caveat as test_missing_api_key_is_rejected_before_mutation: mutation
     # absence is inferred from LangFlow's auth gate, not independently verified.
@@ -94,7 +93,7 @@ def test_valid_api_key_succeeds(
         session_id="sess-001",
     )
     response = langflow_client.run_lf00(conversation, message="Test message")
-    if response.status_code == 500 and "Connection refused" in (response.error or ""):
+    if response.status_code == 500 and (response.error or "").startswith("Connection error:"):
         pytest.skip("LangFlow server not running")
     # A valid key must clear authentication. 200 is a successful run; 404/500 are
     # accepted because the "lf-00" flow may not be registered in the test
@@ -167,4 +166,5 @@ def test_api_key_not_leaked_in_response_repr(
     assert "status=" in repr_str
     assert "flow_id=" in repr_str
     # Should not contain full data or secrets
-    assert "test" not in repr_str or "data" not in repr_str or "FlowReply" in repr_str
+    assert "test" not in repr_str
+    assert "data" not in repr_str

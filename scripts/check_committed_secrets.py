@@ -98,17 +98,18 @@ def scan_tracked_files(repo: Path) -> tuple[SecretFinding, ...]:
     Generated files like requirements.txt (pip-compile output) are excluded
     to avoid false positives on package names like tiktoken (contains "token").
     """
-    # Paths to skip (generated files that may contain false positives)
+    # Paths to skip (generated files that may contain false positives). Exact
+    # repo-relative paths only — a suffix match would silently exempt any
+    # future file that happens to share a name (e.g. another requirements.txt).
     skip_patterns = (
-        "requirements.txt",  # pip-compile output; package names can look like credentials
+        "infra/mcp/requirements.txt",  # pip-compile output; package names can look like credentials
         "tests/integration/conftest.py",  # Test fixtures; no literal secrets
-        "infra/.env.example",  # Template with placeholders only
     )
 
     findings = []
     for relative_path in _list_tracked_files(repo):
         # Skip generated files
-        if any(relative_path.endswith(pattern) for pattern in skip_patterns):
+        if relative_path in skip_patterns:
             continue
 
         file_path = repo / relative_path
