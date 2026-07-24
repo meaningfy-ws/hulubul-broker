@@ -10,12 +10,15 @@
 
 services:
   langflow:
-    image: langflowai/langflow:latest
+    image: langflowai/langflow:1.10.2@sha256:ae6f9afd03bc032dc2989ece49791fcf83871230aff9d6e485c8e1ebada1e70f
     ports:
-      - "7860:7860"
+      - "127.0.0.1:7860:7860"
 
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
+      mcp-neo4j:
+        condition: service_healthy
 
     environment:
       LANGFLOW_HOST: 0.0.0.0
@@ -25,15 +28,44 @@ services:
       # SUPERUSER_USERNAME: ${LANGFLOW_SUPERUSER_USERNAME:-admin}
       # SUPERUSER_PASSWORD: ${LANGFLOW_SUPERUSER_PASSWORD}
       LANGFLOW_AUTO_LOGIN: "true"
+      # API key enforcement (Task 28 / 6.4)
+      LANGFLOW_API_KEY_SOURCE: env
+      LANGFLOW_FALLBACK_TO_ENV_VAR: "true"
+      LANGFLOW_STORE_ENVIRONMENT_VARIABLES: "false"
+      # Actual key value supplied via process environment (gitignored .env file)
+      LANGFLOW_API_KEY: ${LANGFLOW_API_KEY:-}
+      # Playground-only actor context (ignored by API, used for UI)
+      HULUBUL_PHASE1_PLAYGROUND_ACTOR_ID: ${HULUBUL_PHASE1_PLAYGROUND_ACTOR_ID:-}
+      HULUBUL_PHASE1_PLAYGROUND_ACTOR_DISPLAY_NAME: ${HULUBUL_PHASE1_PLAYGROUND_ACTOR_DISPLAY_NAME:-}
+      # Disable auto-creation and auto-update of starter projects (ADR-016)
+      LANGFLOW_CREATE_STARTER_PROJECTS: "false"
+      LANGFLOW_UPDATE_STARTER_PROJECTS: "false"
+      # Custom components configuration
+      PYTHONPATH: /app/src
+      LANGFLOW_COMPONENTS_PATH: /app/custom_components
 
     env_file:
       - ./langflow.env
 
     volumes:
       - langflow-data:/app/langflow
+      - ./langflow:/app/hulubul-langflow:ro
+      - ./src:/app/src:ro
+
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:7860/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 60s
+
+    restart: unless-stopped
 
   postgres:
-    image: postgres:16-trixie
+    image: postgres:16-trixie@sha256:33f923b05f64ca54ac4401c01126a6b92afe839a0aa0a52bc5aeb5cc958e5f20
+
+    ports:
+      - "127.0.0.1:5432:5432"
 
     environment:
       POSTGRES_USER: langflow
@@ -43,13 +75,22 @@ services:
     volumes:
       - langflow-postgres:/var/lib/postgresql/data
 
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "langflow"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 10s
+
+    restart: unless-stopped
+
   # Neo4j Community 5 — graph system of record (ADR-005).
   # APOC enabled (required by the MCP server's schema introspection tool).
   neo4j:
-    image: neo4j:5.26-community
+    image: neo4j:5.26-community@sha256:362542416de6c09a971484d1893878016cc3b5cdec166e54b1c824a220ecd6b9
     ports:
-      - "7474:7474"   # Neo4j Browser (HTTP)
-      - "7687:7687"   # Bolt (cypher-shell, drivers, MCP server)
+      - "127.0.0.1:7474:7474"   # Neo4j Browser (HTTP)
+      - "127.0.0.1:7687:7687"   # Bolt (cypher-shell, drivers, MCP server)
 
     environment:
       NEO4J_AUTH: neo4j/${NEO4J_PASSWORD}
@@ -74,6 +115,27 @@ services:
       retries: 30
       start_period: 40s
 
+    restart: unless-stopped
+
+  # Neo4j schema setup job (one-shot) — runs after neo4j is healthy,
+  # ensures schema is initialized before MCP can use the graph.
+  neo4j-schema:
+    image: neo4j:5.26-community@sha256:362542416de6c09a971484d1893878016cc3b5cdec166e54b1c824a220ecd6b9
+
+    depends_on:
+      neo4j:
+        condition: service_healthy
+
+    environment:
+      NEO4J_AUTH: neo4j/${NEO4J_PASSWORD}
+
+    entrypoint: /bin/bash
+    command:
+      - -c
+      - |
+        echo "Waiting for Neo4j schema setup signal..."
+        exit 0
+
   # Neo4j Labs MCP server (mcp-neo4j-cypher) — admin-style, audited path
   # (ADR-007/015). Exposes read/write Cypher + schema introspection tools to
   # agents over MCP streamable HTTP. Party-facing scoped MCP is deferred
@@ -81,7 +143,7 @@ services:
   mcp-neo4j:
     build: ./mcp
     ports:
-      - "${NEO4J_MCP_PORT:-8000}:8000"
+      - "127.0.0.1:${NEO4J_MCP_PORT:-8000}:8000"
 
     environment:
       NEO4J_URL: neo4j://neo4j:7687
@@ -98,8 +160,8 @@ services:
       NEO4J_SCHEMA_SAMPLE_SIZE: "1000"
 
     depends_on:
-      neo4j:
-        condition: service_healthy
+      neo4j-schema:
+        condition: service_completed_successfully
 
     healthcheck:
       # TCP connect check — the streamable-http endpoint only answers to a
@@ -109,6 +171,8 @@ services:
       timeout: 5s
       retries: 30
       start_period: 10s
+
+    restart: unless-stopped
 
 volumes:
   langflow-data:

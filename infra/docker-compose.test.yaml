@@ -1,0 +1,26 @@
+# Override configuration for acceptance testing.
+#
+# This extends docker-compose.yaml with test-specific settings:
+# - Pinned API key for test environment
+# - Optional playground actor identifiers (for UI testing only)
+# - Exposed ports for test client access
+#
+# Usage:
+#   docker-compose -f docker-compose.yaml -f docker-compose.test.yaml up
+#
+# Environment variables:
+#   LANGFLOW_API_KEY - Test API key (from process env or .env)
+#   HULUBUL_PHASE1_PLAYGROUND_ACTOR_ID - Optional test actor ID (UI only)
+#   HULUBUL_PHASE1_PLAYGROUND_ACTOR_DISPLAY_NAME - Optional test actor name (UI only)
+
+version: "3.8"
+
+services:
+  langflow:
+    # Extend langflow service with test-specific environment variables
+    environment:
+      # Test API key from environment (never committed)
+      LANGFLOW_API_KEY: ${LANGFLOW_API_KEY:-test-key-xyz}
+      # Optional playground actor context (UI only, ignored by API)
+      HULUBUL_PHASE1_PLAYGROUND_ACTOR_ID: ${HULUBUL_PHASE1_PLAYGROUND_ACTOR_ID:-}
+      HULUBUL_PHASE1_PLAYGROUND_ACTOR_DISPLAY_NAME: ${HULUBUL_PHASE1_PLAYGROUND_ACTOR_DISPLAY_NAME:-}
