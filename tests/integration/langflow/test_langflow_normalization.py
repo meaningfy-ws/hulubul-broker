@@ -5,12 +5,13 @@ import json
 import tempfile
 from pathlib import Path
 from textwrap import dedent
+from typing import Any
 
 import pytest
 
 
 @pytest.fixture
-def sample_langflow_flow():
+def sample_langflow_flow() -> dict[str, Any]:
     """Sample LangFlow 1.10.2 export format with unsorted keys and varied formatting."""
     return {
         "data": {
@@ -47,7 +48,7 @@ def sample_langflow_flow():
 
 
 @pytest.fixture
-def sample_flow_with_env_vars():
+def sample_flow_with_env_vars() -> dict[str, Any]:
     """Sample flow with hardcoded LLM credentials that should be replaced."""
     return {
         "data": {
@@ -70,7 +71,7 @@ def sample_flow_with_env_vars():
 
 
 @pytest.fixture
-def manifest_yaml():
+def manifest_yaml() -> str:
     """Load flow-manifest.yaml runtime bindings."""
     return dedent("""
         runtime_bindings:
@@ -82,7 +83,7 @@ def manifest_yaml():
     """).strip()
 
 
-def test_normalize_preserves_node_edge_order(sample_langflow_flow):
+def test_normalize_preserves_node_edge_order(sample_langflow_flow: dict[str, Any]) -> None:
     """Test that normalization preserves node/edge array order."""
     from scripts.normalize_langflow_flows import normalize_flow_json
 
@@ -93,13 +94,13 @@ def test_normalize_preserves_node_edge_order(sample_langflow_flow):
     assert normalized["data"]["edges"][0]["source"] == "node1-id"
 
 
-def test_normalize_sorts_keys_at_each_level(sample_langflow_flow):
+def test_normalize_sorts_keys_at_each_level(sample_langflow_flow: dict[str, Any]) -> None:
     """Test that all JSON keys are sorted alphabetically at each level."""
     from scripts.normalize_langflow_flows import normalize_flow_json
 
     normalized = normalize_flow_json(sample_langflow_flow)
 
-    def verify_keys_sorted(obj, path=""):
+    def verify_keys_sorted(obj: Any, path: str = "") -> None:
         """Recursively verify all dict keys are sorted."""
         if isinstance(obj, dict):
             keys = list(obj.keys())
@@ -114,7 +115,7 @@ def test_normalize_sorts_keys_at_each_level(sample_langflow_flow):
     verify_keys_sorted(normalized)
 
 
-def test_normalize_idempotent(sample_langflow_flow):
+def test_normalize_idempotent(sample_langflow_flow: dict[str, Any]) -> None:
     """Test that normalizing twice produces identical output (idempotence)."""
     from scripts.normalize_langflow_flows import normalize_flow_json
 
@@ -132,7 +133,7 @@ def test_normalize_idempotent(sample_langflow_flow):
     assert first_hash == second_hash
 
 
-def test_normalize_uses_2_space_indentation(sample_langflow_flow):
+def test_normalize_uses_2_space_indentation(sample_langflow_flow: dict[str, Any]) -> None:
     """Test that normalized JSON uses 2-space indentation."""
     from scripts.normalize_langflow_flows import normalize_to_json_string
 
@@ -147,7 +148,7 @@ def test_normalize_uses_2_space_indentation(sample_langflow_flow):
             assert spaces % 2 == 0, f"Indentation not multiple of 2: {line!r}"
 
 
-def test_normalize_uses_lf_line_endings(sample_langflow_flow):
+def test_normalize_uses_lf_line_endings(sample_langflow_flow: dict[str, Any]) -> None:
     """Test that normalized JSON uses LF line endings."""
     from scripts.normalize_langflow_flows import normalize_to_json_string
 
@@ -185,12 +186,12 @@ def test_normalize_uses_lf_line_endings(sample_langflow_flow):
     ],
 )
 def test_restore_manifest_variables(
-    sample_flow_with_env_vars,
-    input_json,
-    expected_model_name,
-    expected_base_url,
-    expected_api_key,
-):
+    sample_flow_with_env_vars: dict[str, Any],
+    input_json: dict[str, Any],
+    expected_model_name: str,
+    expected_base_url: str,
+    expected_api_key: str,
+) -> None:
     """Test that manifest-allowlisted variable names are restored."""
     from scripts.normalize_langflow_flows import normalize_flow_json_with_manifest
 
@@ -211,7 +212,24 @@ def test_restore_manifest_variables(
     assert model_node["data"]["api_key"] == expected_api_key
 
 
-def test_check_mode_detects_idempotence():
+def test_reject_undeclared_runtime_variable(sample_flow_with_env_vars: dict[str, Any]) -> None:
+    """Restoring a variable name outside the approved allowlist must raise."""
+    from scripts.normalize_langflow_flows import (
+        NormalizationError,
+        normalize_flow_json_with_manifest,
+    )
+
+    manifest_bindings = {
+        "OpenAIModel-hlb-lf-00-model-v1": {
+            "api_key": "ARBITRARY_UNDECLARED_SECRET",
+        }
+    }
+
+    with pytest.raises(NormalizationError, match="undeclared runtime variable"):
+        normalize_flow_json_with_manifest(sample_flow_with_env_vars, manifest_bindings)
+
+
+def test_check_mode_detects_idempotence() -> None:
     """Test that --check mode correctly detects idempotence."""
     from scripts.normalize_langflow_flows import check_file_idempotence
 
@@ -242,7 +260,7 @@ def test_check_mode_detects_idempotence():
         assert is_normalized
 
 
-def test_cli_check_flag_with_file():
+def test_cli_check_flag_with_file() -> None:
     """Test CLI --check flag functionality."""
     import sys
 
@@ -271,7 +289,7 @@ def test_cli_check_flag_with_file():
             sys.argv = old_argv
 
 
-def test_cli_output_flag():
+def test_cli_output_flag() -> None:
     """Test CLI --output flag to write normalized flows to directory."""
     import sys
 

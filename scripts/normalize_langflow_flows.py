@@ -22,6 +22,21 @@ import sys
 from pathlib import Path
 from typing import Any
 
+# The only environment variable names ever allowed to be restored into a
+# `load_from_db=true` field. Declaring a binding for any other name in
+# flow-manifest.yaml is a normalization-time error, not a silent pass-through.
+ALLOWED_RUNTIME_VARIABLE_NAMES = frozenset(
+    {
+        "HULUBUL_LLM_MODEL",
+        "HULUBUL_LLM_BASE_URL",
+        "HULUBUL_LLM_API_KEY",
+    }
+)
+
+
+class NormalizationError(Exception):
+    """Raised when normalization would restore an undeclared runtime variable."""
+
 
 def sort_dict_keys(obj: Any, preserve_arrays: bool = True) -> Any:
     """
@@ -81,6 +96,10 @@ def normalize_flow_json_with_manifest(
 
     Returns:
         Normalized flow with restored variable names
+
+    Raises:
+        NormalizationError: If a binding references a variable name outside
+            ``ALLOWED_RUNTIME_VARIABLE_NAMES``.
     """
     normalized = normalize_flow_json(flow)
 
@@ -92,6 +111,11 @@ def normalize_flow_json_with_manifest(
                 bindings = manifest_bindings[node_id]
                 if "data" in node:
                     for field, env_var_name in bindings.items():
+                        if env_var_name not in ALLOWED_RUNTIME_VARIABLE_NAMES:
+                            raise NormalizationError(
+                                f"undeclared runtime variable reference: "
+                                f"{env_var_name!r} on {node_id}.{field}"
+                            )
                         if field in node["data"]:
                             # Replace hardcoded value with environment variable reference
                             node["data"][field] = f"{{{{ {env_var_name} }}}}"

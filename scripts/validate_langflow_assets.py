@@ -25,7 +25,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-import yaml
+import yaml  # type: ignore[import-untyped]
 
 ALLOWED_ENV_VARS = {
     "HULUBUL_LLM_MODEL",
@@ -105,6 +105,7 @@ class ManifestValidator:
 
     def _validate_structure(self) -> None:
         """Validate manifest has required top-level keys."""
+        assert self.manifest is not None
         required_keys = {"schema_version", "langflow_version", "flows", "deployment_order"}
         missing = required_keys - set(self.manifest.keys())
         if missing:
@@ -143,6 +144,7 @@ class ManifestValidator:
 
     def _validate_flow_ids(self) -> None:
         """Validate flow IDs match expected stable values."""
+        assert self.manifest is not None
         if "flows" not in self.manifest:
             return
 
@@ -172,6 +174,7 @@ class ManifestValidator:
 
     def _validate_deployment_order(self) -> None:
         """Validate deployment order."""
+        assert self.manifest is not None
         if "deployment_order" not in self.manifest:
             self.errors.append(ValidationError("manifest", "Missing deployment_order field"))
             return
@@ -188,6 +191,7 @@ class ManifestValidator:
 
     def _validate_runtime_bindings(self) -> None:
         """Validate runtime variable bindings."""
+        assert self.manifest is not None
         if "runtime_bindings" not in self.manifest:
             self.errors.append(ValidationError("manifest", "Missing runtime_bindings field"))
             return
@@ -477,7 +481,7 @@ class LFXValidator:
             )
 
 
-def main():
+def main() -> int:
     """Main entry point."""
     parser = argparse.ArgumentParser(
         description="Validate LangFlow assets against manifest and schema rules"
@@ -520,6 +524,7 @@ def main():
         return 1
 
     manifest = manifest_validator.manifest
+    assert manifest is not None
 
     # 2. Topology validation
     topology_validator = TopologyValidator(manifest, repo_root, flows_dir)

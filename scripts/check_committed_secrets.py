@@ -46,6 +46,16 @@ _ASSIGNMENT_PATTERN = re.compile(
 # NEO4J_PASSWORD=changeme123). Kept narrow and explicit on purpose.
 _PLACEHOLDER_VALUE_PATTERN = re.compile(r"(?i)^changeme\d*$")
 
+# Matches a bare `name.attr[.attr...]` reference, e.g. a Python keyword
+# argument pointing at a variable (`api_key=args.auth_token,`). Only applied
+# to `.py` files: a real committed secret is an opaque token, never a valid
+# dotted identifier chain, and this pattern only fires in source files where
+# `NAME=value` syntax is a keyword argument rather than an env-style
+# assignment.
+_DOTTED_REFERENCE_PATTERN = re.compile(
+    r"^[A-Za-z_][A-Za-z0-9_]*(?:\.[A-Za-z_][A-Za-z0-9_]*)+[,)]?$"
+)
+
 
 @dataclass(frozen=True)
 class SecretFinding:
@@ -64,7 +74,11 @@ def _is_placeholder_value(value: str) -> bool:
     return bool(_PLACEHOLDER_VALUE_PATTERN.match(value))
 
 
-def _file_has_credential_assignment(contents: str) -> bool:
+def _is_dotted_reference(value: str) -> bool:
+    return bool(_DOTTED_REFERENCE_PATTERN.match(value))
+
+
+def _file_has_credential_assignment(contents: str, *, is_python_source: bool) -> bool:
     for line in contents.splitlines():
         match = _ASSIGNMENT_PATTERN.match(line)
         if not match:
@@ -73,6 +87,8 @@ def _file_has_credential_assignment(contents: str) -> bool:
         if not raw_value or not _looks_like_credential_name(name):
             continue
         if _is_placeholder_value(raw_value):
+            continue
+        if is_python_source and _is_dotted_reference(raw_value):
             continue
         return True
     return False
@@ -116,7 +132,8 @@ def scan_tracked_files(repo: Path) -> tuple[SecretFinding, ...]:
             contents = file_path.read_text(encoding="utf-8")
         except (UnicodeDecodeError, OSError):
             continue
-        if _file_has_credential_assignment(contents):
+        is_python_source = relative_path.endswith(".py")
+        if _file_has_credential_assignment(contents, is_python_source=is_python_source):
             findings.append(SecretFinding(path=relative_path, rule_id=RULE_ID_CREDENTIAL_PATTERN))
     return tuple(findings)
 

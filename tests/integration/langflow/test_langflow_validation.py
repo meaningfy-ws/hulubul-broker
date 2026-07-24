@@ -21,13 +21,13 @@ SCRIPT_PATH = REPO_ROOT / "scripts" / "validate_langflow_assets.py"
 class TestManifestValidation:
     """Test manifest structure and completeness validation."""
 
-    def test_manifest_exists(self):
+    def test_manifest_exists(self) -> None:
         """Manifest file should exist and be readable."""
         assert MANIFEST_PATH.exists(), f"Manifest not found at {MANIFEST_PATH}"
 
-    def test_manifest_declares_three_flows(self):
+    def test_manifest_declares_three_flows(self) -> None:
         """Manifest must declare exactly three flows."""
-        import yaml
+        import yaml  # type: ignore[import-untyped]
 
         with open(MANIFEST_PATH) as f:
             manifest = yaml.safe_load(f)
@@ -40,7 +40,7 @@ class TestManifestValidation:
             "lf-00-main-router",
         }
 
-    def test_manifest_flow_ids_are_stable(self):
+    def test_manifest_flow_ids_are_stable(self) -> None:
         """Flow IDs should match expected values from task 29 spec."""
         import yaml
 
@@ -58,7 +58,7 @@ class TestManifestValidation:
                 f"Flow {flow_name} has unexpected ID: {manifest['flows'][flow_name]['id']}"
             )
 
-    def test_manifest_deployment_order(self):
+    def test_manifest_deployment_order(self) -> None:
         """Deployment order should be lf-70 -> lf-10 -> lf-00."""
         import yaml
 
@@ -72,7 +72,7 @@ class TestManifestValidation:
         ]
         assert manifest["deployment_order"] == expected_order
 
-    def test_manifest_has_runtime_bindings(self):
+    def test_manifest_has_runtime_bindings(self) -> None:
         """Manifest must declare runtime variable bindings."""
         import yaml
 
@@ -82,7 +82,7 @@ class TestManifestValidation:
         assert "runtime_bindings" in manifest
         assert len(manifest["runtime_bindings"]) == 3
 
-    def test_manifest_runtime_bindings_reference_three_openai_models(self):
+    def test_manifest_runtime_bindings_reference_three_openai_models(self) -> None:
         """Runtime bindings should reference exactly three OpenAI model components."""
         import yaml
 
@@ -99,7 +99,7 @@ class TestManifestValidation:
             assert "model_name" in binding["fields"]
             assert binding["fields"]["model_name"] == "HULUBUL_LLM_MODEL"
 
-    def test_manifest_environment_variables_allowlisted(self):
+    def test_manifest_environment_variables_allowlisted(self) -> None:
         """Only allowlisted environment variables should appear in runtime bindings."""
         import yaml
 
@@ -126,11 +126,11 @@ class TestManifestValidation:
 class TestTopologyValidation:
     """Test flow file existence and topology."""
 
-    def test_flows_directory_exists(self):
+    def test_flows_directory_exists(self) -> None:
         """Flows directory should exist."""
         assert FLOWS_DIR.exists(), f"Flows directory not found at {FLOWS_DIR}"
 
-    def test_no_ui_only_flows_without_manifest_entry(self, tmp_path):
+    def test_no_ui_only_flows_without_manifest_entry(self, tmp_path: Path) -> None:
         """If a flow file exists but is not in manifest, it's a UI-only flow (fail)."""
         import yaml
 
@@ -150,7 +150,7 @@ class TestTopologyValidation:
                 f"All flows must be listed in manifest."
             )
 
-    def test_no_missing_flows_referenced_in_manifest(self):
+    def test_no_missing_flows_referenced_in_manifest(self) -> None:
         """All flows referenced in manifest must exist as files."""
         import yaml
 
@@ -168,7 +168,7 @@ class TestTopologyValidation:
                     f"Flow file {flow_info['file']} not yet created (expected in Checkpoint 8)"
                 )
 
-    def test_manifest_references_valid_file_paths(self):
+    def test_manifest_references_valid_file_paths(self) -> None:
         """All file paths in manifest should be relative to flows/ directory."""
         import yaml
 
@@ -186,11 +186,11 @@ class TestTopologyValidation:
 class TestValidationScriptBasics:
     """Test that the validation script exists and is callable."""
 
-    def test_script_exists(self):
+    def test_script_exists(self) -> None:
         """Validation script should exist."""
         assert SCRIPT_PATH.exists(), f"Script not found at {SCRIPT_PATH}"
 
-    def test_script_accepts_manifest_argument(self):
+    def test_script_accepts_manifest_argument(self) -> None:
         """Script should accept manifest path as argument."""
         result = subprocess.run(
             ["poetry", "run", "python", str(SCRIPT_PATH), "--help"],
@@ -202,7 +202,7 @@ class TestValidationScriptBasics:
         assert result.returncode == 0, f"Script help failed: {result.stderr}"
         assert "manifest" in result.stdout.lower()
 
-    def test_script_validates_manifest_when_given_path(self):
+    def test_script_validates_manifest_when_given_path(self) -> None:
         """Script should validate manifest when given the path."""
         result = subprocess.run(
             ["poetry", "run", "python", str(SCRIPT_PATH), str(MANIFEST_PATH)],
@@ -223,13 +223,13 @@ class TestFlowFilesWhenPresent:
     """Tests that apply only if flow files exist."""
 
     @pytest.fixture
-    def flows_exist(self):
+    def flows_exist(self) -> bool:
         """Skip test if flows don't exist yet."""
         if not any(FLOWS_DIR.glob("*.json")):
             pytest.skip("Flow files not yet created (expected in Checkpoint 8)")
         return True
 
-    def test_flow_files_are_valid_json(self, flows_exist):
+    def test_flow_files_are_valid_json(self, flows_exist: bool) -> None:
         """All flow files must be valid JSON."""
         for flow_file in FLOWS_DIR.glob("*.json"):
             with open(flow_file) as f:
@@ -238,7 +238,7 @@ class TestFlowFilesWhenPresent:
                 except json.JSONDecodeError as e:
                     pytest.fail(f"Flow file {flow_file.name} is not valid JSON: {e}")
 
-    def test_flows_reference_only_allowed_components(self, flows_exist):
+    def test_flows_reference_only_allowed_components(self, flows_exist: bool) -> None:
         """Flows should not reference LF-20 or out-of-scope flows."""
         for flow_file in FLOWS_DIR.glob("*.json"):
             with open(flow_file) as f:
@@ -253,7 +253,7 @@ class TestFlowFilesWhenPresent:
                 f"Flow {flow_file.name} references LF-20 (out of scope)"
             )
 
-    def test_mcp_tools_only_in_lf70(self, flows_exist):
+    def test_mcp_tools_only_in_lf70(self, flows_exist: bool) -> None:
         """MCP tools should only be used in LF-70 (data-access)."""
         lf70_file = FLOWS_DIR / "10-lf-70-data-access.json"
         other_flows = [f for f in FLOWS_DIR.glob("*.json") if f != lf70_file]
@@ -275,7 +275,7 @@ class TestFlowFilesWhenPresent:
 class TestValidationScriptOutput:
     """Test the validation script output and error messages."""
 
-    def test_script_provides_clear_error_messages(self):
+    def test_script_provides_clear_error_messages(self) -> None:
         """When validation fails, script should provide clear error messages."""
         # Create a malformed manifest to test error reporting
         with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as f:
@@ -296,7 +296,7 @@ class TestValidationScriptOutput:
         finally:
             Path(bad_manifest).unlink()
 
-    def test_script_exits_zero_on_valid_manifest(self):
+    def test_script_exits_zero_on_valid_manifest(self) -> None:
         """Script should exit 0 when manifest is valid."""
         result = subprocess.run(
             ["poetry", "run", "python", str(SCRIPT_PATH), str(MANIFEST_PATH)],
