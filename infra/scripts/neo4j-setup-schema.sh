@@ -9,6 +9,13 @@ source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/neo4j-common.sh"
 load_env
 neo4j_wait
 
-echo "Applying schema from infra/cypher/schema.cypher..."
+echo "Applying domain schema from infra/cypher/schema.cypher..."
 neo4j_exec_file "$CYPHER_DIR/schema.cypher"
-echo "Schema applied."
+
+echo "Applying operational schema from infra/cypher/operational-schema.cypher..."
+neo4j_exec_file "$CYPHER_DIR/operational-schema.cypher"
+
+echo "Waiting for indexes to be ready..."
+neo4j_exec_file <(echo "CALL db.awaitIndexes(120)")
+
+echo "All schemas applied."
