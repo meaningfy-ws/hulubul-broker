@@ -195,14 +195,9 @@ class ExecutionEnvelopeComponent(Component):
         except (AttributeError, KeyError):
             pass
 
-        # Try Message's session_id as fallback if graph context doesn't have it
-        if self.message and self.message.session_id:
-            raw_session = self.message.session_id
-            if isinstance(raw_session, UUID):
-                return str(raw_session)
-            if isinstance(raw_session, str):
-                return raw_session
-
+        # No fallback to Message.session_id here: that would compare the
+        # message's session against itself, silently defeating the
+        # message-vs-graph mismatch check in _normalize_and_validate_session.
         return None
 
     def _normalize_and_validate_session(self, session_id: str | None) -> str:

@@ -1,5 +1,6 @@
 """Tests for contract boundary components: validation, error translation, fixed-edge enforcement."""
 
+import json
 from uuid import uuid4
 
 import pytest
@@ -270,6 +271,23 @@ class TestCanonicalConversion:
         # Should return an error response
         assert isinstance(output, Data | JSON)
 
+    def test_successful_conversion_output_is_json_serializable(
+        self, contract_result_boundary: ContractResultBoundaryComponent
+    ) -> None:
+        """Successfully validated contract data has no non-JSON-native types (e.g. UUID).
+
+        `lfx.schema.data.JSON.data` is a plain dict with no JSON-mode coercion,
+        so `model_dump()` results must already be JSON-native (correlation_id
+        as `str`, not `UUID`).
+        """
+        output = contract_result_boundary.validate_contract_value(
+            FIXED_ROUTING_CONTEXT.model_dump()
+        )
+
+        assert isinstance(output, JSON)
+        assert isinstance(output.data["correlation_id"], str)
+        json.dumps(output.data)  # must not raise
+
 
 # ============================================================================
 # Test: Error Redaction (Field Violations Never Expose Values)
@@ -320,6 +338,16 @@ class TestErrorRedaction:
         # Verify secret value never appears in output
         assert "SECRET_VALUE_12345" not in output_str
         assert "xyz123" not in output_str
+
+    def test_error_response_output_is_json_serializable(
+        self, contract_result_boundary: ContractResultBoundaryComponent
+    ) -> None:
+        """Error response data has no non-JSON-native types (e.g. UUID correlation_id)."""
+        output = contract_result_boundary.validate_contract_value(None)
+
+        assert isinstance(output, JSON)
+        assert isinstance(output.data["correlation_id"], str)
+        json.dumps(output.data)  # must not raise
 
 
 # ============================================================================

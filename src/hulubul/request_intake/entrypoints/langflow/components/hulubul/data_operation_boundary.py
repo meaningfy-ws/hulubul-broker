@@ -149,7 +149,7 @@ class DataOperationRequestBoundaryComponent(Component):
             retryable=policy.retryable,
         )
 
-        return JSON(data=error.model_dump())
+        return JSON(data=error.model_dump(mode="json"))
 
 
 class DataOperationResultBoundaryComponent(Component):
@@ -247,4 +247,4 @@ class DataOperationResultBoundaryComponent(Component):
             retryable=policy.retryable,
         )
 
-        return JSON(data=error.model_dump())
+        return JSON(data=error.model_dump(mode="json"))
