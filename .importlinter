@@ -11,6 +11,7 @@
 [importlinter]
 root_packages =
     hulubul
+include_external_packages = True
 
 ; --- Core is inward-facing only ---
 ; core.models is the single authoritative domain contract. All outward
@@ -60,3 +61,30 @@ source_modules =
     hulubul.request_intake.services
 forbidden_modules =
     hulubul.request_intake.entrypoints
+
+; --- Core models must not import LFX/LangFlow ---
+; Lower layers must never depend on entrypoint/framework concerns.
+; lfx and langflow are framework-specific dependencies that belong only
+; in entrypoints and adapters, not in core domain models.
+;
+[importlinter:contract:core-models-no-lfx]
+name = Core models must not import lfx or langflow
+type = forbidden
+source_modules =
+    hulubul.core.models
+forbidden_modules =
+    lfx
+    langflow
+
+; --- Request intake services must not import LFX/LangFlow ---
+; Services are pure policy and orchestration; no framework coupling.
+; lfx and langflow belong in entrypoints, not in application logic.
+;
+[importlinter:contract:intake-services-no-lfx]
+name = Request intake services must not import lfx or langflow
+type = forbidden
+source_modules =
+    hulubul.request_intake.services
+forbidden_modules =
+    lfx
+    langflow
