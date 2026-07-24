@@ -46,10 +46,12 @@
 
 ## 7. Flow-As-Code Toolchain
 
-- [ ] 7.1 Add the LangFlow directory, stable UUIDv5 flow manifest, LFX local/CI environment map, deployment order, and developer workflow documentation
+- [ ] 7.1 Add the LangFlow directory, stable UUIDv5 flow manifest, LFX local/CI environment map, and deployment order (developer workflow documentation addressed in 7.5)
 - [ ] 7.2 Implement deterministic LFX export normalization and idempotence checks without reordering semantic node/edge arrays
 - [ ] 7.3 Add strict level-4 flow validation, strict upgrade compatibility, required-input/edge checks, and structural environment-variable/secret validation
-- [ ] 7.4 Add LFX push/pull/status targets and a clean-instance drift check that fails for UI-only, missing, duplicate, or untracked remote flows
+- [ ] 7.4 Implement operational policy validation scripts (`validate_langflow_assets.py` and `inspect_langflow_components.py`), component schema capture integration tests, and hard gates for manifest coherence, topology drift detection, UI-only flow rejection, and component schema pinning
+- [ ] 7.5 Create contributor workflow and operational policy documentation (`docs/flow-development.md`) covering flow edit cycle, manifest-as-source-of-truth principle, drift detection, stable UUID/component ID requirements, and local vs. CI workflow — link from README/CONTRIBUTING so new contributors reference it before modifying flows
+- [ ] 7.6 Add LFX push/pull/status Make targets and clean-instance drift check that fails for UI-only, missing, duplicate, or untracked remote flows
 
 ## 8. LF-70 Data Access Flow
 

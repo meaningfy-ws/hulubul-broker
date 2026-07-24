@@ -94,9 +94,11 @@ No `src/hulubul/**/adapters/`, repository, FastAPI, settings loader, custom MCP 
 | `langflow/flows/10-lf-70-data-access.json` | Create from pinned export | LF-70 request boundary, model, agent, one MCP toolkit, retry/result boundary. |
 | `langflow/flows/20-lf-10-request-intake.json` | Create from pinned export | LF-10 intake agent with LF-70 as its sole logical tool. |
 | `langflow/flows/30-lf-00-main-router.json` | Create from pinned export | Chat input, mandatory context prefetch, bounded router, LF-10, structured/rendered outputs. |
-| `scripts/inspect_langflow_components.py` | Create | Capture pinned static/dynamic component schemas and generated edge handles without secrets. |
+| `scripts/inspect_langflow_components.py` | Create | Capture pinned static/dynamic component schemas and generated edge handles without secrets; required for component drift prevention and CI validation. |
 | `scripts/normalize_langflow_flows.py` | Create | Pinned LFX normalization plus restoration of manifest-allowlisted variable names only. |
-| `scripts/validate_langflow_assets.py` | Create | Enforce manifest, stable topology, public ports, environment allowlist, no LF-20/no MCP outside LF-70. |
+| `scripts/validate_langflow_assets.py` | Create | Enforce manifest, stable topology, public ports, environment allowlist, no UI-only/missing/stale flows, no LF-20/no MCP outside LF-70; gates on drift detection. |
+| `docs/flow-development.md` | Create | Contributor workflow guide: edit cycle (UI export→normalize→validate→commit), manifest-as-source-of-truth principle, drift detection, stable UUID/component ID requirements, local vs. CI workflow, and how new contributors reference this before modifying flows. |
+| `README.md` or `CONTRIBUTING.md` | Modify | Add link to `docs/flow-development.md` so contributors find workflow documentation immediately. |
 
 ### Test And Evidence Assets
 
