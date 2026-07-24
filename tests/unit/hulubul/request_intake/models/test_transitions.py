@@ -190,9 +190,8 @@ class TestEvaluateTransitionEdgeValidation:
         assert decision.allowed is False
         assert decision.error_code is ErrorCode.INVALID_STATUS_TRANSITION
 
-    def test_skip_step_rejected(self) -> None:
+    def test_skip_step_allowed(self) -> None:
         """Skipping a step (NEW -> COMPLETE via NEEDS_CLARIFICATION) is allowed."""
-        # Actually, this IS allowed per the spec
         decision = evaluate_transition(
             actual_status=RequestStatus.NEW,
             actual_updated_at=FIXED_TIMESTAMP,

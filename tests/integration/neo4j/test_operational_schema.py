@@ -25,7 +25,7 @@ class TestOperationalConversationBinding:
         session = neo4j_session_with_schema
 
         # Create a request node to link to
-        session.run("CREATE (r:ParcelRequest {id: 'req-001'})")
+        session.run("CREATE (r:DeliveryRequest {id: 'req-001'})")
 
         # Create first binding with sessionId
         session.run(
@@ -60,7 +60,7 @@ class TestOperationalConversationBinding:
         session = neo4j_session_with_schema
 
         # Create a request node
-        session.run("CREATE (r:ParcelRequest {id: 'req-001'})")
+        session.run("CREATE (r:DeliveryRequest {id: 'req-001'})")
 
         # Create a binding
         binding_result = session.run(
@@ -85,7 +85,7 @@ class TestOperationalConversationBinding:
         session.run(
             """
             MATCH (b:OperationalConversationBinding {sessionId: 'test-session-002'})
-            MATCH (r:ParcelRequest {id: 'req-001'})
+            MATCH (r:DeliveryRequest {id: 'req-001'})
             CREATE (b)-[:BINDS_ACTIVE_REQUEST]->(r)
             """
         )
@@ -94,7 +94,7 @@ class TestOperationalConversationBinding:
         rel_result = session.run(
             """
             MATCH (b:OperationalConversationBinding {sessionId: 'test-session-002'})
-                  -[rel:BINDS_ACTIVE_REQUEST]->(r:ParcelRequest)
+                  -[rel:BINDS_ACTIVE_REQUEST]->(r:DeliveryRequest)
             RETURN type(rel) as rel_type
             """
         )

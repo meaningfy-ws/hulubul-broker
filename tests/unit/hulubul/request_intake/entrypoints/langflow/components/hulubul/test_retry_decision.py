@@ -237,18 +237,20 @@ class TestResponseStructure:
 class TestComponentPurity:
     """Test that component does not perform prohibited operations."""
 
-    def test_no_sleep(self, retry_component: RetryDecisionComponent) -> None:
+    def test_no_sleep(
+        self, retry_component: RetryDecisionComponent, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
         """Component does not sleep or delay."""
-        # This is a behavior test - we verify by execution time
+
+        # Deterministic guard: fail immediately if anything sleeps, rather than
+        # asserting on wall-clock time (flaky under CI load).
+        def _fail_on_sleep(*_args: object, **_kwargs: object) -> None:
+            raise AssertionError("build_decision() must not sleep or delay")
+
+        monkeypatch.setattr("time.sleep", _fail_on_sleep)
+
         retry_component.failure_kind = FailureKind.TIMEOUT
-        import time
-
-        start = time.time()
         retry_component.build_decision()
-        elapsed = time.time() - start
-
-        # Should complete in < 100ms (generous for CI)
-        assert elapsed < 0.1
 
     def test_no_external_io(self, retry_component: RetryDecisionComponent) -> None:
         """Component performs no external I/O (verified by mocking)."""

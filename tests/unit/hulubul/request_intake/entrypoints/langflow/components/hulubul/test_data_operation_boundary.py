@@ -1,5 +1,6 @@
 """Tests for data operation boundary components: validation, authorization, serialization."""
 
+import json
 from datetime import datetime
 from typing import Any
 from uuid import uuid4
@@ -662,8 +663,10 @@ class TestCorrelationIdPatching:
 
         assert isinstance(result, JSON)
         data = result.data
-        # Should use request's correlation_id
-        assert str(data["correlation_id"]) == str(FIXED_CORRELATION_ID)
+        # Should use request's correlation_id, as a JSON-native str (not UUID)
+        assert data["correlation_id"] == str(FIXED_CORRELATION_ID)
+        assert isinstance(data["correlation_id"], str)
+        json.dumps(data)  # must not raise
 
     def test_error_has_result_correlation_id(
         self, result_boundary: DataOperationResultBoundaryComponent
@@ -683,5 +686,7 @@ class TestCorrelationIdPatching:
 
         assert isinstance(output, JSON)
         data = output.data
-        # Should have correlation_id (from request if not in result)
+        # Should have correlation_id (from request if not in result), JSON-native
         assert "correlation_id" in data
+        assert isinstance(data["correlation_id"], str)
+        json.dumps(data)  # must not raise

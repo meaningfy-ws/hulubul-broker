@@ -190,7 +190,7 @@ class ContractResultBoundaryComponent(Component):
                     instance = model_type.validate_python(value)
                     # Success: return as JSON
                     if hasattr(instance, "model_dump"):
-                        data = instance.model_dump()
+                        data = instance.model_dump(mode="json")
                     else:
                         data = dict(instance)
                     return JSON(data=data)
@@ -198,7 +198,7 @@ class ContractResultBoundaryComponent(Component):
                 elif isinstance(model_type, type) and issubclass(model_type, BaseModel):
                     instance = model_type.model_validate(value)
                     # Success: return as JSON
-                    return JSON(data=instance.model_dump())
+                    return JSON(data=instance.model_dump(mode="json"))
                 else:
                     # Unknown type, skip
                     continue
@@ -235,4 +235,4 @@ class ContractResultBoundaryComponent(Component):
             retryable=policy.retryable,
         )
 
-        return JSON(data=error.model_dump())
+        return JSON(data=error.model_dump(mode="json"))

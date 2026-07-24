@@ -232,6 +232,18 @@ class TestSessionValidation:
                     with pytest.raises(ValueError, match="INVALID_INPUT|session"):
                         component.build_envelope()
 
+    def test_graph_session_id_does_not_fall_back_to_message_session(
+        self, component: ExecutionEnvelopeComponent
+    ) -> None:
+        """_get_graph_session_id() must not fall back to Message.session_id.
+
+        Falling back would make the message-vs-graph mismatch check compare the
+        message's session against itself, silently defeating the check.
+        """
+        component.message = Message(text="Hello", session_id=SESSION)
+
+        assert component._get_graph_session_id() is None
+
     def test_flow_id_fallback_rejected(self, component: ExecutionEnvelopeComponent) -> None:
         """LangFlow's flow-ID fallback (when session omitted) is rejected."""
         # When session_id is omitted from Message, LFX might use flow_id as fallback

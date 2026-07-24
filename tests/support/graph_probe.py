@@ -96,7 +96,9 @@ class GraphProbe:
         Used to detect requests created but not linked to a session.
 
         Args:
-            namespace: Scope identifier to filter orphaned requests.
+            namespace: Accepted for interface consistency with other probe
+                methods; does not currently filter results (there is no
+                namespace property on DeliveryRequest nodes).
 
         Returns:
             Frozenset of request IDs that are orphaned (not bound to any binding).

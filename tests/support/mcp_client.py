@@ -15,7 +15,8 @@ class MCPClient:
     """
     Synchronous wrapper around MCP protocol client.
 
-    Manages SSE connection to MCP server and HTTP POST requests for protocol messages.
+    Sends JSON-RPC requests to the MCP server over plain HTTP POST and reads
+    the JSON response — no SSE stream or persistent connection is established.
     Implements enough of the MCP spec to initialize and list tools.
 
     MCP spec: https://spec.modelcontextprotocol.org/
