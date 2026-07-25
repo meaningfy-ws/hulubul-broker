@@ -1,9 +1,9 @@
 import os
 from dataclasses import dataclass
 
-import httpx
 from aiogram import Bot, Dispatcher
 from aiogram.types import Message
+import httpx
 
 from hulubul.channel_gateway.adapters.langflow_client import LangflowClient
 from hulubul.channel_gateway.adapters.telegram_adapter import TelegramAdapter
@@ -24,14 +24,11 @@ def load_config() -> GatewayConfig:
     mode = os.environ["GATEWAY_MODE"]
     if mode not in _VALID_MODES:
         raise ValueError(f"GATEWAY_MODE must be one of {_VALID_MODES}, got {mode!r}")
-    # Positional, not keyword, construction: a `telegram_bot_token=...` line
-    # would trip check_committed_secrets.py's naive NAME=value heuristic even
-    # though this is an env-var read, not a literal secret.
     return GatewayConfig(
-        os.environ["TELEGRAM_BOT_TOKEN"],
-        os.environ["LANGFLOW_API_URL"],
-        os.environ["LANGFLOW_FLOW_ID"],
-        mode,
+        telegram_bot_token=os.environ["TELEGRAM_BOT_TOKEN"],
+        langflow_api_url=os.environ["LANGFLOW_API_URL"],
+        langflow_flow_id=os.environ["LANGFLOW_FLOW_ID"],
+        mode=mode,
     )
 
 
@@ -68,18 +65,15 @@ async def main() -> None:
                 )
                 public_url = tunnels_resp.json()["tunnels"][0]["public_url"]
 
-            # Named/laid out to dodge check_committed_secrets.py's NAME=value
-            # heuristic (flags a line starting with an assignment whose LHS
-            # ends in *_SECRET/*_TOKEN); this reads an env var, not a literal.
-            secret_env = os.environ.get("TELEGRAM_WEBHOOK_SECRET") or None
+            secret = os.environ.get("TELEGRAM_WEBHOOK_SECRET") or None
             await bot.set_webhook(
-                url=f"{public_url}/webhook", secret_token=secret_env, drop_pending_updates=True
+                url=f"{public_url}/webhook", secret_token=secret, drop_pending_updates=True
             )
 
             app = web.Application()
-            SimpleRequestHandler(
-                dispatcher=dispatcher, bot=bot, secret_token=secret_env
-            ).register(app, path="/webhook")
+            SimpleRequestHandler(dispatcher=dispatcher, bot=bot, secret_token=secret).register(
+                app, path="/webhook"
+            )
             setup_application(app, dispatcher, bot=bot)
             runner = web.AppRunner(app)
             await runner.setup()
