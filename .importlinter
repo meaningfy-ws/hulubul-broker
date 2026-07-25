@@ -23,6 +23,7 @@ source_modules =
     hulubul.core
 forbidden_modules =
     hulubul.request_intake
+    hulubul.channel_gateway
 
 ; --- Core models have no internal layer dependencies ---
 ; Prevent core from accidentally depending on service or entrypoint patterns.
@@ -73,4 +74,16 @@ layers =
     hulubul.channel_gateway.services
     hulubul.channel_gateway.adapters
     hulubul.channel_gateway.models
+
+; --- Channel gateway is isolated from request_intake ---
+; Two independent bounded contexts; neither should reach into the other's
+; internals. (Both may import hulubul.core, which is the shared domain.)
+;
+[importlinter:contract:channel_gateway-request_intake-isolation]
+name = channel_gateway must not import request_intake
+type = forbidden
+source_modules =
+    hulubul.channel_gateway
+forbidden_modules =
+    hulubul.request_intake
 
