@@ -232,3 +232,4 @@ reports/junit-unit.xml
 .gitnexus/kuzu
 .gitnexus/meta.json
 .vscode/settings.json
+.claude/settings.local.json
