@@ -60,18 +60,19 @@ async def run_webhook(config: GatewayConfig, bot: Bot, dispatcher: Dispatcher) -
             tunnels_resp = await ngrok_client.get(f"{ngrok_api_url}/api/tunnels")
             tunnels_resp.raise_for_status()
             tunnels = tunnels_resp.json()["tunnels"]
+            if not tunnels:
+                raise RuntimeError(
+                    f"ngrok reported no active tunnels at {ngrok_api_url}/api/tunnels — it "
+                    "may still be starting up. Wait for it to finish establishing a tunnel "
+                    "and retry."
+                )
+            public_url = tunnels[0]["public_url"]
         except (httpx.HTTPError, KeyError, ValueError) as exc:
             raise RuntimeError(
                 f"Could not read the ngrok tunnel list from {ngrok_api_url}/api/tunnels: "
                 f"{exc}. Is the 'ngrok' container up (docker compose --profile webhook up) "
                 "and has it finished establishing a tunnel?"
             ) from exc
-        if not tunnels:
-            raise RuntimeError(
-                f"ngrok reported no active tunnels at {ngrok_api_url}/api/tunnels — it may "
-                "still be starting up. Wait for it to finish establishing a tunnel and retry."
-            )
-        public_url = tunnels[0]["public_url"]
 
     await bot.set_webhook(
         url=f"{public_url}/webhook",
