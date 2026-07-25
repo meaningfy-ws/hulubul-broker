@@ -16,9 +16,7 @@ async def test_run_posts_session_id_and_channel_identity_and_returns_reply_text(
         return httpx.Response(
             200,
             json={
-                "outputs": [
-                    {"outputs": [{"results": {"message": {"data": {"text": "Got it!"}}}}]}
-                ]
+                "outputs": [{"outputs": [{"results": {"message": {"data": {"text": "Got it!"}}}}]}]
             },
         )
 

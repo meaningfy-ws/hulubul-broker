@@ -2,10 +2,9 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from hulubul.core.models.domain.hulubul_models import Medium
-
 from hulubul.channel_gateway.models.message import InboundMessage, TextMessage
 from hulubul.channel_gateway.services.relay_message import relay_inbound_message
+from hulubul.core.models.domain.hulubul_models import Medium
 
 
 @pytest.mark.asyncio
@@ -27,9 +26,7 @@ async def test_relay_calls_langflow_with_derived_session_id_and_sends_reply_to_o
         system_id="123456789",
         text="I need to send a parcel",
     )
-    adapter.send.assert_awaited_once_with(
-        "123456789", TextMessage(text="Sure, where is it going?")
-    )
+    adapter.send.assert_awaited_once_with("123456789", TextMessage(text="Sure, where is it going?"))
 
 
 @pytest.mark.asyncio

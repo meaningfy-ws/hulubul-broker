@@ -35,6 +35,4 @@ class TelegramAdapter(ChannelPort):
         if isinstance(message, TextMessage):
             await self._bot.send_message(chat_id=chat_id, text=message.text)
         else:
-            await self._bot.send_photo(
-                chat_id=chat_id, photo=message.url, caption=message.caption
-            )
+            await self._bot.send_photo(chat_id=chat_id, photo=message.url, caption=message.caption)

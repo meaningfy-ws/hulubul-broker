@@ -1,10 +1,9 @@
-from hulubul.core.models.domain.hulubul_models import Medium
-
 from hulubul.channel_gateway.models.message import (
     InboundMessage,
     MediaMessage,
     TextMessage,
 )
+from hulubul.core.models.domain.hulubul_models import Medium
 
 
 def test_inbound_message_is_immutable():

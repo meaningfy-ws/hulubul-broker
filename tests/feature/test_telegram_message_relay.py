@@ -4,10 +4,9 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 from pytest_bdd import given, parsers, scenarios, then, when
 
-from hulubul.core.models.domain.hulubul_models import Medium
-
 from hulubul.channel_gateway.models.message import InboundMessage, TextMessage
 from hulubul.channel_gateway.services.relay_message import relay_inbound_message
+from hulubul.core.models.domain.hulubul_models import Medium
 
 scenarios("../features/telegram_message_relay.feature")
 
@@ -17,7 +16,11 @@ def context():
     return {}
 
 
-@given(parsers.parse('a Telegram chat with system_id "{system_id}" that has never messaged Hulubul before'))
+@given(
+    parsers.parse(
+        'a Telegram chat with system_id "{system_id}" that has never messaged Hulubul before'
+    )
+)
 @given(parsers.parse('a Telegram chat with system_id "{system_id}"'))
 def a_telegram_chat(context, system_id):
     context["system_id"] = system_id
@@ -52,7 +55,11 @@ def langflow_receives_session_id(context, expected_session_id):
     assert kwargs["session_id"] == expected_session_id
 
 
-@then(parsers.parse('LangFlow receives the channel identity medium "{medium}" and system_id "{system_id}"'))
+@then(
+    parsers.parse(
+        'LangFlow receives the channel identity medium "{medium}" and system_id "{system_id}"'
+    )
+)
 def langflow_receives_channel_identity(context, medium, system_id):
     _, kwargs = context["langflow_client"].run.await_args
     assert kwargs["medium"] == medium

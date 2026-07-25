@@ -13,9 +13,7 @@ class LangflowClient:
         self._flow_id = flow_id
         self._client = client
 
-    async def run(
-        self, session_id: str, medium: str, system_id: str, text: str
-    ) -> str | None:
+    async def run(self, session_id: str, medium: str, system_id: str, text: str) -> str | None:
         url = f"{self._base_url}/api/v1/run/{self._flow_id}"
         payload = {
             "input_value": text,
@@ -35,9 +33,7 @@ class LangflowClient:
 
         try:
             data = response.json()
-            return cast(
-                str, data["outputs"][0]["outputs"][0]["results"]["message"]["data"]["text"]
-            )
+            return cast(str, data["outputs"][0]["outputs"][0]["results"]["message"]["data"]["text"])
         except (KeyError, IndexError, TypeError, json.JSONDecodeError) as exc:
             logger.warning("Unexpected LangFlow response shape: %s", exc)
             return None

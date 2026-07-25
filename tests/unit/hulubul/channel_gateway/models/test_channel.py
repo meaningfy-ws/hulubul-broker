@@ -1,6 +1,5 @@
-from hulubul.core.models.domain.hulubul_models import Medium
-
 from hulubul.channel_gateway.models.channel import ChannelRef, derive_session_id
+from hulubul.core.models.domain.hulubul_models import Medium
 
 
 def test_same_channel_always_derives_the_same_session_id():
