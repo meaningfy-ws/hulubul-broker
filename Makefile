@@ -8,6 +8,7 @@ INFRA_PATH   := $(REPO_ROOT)/infra
 SCHEMA       := $(REPO_ROOT)/model/linkml/hulubul.yaml
 GEN          := $(REPO_ROOT)/model/generated
 DIAG         := $(GEN)/diagrams
+DOMAIN_MODELS := $(REPO_ROOT)/src/hulubul/core/models/domain
 COMPOSE_FILE := $(INFRA_PATH)/docker-compose.yaml
 ENV_FILE     := $(INFRA_PATH)/.env
 NEO4J_CY     := $(INFRA_PATH)/cypher
@@ -106,7 +107,7 @@ lint:
 # Pydantic classes (the "possibly generate pydantic" target).
 pydantic:
 	@ echo -e "$(BUILD_PRINT)$(ICON_PROGRESS) Generating Pydantic classes$(END_BUILD_PRINT)"
-	@ mkdir -p $(GEN)/pydantic && poetry run gen-pydantic $(SCHEMA) > $(GEN)/pydantic/hulubul_models.py
+	@ mkdir -p $(DOMAIN_MODELS) && poetry run gen-pydantic $(SCHEMA) > $(DOMAIN_MODELS)/hulubul_models.py
 	@ echo -e "$(BUILD_PRINT)$(ICON_DONE) Pydantic classes generated$(END_BUILD_PRINT)"
 
 # Ontology + constraints. Every class/slot carries an explicit hlb: URI, so the
@@ -321,7 +322,7 @@ operational-schemas: ## Generate operational JSON schemas
 	poetry run gen-operational-schemas --output schemas/operational/v1
 
 check-model-generated: lint pydantic jsonschema erdiagram plantuml classdiagram neo4j-constraints neomodel ## Fail if model/generated is stale relative to the LinkML schema
-	git diff --exit-code -- model/generated ':(exclude)model/generated/owl/**' ':(exclude)model/generated/shacl/**' ':(exclude)model/generated/pydantic/**'
+	git diff --exit-code -- model/generated ':(exclude)model/generated/owl/**' ':(exclude)model/generated/shacl/**' src/hulubul/core/models/domain ':(exclude)src/hulubul/core/models/domain/**'
 
 check-operational-schemas: ## Fail if operational schemas are stale
 	poetry run gen-operational-schemas --output schemas/operational/v1 --check

@@ -25,6 +25,7 @@ Model detail (classes, properties, payloads) is deferred to a dedicated
 | ADR-016 | L2 | Low-code/UI-first orchestration; coded parts Meaningfy-compliant; pragmatic testing | Proposed |
 | ADR-017 | L2 | Transaction-like validated writes; no hard deletes | Proposed |
 | ADR-018 | L3 | Dialogue management grounded in dialogue-act theory + planning | Proposed |
+| ADR-019 | L2 | Generated domain models land in an importable package (`hulubul.core.models.domain`), not orphaned under `model/generated/` | Proposed |
 
 Full text below.
 
@@ -446,3 +447,42 @@ LLM-emergent; and confirm the third framework referenced in discussion
 
 **Confirmation.** A Dialogue Manager component with a documented (subset) dialogue-
 act taxonomy; goals/plans modelled and testable in scenarios.
+
+---
+
+## ADR-019 — Generated domain models land in an importable package (L2)
+
+**Context.** LinkML is the single source of truth for Hulubul's domain model
+(`model/linkml/`), and `make generate-models` derives Pydantic, OWL, SHACL, JSON Schema,
+Cypher, and neomodel targets from it. Historically the Pydantic target wrote to
+`model/generated/pydantic/hulubul_models.py`, which sits outside `pyproject.toml`'s
+`packages` list (only `src/hulubul` is installed) — so no code under `src/hulubul/` could
+import a generated domain class without a `sys.path` hack. This pushed hand-written code
+toward silently redefining domain concepts instead of reusing them (observed twice while
+building the Telegram channel gateway: the hand-written `core/models/operational/` layer,
+and a first-draft local `Medium` enum that duplicated — incompletely — the real
+LinkML-generated one).
+
+**Decision.** `make pydantic`'s output moves to
+`src/hulubul/core/models/domain/hulubul_models.py`, inside the installed package, so any
+bounded context can `from hulubul.core.models.domain.hulubul_models import <Class>` with no
+path manipulation. The file remains fully generated and is never hand-edited — regenerated
+wholesale by `make pydantic`, with the same "never hand-edit, `make` overwrites" rule as
+everything else under `model/generated/`. Only the Pydantic target moves; OWL/SHACL/JSON
+Schema/diagrams/Cypher/neomodel outputs stay under `model/generated/` unchanged.
+
+**Consequences.** +Generated domain models are actually reusable across bounded contexts,
+closing the gap that caused at least two silent near-duplications. +Matches the Meaningfy
+conceptual-modelling default ("generated artefacts land under the relevant package... via
+`make generate-models`"), correcting a prior deviation from that standard. −A new bounded
+context's `models/` layer can now contain both generated domain entities (imported, never
+redefined) and hand-written operational value objects side by side — the boundary between
+them must stay a live code-review discipline (survey `model/generated` →
+`hulubul.core.models.domain` before hand-writing a new model), not something enforced by the
+directory split alone. −The single-file generated output (`hulubul_models.py`, one file for
+the whole merged schema) is unchanged by this decision; splitting into one generated file per
+LinkML module remains a separate, unaddressed improvement.
+
+**Confirmation.** `src/hulubul/core/models/domain/hulubul_models.py` exists, is importable
+from any bounded context, and `model/generated/pydantic/` no longer exists as a separate,
+unreachable copy.

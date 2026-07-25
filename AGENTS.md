@@ -51,6 +51,8 @@ build-up plan.
 - **LinkML is the single source of truth.** Files under `model/generated/` are
   produced by `make` and must never be hand-edited; the next `make` overwrites
   them. Commit generated artifacts in the same commit as the schema edit.
+  `src/hulubul/core/models/domain/` is likewise `make`-generated (`make pydantic`)
+  and must never be hand-edited.
 - **Secrets never live in VCS.** `infra/.env` is gitignored; copy from
   `infra/.env.example` and edit passwords (Neo4j password ≥ 8 characters).
 - **`make lint` is schema linting** (`linkml-lint`), not Python linting — there
