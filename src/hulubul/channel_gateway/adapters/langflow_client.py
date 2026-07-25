@@ -1,5 +1,6 @@
 import json
 import logging
+from typing import cast
 
 import httpx
 
@@ -34,7 +35,9 @@ class LangflowClient:
 
         try:
             data = response.json()
-            return data["outputs"][0]["outputs"][0]["results"]["message"]["data"]["text"]
+            return cast(
+                str, data["outputs"][0]["outputs"][0]["results"]["message"]["data"]["text"]
+            )
         except (KeyError, IndexError, TypeError, json.JSONDecodeError) as exc:
             logger.warning("Unexpected LangFlow response shape: %s", exc)
             return None

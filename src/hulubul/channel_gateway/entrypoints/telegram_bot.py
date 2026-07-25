@@ -1,9 +1,9 @@
 import os
 from dataclasses import dataclass
 
+import httpx
 from aiogram import Bot, Dispatcher
 from aiogram.types import Message
-import httpx
 
 from hulubul.channel_gateway.adapters.langflow_client import LangflowClient
 from hulubul.channel_gateway.adapters.telegram_adapter import TelegramAdapter
