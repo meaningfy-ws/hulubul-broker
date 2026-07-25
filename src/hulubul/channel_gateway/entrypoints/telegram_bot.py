@@ -52,12 +52,34 @@ async def main() -> None:
         if config.mode == "polling":
             await dispatcher.start_polling(bot)
         else:
-            # Webhook mode: registration and the aiohttp server are wired in
-            # Task 11 (local deployment), where the public URL (via ngrok
-            # locally) is known at container startup.
-            raise NotImplementedError(
-                "Webhook server wiring is completed in the local-deployment task."
+            import httpx as _httpx
+            from aiogram.webhook.aiohttp_server import (
+                SimpleRequestHandler,
+                setup_application,
             )
+            from aiohttp import web
+
+            async with _httpx.AsyncClient() as ngrok_client:
+                tunnels_resp = await ngrok_client.get(
+                    f"{os.environ.get('NGROK_API_URL', 'http://ngrok:4040')}/api/tunnels"
+                )
+                public_url = tunnels_resp.json()["tunnels"][0]["public_url"]
+
+            secret = os.environ.get("TELEGRAM_WEBHOOK_SECRET") or None
+            await bot.set_webhook(
+                url=f"{public_url}/webhook", secret_token=secret, drop_pending_updates=True
+            )
+
+            app = web.Application()
+            SimpleRequestHandler(dispatcher=dispatcher, bot=bot, secret_token=secret).register(
+                app, path="/webhook"
+            )
+            setup_application(app, dispatcher, bot=bot)
+            runner = web.AppRunner(app)
+            await runner.setup()
+            site = web.TCPSite(runner, host="0.0.0.0", port=8080)
+            await site.start()
+            await asyncio.Event().wait()
 
 
 if __name__ == "__main__":
