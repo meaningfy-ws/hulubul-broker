@@ -38,6 +38,7 @@ CANONICAL_PYTHON_AND_CI_TARGETS = (
     "format-check-python",
     "typecheck",
     "test-unit",
+    "test-feature",
     "check-architecture",
     "operational-schemas",
     "format-python",
@@ -67,6 +68,7 @@ _NEW_QUALITY_TARGETS_WITHOUT_ENV_FILES = (
     "format-check-python",
     "typecheck",
     "test-unit",
+    "test-feature",
     "check-architecture",
     "operational-schemas",
     "format-python",
@@ -184,6 +186,12 @@ def test_test_unit_enforces_coverage_threshold(makefile_text: str) -> None:
     assert "--cov-fail-under=80" in body
 
 
+def test_test_feature_excludes_e2e(makefile_text: str) -> None:
+    body = target_body(makefile_text, "test-feature")
+    assert "tests/feature" in body
+    assert "--ignore=tests/e2e" in body
+
+
 def test_check_architecture_runs_lint_imports(makefile_text: str) -> None:
     body = target_body(makefile_text, "check-architecture")
     assert "poetry run lint-imports" in body
@@ -200,6 +208,7 @@ def test_ci_static_lists_expected_prerequisites_in_order(makefile_text: str) -> 
         "check-operational-schemas",
         "check-secrets",
         "test-unit",
+        "test-feature",
     ]
 
 

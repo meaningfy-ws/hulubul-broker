@@ -78,6 +78,7 @@ help: ## Display available targets
 	@ echo "    format-python            - Apply Ruff formatting to Python source"
 	@ echo "    typecheck                - Type-check with mypy"
 	@ echo "    test-unit                - Run unit tests with coverage (fails under 80%)"
+	@ echo "    test-feature             - Run feature-level pytest-bdd suites (tests/e2e excluded)"
 	@ echo "    check-architecture       - Enforce import boundaries with import-linter"
 	@ echo "    operational-schemas      - Generate operational JSON schemas"
 	@ echo "    check-model-generated    - Fail if model/generated is stale relative to the LinkML schema"
@@ -289,15 +290,15 @@ install-git-hooks: ## Install the local pre-commit secret scan hook
 # by later plan tasks fail naturally until those tasks land — that is
 # expected, not a bug in this target set.
 #-----------------------------------------------------------------------------
-.PHONY: install lint-python format-check-python typecheck test-unit \
+.PHONY: install lint-python format-check-python typecheck test-unit test-feature \
 	check-architecture operational-schemas format-python check-model-generated \
 	check-operational-schemas check-secrets test-integration \
 	test-system test-bdd ci-static ci-acceptance ci acceptance-up \
 	acceptance-ready acceptance-deploy preflight-langflow-1-10-2 \
 	acceptance-diagnostics acceptance-down release-evidence
 
-install: ## Install all dependency groups (test, quality, langflow, integration)
-	poetry install --with test,quality,langflow,integration
+install: ## Install all dependency groups (test, quality, langflow, integration, gateway)
+	poetry install --with test,quality,langflow,integration,gateway
 
 lint-python: ## Lint Python source with Ruff
 	poetry run ruff check src tests scripts
@@ -314,6 +315,10 @@ typecheck: ## Type-check with mypy
 test-unit: ## Run unit tests with coverage (fails under 80%)
 	@ mkdir -p reports
 	poetry run pytest tests/unit --cov=hulubul --cov-branch --cov-fail-under=80 --junitxml=reports/junit-unit.xml
+
+test-feature: ## Run feature-level pytest-bdd suites (tests/feature); tests/e2e excluded (defense in depth)
+	@ mkdir -p reports
+	poetry run pytest tests/feature --ignore=tests/e2e --junitxml=reports/junit-feature.xml
 
 check-architecture: ## Enforce import boundaries with import-linter
 	poetry run lint-imports
@@ -356,7 +361,7 @@ test-bdd: ## Run BDD step-definition tests
 
 # Static CI: schema + Python quality + fast tests (no comment on the target
 # line itself, so the prerequisite list stays exactly the canonical set).
-ci-static: lint check-model-generated lint-python format-check-python typecheck check-architecture check-operational-schemas check-secrets test-unit
+ci-static: lint check-model-generated lint-python format-check-python typecheck check-architecture check-operational-schemas check-secrets test-unit test-feature
 
 # Acceptance CI: integration + system + BDD tests + evidence report.
 ci-acceptance: test-integration test-system test-bdd release-evidence

@@ -229,6 +229,7 @@ AGENTS.local.md
 # Generated evidence reports for Change 1 (Phase 1 request intake thread)
 reports/change1/
 reports/junit-unit.xml
+reports/junit-feature.xml
 .gitnexus/kuzu
 .gitnexus/meta.json
 .vscode/settings.json
