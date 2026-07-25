@@ -121,18 +121,75 @@ this change's implementation plan and haven't landed yet. Once Task 12 lands, th
 document the exact `.feature` file(s) and the command to run them (expected to run in CI
 alongside the unit suite, per D8).
 
-### End-to-end tests (real Telegram test bot) — not yet implemented
+### End-to-end tests (real Telegram test bot)
 
-A full round-trip test against a real Telegram test bot, plus a Telegram-adapter isolation test
-with LangFlow's response stubbed, are **Task 13** of this change's implementation plan and
-haven't landed yet — `tests/e2e/` doesn't exist in this repo yet. The plan for this suite
-(`plan.md` Task 13) calls for a dedicated Telegram test bot (created the same way as in
-"Telegram bot setup" above, but kept separate from your personal dev bot) and two environment
-variables, `TELEGRAM_TEST_BOT_TOKEN` and `TELEGRAM_TEST_CHAT_ID`, feeding a
-`pytest tests/e2e/` invocation. Treat those names as the plan, not yet a working command — this
-section will be filled in with the actual invocation once Task 13 lands. This suite is local/
-manual-only by design (D8): it is deliberately excluded from CI to avoid adding a Telegram
-bot-token secret to the pipeline.
+A full round-trip test against a real Telegram test bot (`test_telegram_roundtrip.py`), plus a
+Telegram-adapter isolation test with LangFlow's response stubbed (`test_telegram_adapter_isolation.py`),
+run locally only — never in CI (D8). Both tests require a **second, dedicated Telegram test bot**
+distinct from your dev bot.
+
+#### Creating a test bot (via @BotFather)
+
+Follow the same steps as "Telegram bot setup" above (sections 1–7), but use different names to
+keep your test bot separate:
+- Display name: e.g. `Hulubul Test Bot` or similar
+- Username: e.g. `hulubul_test_bot` (must end in `bot`)
+
+You now have two bot tokens:
+- `TELEGRAM_BOT_TOKEN`: your personal dev bot (in `infra/.env`)
+- `TELEGRAM_TEST_BOT_TOKEN`: your test bot (use below)
+
+#### Finding TELEGRAM_TEST_CHAT_ID
+
+The test bot must know where to send and receive messages. You'll need its own chat ID:
+
+1. In Telegram, start a **new 1:1 chat** with your test bot (the one you just created).
+2. Send it any message, e.g. `hello`.
+3. Open a terminal and run:
+   ```bash
+   curl "https://api.telegram.org/bot<TELEGRAM_TEST_BOT_TOKEN>/getUpdates" \
+     | jq '.result[0].message.chat.id'
+   ```
+   Replace `<TELEGRAM_TEST_BOT_TOKEN>` with the token from the test bot's BotFather message.
+4. Copy the numeric ID printed by `jq` — that is your `TELEGRAM_TEST_CHAT_ID`.
+
+#### Running e2e tests locally
+
+With the test bot token and chat ID in hand, run:
+
+```bash
+export TELEGRAM_TEST_BOT_TOKEN=<your test bot token>
+export TELEGRAM_TEST_CHAT_ID=<the chat ID from above>
+poetry run pytest tests/e2e/ -v -s
+```
+
+Or in one line without intermediate `export`:
+```bash
+TELEGRAM_TEST_BOT_TOKEN=<your test bot token> TELEGRAM_TEST_CHAT_ID=<your chat ID> \
+  poetry run pytest tests/e2e/ -v -s
+```
+
+**Expected behavior:** Both tests pass if you have a real test bot token and the local
+LangFlow stack is running (`docker compose up`). In development environments without a real
+token, both tests skip automatically (marked with `pytest.mark.skipif`) — skipping is the
+expected outcome, not a failure.
+
+#### e2e: isolating the Telegram adapter
+
+`test_telegram_adapter_isolation.py` tests only the TelegramAdapter's send/receive contract
+without hitting the real LangFlow API. To run this in isolation:
+
+1. Start a stub LangFlow server on `localhost:7860` that returns a fixed response (instructions
+   for this stub server are outside this runbook's scope — for now, use a simple HTTP mock
+   server that echoes back a `{"reply": "..."}` payload).
+2. Ensure `LANGFLOW_API_URL` points to that stub in your `infra/.env` or shell environment.
+3. Run the test as above:
+   ```bash
+   TELEGRAM_TEST_BOT_TOKEN=<token> TELEGRAM_TEST_CHAT_ID=<id> poetry run pytest tests/e2e/test_telegram_adapter_isolation.py -v -s
+   ```
+
+This test is marked `skipif` as well, so it will skip in CI and in any environment without a
+real test bot token.
 
 ## References
 
