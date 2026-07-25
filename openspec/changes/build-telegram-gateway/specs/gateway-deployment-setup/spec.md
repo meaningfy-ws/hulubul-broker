@@ -4,7 +4,8 @@
 The system SHALL provide a `channel-gateway` service in `infra/docker-compose.yaml`, built
 from a dedicated `infra/channel-gateway/Dockerfile`, configured entirely through environment
 variables (`TELEGRAM_BOT_TOKEN`, `LANGFLOW_API_URL`, `LANGFLOW_FLOW_ID`, `GATEWAY_MODE`), and
-started after the `langflow` service is healthy.
+started after the `langflow` service has started (`langflow` has no healthcheck defined, so
+Compose uses `service_started` rather than `service_healthy`).
 
 #### Scenario: The gateway starts as part of the standard local stack
 - **WHEN** a developer runs `make up`
@@ -36,7 +37,7 @@ HTTPS URL as the Telegram webhook automatically on gateway startup.
 
 ### Requirement: Three-tier local test suite
 The system SHALL organize gateway tests into three suites — `tests/unit/` (mocked, always run),
-`tests/features/*.feature` with `tests/feature/` step-definitions (real local LangFlow,
+`tests/features/*.feature` with `tests/feature/` step-definitions (mocked LangFlow client,
 synthetic inbound, run in CI), and `tests/e2e/` (real Telegram test bot and real local
 LangFlow, local/manual only, excluded from CI) — with the split documented in the runbook.
 
