@@ -35,6 +35,25 @@ forward deliberately, ahead of Phase 1 finishing, to de-risk the Phase 3 channel
 to redirect Phase 1 work. Readers should treat this blueprint as describing a real, working
 subsystem that nonetheless sits outside the currently active Phase 1 change.
 
+## Non-Goals
+
+Explicit boundaries this change does not cross, from `design.md`'s `## Goals / Non-Goals`:
+
+- **Redesigning `OperationalConversationBinding` for concurrent requests per channel** —
+  documented as a forward-looking design note only (see D4); implementation stays
+  single-active-request.
+- **Cross-channel identity merge** (unifying a person's Telegram and WhatsApp `Channel`s) —
+  phone number is not a valid join key for this (Telegram's `systemID` is `chat_id`, not a
+  phone number), and no merge mechanism is designed here.
+- **Live WhatsApp integration** (360dialog account/BSP onboarding, template/opt-in
+  accounting) — `WhatsAppAdapter` stays a `NotImplementedError` stub proving the `ChannelPort`
+  interface fits (D3), not a working adapter.
+- **Running live-Telegram tests in CI** — the e2e suite against a real Telegram test bot is
+  local/manual-only (D8).
+- **Any change to LF-00/LF-70, the Neo4j domain schema, or existing Phase 1 flows** — the
+  gateway calls LangFlow's Run API as a client; it does not modify routing logic upstream of
+  it.
+
 ## Architecture overview
 
 The gateway is a standalone process, not a LangFlow component. It owns the Telegram
@@ -69,7 +88,8 @@ flowchart LR
 ```
 
 The `WhatsAppAdapter` is not in this diagram's live path — it implements the same
-`ChannelPort` interface but has no wired send/receive logic yet (see D3 and Non-Goals).
+`ChannelPort` interface but has no wired send/receive logic yet (see D3 and
+[Non-Goals](#non-goals)).
 
 ## Decisions
 

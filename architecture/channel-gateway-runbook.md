@@ -96,8 +96,8 @@ Polling mode needs no inbound port and no tunnel, so it's the default for first 
 matches the `ChannelPort` interface shape but raises `NotImplementedError` on every call — no
 360dialog account, template, or opt-in setup exists for this gateway. This is a deliberate
 scope boundary, not an oversight: see
-[channel-gateway-blueprint.md's Non-Goals](channel-gateway-blueprint.md) (`design.md`'s
-`## Goals / Non-Goals`, "Live WhatsApp integration") and the WhatsApp-related entries under
+[channel-gateway-blueprint.md's Non-Goals](channel-gateway-blueprint.md#non-goals)
+("Live WhatsApp integration") and the WhatsApp-related entries under
 [Known limitations](channel-gateway-blueprint.md#known-limitations). Come back to this section
 once a real WhatsApp adapter is scoped and built.
 
