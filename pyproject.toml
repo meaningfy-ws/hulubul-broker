@@ -41,6 +41,7 @@ optional = true
 pytest = "8.4.1"
 pytest-bdd = "8.1.0"
 pytest-cov = "7.0.0"
+pytest-asyncio = "0.24.0"
 
 [tool.poetry.group.integration]
 optional = true
@@ -74,6 +75,7 @@ pythonpath = ["src"]
 addopts = "--strict-config --strict-markers --cov-report=xml"
 testpaths = ["tests"]
 markers = ["integration", "system", "evaluation", "live_model"]
+asyncio_mode = "auto"
 
 [tool.coverage.run]
 branch = true
