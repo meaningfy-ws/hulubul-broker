@@ -60,3 +60,17 @@ source_modules =
     hulubul.request_intake.services
 forbidden_modules =
     hulubul.request_intake.entrypoints
+
+; --- Channel gateway layering ---
+; Enforce cosmic python layering: entrypoints → services → models,
+; and adapters → models. No cross-layer dependencies.
+;
+[importlinter:contract:channel_gateway_layers]
+name = channel_gateway layer boundaries
+type = layers
+layers =
+    hulubul.channel_gateway.entrypoints
+    hulubul.channel_gateway.services
+    hulubul.channel_gateway.adapters
+    hulubul.channel_gateway.models
+

@@ -27,6 +27,13 @@ optional = true
 lfx = "1.10.2"
 onnxruntime = "<1.24"
 
+[tool.poetry.group.gateway]
+optional = true
+
+[tool.poetry.group.gateway.dependencies]
+aiogram = "3.30.0"
+httpx = "0.28.1"
+
 [tool.poetry.group.test]
 optional = true
 
