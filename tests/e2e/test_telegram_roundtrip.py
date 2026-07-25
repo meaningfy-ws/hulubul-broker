@@ -8,6 +8,7 @@ Requires: TELEGRAM_TEST_BOT_TOKEN and TELEGRAM_TEST_CHAT_ID in the environment
 """
 
 import os
+import uuid
 
 import httpx
 import pytest
@@ -22,11 +23,29 @@ pytestmark = pytest.mark.skipif(
 async def test_a_real_message_gets_a_real_reply():
     token = os.environ["TELEGRAM_TEST_BOT_TOKEN"]
     chat_id = os.environ["TELEGRAM_TEST_CHAT_ID"]
+    # Unique per run so the sent message (and any failure output) can be
+    # traced back to this specific test invocation.
+    marker = str(uuid.uuid4())
 
     async with httpx.AsyncClient() as client:
+        # Record the highest update_id that already exists BEFORE sending.
+        # `offset=-1` peeks the single most recent update without confirming it
+        # (or anything before it), so this doesn't interfere with the
+        # gateway's own getUpdates polling loop.
+        #
+        # Without this baseline, the loop below could false-pass on a STALE
+        # message already sitting in the chat (e.g. the "hello" a developer
+        # sent while looking up TELEGRAM_TEST_CHAT_ID per the runbook) even if
+        # the gateway never actually ran and no reply was ever sent.
+        baseline_resp = await client.get(
+            f"https://api.telegram.org/bot{token}/getUpdates", params={"offset": -1}
+        )
+        baseline_updates = baseline_resp.json()["result"]
+        baseline_update_id = baseline_updates[-1]["update_id"] if baseline_updates else 0
+
         send_resp = await client.post(
             f"https://api.telegram.org/bot{token}/sendMessage",
-            json={"chat_id": chat_id, "text": "e2e: I need to send a parcel"},
+            json={"chat_id": chat_id, "text": f"e2e: I need to send a parcel [{marker}]"},
         )
         assert send_resp.status_code == 200
 
@@ -40,7 +59,15 @@ async def test_a_real_message_gets_a_real_reply():
                 f"https://api.telegram.org/bot{token}/getUpdates", params={"offset": -1}
             )
             updates = updates_resp.json()["result"]
-            if updates and updates[-1]["message"]["chat"]["id"] == int(chat_id):
+            # Strictly greater than the baseline update_id: this is what makes
+            # the update NEW relative to the send, ruling out a stale message.
+            if (
+                updates
+                and updates[-1]["update_id"] > baseline_update_id
+                and updates[-1]["message"]["chat"]["id"] == int(chat_id)
+            ):
                 assert updates[-1]["message"]["text"]
                 return
-        pytest.fail("No reply received from the gateway within the polling window")
+        pytest.fail(
+            f"No reply received from the gateway within the polling window (marker={marker})"
+        )
