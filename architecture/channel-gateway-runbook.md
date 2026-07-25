@@ -5,9 +5,9 @@ bringing the gateway up locally, and running its test suites. For the design beh
 steps — why the gateway is shaped this way — see the companion
 [channel-gateway-blueprint.md](channel-gateway-blueprint.md).
 
-Some steps below belong to work that hasn't landed yet (local Docker deployment, feature and
-e2e tests). Those sections say so explicitly and point at the task that will fill them in,
-rather than guessing at commands that don't exist yet.
+Telegram bot setup, local Docker deployment (both polling and webhook modes), and all three
+test tiers (unit, feature, e2e) are implemented and documented below. The one remaining gap is
+WhatsApp, which is out of scope for this change — see its own section further down.
 
 ## Telegram bot setup (via @BotFather)
 
@@ -46,16 +46,18 @@ a bot token ready to drop into `infra/.env`.
    Select your bot from the list, then choose **Disable**. (For 1:1 chats with the bot this
    step doesn't change anything — it matters once the bot is added to a group — but disabling it
    now avoids a confusing gap later.)
-7. **Generate a webhook secret token (for later).** Telegram's webhook mode can send a shared
-   secret back on every request (`X-Telegram-Bot-Api-Secret-Token` header) so the gateway can
-   reject requests that didn't actually come from Telegram. Generate a random value now so it's
-   ready when you need it:
+7. **Generate a webhook secret token (needed for webhook mode).** Telegram's webhook mode sends
+   a shared secret back on every request (`X-Telegram-Bot-Api-Secret-Token` header) so the
+   gateway can reject requests that didn't actually come from Telegram. This is **mandatory**:
+   `load_config()` in `src/hulubul/channel_gateway/entrypoints/telegram_bot.py` raises
+   `ValueError: TELEGRAM_WEBHOOK_SECRET is required when GATEWAY_MODE=webhook: ...` and the
+   process refuses to start without it. Generate a random value now, following the same
+   random-string convention BotFather itself uses for tokens:
    ```
    openssl rand -hex 32
    ```
-   Keep this value somewhere safe for now. Wiring it into the gateway's webhook configuration
-   is part of the local Compose webhook setup below, which is still pending (Task 11) — there is
-   no environment variable for it yet.
+   Store it in `infra/.env` as `TELEGRAM_WEBHOOK_SECRET=<the value you generated>`. Polling mode
+   (below) doesn't need this — only set it once you're bringing up webhook mode.
 
 At this point you have a working bot identity and a token, but no gateway running yet — that's
 the next section.
@@ -78,16 +80,36 @@ Polling mode needs no inbound port and no tunnel, so it's the default for first 
 3. Message your bot on Telegram. In polling mode the gateway calls Telegram to fetch updates
    itself, so no public URL or tunnel is required.
 
-> **TODO — webhook mode and the `ngrok` profile.** `GATEWAY_MODE=webhook` and the local `ngrok`
-> tunnel service (D6) are not wired up yet: there is no `infra/channel-gateway/Dockerfile`, no
-> `channel-gateway` entry in `infra/docker-compose.yaml`, and today's webhook code path
-> (`entrypoints/telegram_bot.py`) deliberately raises `NotImplementedError` when
-> `GATEWAY_MODE=webhook` is set, with a comment pointing at "the local-deployment task." That
-> work is **Task 11** of this change's implementation plan (Dockerfile, Compose service, and
-> webhook registration through the `ngrok` tunnel). Once Task 11 lands, this section will be
-> updated with Task 11's exact commands — the `ngrok` Compose profile invocation and how the
-> tunnel's public URL gets registered as the Telegram webhook on gateway startup. Until then,
-> use polling mode above; do not attempt to hand-assemble webhook wiring from this runbook.
+### Webhook mode (via the `ngrok` tunnel)
+
+Webhook mode needs a public URL Telegram can reach, so it uses `ngrok` (D6) to tunnel to the
+gateway's local port. The `ngrok` service lives behind Compose's `webhook` profile so it never
+starts during normal polling-mode bring-up.
+
+1. In `infra/.env`, set:
+   ```
+   GATEWAY_MODE=webhook
+   TELEGRAM_WEBHOOK_SECRET=<the value you generated in step 7 above>
+   NGROK_AUTHTOKEN=<your ngrok auth token, from https://dashboard.ngrok.com/get-started/your-authtoken>
+   ```
+   `TELEGRAM_BOT_TOKEN` and `LANGFLOW_FLOW_ID` should already be set from earlier steps.
+2. Bring up the gateway and the tunnel together:
+   ```
+   GATEWAY_MODE=webhook docker compose --profile webhook up -d --build channel-gateway ngrok
+   ```
+   (`docker-compose.yaml`'s `ngrok` service only starts under `--profile webhook`; `--build`
+   picks up `infra/channel-gateway/Dockerfile` if it hasn't been built yet.)
+3. On startup, `run_webhook()` in `entrypoints/telegram_bot.py` reads the tunnel's public URL
+   from ngrok's local API (`http://ngrok:4040/api/tunnels` inside the Compose network — see
+   `NGROK_API_URL` in `docker-compose.yaml`) and registers it as the bot's webhook, with
+   `TELEGRAM_WEBHOOK_SECRET` as the shared secret Telegram echoes back on every request.
+4. Message your bot on Telegram. Telegram now delivers updates by POSTing to the tunnel's
+   public URL instead of the gateway polling for them.
+5. To inspect the tunnel (public URL, recent requests), open `http://localhost:4040` — ngrok's
+   own local dashboard, exposed via the `4040:4040` port mapping in `docker-compose.yaml`.
+
+To go back to polling mode, set `GATEWAY_MODE=polling` and bring the stack up without the
+`webhook` profile (`docker compose up -d --build channel-gateway`) — `ngrok` won't start.
 
 ## WhatsApp configuration
 
@@ -103,9 +125,9 @@ once a real WhatsApp adapter is scoped and built.
 
 ## Running the test suites locally
 
-The gateway's tests are organized into three tiers (D8) — only the first exists today.
+The gateway's tests are organized into three tiers (D8): unit, feature, and e2e.
 
-### Unit tests (implemented, runs in CI)
+### Unit tests (runs in CI)
 
 Models and adapters tested against mocks, no real Telegram or LangFlow involved:
 
@@ -113,20 +135,31 @@ Models and adapters tested against mocks, no real Telegram or LangFlow involved:
 poetry run pytest tests/unit/hulubul/channel_gateway -v
 ```
 
-### Feature tests (Gherkin, LangFlow-connected) — not yet implemented
+### Feature tests (Gherkin, LangFlow-connected; runs in CI)
 
-`tests/features/*.feature` scenarios and their `tests/feature/` step-definitions, run against a
-real local LangFlow container with synthetic (non-Telegram) inbound payloads, are **Task 12** of
-this change's implementation plan and haven't landed yet. Once Task 12 lands, this section will
-document the exact `.feature` file(s) and the command to run them (expected to run in CI
-alongside the unit suite, per D8).
+`tests/features/telegram_message_relay.feature` and its `tests/feature/` step-definitions
+(`test_telegram_message_relay.py`) exercise the relay path with synthetic (non-Telegram) inbound
+payloads. Run them with:
+
+```
+poetry run pytest tests/feature -v
+```
+
+or via the Makefile target, which also excludes `tests/e2e` (defense in depth) and writes a
+JUnit report:
+
+```
+make test-feature
+```
+
+This runs in CI alongside the unit suite (`make ci-static`, per D8).
 
 ### End-to-end tests (real Telegram test bot)
 
 A full round-trip test against a real Telegram test bot (`test_telegram_roundtrip.py`), plus a
-Telegram-adapter isolation test with LangFlow's response stubbed (`test_telegram_adapter_isolation.py`),
-run locally only — never in CI (D8). Both tests require a **second, dedicated Telegram test bot**
-distinct from your dev bot.
+Telegram-adapter isolation test that exercises `TelegramAdapter` against the real Telegram API
+independent of LangFlow (`test_telegram_adapter_isolation.py`), run locally only — never in CI
+(D8). Both tests require a **second, dedicated Telegram test bot** distinct from your dev bot.
 
 #### Creating a test bot (via @BotFather)
 
@@ -169,27 +202,30 @@ TELEGRAM_TEST_BOT_TOKEN=<your test bot token> TELEGRAM_TEST_CHAT_ID=<your chat I
   poetry run pytest tests/e2e/ -v -s
 ```
 
-**Expected behavior:** Both tests pass if you have a real test bot token and the local
-LangFlow stack is running (`docker compose up`). In development environments without a real
-token, both tests skip automatically (marked with `pytest.mark.skipif`) — skipping is the
-expected outcome, not a failure.
+**Expected behavior — round-trip test:** `test_telegram_roundtrip.py` sends a message to the
+test chat with a unique marker embedded in the text (e.g. `e2e: I need to send a parcel
+[3fa8...]`, a fresh UUID each run), then polls `getUpdates` for a reply. Success means a new
+update appears whose `update_id` is strictly greater than the highest `update_id` seen right
+before the send — this is what rules out the test false-passing on a stale message already
+sitting in the chat (e.g. the `hello` you sent while looking up `TELEGRAM_TEST_CHAT_ID` above)
+without the gateway having run at all. The test requires the local LangFlow stack and a running
+`channel-gateway` (polling mode, pointed at the test bot token) to actually produce a reply. In
+development environments without a real token, it skips automatically (`pytest.mark.skipif`) —
+skipping is the expected outcome, not a failure.
 
-#### e2e: isolating the Telegram adapter
-
-`test_telegram_adapter_isolation.py` tests only the TelegramAdapter's send/receive contract
-without hitting the real LangFlow API. To run this in isolation:
-
-1. Start a stub LangFlow server on `localhost:7860` that returns a fixed response (instructions
-   for this stub server are outside this runbook's scope — for now, use a simple HTTP mock
-   server that echoes back a `{"reply": "..."}` payload).
-2. Ensure `LANGFLOW_API_URL` points to that stub in your `infra/.env` or shell environment.
-3. Run the test as above:
-   ```bash
-   TELEGRAM_TEST_BOT_TOKEN=<token> TELEGRAM_TEST_CHAT_ID=<id> poetry run pytest tests/e2e/test_telegram_adapter_isolation.py -v -s
-   ```
-
-This test is marked `skipif` as well, so it will skip in CI and in any environment without a
-real test bot token.
+**Expected behavior — adapter isolation test:** `test_telegram_adapter_isolation.py` constructs
+a real `TelegramAdapter` around a real `aiogram.Bot(token=...)` and calls the adapter's own
+`send()` method directly — no LangFlow client, flow, or API call is involved anywhere in this
+test. Success means `send()` completes without raising, i.e. the real Telegram API accepted the
+request the adapter built. This tests the adapter's send contract in isolation from LangFlow,
+but does not exercise `TelegramAdapter.receive()` (covered by unit tests) or verify anything
+about LangFlow's behavior when stubbed — a stub-LangFlow harness would be a further
+improvement. Run it directly:
+```bash
+TELEGRAM_TEST_BOT_TOKEN=<token> TELEGRAM_TEST_CHAT_ID=<id> poetry run pytest tests/e2e/test_telegram_adapter_isolation.py -v -s
+```
+It's marked `skipif` as well, so it skips in CI and in any environment without a real test bot
+token.
 
 ## References
 
@@ -197,4 +233,5 @@ real test bot token.
   every step above
 - `openspec/changes/build-telegram-gateway/specs/gateway-deployment-setup/spec.md` — the
   acceptance scenarios this runbook satisfies
-- `openspec/changes/build-telegram-gateway/plan.md` — Tasks 11–14, for the work still pending
+- `openspec/changes/build-telegram-gateway/plan.md` — Tasks 11–14, the local-deployment and
+  test-suite work this runbook documents
