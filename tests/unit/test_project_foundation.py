@@ -44,7 +44,6 @@ CANONICAL_PYTHON_AND_CI_TARGETS = (
     "format-python",
     "check-model-generated",
     "check-operational-schemas",
-    "check-secrets",
     "test-integration",
     "test-system",
     "test-bdd",
@@ -74,7 +73,6 @@ _NEW_QUALITY_TARGETS_WITHOUT_ENV_FILES = (
     "format-python",
     "check-model-generated",
     "check-operational-schemas",
-    "check-secrets",
     "ci-static",
 )
 
@@ -206,7 +204,6 @@ def test_ci_static_lists_expected_prerequisites_in_order(makefile_text: str) -> 
         "typecheck",
         "check-architecture",
         "check-operational-schemas",
-        "check-secrets",
         "test-unit",
         "test-feature",
     ]

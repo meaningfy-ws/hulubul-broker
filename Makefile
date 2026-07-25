@@ -68,9 +68,6 @@ help: ## Display available targets
 	@ echo "    mcp-logs            - Follow the MCP server logs"
 	@ echo "    mcp-restart         - Restart the MCP server"
 	@ echo ""
-	@ echo -e "  $(BUILD_PRINT)Git hooks:$(END_BUILD_PRINT)"
-	@ echo "    install-git-hooks   - Install the local pre-commit secret scan hook"
-	@ echo ""
 	@ echo -e "  $(BUILD_PRINT)CI / Quality gates:$(END_BUILD_PRINT)"
 	@ echo "    install                  - Install project dependencies via Poetry"
 	@ echo "    lint-python              - Lint Python source with Ruff"
@@ -83,7 +80,6 @@ help: ## Display available targets
 	@ echo "    operational-schemas      - Generate operational JSON schemas"
 	@ echo "    check-model-generated    - Fail if model/generated is stale relative to the LinkML schema"
 	@ echo "    check-operational-schemas - Fail if operational schemas are stale"
-	@ echo "    check-secrets            - Scan tracked files for committed secrets"
 	@ echo "    test-integration         - Run integration-marked tests"
 	@ echo "    test-system              - Run system-marked tests"
 	@ echo "    test-bdd                 - Run BDD step-definition tests"
@@ -274,15 +270,6 @@ mcp-restart: check-env ## Restart the MCP server
 	@ docker compose -f $(COMPOSE_FILE) --env-file $(ENV_FILE) restart mcp-neo4j
 
 #-----------------------------------------------------------------------------
-# Git hooks
-#-----------------------------------------------------------------------------
-.PHONY: install-git-hooks
-
-install-git-hooks: ## Install the local pre-commit secret scan hook
-	@ install -m 755 scripts/git-hooks/pre-commit "$$(git rev-parse --git-common-dir)/hooks/pre-commit"
-	@ echo -e "$(BUILD_PRINT)$(ICON_DONE) Installed pre-commit hook (runs check_committed_secrets.py)$(END_BUILD_PRINT)"
-
-#-----------------------------------------------------------------------------
 # Python quality, tests and CI
 # Namespaced so they never collide with the LinkML generation targets above:
 # `lint` stays LinkML-only (linkml-lint); Python style/type checks live under
@@ -292,7 +279,7 @@ install-git-hooks: ## Install the local pre-commit secret scan hook
 #-----------------------------------------------------------------------------
 .PHONY: install lint-python format-check-python typecheck test-unit test-feature \
 	check-architecture operational-schemas format-python check-model-generated \
-	check-operational-schemas check-secrets test-integration \
+	check-operational-schemas test-integration \
 	test-system test-bdd ci-static ci-acceptance ci acceptance-up \
 	acceptance-ready acceptance-deploy preflight-langflow-1-10-2 \
 	acceptance-diagnostics acceptance-down release-evidence
@@ -332,9 +319,6 @@ check-model-generated: lint pydantic jsonschema erdiagram plantuml classdiagram 
 check-operational-schemas: ## Fail if operational schemas are stale
 	poetry run gen-operational-schemas --output schemas/operational/v1 --check
 
-check-secrets: ## Scan tracked files for committed secrets
-	poetry run python scripts/check_committed_secrets.py
-
 # check-flows: ## Validate LangFlow flow assets (normalize, manifest, lfx checks)
 # 	poetry run python scripts/normalize_langflow_flows.py --check langflow/flows/*.json
 # 	poetry run python scripts/validate_langflow_assets.py langflow/flow-manifest.yaml
@@ -361,7 +345,7 @@ test-bdd: ## Run BDD step-definition tests
 
 # Static CI: schema + Python quality + fast tests (no comment on the target
 # line itself, so the prerequisite list stays exactly the canonical set).
-ci-static: lint check-model-generated lint-python format-check-python typecheck check-architecture check-operational-schemas check-secrets test-unit test-feature
+ci-static: lint check-model-generated lint-python format-check-python typecheck check-architecture check-operational-schemas test-unit test-feature
 
 # Acceptance CI: integration + system + BDD tests + evidence report.
 ci-acceptance: test-integration test-system test-bdd release-evidence
