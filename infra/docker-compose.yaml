@@ -64,7 +64,8 @@ services:
   channel-gateway:
     build:
       context: ../
-      dockerfile: infra/channel-gateway/Dockerfile
+      dockerfile: infra/docker/Dockerfile
+      target: channel-gateway
 
     depends_on:
       langflow:
@@ -173,7 +174,10 @@ services:
   # agents over MCP streamable HTTP. Party-facing scoped MCP is deferred
   # (modelling-blocked); see infra/README.md "Security".
   mcp-neo4j:
-    build: ./mcp
+    build:
+      context: ../
+      dockerfile: infra/docker/Dockerfile
+      target: mcp
     ports:
       - "127.0.0.1:${NEO4J_MCP_PORT:-8000}:8000"
 

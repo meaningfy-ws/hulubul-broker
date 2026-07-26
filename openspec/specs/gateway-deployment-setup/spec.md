@@ -5,7 +5,7 @@ TBD - created by archiving change build-telegram-gateway. Update Purpose after a
 ## Requirements
 ### Requirement: Local Docker Compose service for the gateway
 The system SHALL provide a `channel-gateway` service in `infra/docker-compose.yaml`, built
-from a dedicated `infra/channel-gateway/Dockerfile`, configured entirely through environment
+from a dedicated `infra/docker/Dockerfile (target: channel-gateway)`, configured entirely through environment
 variables (`TELEGRAM_BOT_TOKEN`, `LANGFLOW_API_URL`, `LANGFLOW_FLOW_ID`, `GATEWAY_MODE`), and
 started after the `langflow` service has started (`langflow` has no healthcheck defined, so
 Compose uses `service_started` rather than `service_healthy`).

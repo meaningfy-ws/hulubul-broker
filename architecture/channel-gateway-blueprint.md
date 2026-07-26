@@ -324,7 +324,7 @@ locally, switching modes, and registering the webhook live in the
 [runbook](channel-gateway-runbook.md#local-compose-bring-up), not here.
 
 - **One container, both channels.** A single `channel-gateway` service, built from a dedicated
-  `infra/channel-gateway/Dockerfile`, sits alongside `langflow`, `postgres`, `neo4j`, and
+  `infra/docker/Dockerfile (target: channel-gateway)`, sits alongside `langflow`, `postgres`, `neo4j`, and
   `mcp-neo4j` in `infra/docker-compose.yaml` — not one container per channel (D5).
 - **Mode is an environment switch, not a code fork.** `GATEWAY_MODE=polling|webhook` selects
   aiogram's polling loop or its webhook server at process startup; both modes run the same
