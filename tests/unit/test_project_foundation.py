@@ -1,7 +1,7 @@
 """Foundation tests for the packaged ``hulubul`` application.
 
 These tests guard the contracts the Section 1 foundation tasks establish:
-Task 2 (Locked Python Package Baseline) makes ``src/hulubul`` importable with
+Task 2 (Locked Python Package Baseline) makes ``hulubul`` importable with
 a stable ``__version__`` and keeps the pre-existing LinkML generator
 entrypoints declared in ``pyproject.toml``; Task 3 (Python Quality
 Configuration) keeps quality tooling config in dedicated root files; Task 4

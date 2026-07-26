@@ -60,15 +60,18 @@ Dependencies are split into optional groups:
 .
 ├── model/linkml/              # LinkML domain model (source of truth)
 ├── model/generated/           # Generated artifacts (Pydantic, Cypher, diagrams, etc.)
-├── src/hulubul/               # Python application code
+├── hulubul/                   # Python application code (top-level package, no /src)
 ├── tests/                     # Unit, integration, and BDD tests
 ├── scripts/                   # Custom LinkML generators & utilities
+├── infra/docker/Dockerfile    # Multistage, multi-target (channel-gateway, mcp)
 ├── infra/                     # Docker Compose, Neo4j, MCP, LangFlow
 ├── architecture/              # Design documents & ADRs
+├── openspec/                  # The spine: EPICs/PLANs (changes/), durable specs (specs/)
 ├── .github/workflows/ci.yaml  # GitHub Actions CI pipeline
-├── Makefile                   # Build & development automation
-├── pyproject.toml             # Poetry: dependencies, pytest, coverage, linting config
-├── tox.ini                    # Tox: test environments (py310, architecture, schemas, integration, etc.)
+├── Makefile                   # Build & development automation (the single task-runner surface)
+├── pyproject.toml             # Poetry: dependencies + packaging only (D2)
+├── ruff.toml / mypy.ini / pytest.ini / .coveragerc   # Dedicated tool configs (D2)
+├── CLAUDE.md                  # Canonical agent instructions (AGENTS.md is a symlink to it)
 └── README.md                  # This file
 ```
 

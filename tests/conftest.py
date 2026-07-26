@@ -1,7 +1,6 @@
 """Pytest configuration and fixtures."""
 
 import contextlib
-import sys
 from collections.abc import Iterator
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -11,21 +10,7 @@ import pytest
 if TYPE_CHECKING:
     from neo4j import Driver, Session
 
-# Add src directory to Python path BEFORE any imports
 repo_root = Path(__file__).parent.parent
-src_path = str(repo_root / "src")
-if src_path not in sys.path:
-    sys.path.insert(0, src_path)
-
-# Verify import works
-from hulubul.core.models.operational.base import StrictModel  # noqa: E402, F401
-
-
-def pytest_configure(config: pytest.Config) -> None:
-    """Pytest hook called before test collection."""
-    if src_path not in sys.path:
-        sys.path.insert(0, src_path)
-
 
 # ============================================================================
 # Neo4j Integration Test Fixtures

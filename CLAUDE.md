@@ -56,7 +56,7 @@ the truth, not this file.
 | `infra/` | Local stack: `docker-compose.yaml` (Neo4j + mcp-neo4j-cypher + Langflow + Postgres), cypher scripts, MCP/channel-gateway Dockerfiles |
 | `architecture/` | Design documents: project statement, ADRs, use cases, blueprints, NFRs, incremental strategy |
 | `scripts/` | Custom LinkML generators (`gen_neo4j_constraints.py`, `gen_neomodel.py`, `gen_mermaid_classdiagram.py`, `gen_operational_schemas.py`) |
-| `src/hulubul/` | Application code: `core` (shared operational contracts), `request_intake`, `channel_gateway` — cosmic-python layered (models/adapters/services/entrypoints per component), enforced by `.importlinter` |
+| `hulubul/` | Application code (top-level package, no `/src` — D1): `core` (shared operational contracts), `request_intake`, `channel_gateway` — cosmic-python layered (models/adapters/services/entrypoints per component), enforced by `.importlinter` |
 | `openspec/` | The spine: EPICs/PLANs (`changes/`), durable capability specs (`specs/`), the pinned `meaningfy` schema |
 
 ### Visible conventions
@@ -64,7 +64,7 @@ the truth, not this file.
 - **LinkML is the single source of truth.** Files under `model/generated/` are
   produced by `make` and must never be hand-edited; the next `make` overwrites
   them. Commit generated artifacts in the same commit as the schema edit.
-  `src/hulubul/core/models/domain/` is likewise `make`-generated (`make pydantic`)
+  `hulubul/core/models/domain/` is likewise `make`-generated (`make pydantic`)
   and must never be hand-edited.
 - **Secrets never live in VCS.** `infra/.env` is gitignored; copy from
   `infra/.env.example` and edit passwords (Neo4j password ≥ 8 characters).
@@ -179,7 +179,7 @@ routed here — this table is that routing.
 | System design, ADRs, C4 | `meaningfy-architecture:architecture` |
 | Editing the LinkML schema or its generation pipeline | `meaningfy-architecture:linkml-engineering` + `meaningfy-architecture:modelling-conventions` |
 | Generated-domain vs. hand-written model boundary | `meaningfy-architecture:conceptual-modelling` |
-| Code layering/SOLID under `src/hulubul/` | `meaningfy-building:cosmic-python` |
+| Code layering/SOLID under `hulubul/` | `meaningfy-building:cosmic-python` |
 | Gherkin feature files | `meaningfy-building:bdd-gherkin` |
 | Architecture docs, READMEs, docstrings | `meaningfy-core:technical-writing` |
 | Broad-audience explainer prose | `meaningfy-core:explanatory-writing` |

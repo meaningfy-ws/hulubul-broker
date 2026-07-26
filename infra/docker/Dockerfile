@@ -15,7 +15,7 @@ COPY pyproject.toml poetry.lock ./
 RUN poetry config virtualenvs.create false \
     && poetry install --only main,gateway --no-interaction --no-ansi --no-root
 
-COPY src/ src/
+COPY hulubul/ hulubul/
 
 FROM python:3.12-slim AS channel-gateway
 
@@ -24,11 +24,12 @@ WORKDIR /app
 
 COPY --from=channel-gateway-builder /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
 COPY --from=channel-gateway-builder /usr/local/bin /usr/local/bin
-COPY --from=channel-gateway-builder /app/src /app/src
+COPY --from=channel-gateway-builder /app/hulubul /app/hulubul
 
 # poetry install --no-root above skips installing the hulubul package itself
-# (only its dependencies); put src/ on the path so `python -m hulubul...` resolves.
-ENV PYTHONPATH=/app/src
+# (only its dependencies); put its top-level parent dir on the path so
+# `python -m hulubul...` resolves.
+ENV PYTHONPATH=/app
 
 USER appuser
 CMD ["python", "-m", "hulubul.channel_gateway.entrypoints.telegram_bot"]

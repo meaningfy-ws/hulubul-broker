@@ -8,7 +8,7 @@ INFRA_PATH   := $(REPO_ROOT)/infra
 SCHEMA       := $(REPO_ROOT)/model/linkml/hulubul.yaml
 GEN          := $(REPO_ROOT)/model/generated
 DIAG         := $(GEN)/diagrams
-DOMAIN_MODELS := $(REPO_ROOT)/src/hulubul/core/models/domain
+DOMAIN_MODELS := $(REPO_ROOT)/hulubul/core/models/domain
 COMPOSE_FILE := $(INFRA_PATH)/docker-compose.yaml
 ENV_FILE     := $(INFRA_PATH)/.env
 NEO4J_CY     := $(INFRA_PATH)/cypher
@@ -289,16 +289,16 @@ install: ## Install all dependency groups (test, quality, langflow, integration,
 	poetry install --with test,quality,langflow,integration,gateway
 
 lint-python: ## Lint Python source with Ruff
-	poetry run ruff check src tests scripts
+	poetry run ruff check hulubul tests scripts
 
 format-check-python: ## Check Python formatting with Ruff (no changes)
-	poetry run ruff format --check src tests scripts
+	poetry run ruff format --check hulubul tests scripts
 
 format-python: ## Apply Ruff formatting to Python source
-	poetry run ruff format src tests scripts
+	poetry run ruff format hulubul tests scripts
 
 typecheck: ## Type-check with mypy
-	poetry run mypy src/hulubul scripts tests
+	poetry run mypy hulubul scripts tests
 
 test-unit: ## Run unit tests with coverage (fails under 80%)
 	@ mkdir -p reports
@@ -315,7 +315,7 @@ operational-schemas: ## Generate operational JSON schemas
 	poetry run gen-operational-schemas --output schemas/operational/v1
 
 check-model-generated: lint pydantic jsonschema erdiagram plantuml classdiagram neo4j-constraints neomodel ## Fail if model/generated is stale relative to the LinkML schema
-	git diff --exit-code -- model/generated ':(exclude)model/generated/owl/**' ':(exclude)model/generated/shacl/**' src/hulubul/core/models/domain ':(exclude)src/hulubul/core/models/domain/**'
+	git diff --exit-code -- model/generated ':(exclude)model/generated/owl/**' ':(exclude)model/generated/shacl/**' hulubul/core/models/domain ':(exclude)hulubul/core/models/domain/**'
 
 check-operational-schemas: ## Fail if operational schemas are stale
 	poetry run gen-operational-schemas --output schemas/operational/v1 --check

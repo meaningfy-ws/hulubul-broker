@@ -41,7 +41,7 @@ services:
       LANGFLOW_CREATE_STARTER_PROJECTS: "false"
       LANGFLOW_UPDATE_STARTER_PROJECTS: "false"
       # Custom components configuration
-      PYTHONPATH: /app/src
+      PYTHONPATH: /app
       LANGFLOW_COMPONENTS_PATH: /app/custom_components
 
     env_file:
@@ -50,7 +50,7 @@ services:
     volumes:
       - langflow-data:/app/langflow
       - ./langflow:/app/hulubul-langflow:ro
-      - ./src:/app/src:ro
+      - ../hulubul:/app/hulubul:ro
 
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:7860/health"]

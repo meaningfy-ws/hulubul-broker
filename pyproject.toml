@@ -7,7 +7,7 @@ license = "CC-BY-4.0"
 # hulubul is the installable application package; the generator scripts stay
 # packaged alongside it. The LinkML schemas live under model/linkml.
 packages = [
-    { include = "hulubul", from = "src" },
+    { include = "hulubul" },
     { include = "gen_neo4j_constraints.py", from = "scripts" },
     { include = "gen_neomodel.py", from = "scripts" },
     { include = "gen_mermaid_classdiagram.py", from = "scripts" },
