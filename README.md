@@ -16,7 +16,7 @@ poetry install --with test --with quality --with langflow --with integration  # 
 
 Dependencies are split into optional groups:
 - `test` — pytest, pytest-bdd, pytest-cov for unit and BDD testing
-- `quality` — import-linter, ruff, mypy, tox for static analysis and linting
+- `quality` — import-linter, ruff, mypy for static analysis and linting
 - `integration` — httpx, neo4j driver, testcontainers for integration tests
 - `langflow` — LangFlow SDK (lfx) for flow-as-code tooling
 

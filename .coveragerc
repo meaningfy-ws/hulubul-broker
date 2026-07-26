@@ -1,0 +1,10 @@
+[run]
+branch = True
+source = hulubul
+
+[report]
+fail_under = 80
+show_missing = True
+
+[xml]
+output = reports/coverage.xml

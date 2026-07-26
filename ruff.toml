@@ -1,0 +1,14 @@
+line-length = 100
+target-version = "py310"
+
+[lint]
+select = ["E", "F", "I", "N", "UP", "B", "SIM", "RUF"]
+
+# LinkML-generated, never hand-edited (ADR-019) — `make pydantic` overwrites
+# this wholesale, so lint findings here are the generator's concern, not ours.
+[lint.per-file-ignores]
+"src/hulubul/core/models/domain/hulubul_models.py" = ["ALL"]
+"tests/**" = ["E501", "SIM117"]
+
+[format]
+exclude = ["src/hulubul/core/models/domain/hulubul_models.py"]

@@ -1,26 +1,34 @@
-schema: spec-driven
+schema: meaningfy
 
-# Use the below instead of "spec-driven" if you want to use the Superpowers
-# Bridge plugin implicitly. Otherwise, you'd need to specify the schema when
-# calling /opsx-new (`/opsx-new <feature-name> --schema superpowers-bridge`).
-# schema: superpowers-bridge
+# Project context — injected (wrapped in <context>) into every artifact's instructions.
+# This is OpenSpec's native project-context sink. The durable truth is openspec/specs/;
+# this string is the orientation index. If a generated index is ever wanted, regenerate it
+# deterministically into this field (like codegen, with a CI sync-check) — do NOT hand-curate
+# a parallel MEMORY.md.
+context: |
+  Repo: hulubul-broker. An AI broker for ad-hoc package transport arrangements
+  over a chat channel (Telegram in dev, WhatsApp in prod) and a Neo4j graph
+  system of record, with LangFlow orchestrating request-intake/routing flows.
+  Architecture: cosmic-python layering (models, adapters, services,
+  entrypoints) per component (core, request_intake, channel_gateway).
+  Enforced by .importlinter (`make check-architecture`).
+  Top-level package: hulubul (no /src). Default branch: develop (main lags).
+  Domain model: LinkML under model/linkml/, generated artifacts in
+  model/generated/ (never hand-edited).
+  Commits: Conventional Commits (imperative, no trailing punctuation).
+  Artifact vocabulary: EPIC ≡ proposal.md (Shape-Up work shape);
+  PLAN ≡ design.md + tasks.md (clarity gate scores the pair ≥9/10);
+  normative requirements ≡ specs/ deltas (RFC-2119 SHALL + Given/When/Then, no EARS).
+  In-flight changes authored before this pin (e.g.
+  deliver-phase-1-request-intake-thread) keep their own schema pin in their
+  .openspec.yaml — only newly authored changes use `meaningfy`.
 
-
-# Project context (optional)
-# This is shown to AI when creating artifacts.
-# Add your tech stack, conventions, style guides, domain knowledge, etc.
-# Example:
-#   context: |
-#     Tech stack: TypeScript, React, Node.js
-#     We use conventional commits
-#     Domain: e-commerce platform
-
-# Per-artifact rules (optional)
-# Add custom rules for specific artifacts.
-# Example:
-#   rules:
-#     proposal:
-#       - Keep proposals under 500 words
-#       - Always include a "Non-goals" section
-#     tasks:
-#       - Break tasks into chunks of max 2 hours
+# Per-artifact rules — THIN by design. Only the 3 hard rules; rich per-artifact rules are
+# deferred. Additive to the schema's built-in instructions.
+rules:
+  proposal:
+    - The EPIC MUST state an Appetite and a No-gos section (an EPIC without no-gos is unshaped).
+  specs:
+    - Use RFC-2119 SHALL/MUST; every requirement MUST have at least one #### Scenario (WHEN/THEN). No EARS.
+  tasks:
+    - The PLAN MUST cite its parent EPIC id on the first line (golden thread — cite your parent).

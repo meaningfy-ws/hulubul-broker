@@ -1,0 +1,22 @@
+repos:
+  - repo: local
+    hooks:
+      - id: lint-python
+        name: Ruff lint
+        entry: make lint-python
+        language: system
+        pass_filenames: false
+      - id: format-check-python
+        name: Ruff format check
+        entry: make format-check-python
+        language: system
+        pass_filenames: false
+      - id: check-architecture
+        name: import-linter architecture boundaries
+        entry: make check-architecture
+        language: system
+        pass_filenames: false
+        # `typecheck` is deliberately not wired here yet: the channel-gateway
+        # test suite has pre-existing mypy strict-mode gaps (missing
+        # annotations) never caught by CI (feature/input-connector had no
+        # CI runs). Add it back once that debt is cleared.

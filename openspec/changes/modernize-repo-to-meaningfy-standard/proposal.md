@@ -40,10 +40,14 @@ isolated commit, once everything else is stable.
   a Diátaxis-shaped `docs/` component) is explicitly deferred to a separate
   future EPIC. It is a content-judgment migration, not mechanical tooling,
   and doesn't belong in the same appetite as a build-tooling modernization.
-- **DEC-3**: `sonar-project.properties` is skipped. No SonarQube/SonarCloud
-  integration exists anywhere in this repo's CI today; adding the stub file
-  would be unused scaffolding (YAGNI) — add it in the same change that
-  actually wires Sonar in, if that ever happens.
+- **DEC-3** *(revised during branch sync — see below)*: `sonar-project.properties`
+  is added as a minimal stub, **not wired into CI**. Originally scoped as a
+  skip (no Sonar integration visible in this repo's own config); merging
+  `develop` surfaced commit `f98729f`'s message stating the organization
+  already runs a licensed SonarQube instance at the platform level — so the
+  project key/sources stub is cheap and forward-compatible, but actually
+  wiring a CI step needs a `SONAR_TOKEN` and project registration this EPIC
+  doesn't have, so that step stays a documented TODO, not a live gate.
 - **DEC-4**: The `/src` → top-level package lift is in scope but sequenced
   last, isolated in its own commit, after every other slice is green. It is
   the highest-blast-radius step (rewrites `pyproject.toml` packaging, pytest
@@ -93,8 +97,9 @@ isolated commit, once everything else is stable.
 ## What Changes
 
 - Add dedicated root config files (`ruff.toml`, `mypy.ini`, `pytest.ini`,
-  `.coveragerc`, `.pre-commit-config.yaml`, `CHANGELOG.md`, `SECURITY.md`)
-  and strip the equivalent `[tool.*]` blocks out of `pyproject.toml`.
+  `.coveragerc`, `.pre-commit-config.yaml`, `CHANGELOG.md`, `SECURITY.md`,
+  `sonar-project.properties` — stub only, not CI-wired, DEC-3) and strip the
+  equivalent `[tool.*]` blocks out of `pyproject.toml`.
 - Remove `tox.ini`; port its 3 eval-only environments to real Makefile
   targets.
 - Pin `openspec/config.yaml` to `schema: meaningfy`; copy in the pinned

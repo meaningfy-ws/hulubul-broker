@@ -59,7 +59,6 @@ optional = true
 import-linter = "2.3"
 ruff = "0.12.5"
 mypy = "1.17.1"
-tox = "4.28.4"
 
 [tool.poetry.scripts]
 gen-neo4j-constraints = "gen_neo4j_constraints:cli"

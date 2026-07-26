@@ -280,7 +280,8 @@ mcp-restart: check-env ## Restart the MCP server
 .PHONY: install lint-python format-check-python typecheck test-unit test-feature \
 	check-architecture operational-schemas format-python check-model-generated \
 	check-operational-schemas test-integration \
-	test-system test-bdd ci-static ci-acceptance ci acceptance-up \
+	test-system test-bdd test-evaluation-recorded test-evaluation-live \
+	ci-static ci-acceptance ci acceptance-up \
 	acceptance-ready acceptance-deploy preflight-langflow-1-10-2 \
 	acceptance-diagnostics acceptance-down release-evidence
 
@@ -334,14 +335,16 @@ test-system: ## Run system-marked tests
 test-bdd: ## Run BDD step-definition tests
 	poetry run pytest tests/steps/test_delivery_request_intake.py tests/steps/test_conversation_resumption.py
 
-# test-evaluation-recorded: ## Run recorded-model evaluation tests (no live calls)
-# 	poetry run pytest tests/evaluation/test_dataset_contract.py tests/evaluation/test_recorded_intake_evaluation.py
+test-evaluation-recorded: ## Run the offline evaluation suite (fixtures/recorded data, no live calls)
+	poetry run pytest -m evaluation tests
 
-# test-evaluation-live: ## Run live-model evaluation tests (opt-in, calls the real model)
-# 	poetry run pytest tests/evaluation/test_live_intake_evaluation.py --run-live-evaluation
+test-evaluation-live: ## Run the evaluation suite against a live model (opt-in, calls the real model, costs quota)
+	poetry run pytest -m "evaluation and live_model" tests
 
-# test-evaluation-judge: ## Run the LLM-judge clarification evaluation (opt-in, calls the real model)
-# 	poetry run pytest tests/evaluation/test_clarification_judge.py --run-live-evaluation
+# No test currently carries the `evaluation`/`live_model` markers (ported
+# 1:1 from tox.ini's evaluation/evaluation-live envs, which were
+# marker-based, not file-based); both targets collect 0 tests until that
+# suite is authored. Not wired into ci-static — opt-in only, as before.
 
 # Static CI: schema + Python quality + fast tests (no comment on the target
 # line itself, so the prerequisite list stays exactly the canonical set).
