@@ -47,25 +47,39 @@ from .enums import (
 )
 from .envelope import ActorContext, MainFlowInput
 from .errors import ERROR_POLICY, FieldViolation, OperationalError
-from .routing import RouterResult, RoutingContext, RoutingLookupRecord, adapt_routing_lookup
+from .intake import (
+    CompleteIntakeFacts,
+    IntakeFacts,
+    IntakeFactUpdates,
+    IntakeInput,
+    IntakeResult,
+)
+from .routing import (
+    RouterInput,
+    RouterResult,
+    RoutingContext,
+    RoutingLookupRecord,
+    adapt_routing_lookup,
+)
+from .snapshots import DeliveryRequestSnapshot, MutationConfirmation
 
 __all__ = [
     "DATA_OPERATION_ADAPTER",
     "ERROR_POLICY",
     "POST_INTAKE_STATUSES",
-    # Envelope
     "ActorContext",
     "ActorRole",
     "ActorUrn",
     "BindingState",
     "CallerFlow",
+    "CompleteIntakeFacts",
     "ContractKind",
     "CreateDeliveryRequestRequest",
     "DataOperation",
     "DataOperationOutcome",
-    # Data Operations (Task 8)
     "DataOperationRequest",
     "DataOperationResult",
+    "DeliveryRequestSnapshot",
     "DependencyKind",
     "ErrorCategory",
     "ErrorCode",
@@ -75,29 +89,31 @@ __all__ = [
     "GetRequestRoutingContextRequest",
     "HumanSuppliedText",
     "IdentityAssurance",
+    "IntakeFactUpdates",
+    "IntakeFacts",
     "IntakeField",
+    "IntakeInput",
     "IntakeOutcome",
+    "IntakeResult",
     "InvocationSource",
     "MainFlowInput",
+    "MutationConfirmation",
     "NonBlankText",
-    # Errors
     "OperationalError",
     "ReadDeliveryRequestRequest",
     "RequestId",
-    # Enums
     "RequestStatus",
     "RetryAction",
+    "RouterInput",
     "RouterOutcome",
     "RouterResult",
     "RouterTarget",
     "RoutingContext",
-    # Routing
     "RoutingLookupRecord",
     "RoutingReason",
     "RoutingStage",
     "SessionId",
     "SetRequestStatusRequest",
-    # Base
     "StrictModel",
     "UpdateDeliveryRequestRequest",
     "VersionedContract",
