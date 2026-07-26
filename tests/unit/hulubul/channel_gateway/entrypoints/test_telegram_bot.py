@@ -4,6 +4,7 @@ import pytest
 
 from hulubul.channel_gateway.entrypoints.telegram_bot import (
     GatewayConfig,
+    GatewayMode,
     load_config,
     main,
     run_webhook,
@@ -23,7 +24,7 @@ def test_load_config_reads_required_environment_variables(monkeypatch):
         telegram_bot_token="123:abc",
         langflow_api_url="http://langflow:7860",
         langflow_flow_id="flow-1",
-        mode="polling",
+        mode=GatewayMode.polling,
     )
 
 
@@ -71,7 +72,7 @@ def test_load_config_accepts_webhook_mode_when_secret_is_set(monkeypatch):
         telegram_bot_token="123:abc",
         langflow_api_url="http://langflow:7860",
         langflow_flow_id="flow-1",
-        mode="webhook",
+        mode=GatewayMode.webhook,
         webhook_secret="s3cr3t",
     )
 
@@ -128,7 +129,7 @@ def _webhook_config(webhook_secret="s3cr3t"):
         telegram_bot_token="123:abc",
         langflow_api_url="http://langflow:7860",
         langflow_flow_id="flow-1",
-        mode="webhook",
+        mode=GatewayMode.webhook,
         webhook_secret=webhook_secret,
     )
 
@@ -152,10 +153,12 @@ async def test_run_webhook_registers_bot_webhook_with_secret_token_and_ngrok_url
     fake_bot = MagicMock()
     fake_bot.set_webhook = AsyncMock()
     fake_dispatcher = MagicMock()
+    fake_dispatcher.resolve_used_update_types = MagicMock(return_value=["message"])
     fake_ngrok_client = _fake_ngrok_client([{"public_url": "https://abc123.ngrok.io"}])
 
     fake_runner = MagicMock()
     fake_runner.setup = AsyncMock()
+    fake_runner.cleanup = AsyncMock()
     fake_site = MagicMock()
     fake_site.start = AsyncMock()
     fake_event = MagicMock()
@@ -190,6 +193,7 @@ async def test_run_webhook_registers_bot_webhook_with_secret_token_and_ngrok_url
     fake_bot.set_webhook.assert_awaited_once_with(
         url="https://abc123.ngrok.io/webhook",
         secret_token="s3cr3t",
+        allowed_updates=["message"],
         drop_pending_updates=True,
     )
     handler_cls.assert_called_once_with(
@@ -197,6 +201,7 @@ async def test_run_webhook_registers_bot_webhook_with_secret_token_and_ngrok_url
     )
     fake_site.start.assert_awaited_once()
     fake_event.wait.assert_awaited_once()
+    fake_runner.cleanup.assert_awaited_once()
 
 
 @pytest.mark.asyncio

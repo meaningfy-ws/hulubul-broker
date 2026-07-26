@@ -40,14 +40,14 @@ HTTPS URL as the Telegram webhook automatically on gateway startup.
 
 ### Requirement: Three-tier local test suite
 The system SHALL organize gateway tests into three suites — `tests/unit/` (mocked, always run),
-`tests/features/*.feature` with `tests/feature/` step-definitions (mocked LangFlow client,
-synthetic inbound, run in CI), and `tests/e2e/` (real Telegram test bot and real local
+`tests/feature/*.feature` with step-definitions under `tests/feature/steps/` (mocked LangFlow
+client, synthetic inbound, run in CI), and `tests/e2e/` (real Telegram test bot and real local
 LangFlow, local/manual only, excluded from CI) — with the split documented in the runbook.
 
 #### Scenario: Unit and feature suites run in CI
 - **WHEN** the GitHub Actions CI pipeline runs
-- **THEN** it executes `tests/unit/` and the `tests/feature/` step-definitions against
-  `tests/features/*.feature`, and does not require a Telegram bot token as a secret
+- **THEN** it executes `tests/unit/` and the `tests/feature/steps/` step-definitions against
+  `tests/feature/*.feature`, and does not require a Telegram bot token as a secret
 
 #### Scenario: e2e suite is excluded from CI but documented
 - **WHEN** a developer wants to run the full round-trip test against a real Telegram bot

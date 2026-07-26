@@ -2,16 +2,19 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
+from hulubul.channel_gateway.models.channel import ChannelRef
 from hulubul.channel_gateway.models.message import InboundMessage, TextMessage
 from hulubul.channel_gateway.services.relay_message import relay_inbound_message
 from hulubul.core.models.domain.hulubul_models import Medium
+
+_TELEGRAM_123 = ChannelRef(medium=Medium.Telegram, system_id="123456789")
 
 
 @pytest.mark.asyncio
 async def test_relay_calls_langflow_with_derived_session_id_and_sends_reply_to_origin():
     adapter = MagicMock()
     adapter.receive.return_value = InboundMessage(
-        medium=Medium.Telegram, system_id="123456789", text="I need to send a parcel"
+        channel=_TELEGRAM_123, text="I need to send a parcel"
     )
     adapter.send = AsyncMock()
 
@@ -22,8 +25,7 @@ async def test_relay_calls_langflow_with_derived_session_id_and_sends_reply_to_o
 
     langflow_client.run.assert_awaited_once_with(
         session_id="Telegram:123456789",
-        medium="Telegram",
-        system_id="123456789",
+        channel=_TELEGRAM_123,
         text="I need to send a parcel",
     )
     adapter.send.assert_awaited_once_with("123456789", TextMessage(text="Sure, where is it going?"))
@@ -32,9 +34,7 @@ async def test_relay_calls_langflow_with_derived_session_id_and_sends_reply_to_o
 @pytest.mark.asyncio
 async def test_relay_does_not_send_when_langflow_call_fails():
     adapter = MagicMock()
-    adapter.receive.return_value = InboundMessage(
-        medium=Medium.Telegram, system_id="123456789", text="hi"
-    )
+    adapter.receive.return_value = InboundMessage(channel=_TELEGRAM_123, text="hi")
     adapter.send = AsyncMock()
 
     langflow_client = MagicMock()
@@ -48,9 +48,7 @@ async def test_relay_does_not_send_when_langflow_call_fails():
 @pytest.mark.asyncio
 async def test_relay_does_not_crash_the_process_when_send_fails():
     adapter = MagicMock()
-    adapter.receive.return_value = InboundMessage(
-        medium=Medium.Telegram, system_id="123456789", text="hi"
-    )
+    adapter.receive.return_value = InboundMessage(channel=_TELEGRAM_123, text="hi")
     adapter.send = AsyncMock(side_effect=RuntimeError("Telegram API: bot was blocked by the user"))
 
     langflow_client = MagicMock()

@@ -4,6 +4,7 @@ from aiogram import Bot
 from aiogram.types import Message
 
 from hulubul.channel_gateway.adapters.channel_port import ChannelPort
+from hulubul.channel_gateway.models.channel import ChannelRef
 from hulubul.channel_gateway.models.message import (
     InboundMessage,
     MediaMessage,
@@ -24,8 +25,7 @@ class TelegramAdapter(ChannelPort):
         if message.reply_to_message is not None:
             reply_to_message_id = str(message.reply_to_message.message_id)
         return InboundMessage(
-            medium=Medium.Telegram,
-            system_id=str(message.chat.id),
+            channel=ChannelRef(medium=Medium.Telegram, system_id=str(message.chat.id)),
             text=message.text or "",
             reply_to_message_id=reply_to_message_id,
         )

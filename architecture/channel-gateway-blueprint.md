@@ -187,9 +187,10 @@ the module name.
 
 **Choice**:
 - `tests/unit/` — models and adapters with mocks, nothing real; always in CI.
-- `tests/features/*.feature` (Gherkin, pytest-bdd) plus `tests/feature/` step-definitions — real
-  local LangFlow container, synthetic inbound payloads, no real Telegram; traces back to a use
-  case in `architecture/use-cases/` per the `bdd-gherkin` skill; runs in CI.
+- `tests/feature/*.feature` (Gherkin, pytest-bdd) plus step-definitions under
+  `tests/feature/steps/` — a mocked LangFlow client, synthetic inbound payloads, no real
+  Telegram; traces back to a use case in `architecture/use-cases/` per the `bdd-gherkin` skill;
+  runs in CI.
 - `tests/e2e/` — real Telegram test bot plus real local LangFlow, full local stack up;
   local/manual only, excluded from CI. Covers both the full round-trip and a Telegram-only
   isolation scenario (LangFlow response stubbed) as sub-cases within this suite rather than a
@@ -197,8 +198,13 @@ the module name.
 
 **Rationale**: matches the preferred three-category taxonomy while still covering all four
 dependency states (LangFlow × Telegram, connected/disconnected) from the original brainstorm;
-reuses the existing `tests/features/` Gherkin convention and `pytest-bdd` dependency already in
-the repo; avoids adding a Telegram bot-token secret to CI.
+reuses the `pytest-bdd` dependency already in the repo; avoids adding a Telegram bot-token
+secret to CI. The gateway's own `.feature` file and step-definitions were later consolidated
+under one `tests/feature/` folder (`.feature` files alongside a `steps/` subfolder) rather than
+split across sibling `tests/feature/`/`tests/features/` folders, which read as a typo at a
+glance. `request_intake`'s pre-existing `tests/features/*.feature` files (business-language
+specification artifacts with no step-definitions) are a separate, older convention and were
+deliberately left where they are — out of scope for this change.
 
 **Rejected alternative**: running live-Telegram tests in CI with a bot-token secret. Rejected —
 secret management, flakiness, and rate-limit exposure for no current need.

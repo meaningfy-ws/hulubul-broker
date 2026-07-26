@@ -1,6 +1,9 @@
 import asyncio
+import logging
 import os
+import signal
 from dataclasses import dataclass
+from enum import Enum
 
 import httpx
 from aiogram import Bot, Dispatcher, F
@@ -12,7 +15,12 @@ from hulubul.channel_gateway.adapters.langflow_client import LangflowClient
 from hulubul.channel_gateway.adapters.telegram_adapter import TelegramAdapter
 from hulubul.channel_gateway.services.relay_message import relay_inbound_message
 
-_VALID_MODES = {"polling", "webhook"}
+logger = logging.getLogger(__name__)
+
+
+class GatewayMode(str, Enum):
+    polling = "polling"
+    webhook = "webhook"
 
 
 @dataclass(frozen=True)
@@ -20,17 +28,20 @@ class GatewayConfig:
     telegram_bot_token: str
     langflow_api_url: str
     langflow_flow_id: str
-    mode: str
+    mode: GatewayMode
     webhook_secret: str | None = None
 
 
 def load_config() -> GatewayConfig:
-    mode = os.environ["GATEWAY_MODE"]
-    if mode not in _VALID_MODES:
-        raise ValueError(f"GATEWAY_MODE must be one of {_VALID_MODES}, got {mode!r}")
+    mode_value = os.environ["GATEWAY_MODE"]
+    try:
+        mode = GatewayMode(mode_value)
+    except ValueError as exc:
+        valid = [m.value for m in GatewayMode]
+        raise ValueError(f"GATEWAY_MODE must be one of {valid}, got {mode_value!r}") from exc
 
     webhook_secret = os.environ.get("TELEGRAM_WEBHOOK_SECRET") or None
-    if mode == "webhook" and not webhook_secret:
+    if mode == GatewayMode.webhook and not webhook_secret:
         raise ValueError(
             "TELEGRAM_WEBHOOK_SECRET is required when GATEWAY_MODE=webhook: without it, "
             "Telegram's webhook signature validation (X-Telegram-Bot-Api-Secret-Token) is "
@@ -50,9 +61,10 @@ def load_config() -> GatewayConfig:
 async def run_webhook(config: GatewayConfig, bot: Bot, dispatcher: Dispatcher) -> None:
     """Register the Telegram webhook against the local ngrok tunnel and serve it.
 
-    Runs forever (the caller only returns once the process is killed) — extracted out
-    of main() so it's mockable/testable without needing a real event loop that never
-    returns.
+    Runs until SIGTERM/SIGINT — extracted out of main() so it's mockable/testable
+    without needing a real event loop. `SimpleRequestHandler` defaults to handling
+    updates as background tasks, so a signal-driven shutdown that runs `runner.cleanup()`
+    is what stops in-flight requests from being lost silently on redeploy.
     """
     ngrok_api_url = os.environ.get("NGROK_API_URL", "http://ngrok:4040")
     async with httpx.AsyncClient() as ngrok_client:
@@ -77,6 +89,7 @@ async def run_webhook(config: GatewayConfig, bot: Bot, dispatcher: Dispatcher) -
     await bot.set_webhook(
         url=f"{public_url}/webhook",
         secret_token=config.webhook_secret,
+        allowed_updates=dispatcher.resolve_used_update_types(),
         drop_pending_updates=True,
     )
 
@@ -89,7 +102,16 @@ async def run_webhook(config: GatewayConfig, bot: Bot, dispatcher: Dispatcher) -
     await runner.setup()
     site = web.TCPSite(runner, host="0.0.0.0", port=8080)
     await site.start()
-    await asyncio.Event().wait()
+
+    shutdown_event = asyncio.Event()
+    loop = asyncio.get_running_loop()
+    for sig in (signal.SIGTERM, signal.SIGINT):
+        loop.add_signal_handler(sig, shutdown_event.set)
+
+    try:
+        await shutdown_event.wait()
+    finally:
+        await runner.cleanup()
 
 
 async def main() -> None:
@@ -109,11 +131,19 @@ async def main() -> None:
         async def on_message(message: Message) -> None:
             await relay_inbound_message(adapter, langflow_client, message)
 
-        if config.mode == "polling":
+        @dispatcher.message()
+        async def on_non_text_message(message: Message) -> None:
+            logger.info(
+                "Ignoring non-text message in chat %s (no text content to relay).",
+                message.chat.id,
+            )
+
+        if config.mode == GatewayMode.polling:
             await dispatcher.start_polling(bot)
         else:
             await run_webhook(config, bot, dispatcher)
 
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s")
     asyncio.run(main())

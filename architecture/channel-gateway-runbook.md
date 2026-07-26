@@ -135,11 +135,11 @@ Models and adapters tested against mocks, no real Telegram or LangFlow involved:
 poetry run pytest tests/unit/hulubul/channel_gateway -v
 ```
 
-### Feature tests (Gherkin, LangFlow-connected; runs in CI)
+### Feature tests (Gherkin, mocked LangFlow; runs in CI)
 
-`tests/features/telegram_message_relay.feature` and its `tests/feature/` step-definitions
-(`test_telegram_message_relay.py`) exercise the relay path with synthetic (non-Telegram) inbound
-payloads. Run them with:
+`tests/feature/telegram_message_relay.feature` and its step-definitions under
+`tests/feature/steps/` (`test_telegram_message_relay.py`) exercise the relay path with synthetic
+(non-Telegram) inbound payloads against a mocked `LangflowClient`. Run them with:
 
 ```
 poetry run pytest tests/feature -v

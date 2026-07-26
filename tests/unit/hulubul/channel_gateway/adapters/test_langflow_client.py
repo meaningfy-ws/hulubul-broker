@@ -4,6 +4,10 @@ import httpx
 import pytest
 
 from hulubul.channel_gateway.adapters.langflow_client import LangflowClient
+from hulubul.channel_gateway.models.channel import ChannelRef
+from hulubul.core.models.domain.hulubul_models import Medium
+
+_TELEGRAM_123 = ChannelRef(medium=Medium.Telegram, system_id="123")
 
 
 @pytest.mark.asyncio
@@ -25,9 +29,7 @@ async def test_run_posts_session_id_and_channel_identity_and_returns_reply_text(
         client = LangflowClient(
             base_url="http://langflow:7860", flow_id="abc123", client=http_client
         )
-        reply = await client.run(
-            session_id="Telegram:123", medium="Telegram", system_id="123", text="hello"
-        )
+        reply = await client.run(session_id="Telegram:123", channel=_TELEGRAM_123, text="hello")
 
     assert reply == "Got it!"
     assert captured_request["url"] == "http://langflow:7860/api/v1/run/abc123"
@@ -50,9 +52,7 @@ async def test_run_returns_none_on_http_error():
         client = LangflowClient(
             base_url="http://langflow:7860", flow_id="abc123", client=http_client
         )
-        reply = await client.run(
-            session_id="Telegram:123", medium="Telegram", system_id="123", text="hello"
-        )
+        reply = await client.run(session_id="Telegram:123", channel=_TELEGRAM_123, text="hello")
 
     assert reply is None
 
@@ -67,9 +67,7 @@ async def test_run_returns_none_on_unexpected_response_shape():
         client = LangflowClient(
             base_url="http://langflow:7860", flow_id="abc123", client=http_client
         )
-        reply = await client.run(
-            session_id="Telegram:123", medium="Telegram", system_id="123", text="hello"
-        )
+        reply = await client.run(session_id="Telegram:123", channel=_TELEGRAM_123, text="hello")
 
     assert reply is None
 
@@ -84,8 +82,6 @@ async def test_run_returns_none_on_malformed_json_response():
         client = LangflowClient(
             base_url="http://langflow:7860", flow_id="abc123", client=http_client
         )
-        reply = await client.run(
-            session_id="Telegram:123", medium="Telegram", system_id="123", text="hello"
-        )
+        reply = await client.run(session_id="Telegram:123", channel=_TELEGRAM_123, text="hello")
 
     assert reply is None

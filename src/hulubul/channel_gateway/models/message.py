@@ -1,12 +1,11 @@
 from dataclasses import dataclass
 
-from hulubul.core.models.domain.hulubul_models import Medium
+from hulubul.channel_gateway.models.channel import ChannelRef
 
 
 @dataclass(frozen=True)
 class InboundMessage:
-    medium: Medium
-    system_id: str
+    channel: ChannelRef
     text: str
     reply_to_message_id: str | None = None
 

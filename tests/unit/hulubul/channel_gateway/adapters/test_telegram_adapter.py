@@ -24,8 +24,8 @@ def test_receive_normalizes_a_plain_text_update():
 
     inbound = adapter.receive(raw)
 
-    assert inbound.medium is Medium.Telegram
-    assert inbound.system_id == "123456789"
+    assert inbound.channel.medium is Medium.Telegram
+    assert inbound.channel.system_id == "123456789"
     assert inbound.text == "hello"
     assert inbound.reply_to_message_id is None
 

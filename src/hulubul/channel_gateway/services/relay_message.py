@@ -12,12 +12,11 @@ async def relay_inbound_message(
     adapter: ChannelPort, langflow_client: LangflowClient, raw_update: object
 ) -> None:
     inbound = adapter.receive(raw_update)
-    session_id = derive_session_id(inbound.medium, inbound.system_id)
+    session_id = derive_session_id(inbound.channel)
 
     reply_text = await langflow_client.run(
         session_id=session_id,
-        medium=inbound.medium.value,
-        system_id=inbound.system_id,
+        channel=inbound.channel,
         text=inbound.text,
     )
 
@@ -28,7 +27,7 @@ async def relay_inbound_message(
         return
 
     try:
-        await adapter.send(inbound.system_id, TextMessage(text=reply_text))
+        await adapter.send(inbound.channel.system_id, TextMessage(text=reply_text))
     except Exception:
         logger.exception(
             "Failed to send reply for session_id=%s; message is dropped, not retried.",

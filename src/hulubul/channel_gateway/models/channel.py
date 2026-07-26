@@ -18,5 +18,5 @@ class ChannelRef:
     system_id: str
 
 
-def derive_session_id(medium: Medium, system_id: str) -> str:
-    return f"{medium.value}:{system_id}"
+def derive_session_id(channel: ChannelRef) -> str:
+    return f"{channel.medium.value}:{channel.system_id}"
