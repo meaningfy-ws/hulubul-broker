@@ -7,44 +7,42 @@ two diverge.
 
 ## Project purpose
 
-Hulubul is an **autonomous, agent-driven parcel-brokerage service**: it turns a
-Sender's intention into a structured Parcel Request, matches it to transporters,
-and carries the communication through pick-up and delivery — over a chat channel
-(Telegram in dev, WhatsApp in prod), on a **Neo4j graph** system of record, with
-LangFlow orchestrating the request-intake/routing flows.
+Hulubul is an autonomous, agent-driven parcel-brokerage service: it turns a
+Sender's chat message into a structured Parcel Request, matches it to
+transporters, and carries the communication through pick-up and delivery —
+over Telegram (dev) / WhatsApp (prod), on a Neo4j graph system of record,
+orchestrated by LangFlow.
 
-The LinkML domain model, the local infrastructure stack, the `hulubul` Python
-application (cosmic-python layered: `core`, `request_intake`, `channel_gateway`),
-and a Telegram channel-gateway adapter are built. Architecture documents under
-`architecture/` describe the target system and an incremental (Phase 1–4)
-build-up plan; current in-flight and completed work is tracked in
-`openspec/changes/` and `openspec/specs/` (see "Golden thread" below) — that is
-the truth, not this file.
+Built so far: the LinkML domain model, the local infra stack, the `hulubul`
+Python application (cosmic-python layered: `core`, `request_intake`,
+`channel_gateway`), and a Telegram channel-gateway adapter. Architecture
+docs under `architecture/` describe the target system and an incremental
+(Phase 1–4) build-up plan; current in-flight and completed work is tracked
+in `openspec/changes/` and `openspec/specs/` (see "Golden thread" below) —
+that is the truth, not this file.
+
+## Git workflow: PR-only merges
+
+**CRITICAL:** All changes to `develop` and `main` go through pull requests
+with human review — never push directly to either. Open a PR, wait for
+explicit human approval, then merge. No exceptions.
 
 ## Important commands
 
-`make help` prints the canonical target list. Key groups:
+`make help` prints the full target list (model generation, Docker, Neo4j/MCP,
+quality gates). The ones you'll use every session:
 
-**Python testing & quality**:
-- `make test-unit` — unit tests, 80% coverage enforced
-- `make test-feature` — pytest-bdd feature suites (`tests/e2e` excluded)
-- `make lint-python` / `format-check-python` / `typecheck` — Ruff / Ruff / mypy
+- `make check-all` — the full local quality gate (lint, types, architecture,
+  model checks, tests) — run before claiming any work done
+- `make test-unit` / `test-feature` — unit tests (80% coverage enforced) /
+  pytest-bdd feature suites
+- `make lint-python` / `format-check-python` / `typecheck` — Ruff / Ruff /
+  mypy (`make lint` is LinkML schema linting, not Python)
 - `make check-architecture` — import-linter boundary check
-- `make ci-static` — the full static quality gate (all of the above + model checks)
-
-**Model generation** (LinkML source under `model/linkml/` → `model/generated/`):
-- `make all` — lint + regenerate every artifact
-- `make lint` — lint the LinkML schema (`linkml-lint`, not Python linting)
-- `make pydantic` / `owl` / `shacl` / `jsonschema` / `erdiagram` / `plantuml` / `classdiagram` / `neo4j-constraints` / `neomodel` — regenerate a single artifact
-- `make clean` — wipe `model/generated/`
-
-**Docker** (Neo4j + MCP + Langflow + Postgres):
-- `make up` / `down` / `down-volumes` / `rebuild` / `logs` / `ps`
-- Prerequisite: `cp infra/.env.example infra/.env` (gitignored; edit passwords)
-
-**Neo4j + MCP**:
-- `make neo4j-schema` / `neo4j-seed` / `neo4j-queries` / `neo4j-reset` / `neo4j-shell` / `neo4j-browser`
-- `make mcp-logs` / `mcp-restart`
+- `make all` (from `model/`, or repo root) — regenerate every LinkML-derived
+  artifact after a schema edit
+- `make up` (Docker stack) needs `cp infra/.env.example infra/.env` first
+  (gitignored; edit passwords)
 
 ## Top-level architecture
 
@@ -93,23 +91,17 @@ file and `.claude/memory/MEMORY.md` are regenerable indexes that point at it,
 never a parallel source. In-flight changes authored before the `meaningfy`
 schema pin (e.g. `deliver-phase-1-request-intake-thread`) keep their own
 schema in their `.openspec.yaml` — only newly authored changes use
-`meaningfy`.
+`meaningfy`, and that pointer, not a restated copy, is how you'll always
+find the current truth.
 
-## Git workflow: PR-only merges
+## Local developer overrides (Claude Code specific)
 
-**CRITICAL:** All changes to `develop` and `main` branches **MUST** go through
-pull requests with human review. No direct pushes allowed.
-
-- **Never push directly** to `develop` or `main`
-- **Always create a PR** for review before merging
-- Wait for explicit human approval before merging
-- This is the only merge path; no exceptions
-
-## Local developer overrides
-
-An optional, git-ignored tier of instructions is imported below. If the file
-does not exist, the import is skipped. Anything it contains is local-only and
-must never surface in commits, PRs, code, comments, or docs.
+Claude Code's `@file` import syntax pulls in an optional, git-ignored tier
+of instructions below — this mechanism is Claude Code specific; other
+AGENTS.md-reading tools will just see this line as plain text and can
+ignore it. If `AGENTS.local.md` doesn't exist, the import is a no-op.
+Anything it contains is local-only — keep it out of commits, PRs, code,
+comments, and other docs.
 
 @AGENTS.local.md
 
@@ -168,10 +160,9 @@ When all 5 hold → proactively suggest "ready to `/opsx:propose`?" — wait for
 - Do not grant commit approval implicitly. The developer retains approval of
   each commit unless they explicitly delegate it for the current task.
 
-### Meaningfy skill routing
+### Skill routing (meaningfy-skillery + superpowers)
 
-`meaningfy-skillery` (22 skills: core/building/consulting/architecture) isn't otherwise
-routed here — this table is that routing.
+Neither skill family is otherwise routed here — this table is that routing.
 
 | When | Skill |
 |---|---|
@@ -190,11 +181,17 @@ routed here — this table is that routing.
 | New-repo or repo-wide scaffolding | `meaningfy-building:project-setup` |
 | Deploy/CD setup (real deployment, not local Compose) | `meaningfy-building:ci-cd-delivery` |
 | Release/versioning/publish | `meaningfy-building:meaningfy-release` |
+| Before creating a feature/component/behavior change | `superpowers:brainstorming` |
+| Before writing any implementation code | `superpowers:test-driven-development` (RED-GREEN-REFACTOR) |
+| Any bug, test failure, or unexpected behavior | `superpowers:systematic-debugging`, before proposing a fix |
+| Before claiming work done, fixed, or passing | `superpowers:verification-before-completion` |
+| Completing a task or before merging | `superpowers:requesting-code-review` |
+| Received review feedback | `superpowers:receiving-code-review` — verify, don't rubber-stamp |
+| 2+ independent tasks with no shared state | `superpowers:dispatching-parallel-agents` |
 
-`meaningfy-consulting:*` (coach/decision-package/proposal-writing/estimation/
-executive-communication) is **not applicable** to this repo — it's for running a consulting
-engagement, not building this product. `/opsx:propose` and `proposal-writing` are unrelated
-despite the name overlap.
+`meaningfy-consulting:*` is **not applicable** to this repo (it's for running a
+consulting engagement, not building this product) — `/opsx:propose` and
+`proposal-writing` are unrelated despite the name overlap.
 
 <!-- gitnexus:start -->
 # GitNexus — Code Intelligence
