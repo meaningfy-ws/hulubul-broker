@@ -35,8 +35,8 @@
 ## 5. Agent file reconciliation
 
 - [x] 5.1 Remove the broken `CLAUDE.md` symlink
-- [x] 5.2 Move `AGENTS.md`'s content into `CLAUDE.md` (canonical); add the "Golden thread" spine note
-- [x] 5.3 Create `AGENTS.md` as a relative symlink to `CLAUDE.md` (`ln -s CLAUDE.md AGENTS.md`)
+- [x] 5.2 Keep `AGENTS.md`'s content as canonical (DEC-8, reversed from CLAUDE-canonical per developer instruction); add the "Golden thread" spine note
+- [x] 5.3 Replace `CLAUDE.md` with a minimal pointer ("Read AGENTS.md"), not a symlink
 - [x] 5.4 Add `.claude/memory/MEMORY.md` (regenerable index, ≤200 lines)
 - [x] 5.5 Verify `CLAUDE.md`/`AGENTS.md` resolve correctly from a clean `git clone` (portability check)
 - [x] 5.6 Commit
@@ -50,11 +50,11 @@
 
 ## 7. Infra Dockerfile consolidation
 
-- [x] 7.1 Create `infra/docker/Dockerfile` (multistage, multi-target: `channel-gateway`, `mcp`)
-- [x] 7.2 Create co-located `infra/docker/Dockerfile.dockerignore`
-- [x] 7.3 Update `infra/docker-compose.yaml` build contexts/targets
+- [x] 7.1 Create `infra/docker/channel-gateway/Dockerfile` and `infra/docker/mcp/Dockerfile` (single-purpose each, revised from an initial multi-target approach per developer feedback — one image, one purpose)
+- [x] 7.2 Create each one's co-located `Dockerfile.dockerignore`
+- [x] 7.3 Update `infra/docker-compose.yaml` build contexts (no `target:` needed)
 - [x] 7.4 Remove `infra/channel-gateway/Dockerfile` and `infra/mcp/Dockerfile`
-- [x] 7.5 Build both targets locally and diff the resulting image file listings against pre-change images
+- [x] 7.5 Build both images locally and diff the resulting image file listings against pre-change images
 - [x] 7.6 Commit
 
 ## 8. `/src` lift

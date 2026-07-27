@@ -17,9 +17,13 @@ architecture
 openspec
 docs
 tests
+scripts
 langflow
-model/generated
-model/modelspecs
-model/hulubul-transport.qea
+model
+hulubul
+pyproject.toml
+poetry.lock
 infra/.env
 infra/langflow.env
+infra/docker/channel-gateway
+infra/mcp/requirements.in

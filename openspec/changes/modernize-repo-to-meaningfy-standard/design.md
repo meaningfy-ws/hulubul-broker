@@ -52,14 +52,20 @@ DEC-n, not repeated here):
   `.openspec.yaml` (confirmed by inspecting that change's file). The global
   `openspec/config.yaml` default becomes `meaningfy`; the in-flight change's
   own `.openspec.yaml` is untouched.
-- **Infra Dockerfile consolidation approach**: move to
-  `infra/docker/Dockerfile` with build-arg or multi-target stages
-  (`--target channel-gateway`, `--target mcp`) rather than two fully
-  separate Dockerfiles, since both are thin Python service images sharing
-  the same base — this is the standard's "multistage builder→slim non-root"
-  shape applied to two related targets instead of duplicating boilerplate.
-  Co-locate the dockerignore as `infra/docker/Dockerfile.dockerignore` per
-  D11.
+- **Infra Dockerfile consolidation approach** *(revised after developer
+  feedback)*: originally a single `infra/docker/Dockerfile` with
+  `--target channel-gateway`/`--target mcp` multi-target stages was tried.
+  Reverted per explicit developer instruction: a Docker image must have a
+  single purpose, even at the cost of duplicating boilerplate across two
+  files — a shared multi-target file makes it too easy for one service's
+  build args/stages to leak into the other, and is harder to reason about
+  at a glance. Final shape: `infra/docker/channel-gateway/Dockerfile` and
+  `infra/docker/mcp/Dockerfile`, each single-purpose and independently
+  multistage where applicable (channel-gateway: builder→slim non-root; mcp:
+  already minimal, digest-pinned, non-root). Both still use the repo-root
+  build context (not a narrowed per-service context) for consistency
+  between the two, per the same feedback. Each gets its own co-located
+  `Dockerfile.dockerignore` per D11.
 
 ## Algorithm / approach
 
@@ -88,20 +94,26 @@ operations, so there is no retry/replay concern; a slice that fails
    templates/) into the repo; set `openspec/config.yaml`'s `schema:
    meaningfy`; add the project `context:` block (repo, layering, branch,
    commit conventions) and the 3 thin per-artifact rules. Commit.
-5. **Agent file reconciliation** — delete the broken `CLAUDE.md` symlink;
-   rename/move `AGENTS.md`'s content into `CLAUDE.md` (canonical); create
-   `AGENTS.md` as a **relative** symlink (`ln -s CLAUDE.md AGENTS.md`, not
-   absolute — the root cause of the current break); add a "Golden thread"
-   note per `spine-projection.md`; add `.claude/memory/MEMORY.md`. Commit.
+5. **Agent file reconciliation** — delete the broken `CLAUDE.md` symlink
+   (absolute-path target was the root cause); keep `AGENTS.md`'s content as
+   the canonical file (DEC-8: reverses the project-setup standard's default
+   CLAUDE-canonical choice, per explicit developer instruction — `AGENTS.md`
+   is the cross-tool standard name and the developer wants it real);
+   replace `CLAUDE.md` with a minimal pointer ("Read AGENTS.md"), not a
+   symlink, so any tool reading `CLAUDE.md` directly is forced to go read
+   the real file; add a "Golden thread" note per `spine-projection.md`; add
+   `.claude/memory/MEMORY.md`. Commit.
 6. **pyproject normalization** — remove the `[tool.pytest.ini_options]`,
    `[tool.coverage.*]`, `[tool.ruff.*]`, `[tool.mypy]` blocks now that
    slice 2 has them in dedicated files; leave `[project]`/`[tool.poetry]`/
    dependency groups/`[build-system]` only. Commit.
 7. **Infra Dockerfile consolidation** — introduce
-   `infra/docker/Dockerfile` (multistage, multi-target for
-   channel-gateway + mcp), `infra/docker/Dockerfile.dockerignore`; update
-   `infra/docker-compose.yaml` build contexts/targets; remove the two old
-   per-component Dockerfiles. Commit.
+   `infra/docker/channel-gateway/Dockerfile` and `infra/docker/mcp/Dockerfile`
+   (each single-purpose, independently multistage where applicable, each
+   with its own co-located `Dockerfile.dockerignore`); update
+   `infra/docker-compose.yaml` build contexts (no `target:` needed — each
+   file has exactly one image); remove the two old per-component
+   Dockerfiles. Commit.
 8. **`/src` lift** — `git mv src/hulubul hulubul` (root-level, preserves
    blame); update `pyproject.toml`'s `packages` entry (drop `from = "src"`);
    update `pytest.ini`'s `pythonpath` (drop `src`, or set to `.`); remove
@@ -152,12 +164,14 @@ operations, so there is no retry/replay concern; a slice that fails
   call the same `make` targets CI already runs, so "pre-commit passes"
   never diverges from "CI passes"; document install (`pre-commit install`)
   in the README as opt-in, not a hard gate outside CI.
-- [Risk] Consolidating two Dockerfiles into one multistage/multi-target file
-  could change build behavior subtly (layer caching, image size) for
-  channel-gateway or mcp. → [Mitigation] no non-goal here is deploying —
-  build both images locally (`docker build --target channel-gateway`,
-  `--target mcp`) and diff the resulting image's file listing against the
-  pre-change image before considering slice 7 done.
+- [Risk] Splitting into two independent Dockerfiles, both multistage where
+  applicable, could change build behavior subtly (layer caching, image
+  size) for channel-gateway or mcp. → [Mitigation] no non-goal here is
+  deploying — build both images locally
+  (`docker build -f infra/docker/channel-gateway/Dockerfile .`,
+  `docker build -f infra/docker/mcp/Dockerfile .`) and diff the resulting
+  image's file listing against the pre-change image before considering
+  slice 7 done.
 
 ## Open Questions
 

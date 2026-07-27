@@ -9,7 +9,7 @@ not authority.
 - Project context, architecture summary, and conventions: `openspec/config.yaml`'s `context:` field.
 - Durable capability specs (the truth): `openspec/specs/`.
 - In-flight work (EPICs + PLANs): `openspec/changes/`.
-- Agent routing, commands, and the golden thread: `CLAUDE.md` (canonical; `AGENTS.md` is a symlink to it).
+- Agent routing, commands, and the golden thread: `AGENTS.md` (canonical; `CLAUDE.md` just points there).
 
 ## Stable patterns
 

@@ -26,7 +26,7 @@ MCP_NEO4J_CYPHER_VERSION = "mcp-neo4j-cypher==0.6.0"
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 COMPOSE_FILE = PROJECT_ROOT / "infra" / "docker-compose.yaml"
-MCP_DOCKERFILE = PROJECT_ROOT / "infra" / "docker" / "Dockerfile"
+MCP_DOCKERFILE = PROJECT_ROOT / "infra" / "docker" / "mcp" / "Dockerfile"
 MCP_REQUIREMENTS = PROJECT_ROOT / "infra" / "mcp" / "requirements.txt"
 
 
@@ -61,17 +61,12 @@ class TestRuntimeImagePins:
         )
 
     def test_mcp_base_image_is_exactly_approved(self) -> None:
-        """MCP service's Python base image must use exact approved digest.
-
-        infra/docker/Dockerfile is multi-stage/multi-target (channel-gateway,
-        mcp); only the `mcp` stage's base is digest-pinned, so this matches
-        the `FROM ... AS mcp` line specifically, not the first FROM.
-        """
+        """MCP service's Python base image must use exact approved digest."""
         with open(MCP_DOCKERFILE) as f:
             dockerfile_content = f.read()
 
-        from_match = re.search(r"^FROM\s+(\S+)\s+AS\s+mcp\s*$", dockerfile_content, re.MULTILINE)
-        assert from_match, "Dockerfile must have a 'FROM ... AS mcp' statement"
+        from_match = re.search(r"^FROM\s+(\S+)", dockerfile_content, re.MULTILINE)
+        assert from_match, "Dockerfile must have a FROM statement"
 
         actual_image = from_match.group(1)
         assert actual_image == PYTHON_BASE_IMAGE, (

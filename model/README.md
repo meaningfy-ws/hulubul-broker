@@ -26,6 +26,44 @@ schema is the single source of truth**; every artifact under
 | [`hulubul_request.yaml`](linkml/hulubul_request.yaml) | Delivery requests, parcels |
 | [`hulubul_feedback.yaml`](linkml/hulubul_feedback.yaml) | Feedback |
 
+## Modelling workflow (how `linkml/` comes to exist)
+
+The LinkML schema isn't hand-designed from scratch — it's derived through a
+four-stage pipeline, each stage a deliberate hand-off between a modelling
+tool, an LLM transformation, and deterministic generation:
+
+1. **Model in Enterprise Architect.** The conceptual/domain model is drawn as
+   UML in the Sparx EA project ([`hulubul-transport.qea`](hulubul-transport.qea)),
+   then UML diagrams are exported as images (the `*.png` files in this
+   directory — `feedback.png`, `request.png`, `roles.png`, `spatial.png`,
+   `transportService.png`).
+2. **Transform the diagram images into modelspecs.** An LLM reads the
+   exported UML diagram images and writes two human-readable Markdown specs
+   under [`modelspecs/`](modelspecs/):
+   [`hulubul_v1_model_spec.md`](modelspecs/hulubul_v1_model_spec.md) (the
+   domain model itself) and
+   [`hulubul_v1_access_control.md`](modelspecs/hulubul_v1_access_control.md)
+   (access-control rules). These are the provenance record between the UML
+   diagrams and the LinkML schema — human-readable, reviewable prose, not
+   generated output.
+3. **Transform the modelspecs into LinkML.** An LLM, using the
+   `meaningfy-architecture:linkml-engineering` skill (LinkML authoring
+   conventions, generator wiring, quality gates), turns the two modelspecs
+   into the LinkML schema modules under [`linkml/`](linkml/). This is the
+   one hand-authored (LLM-assisted) step in the pipeline — everything
+   downstream of it is deterministic.
+4. **Generate every downstream artifact deterministically.** `make all`
+   drives LinkML's stock generators plus the repo's custom generators
+   under [`../scripts/`](../scripts/) to produce every artifact in
+   [`generated/`](generated/) and the Pydantic domain models inside the
+   `hulubul` package. See "How to use" and "Regenerating" below — this step
+   has no LLM in the loop and is fully reproducible.
+
+Each stage's output is committed; regenerating a downstream artifact never
+requires re-running an upstream stage unless the upstream content actually
+changed (e.g. don't re-derive `linkml/` from the modelspecs unless the
+modelspecs themselves changed).
+
 ## How to use
 
 Everything is driven by `make` from the **repo root** (not this folder). One-time

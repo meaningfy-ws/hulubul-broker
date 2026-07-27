@@ -86,6 +86,18 @@ isolated commit, once everything else is stable.
   whose Requirement 1 is "the gate SHALL pass." Recommendation to the human
   reviewer: land a small, separate PR annotating those 69 test functions
   (mechanical, no behavior change) before or alongside merging this one.
+- **DEC-8** *(reverses this EPIC's original D8/DEC-4 choice, per explicit
+  developer instruction)*: `AGENTS.md` — not `CLAUDE.md` — is the canonical
+  agent instruction file. `CLAUDE.md` is a minimal pointer
+  ("Read AGENTS.md") rather than a symlink, so a tool that reads `CLAUDE.md`
+  directly sees only the pointer and is forced to actually read `AGENTS.md`.
+  Rationale given: `AGENTS.md` is the cross-tool standard name (readable by
+  more than just Claude Code); the developer wants it to be the one real
+  file. This is a deliberate, logged reversal of the Meaningfy
+  project-setup standard's default (CLAUDE-canonical, D8/DEC-4) — every
+  place that cited the original direction (this proposal, design.md,
+  tasks.md, specs/repository-tooling-standard/spec.md, `.claude/memory/MEMORY.md`,
+  `README.md`) was updated to match, not left silently stale.
 
 ## Rabbit-holes
 
@@ -120,14 +132,16 @@ isolated commit, once everything else is stable.
   `.coveragerc`, `.pre-commit-config.yaml`, `CHANGELOG.md`, `SECURITY.md`,
   `sonar-project.properties` — stub only, not CI-wired, DEC-3) and strip the
   equivalent `[tool.*]` blocks out of `pyproject.toml`.
-- Remove `tox.ini`; port its 3 eval-only environments to real Makefile
-  targets.
+- Remove `tox.ini`; port its 2 real eval-only environments (a 3rd,
+  "judge", was only ever an already-broken Makefile placeholder — DEC-5)
+  to real Makefile targets.
 - Pin `openspec/config.yaml` to `schema: meaningfy`; copy in the pinned
   `openspec/schemas/meaningfy/` schema.
-- Fix the broken `CLAUDE.md` symlink: `CLAUDE.md` becomes the canonical
-  file, `AGENTS.md` becomes a relative symlink to it (**BREAKING** for any
-  tooling that reads `AGENTS.md` expecting it to be the real file — none is
-  known to exist).
+- Fix the broken `CLAUDE.md` symlink: `AGENTS.md` becomes the canonical
+  file (DEC-8, reversing the original CLAUDE-canonical choice per explicit
+  developer instruction), `CLAUDE.md` becomes a minimal pointer
+  (**BREAKING** for any tooling that reads `CLAUDE.md` expecting it to
+  carry the full instructions — none is known to exist).
 - Add `.claude/memory/MEMORY.md` as a regenerable orientation index.
 - Consolidate `infra/channel-gateway/Dockerfile` and `infra/mcp/Dockerfile`
   toward the prescribed multistage layout with co-located dockerignore.

@@ -63,7 +63,7 @@ Dependencies are split into optional groups:
 ├── hulubul/                   # Python application code (top-level package, no /src)
 ├── tests/                     # Unit, integration, and BDD tests
 ├── scripts/                   # Custom LinkML generators & utilities
-├── infra/docker/Dockerfile    # Multistage, multi-target (channel-gateway, mcp)
+├── infra/docker/*/Dockerfile  # One single-purpose, multistage Dockerfile per service
 ├── infra/                     # Docker Compose, Neo4j, MCP, LangFlow
 ├── architecture/              # Design documents & ADRs
 ├── openspec/                  # The spine: EPICs/PLANs (changes/), durable specs (specs/)
@@ -71,7 +71,7 @@ Dependencies are split into optional groups:
 ├── Makefile                   # Build & development automation (the single task-runner surface)
 ├── pyproject.toml             # Poetry: dependencies + packaging only (D2)
 ├── ruff.toml / mypy.ini / pytest.ini / .coveragerc   # Dedicated tool configs (D2)
-├── CLAUDE.md                  # Canonical agent instructions (AGENTS.md is a symlink to it)
+├── AGENTS.md                  # Canonical agent instructions (CLAUDE.md just points here)
 └── README.md                  # This file
 ```
 

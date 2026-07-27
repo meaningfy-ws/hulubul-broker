@@ -18,15 +18,16 @@ explicitly out of this EPIC's scope (no channel-gateway test changes). No
   increase relative to the pre-modernization baseline (69)
 
 ### Requirement: Agent instruction file resolves on any checkout
-`CLAUDE.md` SHALL be the canonical agent instruction file, and `AGENTS.md`
-SHALL be a relative symlink to it, so both resolve to the same content on
-any machine or checkout path.
+`AGENTS.md` SHALL be the canonical agent instruction file (DEC-8), and
+`CLAUDE.md` SHALL contain only a pointer to it, so a contributor or tool on
+any machine or checkout path always finds the real instructions and never a
+broken or absolute-path reference.
 
 #### Scenario: Fresh clone on a different machine
 - **WHEN** a contributor clones the repository onto a machine other than the
   one it was authored on
-- **THEN** both `CLAUDE.md` and `AGENTS.md` resolve to readable, identical
-  content, with no absolute path pointing outside the repository
+- **THEN** `AGENTS.md` is a readable, complete file with no absolute path
+  pointing outside the repository, and `CLAUDE.md` points to it
 
 ### Requirement: OpenSpec spine validates under the pinned schema
 `openspec/config.yaml` SHALL pin `schema: meaningfy`, and all newly authored

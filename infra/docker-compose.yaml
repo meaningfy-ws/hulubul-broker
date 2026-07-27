@@ -64,8 +64,7 @@ services:
   channel-gateway:
     build:
       context: ../
-      dockerfile: infra/docker/Dockerfile
-      target: channel-gateway
+      dockerfile: infra/docker/channel-gateway/Dockerfile
 
     depends_on:
       langflow:
@@ -176,8 +175,7 @@ services:
   mcp-neo4j:
     build:
       context: ../
-      dockerfile: infra/docker/Dockerfile
-      target: mcp
+      dockerfile: infra/docker/mcp/Dockerfile
     ports:
       - "127.0.0.1:${NEO4J_MCP_PORT:-8000}:8000"
 

@@ -39,7 +39,7 @@ out of scope (see *Security*).
 | Service    | Image / build          | Host port(s) | Purpose                                                |
 |------------|------------------------|--------------|--------------------------------------------------------|
 | `neo4j`    | `neo4j:5.26-community` | 7474, 7687   | Graph DB (Browser 7474, Bolt 7687). APOC enabled.      |
-| `mcp-neo4j`| `infra/docker/Dockerfile` (target: `mcp`, python 3.12)  | 8000         | Neo4j Labs MCP server (streamable HTTP at `/mcp/`).    |
+| `mcp-neo4j`| `infra/docker/mcp/Dockerfile` (python 3.12)  | 8000         | Neo4j Labs MCP server (streamable HTTP at `/mcp/`).    |
 | `langflow` | `langflowai/langflow`  | 7860         | Low-code agent orchestration.                          |
 | `postgres` | `postgres:16`          | — (internal) | Langflow metadata.                                     |
 
@@ -132,8 +132,12 @@ infra/
 ├── .env.example               # committed template (copy to .env)
 ├── langflow.env               # Langflow LLM/model env (gitignored)
 ├── docker/
-│   ├── Dockerfile             # multistage, multi-target: channel-gateway, mcp
-│   └── Dockerfile.dockerignore
+│   ├── channel-gateway/
+│   │   ├── Dockerfile          # single-purpose, multistage, non-root
+│   │   └── Dockerfile.dockerignore
+│   └── mcp/
+│       ├── Dockerfile          # single-purpose, digest-pinned, non-root
+│       └── Dockerfile.dockerignore
 ├── mcp/
 │   ├── requirements.in         # direct mcp-neo4j-cypher input
 │   └── requirements.txt        # pinned, hash-locked mcp-neo4j-cypher==0.6.0

@@ -98,7 +98,7 @@ starts during normal polling-mode bring-up.
    GATEWAY_MODE=webhook docker compose --profile webhook up -d --build channel-gateway ngrok
    ```
    (`docker-compose.yaml`'s `ngrok` service only starts under `--profile webhook`; `--build`
-   picks up `infra/docker/Dockerfile (target: channel-gateway)` if it hasn't been built yet.)
+   picks up `infra/docker/channel-gateway/Dockerfile` if it hasn't been built yet.)
 3. On startup, `run_webhook()` in `entrypoints/telegram_bot.py` reads the tunnel's public URL
    from ngrok's local API (`http://ngrok:4040/api/tunnels` inside the Compose network — see
    `NGROK_API_URL` in `docker-compose.yaml`) and registers it as the bot's webhook, with
