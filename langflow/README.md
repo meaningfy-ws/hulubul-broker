@@ -43,7 +43,7 @@ the push/pull/status tooling to their target URLs and secrets.
    `lfx export`).
 2. Normalize it deterministically:
    ```
-   poetry run python scripts/normalize_langflow_flows.py --write langflow/flows/<file>.json
+   poetry run python scripts/normalize_langflow_flows.py langflow/flows/<file>.json
    ```
    This sorts JSON keys, preserves node/edge array order, and restores only
    the manifest-allowlisted runtime variable names into `load_from_db=true`
@@ -58,8 +58,11 @@ the push/pull/status tooling to their target URLs and secrets.
 4. Commit the normalized flow file together with any manifest changes in the
    same commit.
 
-`make check-flows` runs steps 2-3 (plus strict `lfx validate`/`lfx upgrade`)
-and is part of `make ci-static`.
+`make check-flows` runs steps 2-3 (plus strict `lfx validate`/`lfx upgrade`),
+but is **not** part of `make ci-static` yet. Its manifest/topology validation
+step (`validate_langflow_assets.py`) is currently commented out in the
+Makefile with a `TODO(Checkpoint 8)` note, since it requires the flow JSON
+files this README describes creating "later" — see step 2 above.
 
 ## Drift detection and pinned component schemas
 

@@ -47,8 +47,9 @@ class TestComponentSchemaPersistence:
         data = json.loads(content)
         stored_hash = data.get("sha256")
 
-        # Recompute hash: exclude the hash field itself
-        schemas_copy = {k: v for k, v in data.items() if k != "sha256"}
+        # Recompute hash: exclude the hash field and the volatile timestamp,
+        # matching scripts/inspect_langflow_components.py's compute_hash().
+        schemas_copy = {k: v for k, v in data.items() if k not in ("sha256", "timestamp")}
         computed_json = json.dumps(schemas_copy, sort_keys=True, separators=(",", ":"))
         computed_hash = hashlib.sha256(computed_json.encode()).hexdigest()
 
@@ -58,7 +59,7 @@ class TestComponentSchemaPersistence:
         )
 
     def test_component_schemas_contains_required_components(self) -> None:
-        """All 7 required CP4 components should have schemas (if deployed)."""
+        """All 8 required CP4 components should have schemas (if deployed)."""
         content = COMPONENT_SCHEMAS_PATH.read_text()
         data = json.loads(content)
 

@@ -10,10 +10,15 @@ Tests verify:
 """
 
 import pathlib
+import re
 import uuid
 
 import pytest
 import yaml  # type: ignore
+
+# Environment values must be a bare env-var name (LANGFLOW_URL) or a
+# ${VAR}-style template — never a literal secret/URL/IP.
+ENV_VAR_NAME_PATTERN = re.compile(r"^\$\{[A-Z][A-Z0-9_]*\}$|^[A-Z][A-Z0-9_]*$")
 
 # Hard-coded stable UUIDs from plan.md (UUIDv5 over flow names)
 EXPECTED_FLOW_UUIDS = {
@@ -376,13 +381,11 @@ class TestEnvironmentsConfiguration:
             data = yaml.safe_load(f)
 
         local_env = data["local"]
-        # Values should be strings that look like env var names (uppercase, no actual URLs/IPs)
-        # or they may be templated strings like ${VAR_NAME}
         for key, value in local_env.items():
             if isinstance(value, str):
-                # Ensure it's not a secret value (should be env var name or template)
-                assert not value.startswith("http://127.0.0.1:") or "${" in str(local_env), (
-                    f"Environment value for {key} appears to be a hardcoded URL, should reference env var"
+                assert ENV_VAR_NAME_PATTERN.match(value), (
+                    f"Environment value for {key} must be an env-var name or ${{VAR}} "
+                    f"template, got: {value!r}"
                 )
 
     def test_ci_environment_values_are_env_var_names_not_secrets(
@@ -395,9 +398,9 @@ class TestEnvironmentsConfiguration:
         ci_env = data["ci"]
         for key, value in ci_env.items():
             if isinstance(value, str):
-                # Ensure it's not a secret value
-                assert not value.startswith("http://127.0.0.1:") or "${" in str(ci_env), (
-                    f"Environment value for {key} appears to be a hardcoded URL, should reference env var"
+                assert ENV_VAR_NAME_PATTERN.match(value), (
+                    f"Environment value for {key} must be an env-var name or ${{VAR}} "
+                    f"template, got: {value!r}"
                 )
 
 

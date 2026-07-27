@@ -139,8 +139,9 @@ class TestTopologyValidation:
 
         manifest_flows = {flow["file"] for flow in manifest["flows"].values()}
 
-        # List all .json files in flows directory
-        actual_flows = set(f.relative_to(FLOWS_DIR).as_posix() for f in FLOWS_DIR.glob("*.json"))
+        # List all .json files in flows directory, prefixed to match manifest
+        # "file" entries (e.g. "flows/10-lf-70-data-access.json").
+        actual_flows = {f"flows/{f.name}" for f in FLOWS_DIR.glob("*.json")}
 
         # Any flow file not in manifest is a UI-only flow (error condition)
         ui_only = actual_flows - manifest_flows
@@ -150,6 +151,10 @@ class TestTopologyValidation:
                 f"All flows must be listed in manifest."
             )
 
+    @pytest.mark.skip(
+        reason="Flow JSON files not created until Checkpoint 8 — re-enable "
+        "once langflow/flows/*.json exist"
+    )
     def test_no_missing_flows_referenced_in_manifest(self) -> None:
         """All flows referenced in manifest must exist as files."""
         import yaml
@@ -157,16 +162,11 @@ class TestTopologyValidation:
         with open(MANIFEST_PATH) as f:
             manifest = yaml.safe_load(f)
 
-        for _flow_name, flow_info in manifest["flows"].items():
-            flow_file = FLOWS_DIR / flow_info["file"]
-            # This test only checks that we understand the requirement;
-            # actual files may not exist in early task phases.
-            # The validation script should fail if they're missing.
-            if flow_file.parent.exists() and not flow_file.exists():
-                # If flows directory exists, we can check for missing files
-                pytest.skip(
-                    f"Flow file {flow_info['file']} not yet created (expected in Checkpoint 8)"
-                )
+        for flow_name, flow_info in manifest["flows"].items():
+            flow_file = MANIFEST_PATH.parent / flow_info["file"]
+            assert flow_file.exists(), (
+                f"Flow {flow_name} referenced in manifest but file not found: {flow_info['file']}"
+            )
 
     def test_manifest_references_valid_file_paths(self) -> None:
         """All file paths in manifest should be relative to flows/ directory."""
@@ -181,6 +181,65 @@ class TestTopologyValidation:
                 f"Flow {flow_name} has invalid file path: {file_path} (must start with 'flows/')"
             )
             assert file_path.endswith(".json"), f"Flow {flow_name} file must be JSON: {file_path}"
+
+    def test_referenced_flow_file_resolved_relative_to_manifest_dir(self, tmp_path: Path) -> None:
+        """Manifest "file" paths resolve against the manifest dir, not repo root.
+
+        Regression test: relative_path is "flows/<name>.json" and flows_dir is
+        "<manifest_dir>/flows" — the file must be found at
+        "<manifest_dir>/flows/<name>.json", not "<manifest_dir>/flows/flows/<name>.json"
+        or "<repo_root>/flows/<name>.json".
+        """
+        from scripts.validate_langflow_assets import TopologyValidator
+
+        flows_dir = tmp_path / "langflow" / "flows"
+        flows_dir.mkdir(parents=True)
+        (flows_dir / "10-lf-70-data-access.json").write_text("{}")
+
+        manifest = {
+            "flows": {
+                "lf-70-data-access": {"file": "flows/10-lf-70-data-access.json"},
+            }
+        }
+
+        validator = TopologyValidator(manifest, flows_dir)
+        assert validator.validate() is True, [str(e) for e in validator.errors]
+
+
+class TestMcpUsageValidation:
+    """Test that MCP/toolkit usage is only allowed in LF-70 (data-access)."""
+
+    def test_toolscomponent_outside_lf70_is_rejected(self, tmp_path: Path) -> None:
+        """A non-LF-70 flow using ToolsComponent (not literally MCPToolsComponent)
+
+        must still be rejected — mirrors the two-marker contract already
+        asserted in TestFlowFilesWhenPresent.test_mcp_tools_only_in_lf70
+        ("mcp" and "toolscomponent").
+        """
+        from scripts.validate_langflow_assets import FlowContentValidator
+
+        flows_dir = tmp_path / "flows"
+        flows_dir.mkdir()
+        (flows_dir / "30-lf-00-main-router.json").write_text(
+            '{"data": {"nodes": [{"type": "ToolsComponent"}]}}'
+        )
+
+        validator = FlowContentValidator(flows_dir)
+        assert validator.validate() is False
+        assert any("mcp" in str(e).lower() for e in validator.errors)
+
+    def test_mcp_tools_allowed_in_lf70(self, tmp_path: Path) -> None:
+        """LF-70 is allowed to use MCP tools."""
+        from scripts.validate_langflow_assets import FlowContentValidator
+
+        flows_dir = tmp_path / "flows"
+        flows_dir.mkdir()
+        (flows_dir / "10-lf-70-data-access.json").write_text(
+            '{"data": {"nodes": [{"type": "MCPToolsComponent"}]}}'
+        )
+
+        validator = FlowContentValidator(flows_dir)
+        assert validator.validate() is True, [str(e) for e in validator.errors]
 
 
 class TestValidationScriptBasics:

@@ -268,9 +268,8 @@ class ManifestValidator:
 class TopologyValidator:
     """Validates flow file existence and topology."""
 
-    def __init__(self, manifest: dict[str, Any], repo_root: Path, flows_dir: Path):
+    def __init__(self, manifest: dict[str, Any], flows_dir: Path):
         self.manifest = manifest
-        self.repo_root = repo_root
         self.flows_dir = flows_dir
         self.errors: list[ValidationError] = []
 
@@ -296,9 +295,10 @@ class TopologyValidator:
             return
 
         for flow_name, flow_info in self.manifest["flows"].items():
-            # File paths in manifest are relative to repo root
+            # File paths in manifest are relative to the manifest's own
+            # directory (langflow/), e.g. "flows/10-lf-70-data-access.json".
             relative_path = flow_info.get("file", "")
-            flow_file = self.repo_root / relative_path
+            flow_file = self.flows_dir.parent / relative_path
 
             if not flow_file.exists():
                 self.errors.append(
@@ -399,7 +399,7 @@ class FlowContentValidator:
 
         flow_str = json.dumps(flow_data).lower()
 
-        if not is_lf70 and "mcptoolscomponent" in flow_str:
+        if not is_lf70 and ("mcp" in flow_str or "toolscomponent" in flow_str):
             # Non-LF-70 flows must not use MCP tools
             self.errors.append(
                 ValidationError(
@@ -504,13 +504,10 @@ def main() -> int:
         print(f"[ERROR] Manifest not found: {args.manifest}", file=sys.stderr)
         return 1
 
-    # Determine flows directory and repo root
+    # Determine flows directory
     flows_dir = args.flows_dir
     if flows_dir is None:
         flows_dir = args.manifest.parent / "flows"
-
-    # Repo root is typically parent of manifest directory
-    repo_root = args.manifest.parent.parent
 
     # Run validators
     all_errors: list[ValidationError] = []
@@ -527,7 +524,7 @@ def main() -> int:
     assert manifest is not None
 
     # 2. Topology validation
-    topology_validator = TopologyValidator(manifest, repo_root, flows_dir)
+    topology_validator = TopologyValidator(manifest, flows_dir)
     if not topology_validator.validate():
         all_errors.extend(topology_validator.errors)
         for error in topology_validator.errors:

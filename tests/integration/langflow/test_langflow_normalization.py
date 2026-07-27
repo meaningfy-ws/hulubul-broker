@@ -27,7 +27,7 @@ def sample_langflow_flow() -> dict[str, Any]:
                     "type": "OpenAIModel",
                     "data": {
                         "model_name": "gpt-4",
-                        "api_key": "sk-1234567890",
+                        "api_key": "REDACTED-TEST-API-KEY",
                         "temperature": 0,
                     },
                     "position": [300, 100],
@@ -59,7 +59,7 @@ def sample_flow_with_env_vars() -> dict[str, Any]:
                     "data": {
                         "model_name": "gpt-4",
                         "openai_api_base": "https://api.openai.com/v1",
-                        "api_key": "sk-12345678901234567890123456789012",
+                        "api_key": "REDACTED-TEST-API-KEY-LONG",
                     },
                     "position": [300, 100],
                 },
@@ -171,7 +171,7 @@ def test_normalize_uses_lf_line_endings(sample_langflow_flow: dict[str, Any]) ->
                             "data": {
                                 "model_name": "gpt-4",
                                 "openai_api_base": "https://api.openai.com/v1",
-                                "api_key": "sk-12345678901234567890123456789012",
+                                "api_key": "REDACTED-TEST-API-KEY-LONG",
                             },
                         }
                     ],

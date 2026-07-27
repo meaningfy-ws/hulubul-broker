@@ -6,7 +6,7 @@ This script captures and pins component schemas from LangFlow 1.10.2,
 enabling drift detection and export stability verification.
 
 Features:
-- Queries LangFlow API for custom component schemas (7 components from CP4)
+- Queries LangFlow API for custom component schemas (8 components from CP4)
 - Captures input/output schemas without credentials
 - Saves to .lfx/component-schemas-pinned.json with SHA-256 hash
 - Supports --check mode for drift detection
@@ -254,7 +254,11 @@ class LangFlowComponentInspector:
 
 
 def compute_hash(data: dict[str, Any]) -> str:
-    """Compute SHA-256 hash of data (excluding 'sha256' field).
+    """Compute SHA-256 hash of data (excluding 'sha256' and 'timestamp').
+
+    'timestamp' is excluded because it changes on every run and would make
+    the hash useless for drift detection even when component schemas are
+    identical.
 
     Args:
         data: Data dict to hash
@@ -262,8 +266,7 @@ def compute_hash(data: dict[str, Any]) -> str:
     Returns:
         Hex string of SHA-256 hash
     """
-    # Create copy without the hash field itself
-    hashable = {k: v for k, v in data.items() if k != "sha256"}
+    hashable = {k: v for k, v in data.items() if k not in ("sha256", "timestamp")}
     json_str = json.dumps(hashable, sort_keys=True, separators=(",", ":"))
     return hashlib.sha256(json_str.encode()).hexdigest()
 
