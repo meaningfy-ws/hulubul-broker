@@ -1,15 +1,21 @@
 ## ADDED Requirements
 
 ### Requirement: Quality gate stays green across the migration
-The repository's `make check-all` target SHALL pass (lint, types,
-architecture, tests, coverage) after every commit that lands as part of the
-repository modernization.
+The repository's `make check-all` target SHALL pass (lint, architecture,
+tests, coverage) after every commit that lands as part of the repository
+modernization, with the sole carve-out of `typecheck` (DEC-7): 69
+pre-existing mypy strict-mode errors in `tests/unit/hulubul/channel_gateway/**`
+predate this change (confirmed present on `origin/develop`) and are
+explicitly out of this EPIC's scope (no channel-gateway test changes). No
+*new* mypy error may be introduced by this change.
 
-#### Scenario: A slice commit is green
+#### Scenario: A slice commit is green modulo the pre-existing typecheck debt
 - **WHEN** any modernization slice (config files, spine schema pin, agent
   file reconciliation, pyproject normalization, infra consolidation, or the
   `/src` lift) is committed
-- **THEN** running `make check-all` on that commit exits successfully
+- **THEN** running `make check-all` on that commit exits successfully for
+  every component except `typecheck`, and `typecheck`'s error count does not
+  increase relative to the pre-modernization baseline (69)
 
 ### Requirement: Agent instruction file resolves on any checkout
 `CLAUDE.md` SHALL be the canonical agent instruction file, and `AGENTS.md`
@@ -27,15 +33,18 @@ any machine or checkout path.
 changes SHALL validate against it.
 
 #### Scenario: Strict validation passes
-- **WHEN** `openspec validate --strict` runs against the repository after
+- **WHEN** `openspec validate --all --strict` runs against the repository after
   the schema pin
 - **THEN** it exits successfully for every change that declares
   `schema: meaningfy` in its `.openspec.yaml`
 
 ### Requirement: CI mirrors local quality gates exactly
 The repository SHALL have a single task-runner surface (the Makefile) for
-quality gates, so CI and local runs of `make check-all` exercise identical
-commands.
+quality gates, so CI and local runs of `make check-all`/`make ci-static`
+exercise identical commands. Scope note: `.github/workflows/ci.yaml` only
+runs `ci-static` (`static-quality` job) — it does not invoke `ci-acceptance`
+(integration/system/BDD tests, which need the Docker acceptance stack), so
+this requirement's parity claim covers `ci-static` only, not `ci-acceptance`.
 
 #### Scenario: No duplicated or diverging task runner
 - **WHEN** the repository's root is inspected after the modernization

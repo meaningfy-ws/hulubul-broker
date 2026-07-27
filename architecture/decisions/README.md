@@ -456,7 +456,7 @@ act taxonomy; goals/plans modelled and testable in scenarios.
 (`model/linkml/`), and `make generate-models` derives Pydantic, OWL, SHACL, JSON Schema,
 Cypher, and neomodel targets from it. Historically the Pydantic target wrote to
 `model/generated/pydantic/hulubul_models.py`, which sits outside `pyproject.toml`'s
-`packages` list (only `src/hulubul` is installed) — so no code under `src/hulubul/` could
+`packages` list (only `hulubul` is installed) — so no code under `hulubul/` could
 import a generated domain class without a `sys.path` hack. This pushed hand-written code
 toward silently redefining domain concepts instead of reusing them (observed twice while
 building the Telegram channel gateway: the hand-written `core/models/operational/` layer,
@@ -464,7 +464,7 @@ and a first-draft local `Medium` enum that duplicated — incompletely — the r
 LinkML-generated one).
 
 **Decision.** `make pydantic`'s output moves to
-`src/hulubul/core/models/domain/hulubul_models.py`, inside the installed package, so any
+`hulubul/core/models/domain/hulubul_models.py`, inside the installed package, so any
 bounded context can `from hulubul.core.models.domain.hulubul_models import <Class>` with no
 path manipulation. The file remains fully generated and is never hand-edited — regenerated
 wholesale by `make pydantic`, with the same "never hand-edit, `make` overwrites" rule as
@@ -483,6 +483,6 @@ directory split alone. −The single-file generated output (`hulubul_models.py`,
 the whole merged schema) is unchanged by this decision; splitting into one generated file per
 LinkML module remains a separate, unaddressed improvement.
 
-**Confirmation.** `src/hulubul/core/models/domain/hulubul_models.py` exists, is importable
+**Confirmation.** `hulubul/core/models/domain/hulubul_models.py` exists, is importable
 from any bounded context, and `model/generated/pydantic/` no longer exists as a separate,
 unreachable copy.

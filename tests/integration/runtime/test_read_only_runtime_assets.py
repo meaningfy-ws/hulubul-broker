@@ -45,12 +45,13 @@ class TestReadOnlyMounts:
         langflow_service = compose["services"]["langflow"]
         volumes = langflow_service.get("volumes", [])
 
-        # Check for the hulubul read-only mount (../hulubul:/app/hulubul:ro)
+        # Check for the hulubul read-only mount (../hulubul:/app/pypath/hulubul:ro)
         read_only_mounts = [v for v in volumes if isinstance(v, str) and ":ro" in v]
-        hulubul_ro = [v for v in read_only_mounts if "/app/hulubul:ro" in v]
+        hulubul_ro = [v for v in read_only_mounts if "/app/pypath/hulubul:ro" in v]
 
         assert hulubul_ro, (
-            f"hulubul/ must be mounted read-only at /app/hulubul:ro. Current volumes: {volumes}"
+            f"hulubul/ must be mounted read-only at /app/pypath/hulubul:ro. "
+            f"Current volumes: {volumes}"
         )
 
     def test_langflow_data_volume_writable(self, compose: dict[str, Any]) -> None:
@@ -100,13 +101,13 @@ class TestCustomComponentsConfiguration:
     """Verify that custom components path and PYTHONPATH are configured."""
 
     def test_pythonpath_configured(self, compose: dict[str, Any]) -> None:
-        """Verify PYTHONPATH includes /app (parent of the mounted hulubul/ package)."""
+        """Verify PYTHONPATH is a dedicated root, parent of the mounted hulubul/ package."""
         langflow_service = compose["services"]["langflow"]
         env = langflow_service.get("environment", {})
 
         assert "PYTHONPATH" in env, "PYTHONPATH must be set in environment for custom components"
-        assert env["PYTHONPATH"] == "/app", (
-            f"PYTHONPATH must be '/app', got {env.get('PYTHONPATH')}"
+        assert env["PYTHONPATH"] == "/app/pypath", (
+            f"PYTHONPATH must be '/app/pypath', got {env.get('PYTHONPATH')}"
         )
 
     def test_components_path_configured(self, compose: dict[str, Any]) -> None:

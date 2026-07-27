@@ -17,7 +17,7 @@ not authority.
   `channel_gateway`): models → adapters/services → entrypoints, enforced by
   `.importlinter` (`make check-architecture`).
 - LinkML (`model/linkml/`) is the domain source of truth; everything under
-  `model/generated/` and `src/hulubul/core/models/domain/` is generated,
+  `model/generated/` and `hulubul/core/models/domain/` is generated,
   never hand-edited.
 - Single task-runner surface: the Makefile (no `tox.ini`).
 - OpenSpec schema: `meaningfy`, pinned per `openspec/config.yaml`. In-flight

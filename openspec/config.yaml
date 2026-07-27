@@ -2,9 +2,9 @@ schema: meaningfy
 
 # Project context — injected (wrapped in <context>) into every artifact's instructions.
 # This is OpenSpec's native project-context sink. The durable truth is openspec/specs/;
-# this string is the orientation index. If a generated index is ever wanted, regenerate it
-# deterministically into this field (like codegen, with a CI sync-check) — do NOT hand-curate
-# a parallel MEMORY.md.
+# this string and .claude/memory/MEMORY.md (D9) are both regenerable orientation
+# indexes that point at it — neither is authority, and neither should duplicate
+# specs/ content as a hand-curated change-log. If they disagree, specs/ wins.
 context: |
   Repo: hulubul-broker. An AI broker for ad-hoc package transport arrangements
   over a chat channel (Telegram in dev, WhatsApp in prod) and a Neo4j graph

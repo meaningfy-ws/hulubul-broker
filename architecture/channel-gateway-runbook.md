@@ -49,7 +49,7 @@ a bot token ready to drop into `infra/.env`.
 7. **Generate a webhook secret token (needed for webhook mode).** Telegram's webhook mode sends
    a shared secret back on every request (`X-Telegram-Bot-Api-Secret-Token` header) so the
    gateway can reject requests that didn't actually come from Telegram. This is **mandatory**:
-   `load_config()` in `src/hulubul/channel_gateway/entrypoints/telegram_bot.py` raises
+   `load_config()` in `hulubul/channel_gateway/entrypoints/telegram_bot.py` raises
    `ValueError: TELEGRAM_WEBHOOK_SECRET is required when GATEWAY_MODE=webhook: ...` and the
    process refuses to start without it. Generate a random value now, following the same
    random-string convention BotFather itself uses for tokens:
@@ -76,7 +76,7 @@ Polling mode needs no inbound port and no tunnel, so it's the default for first 
 2. Set `GATEWAY_MODE=polling` alongside `TELEGRAM_BOT_TOKEN` (from the previous section),
    `LANGFLOW_API_URL`, and `LANGFLOW_FLOW_ID` in `infra/.env` — these are the environment
    variables `entrypoints/telegram_bot.py` reads at startup (`load_config()` in
-   `src/hulubul/channel_gateway/entrypoints/telegram_bot.py`).
+   `hulubul/channel_gateway/entrypoints/telegram_bot.py`).
 3. Message your bot on Telegram. In polling mode the gateway calls Telegram to fetch updates
    itself, so no public URL or tunnel is required.
 
@@ -114,7 +114,7 @@ To go back to polling mode, set `GATEWAY_MODE=polling` and bring the stack up wi
 ## WhatsApp configuration
 
 **Not yet implemented.** There is no live WhatsApp configuration to document here.
-`WhatsAppAdapter` (`src/hulubul/channel_gateway/adapters/whatsapp_adapter.py`) is a stub that
+`WhatsAppAdapter` (`hulubul/channel_gateway/adapters/whatsapp_adapter.py`) is a stub that
 matches the `ChannelPort` interface shape but raises `NotImplementedError` on every call — no
 360dialog account, template, or opt-in setup exists for this gateway. This is a deliberate
 scope boundary, not an oversight: see

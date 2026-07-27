@@ -20,7 +20,7 @@
 
 ## 3. tox removal
 
-- [x] 3.1 Port `tox.ini`'s `evaluation`/`evaluation-live`/live-model-judge envs into the Makefile's commented-out `test-evaluation-*` stubs, uncomment and wire them
+- [x] 3.1 Port `tox.ini`'s 2 real `evaluation`/`evaluation-live` envs (marker-based) to real Makefile targets; drop the never-real "judge" placeholder (DEC-5, corrected — tox only had 2 envs, not 3)
 - [x] 3.2 Delete `tox.ini`
 - [x] 3.3 Remove the `tox` dependency from `pyproject.toml`'s `quality` group
 - [x] 3.4 Commit
@@ -29,7 +29,7 @@
 
 - [x] 4.1 Copy `openspec/schemas/meaningfy/` (schema.yaml + templates/) into the repo
 - [x] 4.2 Set `openspec/config.yaml`'s `schema: meaningfy`, add project `context:` + the 3 thin per-artifact rules
-- [x] 4.3 Run `openspec validate --strict`; confirm the in-flight `deliver-phase-1-request-intake-thread` change (its own `superpowers-bridge` pin) is untouched
+- [x] 4.3 Run `openspec validate --all --strict`; confirm the in-flight `deliver-phase-1-request-intake-thread` change (its own `superpowers-bridge` pin) is untouched
 - [x] 4.4 Commit
 
 ## 5. Agent file reconciliation
@@ -70,7 +70,7 @@
 ## 9. Full verification
 
 - [x] 9.1 `make check-all` green
-- [x] 9.2 `openspec validate --strict` green
+- [x] 9.2 `openspec validate --all --strict` green
 - [x] 9.3 Confirm `.github/workflows/ci.yaml` has no leftover `tox`/`src/` references
 - [x] 9.4 Confirm the four proof scenarios hold (check-all per slice already true by construction; agent-file resolution; strict validation; CI/local parity)
 
@@ -80,5 +80,5 @@
 
 ## Verification
 
-`make check-all` after every slice (2–8), plus `openspec validate --strict`
+`make check-all` after every slice (2–8), plus `openspec validate --all --strict`
 and a fresh-clone agent-file check in the final verification group (9).

@@ -70,6 +70,7 @@ help: ## Display available targets
 	@ echo ""
 	@ echo -e "  $(BUILD_PRINT)CI / Quality gates:$(END_BUILD_PRINT)"
 	@ echo "    install                  - Install project dependencies via Poetry"
+	@ echo "    hooks                    - Install local pre-commit hooks (lint/format-check/architecture)"
 	@ echo "    lint-python              - Lint Python source with Ruff"
 	@ echo "    format-check-python      - Check Python formatting with Ruff (no changes)"
 	@ echo "    format-python            - Apply Ruff formatting to Python source"
@@ -85,8 +86,8 @@ help: ## Display available targets
 	@ echo "    test-bdd                 - Run BDD step-definition tests"
 	@ echo "    test-evaluation-recorded - Run recorded-model evaluation tests (no live calls)"
 	@ echo "    test-evaluation-live     - Run live-model evaluation tests (opt-in, calls the real model)"
-	@ echo "    test-evaluation-judge    - Run the LLM-judge clarification evaluation (opt-in, calls the real model)"
 	@ echo "    ci-static                - Run static quality gates (lint)"
+	@ echo "    check-all                - Alias for ci-static (project-setup standard's quality-gate name)"
 	@ echo "    ci-acceptance            - Integration + system + BDD tests + evidence report"
 	@ echo "    ci                       - Full CI pipeline (static + acceptance)"
 	@ echo "    release-evidence         - Build the Change 1 release evidence report"
@@ -277,16 +278,19 @@ mcp-restart: check-env ## Restart the MCP server
 # by later plan tasks fail naturally until those tasks land — that is
 # expected, not a bug in this target set.
 #-----------------------------------------------------------------------------
-.PHONY: install lint-python format-check-python typecheck test-unit test-feature \
+.PHONY: install hooks lint-python format-check-python typecheck test-unit test-feature \
 	check-architecture operational-schemas format-python check-model-generated \
 	check-operational-schemas test-integration \
 	test-system test-bdd test-evaluation-recorded test-evaluation-live \
-	ci-static ci-acceptance ci acceptance-up \
+	ci-static ci-acceptance ci check-all acceptance-up \
 	acceptance-ready acceptance-deploy preflight-langflow-1-10-2 \
 	acceptance-diagnostics acceptance-down release-evidence
 
 install: ## Install all dependency groups (test, quality, langflow, integration, gateway)
 	poetry install --with test,quality,langflow,integration,gateway
+
+hooks: ## Install the local pre-commit hooks (lint/format-check/architecture)
+	poetry run pre-commit install
 
 lint-python: ## Lint Python source with Ruff
 	poetry run ruff check hulubul tests scripts
@@ -300,9 +304,9 @@ format-python: ## Apply Ruff formatting to Python source
 typecheck: ## Type-check with mypy
 	poetry run mypy hulubul scripts tests
 
-test-unit: ## Run unit tests with coverage (fails under 80%)
+test-unit: ## Run unit + static tests with coverage (fails under 80%)
 	@ mkdir -p reports
-	poetry run pytest tests/unit --cov=hulubul --cov-branch --cov-fail-under=80 --junitxml=reports/junit-unit.xml
+	poetry run pytest tests/unit tests/static --cov=hulubul --cov-branch --cov-fail-under=80 --junitxml=reports/junit-unit.xml
 
 test-feature: ## Run feature-level pytest-bdd suites (tests/feature); tests/e2e excluded (defense in depth)
 	@ mkdir -p reports
@@ -336,10 +340,10 @@ test-bdd: ## Run BDD step-definition tests
 	poetry run pytest tests/steps/test_delivery_request_intake.py tests/steps/test_conversation_resumption.py
 
 test-evaluation-recorded: ## Run the offline evaluation suite (fixtures/recorded data, no live calls)
-	poetry run pytest -m evaluation tests
+	poetry run pytest -m evaluation tests || [ $$? -eq 5 ]
 
 test-evaluation-live: ## Run the evaluation suite against a live model (opt-in, calls the real model, costs quota)
-	poetry run pytest -m "evaluation and live_model" tests
+	poetry run pytest -m "evaluation and live_model" tests || [ $$? -eq 5 ]
 
 # No test currently carries the `evaluation`/`live_model` markers (ported
 # 1:1 from tox.ini's evaluation/evaluation-live envs, which were
@@ -355,6 +359,10 @@ ci-acceptance: test-integration test-system test-bdd release-evidence
 
 # Full CI pipeline (static + acceptance).
 ci: ci-static ci-acceptance
+
+# Alias for the Meaningfy project-setup standard's "make check-all" convention
+# (the local/CI quality gate runnable without the Docker acceptance stack).
+check-all: ci-static
 
 ACCEPTANCE_PROJECT ?= hulubul-change1-$${USER}
 ACCEPTANCE_COMPOSE = docker compose -p $(ACCEPTANCE_PROJECT) -f infra/docker-compose.yaml -f infra/docker-compose.test.yaml

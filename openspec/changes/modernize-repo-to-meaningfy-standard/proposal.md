@@ -54,10 +54,15 @@ isolated commit, once everything else is stable.
   `pythonpath`, and the manual `sys.path` shim in `tests/conftest.py`) —
   GitNexus confirms 0 import cycles in the current graph, which de-risks it,
   but it still touches every path-based config in one pass.
-- **DEC-5**: `tox.ini` is removed. Its 3 eval-only environments
-  (`evaluation`, `evaluation-live`, the live-model judge eval) are ported to
-  real Makefile targets (currently commented-out placeholders) first, so no
-  capability is lost — the Makefile becomes the single task-runner surface
+- **DEC-5** *(corrected during implementation)*: `tox.ini` is removed. It had
+  exactly 2 marker-based eval environments (`evaluation`,
+  `evaluation-live`) — not 3; the Makefile's 3 commented-out placeholder
+  targets (`test-evaluation-recorded/-live/-judge`) were aspirational and
+  already referenced test files that never existed. The 2 real tox envs are
+  ported 1:1 (marker-based, `pytest -m evaluation tests` /
+  `pytest -m "evaluation and live_model" tests`) to real Makefile targets;
+  the third, never-real "judge" placeholder is dropped, not ported — no
+  capability is actually lost. The Makefile becomes the single task-runner surface
   (D7).
 - **DEC-6**: `openspec/config.yaml` is pinned to `schema: meaningfy` with the
   schema copied in per `spine-projection.md`. The in-flight
@@ -66,6 +71,21 @@ isolated commit, once everything else is stable.
   pinning already exists in this repo) rather than being force-migrated
   mid-flight — only newly authored changes, including this one, use
   `meaningfy` going forward.
+- **DEC-7** *(added post-review)*: `make ci-static`/`make check-all` include
+  `typecheck`, and it stays red — 69 pre-existing mypy strict-mode errors
+  (missing type annotations) in `tests/unit/hulubul/channel_gateway/**`,
+  confirmed present on `origin/develop` already and never caught because
+  `feature/input-connector` never ran through CI (no PR had opened against
+  `main`/`develop` yet). This branch is the first thing to actually exercise
+  that CI path, so **this PR will show a red `typecheck` step** — that is
+  this pre-existing debt surfacing, not a regression introduced here. Per
+  this EPIC's own no-go (no channel-gateway test changes), fixing those 69
+  annotations is explicitly out of scope for this change. The alternative —
+  dropping `typecheck` from `ci-static` — was rejected: it would hide the
+  debt instead of surfacing it, defeating the point of a modernization EPIC
+  whose Requirement 1 is "the gate SHALL pass." Recommendation to the human
+  reviewer: land a small, separate PR annotating those 69 test functions
+  (mechanical, no behavior change) before or alongside merging this one.
 
 ## Rabbit-holes
 

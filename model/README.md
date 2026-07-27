@@ -68,7 +68,7 @@ package so it's importable. Run `make all` for the lot.
 
 | Target | Output | Purpose |
 |--------|--------|---------|
-| `pydantic` | `src/hulubul/core/models/domain/hulubul_models.py` (outside `generated/`, per ADR-019) | Pydantic models |
+| `pydantic` | `hulubul/core/models/domain/hulubul_models.py` (outside `generated/`, per ADR-019) | Pydantic models |
 | `owl` | `generated/owl/hulubul.owl.ttl` | OWL ontology |
 | `shacl` | `generated/shacl/hulubul.shacl.ttl` | SHACL shapes (validation) |
 | `jsonschema` | `generated/jsonschema/hulubul.schema.json` | JSON Schema |
