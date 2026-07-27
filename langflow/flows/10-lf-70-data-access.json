@@ -3,63 +3,11 @@
     "edges": [
       {
         "animated": false,
+        "className": "",
         "data": {
           "sourceHandle": {
-            "dataType": "Message",
-            "id": "HulubulDataOperationRequestBoundary-hlb-lf-70-request-v1",
-            "name": "response",
-            "output_types": [
-              "Message"
-            ]
-          },
-          "targetHandle": {
-            "fieldName": "input_value",
-            "id": "Agent-hlb-lf-70-agent-v1",
-            "inputTypes": [
-              "Message",
-              "str"
-            ],
-            "type": "Message"
-          }
-        },
-        "id": "edge-request-to-agent",
-        "source": "HulubulDataOperationRequestBoundary-hlb-lf-70-request-v1",
-        "sourceHandle": "{dataType:Message,id:HulubulDataOperationRequestBoundary-hlb-lf-70-request-v1,name:response,output_types:[Message]}",
-        "target": "Agent-hlb-lf-70-agent-v1",
-        "targetHandle": "{fieldName:input_value,id:Agent-hlb-lf-70-agent-v1,inputTypes:[Message,str],type:Message}"
-      },
-      {
-        "animated": false,
-        "data": {
-          "sourceHandle": {
-            "dataType": "LanguageModel",
-            "id": "OpenAIModel-hlb-lf-70-model-v1",
-            "name": "model_output",
-            "output_types": [
-              "LanguageModel"
-            ]
-          },
-          "targetHandle": {
-            "fieldName": "model",
-            "id": "Agent-hlb-lf-70-agent-v1",
-            "inputTypes": [
-              "LanguageModel"
-            ],
-            "type": "LanguageModel"
-          }
-        },
-        "id": "edge-model-to-agent",
-        "source": "OpenAIModel-hlb-lf-70-model-v1",
-        "sourceHandle": "{dataType:LanguageModel,id:OpenAIModel-hlb-lf-70-model-v1,name:model_output,output_types:[LanguageModel]}",
-        "target": "Agent-hlb-lf-70-agent-v1",
-        "targetHandle": "{fieldName:model,id:Agent-hlb-lf-70-agent-v1,inputTypes:[LanguageModel],type:LanguageModel}"
-      },
-      {
-        "animated": false,
-        "data": {
-          "sourceHandle": {
-            "dataType": "Tool",
-            "id": "MCPToolkit-hlb-lf-70-neo4j-v1",
+            "dataType": "MCPTools",
+            "id": "MCPTools-hlb-lf-70-neo4j-v1",
             "name": "component_as_tool",
             "output_types": [
               "Tool"
@@ -71,20 +19,22 @@
             "inputTypes": [
               "Tool"
             ],
-            "type": "Tool"
+            "type": "other"
           }
         },
-        "id": "edge-tools-to-agent",
-        "source": "MCPToolkit-hlb-lf-70-neo4j-v1",
-        "sourceHandle": "{dataType:Tool,id:MCPToolkit-hlb-lf-70-neo4j-v1,name:component_as_tool,output_types:[Tool]}",
+        "id": "xy-edge__MCPTools-hlb-lf-70-neo4j-v1{œdataTypeœ:œMCPToolsœ,œidœ:œMCPTools-hlb-lf-70-neo4j-v1œ,œnameœ:œcomponent_as_toolœ,œoutput_typesœ:[œToolœ]}-Agent-hlb-lf-70-agent-v1{œfieldNameœ:œtoolsœ,œidœ:œAgent-hlb-lf-70-agent-v1œ,œinputTypesœ:[œToolœ],œtypeœ:œotherœ}",
+        "selected": false,
+        "source": "MCPTools-hlb-lf-70-neo4j-v1",
+        "sourceHandle": "{œdataTypeœ:œMCPToolsœ,œidœ:œMCPTools-hlb-lf-70-neo4j-v1œ,œnameœ:œcomponent_as_toolœ,œoutput_typesœ:[œToolœ]}",
         "target": "Agent-hlb-lf-70-agent-v1",
-        "targetHandle": "{fieldName:tools,id:Agent-hlb-lf-70-agent-v1,inputTypes:[Tool],type:Tool}"
+        "targetHandle": "{œfieldNameœ:œtoolsœ,œidœ:œAgent-hlb-lf-70-agent-v1œ,œinputTypesœ:[œToolœ],œtypeœ:œotherœ}"
       },
       {
         "animated": false,
+        "className": "",
         "data": {
           "sourceHandle": {
-            "dataType": "Message",
+            "dataType": "HulubulDataAccessAgent",
             "id": "Agent-hlb-lf-70-agent-v1",
             "name": "response",
             "output_types": [
@@ -92,53 +42,30 @@
             ]
           },
           "targetHandle": {
-            "fieldName": "agent_response",
-            "id": "HulubulFailureClassifier-hlb-lf-70-classifier-v1",
+            "fieldName": "raw_value",
+            "id": "HulubulDataOperationResultBoundary-hlb-lf-70-result-v1",
             "inputTypes": [
-              "Message"
+              "Message",
+              "Data",
+              "JSON"
             ],
-            "type": "Message"
+            "type": "other"
           }
         },
-        "id": "edge-agent-to-classifier",
+        "id": "xy-edge__Agent-hlb-lf-70-agent-v1{œdataTypeœ:œHulubulDataAccessAgentœ,œidœ:œAgent-hlb-lf-70-agent-v1œ,œnameœ:œresponseœ,œoutput_typesœ:[œMessageœ]}-HulubulDataOperationResultBoundary-hlb-lf-70-result-v1{œfieldNameœ:œraw_valueœ,œidœ:œHulubulDataOperationResultBoundary-hlb-lf-70-result-v1œ,œinputTypesœ:[œMessageœ,œDataœ,œJSONœ],œtypeœ:œotherœ}",
+        "selected": false,
         "source": "Agent-hlb-lf-70-agent-v1",
-        "sourceHandle": "{dataType:Message,id:Agent-hlb-lf-70-agent-v1,name:response,output_types:[Message]}",
-        "target": "HulubulFailureClassifier-hlb-lf-70-classifier-v1",
-        "targetHandle": "{fieldName:agent_response,id:HulubulFailureClassifier-hlb-lf-70-classifier-v1,inputTypes:[Message],type:Message}"
+        "sourceHandle": "{œdataTypeœ:œHulubulDataAccessAgentœ,œidœ:œAgent-hlb-lf-70-agent-v1œ,œnameœ:œresponseœ,œoutput_typesœ:[œMessageœ]}",
+        "target": "HulubulDataOperationResultBoundary-hlb-lf-70-result-v1",
+        "targetHandle": "{œfieldNameœ:œraw_valueœ,œidœ:œHulubulDataOperationResultBoundary-hlb-lf-70-result-v1œ,œinputTypesœ:[œMessageœ,œDataœ,œJSONœ],œtypeœ:œotherœ}"
       },
       {
         "animated": false,
         "data": {
           "sourceHandle": {
-            "dataType": "str",
-            "id": "HulubulFailureClassifier-hlb-lf-70-classifier-v1",
-            "name": "classify_failure",
-            "output_types": [
-              "str"
-            ]
-          },
-          "targetHandle": {
-            "fieldName": "input_text",
-            "id": "ConditionalRouter-hlb-lf-70-retry-router-v1",
-            "inputTypes": [
-              "str"
-            ],
-            "type": "str"
-          }
-        },
-        "id": "edge-classifier-to-router",
-        "source": "HulubulFailureClassifier-hlb-lf-70-classifier-v1",
-        "sourceHandle": "{dataType:str,id:HulubulFailureClassifier-hlb-lf-70-classifier-v1,name:classify_failure,output_types:[str]}",
-        "target": "ConditionalRouter-hlb-lf-70-retry-router-v1",
-        "targetHandle": "{fieldName:input_text,id:ConditionalRouter-hlb-lf-70-retry-router-v1,inputTypes:[str],type:str}"
-      },
-      {
-        "animated": false,
-        "data": {
-          "sourceHandle": {
-            "dataType": "Message",
-            "id": "ConditionalRouter-hlb-lf-70-retry-router-v1",
-            "name": "true_result",
+            "dataType": "HulubulDataOperationRequestBoundary",
+            "id": "HulubulDataOperationRequestBoundary-hlb-lf-70-request-v1",
+            "name": "response",
             "output_types": [
               "Message"
             ]
@@ -147,80 +74,135 @@
             "fieldName": "input_value",
             "id": "Agent-hlb-lf-70-agent-v1",
             "inputTypes": [
-              "Message",
-              "str"
+              "Message"
             ],
-            "type": "Message"
+            "type": "str"
           }
         },
-        "id": "edge-router-true-to-agent-retry",
-        "source": "ConditionalRouter-hlb-lf-70-retry-router-v1",
-        "sourceHandle": "{dataType:Message,id:ConditionalRouter-hlb-lf-70-retry-router-v1,name:true_result,output_types:[Message]}",
+        "id": "xy-edge__HulubulDataOperationRequestBoundary-hlb-lf-70-request-v1{œdataTypeœ:œHulubulDataOperationRequestBoundaryœ,œidœ:œHulubulDataOperationRequestBoundary-hlb-lf-70-request-v1œ,œnameœ:œresponseœ,œoutput_typesœ:[œMessageœ]}-Agent-hlb-lf-70-agent-v1{œfieldNameœ:œinput_valueœ,œidœ:œAgent-hlb-lf-70-agent-v1œ,œinputTypesœ:[œMessageœ],œtypeœ:œstrœ}",
+        "selected": false,
+        "source": "HulubulDataOperationRequestBoundary-hlb-lf-70-request-v1",
+        "sourceHandle": "{œdataTypeœ:œHulubulDataOperationRequestBoundaryœ,œidœ:œHulubulDataOperationRequestBoundary-hlb-lf-70-request-v1œ,œnameœ:œresponseœ,œoutput_typesœ:[œMessageœ]}",
         "target": "Agent-hlb-lf-70-agent-v1",
-        "targetHandle": "{fieldName:input_value,id:Agent-hlb-lf-70-agent-v1,inputTypes:[Message,str],type:Message}"
+        "targetHandle": "{œfieldNameœ:œinput_valueœ,œidœ:œAgent-hlb-lf-70-agent-v1œ,œinputTypesœ:[œMessageœ],œtypeœ:œstrœ}"
       },
       {
-        "animated": false,
         "data": {
           "sourceHandle": {
-            "dataType": "Message",
-            "id": "ConditionalRouter-hlb-lf-70-retry-router-v1",
-            "name": "false_result",
+            "dataType": "HulubulDataOperationRequestBoundary",
+            "id": "HulubulDataOperationRequestBoundary-hlb-lf-70-request-v1",
+            "name": "response",
             "output_types": [
               "Message"
             ]
           },
           "targetHandle": {
-            "fieldName": "result_value",
+            "fieldName": "request_dict",
             "id": "HulubulDataOperationResultBoundary-hlb-lf-70-result-v1",
             "inputTypes": [
+              "Message",
               "Data",
               "JSON"
             ],
-            "type": "Message"
+            "type": "other"
           }
         },
-        "id": "edge-router-false-to-result",
-        "source": "ConditionalRouter-hlb-lf-70-retry-router-v1",
-        "sourceHandle": "{dataType:Message,id:ConditionalRouter-hlb-lf-70-retry-router-v1,name:false_result,output_types:[Message]}",
+        "id": "xy-edge__HulubulDataOperationRequestBoundary-hlb-lf-70-request-v1{œdataTypeœ:œHulubulDataOperationRequestBoundaryœ,œidœ:œHulubulDataOperationRequestBoundary-hlb-lf-70-request-v1œ,œnameœ:œresponseœ,œoutput_typesœ:[œMessageœ]}-HulubulDataOperationResultBoundary-hlb-lf-70-result-v1{œfieldNameœ:œrequest_dictœ,œidœ:œHulubulDataOperationResultBoundary-hlb-lf-70-result-v1œ,œinputTypesœ:[œMessageœ,œDataœ,œJSONœ],œtypeœ:œotherœ}",
+        "source": "HulubulDataOperationRequestBoundary-hlb-lf-70-request-v1",
+        "sourceHandle": "{œdataTypeœ:œHulubulDataOperationRequestBoundaryœ,œidœ:œHulubulDataOperationRequestBoundary-hlb-lf-70-request-v1œ,œnameœ:œresponseœ,œoutput_typesœ:[œMessageœ]}",
         "target": "HulubulDataOperationResultBoundary-hlb-lf-70-result-v1",
-        "targetHandle": "{fieldName:result_value,id:HulubulDataOperationResultBoundary-hlb-lf-70-result-v1,inputTypes:[Data,JSON],type:Message}"
+        "targetHandle": "{œfieldNameœ:œrequest_dictœ,œidœ:œHulubulDataOperationResultBoundary-hlb-lf-70-result-v1œ,œinputTypesœ:[œMessageœ,œDataœ,œJSONœ],œtypeœ:œotherœ}"
       }
     ],
     "nodes": [
       {
         "data": {
+          "description": "Validate and authorize DataOperationRequest payloads",
+          "display_name": "Data Operation Request Boundary",
           "id": "HulubulDataOperationRequestBoundary-hlb-lf-70-request-v1",
           "node": {
             "base_classes": [
               "Message"
             ],
-            "category": "components",
+            "beta": false,
+            "conditional_paths": [],
+            "custom_fields": {},
             "description": "Validate and authorize DataOperationRequest payloads",
             "display_name": "Data Operation Request Boundary",
+            "documentation": "",
             "edited": false,
             "field_order": [
               "input_value"
             ],
+            "frozen": false,
             "icon": "shield-check",
-            "key": "DataOperationRequestBoundaryComponent",
-            "lf_version": "1.10.2",
+            "legacy": false,
+            "metadata": {
+              "code_hash": "b413777d7fe2",
+              "dependencies": {
+                "dependencies": [
+                  {
+                    "name": "lfx",
+                    "version": "1.10.2"
+                  },
+                  {
+                    "name": "pydantic",
+                    "version": "2.13.4"
+                  },
+                  {
+                    "name": "hulubul",
+                    "version": null
+                  }
+                ],
+                "total_dependencies": 3
+              },
+              "module": "custom_components.data_operation_request_boundary"
+            },
+            "minimized": false,
             "output_types": [],
             "outputs": [
               {
+                "allows_loop": false,
                 "cache": true,
                 "display_name": "Message",
+                "group_outputs": false,
                 "hidden": false,
-                "method": "validate_request_value",
+                "loop_types": null,
+                "method": "build_output",
                 "name": "response",
+                "options": null,
+                "required_inputs": null,
+                "selected": "Message",
+                "tool_mode": true,
                 "types": [
                   "Message"
-                ]
+                ],
+                "value": "__UNDEFINED__"
               }
             ],
+            "pinned": false,
             "template": {
               "_type": "Component",
+              "code": {
+                "advanced": true,
+                "dynamic": true,
+                "fileTypes": [],
+                "file_path": "",
+                "info": "",
+                "list": false,
+                "load_from_db": false,
+                "multiline": true,
+                "name": "code",
+                "password": false,
+                "placeholder": "",
+                "required": true,
+                "show": true,
+                "title_case": false,
+                "type": "code",
+                "value": "\"\"\"Data operation request boundary component: validation and authorization.\n\nSplit from the former data_operation_boundary.py (which held both the request\nand result boundary components) because LangFlow's directory-based custom\ncomponent loader registers exactly one component per file, named after the\nfile -- a second class in the same file is silently dropped from the sidebar\npalette. See data_operation_result_boundary.py for the paired component.\n\"\"\"\n\nimport json\nfrom typing import Any\nfrom uuid import UUID\n\nfrom lfx.custom.custom_component.component import Component\nfrom lfx.inputs.inputs import HandleInput\nfrom lfx.schema.data import JSON\nfrom lfx.schema.message import Message\nfrom lfx.template.field.base import Output\nfrom pydantic import ValidationError\n\nfrom hulubul.core.models.operational import (\n    CallerFlow,\n    ErrorCode,\n    OperationalError,\n    validate_data_operation_request,\n)\nfrom hulubul.core.models.operational.errors import ERROR_POLICY\nfrom hulubul.request_intake.services.data_operation_policy import (\n    authorize_operation,\n    validate_operation_preconditions,\n)\n\n__all__ = [\"DataOperationRequestBoundaryComponent\"]\n\n\nclass DataOperationRequestBoundaryComponent(Component):\n    \"\"\"Validate and authorize data operation requests.\n\n    Enforces validation-before-authorization precedence:\n    1. Validate contract (rejects raw query/Cypher, undeclared fields, mismatched payload)\n    2. Authorize operation (caller capability check)\n    3. Validate preconditions (expected state, transition validity)\n\n    Returns Message (valid request) or JSON (error with INVALID_CONTRACT or OPERATION_NOT_ALLOWED).\n    \"\"\"\n\n    display_name = \"Data Operation Request Boundary\"\n    description = \"Validate and authorize DataOperationRequest payloads\"\n    icon = \"shield-check\"\n    name = \"HulubulDataOperationRequestBoundary\"\n\n    inputs = [  # noqa: RUF012\n        HandleInput(  # type: ignore[call-arg]\n            name=\"input_value\",\n            display_name=\"Data Operation Request\",\n            info=\"Typed DataOperationRequest to validate and authorize\",\n            input_types=[\"Data\", \"JSON\"],\n            required=True,\n        ),\n    ]\n\n    outputs = [  # noqa: RUF012\n        Output(  # type: ignore[call-arg]\n            display_name=\"Message\", name=\"response\", type_=Message, method=\"build_output\"\n        ),\n    ]\n\n    def build_output(self) -> Message:\n        \"\"\"LFX-facing output: validate self.input_value.\n\n        Always returns Message (even for errors, wrapping the JSON error as\n        message text) so LFX registers a single declared output type. A\n        `Message | JSON` return annotation here previously made LFX register\n        `output_types=[\"JSON\", \"Message\"]`, which the frontend's connection\n        check treats as a strict subset requirement against the (Message-only)\n        target -- silently rejecting every edge into this output.\n        \"\"\"\n        raw_value = self.input_value\n        if hasattr(raw_value, \"data\"):\n            raw_value = raw_value.data\n        result = self.validate_request_value(raw_value)\n        if isinstance(result, Message):\n            return result\n        return Message(text=json.dumps(result.data))\n\n    def validate_request_value(self, raw_value: dict[str, Any]) -> Message | JSON:\n        \"\"\"Validate and authorize request, return typed output or error.\n\n        Args:\n            raw_value: Raw request dict\n\n        Returns:\n            Message: If valid and authorized (serialized DataOperationRequest as JSON text)\n            JSON: If contract validation fails (INVALID_CONTRACT) or authorization fails\n                  (OPERATION_NOT_ALLOWED)\n        \"\"\"\n        # Extract correlation_id (string from request) for error responses\n        correlation_id_str = raw_value.get(\"correlation_id\", \"\")\n\n        # Step 1: Validate contract (ValidationError → INVALID_CONTRACT)\n        try:\n            request = validate_data_operation_request(raw_value)\n        except ValidationError:\n            # Contract validation failed: wrong operation, undeclared fields, etc.\n            return self._make_error_response(\n                code=ErrorCode.INVALID_CONTRACT,\n                correlation_id_str=correlation_id_str,\n            )\n\n        # Update correlation_id from valid request (it's a string in DataOperationRequest)\n        correlation_id_str = request.correlation_id\n\n        # Step 2: Authorize operation (capability check)\n        try:\n            caller = CallerFlow(request.caller)\n        except ValueError:\n            return self._make_error_response(\n                code=ErrorCode.INVALID_CONTRACT,\n                correlation_id_str=correlation_id_str,\n            )\n\n        auth_error = authorize_operation(caller, request.operation)\n        if auth_error is not None:\n            # Create new error with correct correlation_id (model is frozen)\n            return self._make_error_response(\n                code=auth_error.code,\n                correlation_id_str=correlation_id_str,\n            )\n\n        # Step 3: Validate preconditions (state transitions, timestamps, etc.)\n        precond_error = validate_operation_preconditions(request)\n        if precond_error is not None:\n            # Create new error with correct correlation_id (model is frozen)\n            return self._make_error_response(\n                code=precond_error.code,\n                correlation_id_str=correlation_id_str,\n            )\n\n        # Success: return typed Message with validated request\n        return Message(text=request.model_dump_json())\n\n    def _make_error_response(\n        self,\n        code: ErrorCode,\n        correlation_id_str: str,\n    ) -> JSON:\n        \"\"\"Create error response with request's correlation_id.\n\n        Args:\n            code: The ErrorCode\n            correlation_id_str: The request's correlation_id string\n\n        Returns:\n            JSON: Serialized OperationalError with correct correlation_id\n        \"\"\"\n        from uuid import uuid4\n\n        # Try to parse correlation_id_str as UUID, otherwise generate new one\n        try:\n            correlation_id = UUID(correlation_id_str) if correlation_id_str else uuid4()\n        except (ValueError, TypeError):\n            correlation_id = uuid4()\n\n        policy = ERROR_POLICY[code]\n        error = OperationalError(\n            schema_version=\"1.0.0\",\n            code=code,\n            correlation_id=correlation_id,\n            category=policy.category,\n            message=policy.safe_message,\n            retryable=policy.retryable,\n        )\n\n        return JSON(data=error.model_dump(mode=\"json\"))\n"
+              },
               "input_value": {
+                "_input_type": "HandleInput",
                 "advanced": false,
                 "display_name": "Data Operation Request",
                 "dynamic": false,
@@ -230,706 +212,1164 @@
                   "JSON"
                 ],
                 "list": false,
+                "list_add_label": "Add More",
                 "load_from_db": false,
-                "multiline": false,
                 "name": "input_value",
+                "override_skip": false,
                 "placeholder": "",
-                "required": false,
+                "required": true,
                 "show": true,
-                "type": "any",
-                "value": ""
+                "title_case": false,
+                "trace_as_metadata": true,
+                "track_in_telemetry": false,
+                "type": "other",
+                "value": {}
               }
-            }
+            },
+            "tool_mode": false
           },
-          "selected_output": "response",
           "showNode": true,
-          "type": "DataOperationRequestBoundaryComponent"
+          "type": "HulubulDataOperationRequestBoundary"
         },
         "dragging": false,
-        "height": 240,
         "id": "HulubulDataOperationRequestBoundary-hlb-lf-70-request-v1",
-        "position": {
-          "x": 100,
-          "y": 100
+        "measured": {
+          "height": 185,
+          "width": 320
         },
-        "width": 300
+        "position": {
+          "x": -192.83477487576957,
+          "y": 33.72844671256377
+        },
+        "selected": false,
+        "type": "genericNode"
       },
       {
         "data": {
-          "id": "OpenAIModel-hlb-lf-70-model-v1",
+          "id": "MCPTools-hlb-lf-70-neo4j-v1",
           "node": {
             "base_classes": [
-              "LanguageModel"
+              "Table"
             ],
-            "category": "models",
-            "description": "OpenAI language model (deterministic settings for LF-70)",
-            "display_name": "OpenAI Model",
+            "beta": false,
+            "conditional_paths": [],
+            "custom_fields": {},
+            "description": "Connect to an MCP server to use its tools.",
+            "display_name": "MCP Tools",
+            "documentation": "https://docs.langflow.org/mcp-tools",
             "edited": false,
             "field_order": [
-              "model_name",
-              "temperature",
-              "seed",
-              "openai_api_base",
-              "api_key",
-              "max_retries",
-              "timeout"
+              "mcp_server",
+              "use_cache",
+              "verify_ssl",
+              "headers",
+              "tool_execution_timeout",
+              "tool",
+              "tool_placeholder"
             ],
-            "icon": "openai",
-            "key": "OpenAIModel",
-            "lf_version": "1.10.2",
+            "frozen": false,
+            "icon": "Mcp",
+            "last_updated": "2026-07-27T14:08:02.536Z",
+            "legacy": false,
+            "metadata": {
+              "code_hash": "c7652a63f23e",
+              "dependencies": {
+                "dependencies": [
+                  {
+                    "name": "langchain_core",
+                    "version": "1.4.8"
+                  },
+                  {
+                    "name": "pydantic",
+                    "version": "2.13.4"
+                  },
+                  {
+                    "name": "lfx",
+                    "version": null
+                  },
+                  {
+                    "name": "langflow",
+                    "version": null
+                  }
+                ],
+                "total_dependencies": 4
+              },
+              "module": "lfx.components.models_and_agents.mcp_component.MCPToolsComponent"
+            },
+            "minimized": false,
             "output_types": [],
             "outputs": [
               {
-                "cache": true,
-                "display_name": "LanguageModel",
-                "hidden": false,
-                "method": "build",
-                "name": "model_output",
-                "types": [
-                  "LanguageModel"
-                ]
-              }
-            ],
-            "template": {
-              "_type": "Component",
-              "api_key": {
-                "advanced": false,
-                "display_name": "API Key",
-                "dynamic": false,
-                "info": "OpenAI API key",
-                "input_types": [],
-                "list": false,
-                "load_from_db": true,
-                "multiline": false,
-                "name": "api_key",
-                "password": true,
-                "placeholder": "",
-                "required": false,
-                "show": true,
-                "type": "password",
-                "value": ""
-              },
-              "max_retries": {
-                "advanced": false,
-                "default": 0,
-                "display_name": "Max Retries",
-                "dynamic": false,
-                "info": "Maximum retries for API calls (0 = no retries)",
-                "input_types": [],
-                "list": false,
-                "load_from_db": false,
-                "multiline": false,
-                "name": "max_retries",
-                "placeholder": "",
-                "required": false,
-                "show": true,
-                "type": "int",
-                "value": 0
-              },
-              "model_name": {
-                "advanced": false,
-                "display_name": "Model Name",
-                "dynamic": false,
-                "info": "Model identifier (e.g., gpt-4, deepseek-v4-flash)",
-                "input_types": [],
-                "list": false,
-                "load_from_db": true,
-                "multiline": false,
-                "name": "model_name",
-                "placeholder": "",
-                "required": false,
-                "show": true,
-                "type": "str",
-                "value": ""
-              },
-              "openai_api_base": {
-                "advanced": false,
-                "display_name": "API Base URL",
-                "dynamic": false,
-                "info": "Base URL for OpenAI-compatible API",
-                "input_types": [],
-                "list": false,
-                "load_from_db": true,
-                "multiline": false,
-                "name": "openai_api_base",
-                "placeholder": "",
-                "required": false,
-                "show": true,
-                "type": "str",
-                "value": ""
-              },
-              "seed": {
-                "advanced": false,
-                "default": 1,
-                "display_name": "Seed",
-                "dynamic": false,
-                "info": "Random seed for reproducibility",
-                "input_types": [],
-                "list": false,
-                "load_from_db": false,
-                "multiline": false,
-                "name": "seed",
-                "placeholder": "",
-                "required": false,
-                "show": true,
-                "type": "int",
-                "value": 1
-              },
-              "temperature": {
-                "advanced": false,
-                "default": 0.0,
-                "display_name": "Temperature",
-                "dynamic": false,
-                "info": "Temperature for determinism (0.0 for deterministic behavior)",
-                "input_types": [],
-                "list": false,
-                "load_from_db": false,
-                "multiline": false,
-                "name": "temperature",
-                "placeholder": "",
-                "required": false,
-                "show": true,
-                "type": "float",
-                "value": 0.0
-              },
-              "timeout": {
-                "advanced": false,
-                "default": 5,
-                "display_name": "Timeout (seconds)",
-                "dynamic": false,
-                "info": "Timeout in seconds for API calls",
-                "input_types": [],
-                "list": false,
-                "load_from_db": false,
-                "multiline": false,
-                "name": "timeout",
-                "placeholder": "",
-                "required": false,
-                "show": true,
-                "type": "int",
-                "value": 5
-              }
-            }
-          },
-          "selected_output": "model_output",
-          "showNode": true,
-          "type": "OpenAIModel"
-        },
-        "dragging": false,
-        "height": 300,
-        "id": "OpenAIModel-hlb-lf-70-model-v1",
-        "position": {
-          "x": 500,
-          "y": 100
-        },
-        "width": 300
-      },
-      {
-        "data": {
-          "id": "MCPToolkit-hlb-lf-70-neo4j-v1",
-          "node": {
-            "base_classes": [
-              "Tool"
-            ],
-            "category": "tools",
-            "description": "Neo4j MCP toolkit (schema, read, write operations)",
-            "display_name": "Neo4j MCP Toolkit",
-            "edited": false,
-            "field_order": [
-              "url"
-            ],
-            "icon": "server",
-            "key": "MCPToolkit",
-            "lf_version": "1.10.2",
-            "output_types": [],
-            "outputs": [
-              {
-                "cache": true,
-                "display_name": "Tool",
-                "hidden": false,
-                "method": "get_tools",
+                "allows_loop": false,
+                "cache": false,
+                "display_name": "Toolset",
+                "group_outputs": false,
+                "hidden": null,
+                "loop_types": null,
+                "method": "to_toolkit",
                 "name": "component_as_tool",
+                "options": null,
+                "required_inputs": null,
+                "selected": "Tool",
+                "tool_mode": true,
                 "types": [
                   "Tool"
-                ]
+                ],
+                "value": "__UNDEFINED__"
               }
             ],
+            "pinned": false,
             "template": {
+              "_frontend_node_flow_id": {
+                "value": "94f6774d-ebc7-5bf1-8486-886f91886a5f"
+              },
+              "_frontend_node_folder_id": {
+                "value": "a6f9eb0d-e26e-4d3d-9232-fe1704342cd4"
+              },
               "_type": "Component",
-              "url": {
-                "advanced": false,
-                "display_name": "MCP Server URL",
-                "dynamic": false,
-                "info": "URL of the Neo4j MCP server",
-                "input_types": [],
+              "code": {
+                "advanced": true,
+                "dynamic": true,
+                "fileTypes": [],
+                "file_path": "",
+                "info": "",
                 "list": false,
-                "load_from_db": true,
-                "multiline": false,
-                "name": "url",
-                "placeholder": "http://mcp-neo4j:8000/mcp/",
+                "load_from_db": false,
+                "multiline": true,
+                "name": "code",
+                "password": false,
+                "placeholder": "",
+                "required": true,
+                "show": true,
+                "title_case": false,
+                "type": "code",
+                "value": "from __future__ import annotations\n\nimport asyncio\nimport hashlib\nimport json\nimport time\nimport uuid\nfrom types import UnionType\nfrom typing import Any, get_args, get_origin\n\nfrom langchain_core.tools import StructuredTool  # noqa: TC002\nfrom pydantic import BaseModel\n\nfrom lfx.base.agents.utils import maybe_unflatten_dict, safe_cache_get, safe_cache_set\nfrom lfx.base.mcp.util import (\n    MCPStdioClient,\n    MCPStreamableHttpClient,\n    update_tools,\n)\nfrom lfx.base.tools.constants import TOOL_OUTPUT_DISPLAY_NAME, TOOL_OUTPUT_NAME\nfrom lfx.custom.custom_component.component_with_cache import ComponentWithCache\nfrom lfx.inputs.inputs import InputTypes  # noqa: TC001\nfrom lfx.io import BoolInput, DictInput, DropdownInput, FloatInput, McpInput, MessageTextInput, Output\nfrom lfx.io.schema import schema_to_langflow_inputs\nfrom lfx.log.logger import logger\nfrom lfx.schema.dataframe import DataFrame\nfrom lfx.schema.message import Message\nfrom lfx.services.deps import get_storage_service, session_scope\n\n\ndef resolve_mcp_config(\n    server_name: str,  # noqa: ARG001\n    server_config_from_value: dict | None,\n    server_config_from_db: dict | None,\n) -> dict | None:\n    \"\"\"Resolve MCP server config with proper precedence.\n\n    Resolves the configuration for an MCP server with the following precedence:\n    1. Database config (takes priority) - ensures edits are reflected\n    2. Config from value/tweaks (fallback) - allows REST API to provide config for new servers\n\n    Args:\n        server_name: Name of the MCP server\n        server_config_from_value: Config provided via value/tweaks (optional)\n        server_config_from_db: Config from database (optional)\n\n    Returns:\n        Final config to use (DB takes priority, falls back to value)\n        Returns None if no config found in either location\n    \"\"\"\n    if server_config_from_db:\n        return server_config_from_db\n    return server_config_from_value\n\n\n# TODO(legacy-cleanup): This file is ~800 lines, over the 500-line guideline. Split\n# helper functions (resolve_mcp_config, connection resolution) from the MCPToolsComponent\n# orchestration logic in a follow-up PR.\nclass MCPToolsComponent(ComponentWithCache):\n    \"\"\"MCP Tools component.\n\n    Behaviour notes:\n    - Stale agent tools vs server were caused by Langflow caching the Toolset output\n      (``Output.cache=True`` plus the persisted ``output.value`` in saved flow JSON), not\n      only by the user-facing \"Use Cached Server\" (``use_cache``) toggle. ``_build_tool_output``\n      declares the Toolset output with ``cache=False`` and ``map_outputs`` overrides the\n      persisted value for existing flows so every run resolves a fresh tool list.\n    - ``update_tool_list`` is serialized with an ``asyncio.Lock`` so concurrent calls do not\n      share the same Streamable HTTP client session; overlapping POST/DELETE cycles otherwise\n      surface as HTTP 404 and the MCP SDK reports ``Session terminated``.\n    - All diagnostic logs are at DEBUG level to avoid swamping logs on hot paths (an agent\n      may call ``_get_tools`` per step). Header values are never logged; only header *keys*.\n    \"\"\"\n\n    # Short-lived in-memory cache window (seconds) for ``_get_tools``. When the\n    # same header-hash key is requested again within this window the cached tool\n    # list is reused so parallel agent runs that share identical auth don't\n    # each pay for a fresh MCP round-trip. Set to ``0`` to disable. This is\n    # distinct from the \"Use Cached Server\" (``use_cache``) toggle which only\n    # controls the shared cross-request server cache.\n    TOOL_TTL_SECS: int = 30\n    # Upper bound on the per-instance TTL cache. Oldest entries are evicted\n    # when the cap is reached. Keeps memory bounded for flows where the same\n    # component handles many rotating auth contexts (e.g. per-tenant tokens).\n    TOOL_TTL_MAX_ENTRIES: int = 32\n    # Upper bound on the shared cross-request ``servers`` cache. Each\n    # (server_name, header-hash) pair is a distinct entry; without a bound a\n    # tenant that rotates session tokens would grow this map without limit.\n    SHARED_SERVERS_CACHE_MAX_ENTRIES: int = 64\n\n    schema_inputs: list = []\n    tools: list[StructuredTool] = []\n    _not_load_actions: bool = False\n    _tool_cache: dict = {}\n    _last_selected_server: str | None = None  # Cache for the last selected server\n\n    def __init__(self, **data) -> None:\n        super().__init__(**data)\n        # Initialize cache keys to avoid CacheMiss when accessing them\n        self._ensure_cache_structure()\n\n        # Initialize clients with access to the component cache.\n        # Per-component timeout is normalized and applied immediately before MCP calls.\n        self.stdio_client: MCPStdioClient = MCPStdioClient(component_cache=self._shared_component_cache)\n        self.streamable_http_client: MCPStreamableHttpClient = MCPStreamableHttpClient(\n            component_cache=self._shared_component_cache\n        )\n        # One MCP stdio/streamable client pair per component; concurrent update_tool_list calls\n        # otherwise race (session DELETE vs POST) and the MCP SDK surfaces HTTP 404 as \"Session terminated\".\n        self._update_tool_list_lock = asyncio.Lock()\n        # Per-instance TTL cache for ``_get_tools``: {cache_key: (monotonic_ts, tools)}.\n        # Declared here (not at class scope) so every component gets its own dict —\n        # a class-level dict would be shared across every MCPToolsComponent in the process,\n        # leaking tool lists across tenants that happen to hash to the same key.\n        self._ttl_tool_cache: dict[str, tuple[float, list]] = {}\n\n    def _ensure_cache_structure(self):\n        \"\"\"Ensure the cache has the required structure.\"\"\"\n        # Check if servers key exists and is not CacheMiss\n        servers_value = safe_cache_get(self._shared_component_cache, \"servers\")\n        if servers_value is None:\n            safe_cache_set(self._shared_component_cache, \"servers\", {})\n\n        # Check if last_selected_server key exists and is not CacheMiss\n        last_server_value = safe_cache_get(self._shared_component_cache, \"last_selected_server\")\n        if last_server_value is None:\n            safe_cache_set(self._shared_component_cache, \"last_selected_server\", \"\")\n\n    def _normalized_headers_for_cache(self) -> dict[str, str]:\n        \"\"\"Component headers as a dict for stable cache keying (auth / tweaks).\"\"\"\n        component_headers = getattr(self, \"headers\", None) or []\n        if isinstance(component_headers, list):\n            return {\n                str(item[\"key\"]): str(item[\"value\"])\n                for item in component_headers\n                if isinstance(item, dict) and \"key\" in item and \"value\" in item\n            }\n        if isinstance(component_headers, dict):\n            return {str(k): str(v) for k, v in component_headers.items()}\n        return {}\n\n    def _normalize_tool_execution_timeout(self) -> float | None:\n        \"\"\"Normalize the timeout input and reject negative values with a field-specific error.\"\"\"\n        timeout_value = getattr(self, \"tool_execution_timeout\", 0.0)\n\n        if timeout_value in (None, \"\"):\n            return None\n\n        try:\n            val = float(timeout_value)\n        except (ValueError, TypeError):\n            return None\n\n        if val < 0:\n            msg = \"Tool Execution Timeout must be greater than or equal to 0.\"\n            raise ValueError(msg)\n\n        return val if val else None\n\n    def _mcp_servers_cache_key(self, server_name: str) -> str:\n        \"\"\"Cache key for shared servers map.\n\n        Includes headers and timeout so auth/tweak/timeout changes get distinct entries.\n        \"\"\"\n        if not server_name:\n            return \"\"\n\n        raw_timeout = getattr(self, \"tool_execution_timeout\", 0.0) or 0.0\n        normalized_timeout = max(0.0, float(raw_timeout))\n\n        hdrs = self._normalized_headers_for_cache()\n\n        # Build cache key components\n        cache_data = {\n            \"headers\": hdrs,\n            \"timeout\": normalized_timeout,\n        }\n\n        # If no headers and default timeout, just use server name\n        if not hdrs and normalized_timeout == 0.0:\n            return server_name\n\n        payload = json.dumps(cache_data, sort_keys=True)\n        digest = hashlib.sha256(payload.encode()).hexdigest()[:16]\n        return f\"{server_name}:{digest}\"\n\n    def _build_tool_output(self) -> Output:\n        # Do not cache Toolset output. This is separate from the MCP \"Use Cached Server\" (use_cache)\n        # toggle: Langflow's Output.cache defaults to True and was memoizing the first to_toolkit()\n        # result, so per-request tweaks/headers never refreshed bound tools even when use_cache=False.\n        return Output(\n            name=TOOL_OUTPUT_NAME,\n            display_name=TOOL_OUTPUT_DISPLAY_NAME,\n            method=\"to_toolkit\",\n            types=[\"Tool\"],\n            cache=False,\n        )\n\n    def map_outputs(self) -> None:\n        \"\"\"Override the persisted ``component_as_tool`` cache flag from saved flow JSON.\n\n        ``_build_tool_output`` already returns the output with ``cache=False``, but the\n        flow JSON for existing flows often stores ``cache: true`` for ``component_as_tool``\n        and that persisted value wins over the declaration. Forcing ``cache=False`` here\n        guarantees saved flows also bypass Output memoization and get a fresh tool list\n        on every run.\n        \"\"\"\n        super().map_outputs()\n        if TOOL_OUTPUT_NAME in self._outputs_map:\n            self._outputs_map[TOOL_OUTPUT_NAME].cache = False\n\n    default_keys: list[str] = [\n        \"code\",\n        \"_type\",\n        \"tool_mode\",\n        \"tool_placeholder\",\n        \"mcp_server\",\n        \"tool\",\n        \"use_cache\",\n        \"verify_ssl\",\n        \"headers\",\n        \"tool_execution_timeout\",\n    ]\n\n    display_name = \"MCP Tools\"\n    description = \"Connect to an MCP server to use its tools.\"\n    documentation: str = \"https://docs.langflow.org/mcp-tools\"\n    icon = \"Mcp\"\n    name = \"MCPTools\"\n\n    inputs = [\n        McpInput(\n            name=\"mcp_server\",\n            display_name=\"MCP Server\",\n            info=\"Select the MCP Server that will be used by this component\",\n            real_time_refresh=True,\n        ),\n        BoolInput(\n            name=\"use_cache\",\n            display_name=\"Use Cached Server\",\n            info=(\n                \"Enable caching of MCP Server and tools to improve performance. \"\n                \"Disable to always fetch fresh tools and server updates.\"\n            ),\n            value=False,\n            advanced=True,\n        ),\n        BoolInput(\n            name=\"verify_ssl\",\n            display_name=\"Verify SSL Certificate\",\n            info=(\n                \"Enable SSL certificate verification for HTTPS connections. \"\n                \"Disable only for development/testing with self-signed certificates.\"\n            ),\n            value=True,\n            advanced=True,\n        ),\n        DictInput(\n            name=\"headers\",\n            display_name=\"Headers\",\n            info=(\n                \"HTTP headers to include with MCP server requests. \"\n                \"Useful for authentication (e.g., Authorization header). \"\n                \"These headers override any headers configured in the MCP server settings.\"\n            ),\n            advanced=True,\n            is_list=True,\n        ),\n        FloatInput(\n            name=\"tool_execution_timeout\",\n            display_name=\"Tool Execution Timeout (seconds)\",\n            info=(\n                \"Maximum time to wait for tool execution before timing out. \"\n                \"Supports decimal values for sub-second timeouts (e.g., 0.01 for 10ms). \"\n                \"Set to 0 to use the system-configured MCP timeout.\"\n            ),\n            value=0.0,\n            range_spec={\"min\": 0.0, \"max\": 3600.0, \"step\": 0.01},\n            real_time_refresh=True,\n            advanced=True,\n        ),\n        DropdownInput(\n            name=\"tool\",\n            display_name=\"Tool\",\n            options=[],\n            value=\"\",\n            info=\"Select the tool to execute\",\n            show=False,\n            required=True,\n            real_time_refresh=True,\n            refresh_button=True,\n        ),\n        MessageTextInput(\n            name=\"tool_placeholder\",\n            display_name=\"Tool Placeholder\",\n            info=\"Placeholder for the tool\",\n            value=\"\",\n            show=False,\n            tool_mode=False,\n        ),\n    ]\n\n    outputs = [\n        Output(display_name=\"Response\", name=\"response\", method=\"build_output\"),\n    ]\n\n    async def _validate_schema_inputs(self, tool_obj) -> list[InputTypes]:\n        \"\"\"Validate and process schema inputs for a tool.\"\"\"\n        try:\n            if not tool_obj or not hasattr(tool_obj, \"args_schema\"):\n                msg = \"Invalid tool object or missing input schema\"\n                raise ValueError(msg)\n\n            input_schema = tool_obj.args_schema\n            if not input_schema:\n                msg = f\"Empty input schema for tool '{tool_obj.name}'\"\n                raise ValueError(msg)\n\n            schema_inputs = schema_to_langflow_inputs(input_schema)\n            if not schema_inputs:\n                msg = f\"No input parameters defined for tool '{tool_obj.name}'\"\n                await logger.awarning(msg)\n                return []\n\n        except Exception as e:\n            msg = f\"Error validating schema inputs: {e!s}\"\n            await logger.aexception(msg)\n            raise ValueError(msg) from e\n        else:\n            return schema_inputs\n\n    async def update_tool_list(self, mcp_server_value=None):\n        # Accepts mcp_server_value as dict {name, config} or uses self.mcp_server\n        mcp_server = mcp_server_value if mcp_server_value is not None else getattr(self, \"mcp_server\", None)\n        server_name = None\n        server_config_from_value = None\n        if isinstance(mcp_server, dict):\n            server_name = mcp_server.get(\"name\")\n            server_config_from_value = mcp_server.get(\"config\")\n        else:\n            server_name = mcp_server\n        if not server_name:\n            self.tools = []\n            await logger.adebug(\"MCP update_tool_list: empty server_name, clearing tools\")\n            return [], {\"name\": server_name, \"config\": server_config_from_value}\n\n        servers_cache_key = self._mcp_servers_cache_key(server_name)\n\n        # Check if caching is enabled, default to False\n        use_cache = getattr(self, \"use_cache\", False)\n        header_keys = sorted(self._normalized_headers_for_cache().keys())\n        await logger.adebug(\n            \"MCP update_tool_list: start server=%r use_cache=%s shared_cache_key=%r header_keys=%s\",\n            server_name,\n            use_cache,\n            servers_cache_key,\n            header_keys,\n        )\n\n        async with self._update_tool_list_lock:\n            # Use shared cache if available and caching is enabled\n            cached = None\n            if use_cache:\n                servers_cache = safe_cache_get(self._shared_component_cache, \"servers\", {})\n                cached = servers_cache.get(servers_cache_key) if isinstance(servers_cache, dict) else None\n\n            if cached is not None:\n                try:\n                    tools_from_cache = cached[\"tools\"]\n                    server_config_from_value = cached[\"config\"]\n                except (TypeError, KeyError, AttributeError) as e:\n                    # Handle corrupted cache data by clearing it and continuing to fetch fresh tools\n                    msg = f\"Unable to use cached data for MCP Server{server_name}: {e}\"\n                    await logger.awarning(msg)\n                    # Clear the corrupted cache entry\n                    current_servers_cache = safe_cache_get(self._shared_component_cache, \"servers\", {})\n                    if isinstance(current_servers_cache, dict) and servers_cache_key in current_servers_cache:\n                        current_servers_cache.pop(servers_cache_key)\n                        safe_cache_set(self._shared_component_cache, \"servers\", current_servers_cache)\n                else:\n                    self.tools = tools_from_cache\n                    self.tool_names = [t.name for t in self.tools if hasattr(t, \"name\")]\n                    self._tool_cache = cached[\"tool_cache\"]\n                    await logger.adebug(\n                        \"MCP update_tool_list: shared_servers_cache HIT count=%d server=%r\",\n                        len(self.tools),\n                        server_name,\n                    )\n                    return self.tools, {\"name\": server_name, \"config\": server_config_from_value}\n\n            try:\n                # Try to fetch from database first to ensure we have the latest config.\n                # This ensures database updates (like editing a server) take effect.\n                # When running in LFX standalone mode the full Langflow package and\n                # database may not be available — in that case we skip the DB lookup\n                # and fall back to the config embedded in the flow (server_config_from_value).\n                server_config_from_db = None\n                try:\n                    from langflow.api.v2.mcp import get_server\n                    from langflow.services.database.models.user.crud import get_user_by_id\n\n                    from lfx.services.deps import get_settings_service\n                except ModuleNotFoundError as e:\n                    # Deliberately `except ModuleNotFoundError` (not `except ImportError`): a\n                    # plain ImportError here means `get_server` / `get_user_by_id` was removed\n                    # from an installed Langflow — a real API break that should NOT be\n                    # swallowed as \"standalone mode\". ModuleNotFoundError alone covers the\n                    # \"Langflow absent\" case.\n                    #\n                    # Even within ModuleNotFoundError, only treat this as LFX standalone mode\n                    # when one of the target Langflow modules is itself missing. Transitive\n                    # ModuleNotFoundError (e.g. a dependency like sqlmodel failing to import\n                    # inside langflow.*) indicates a real bug in the full Langflow stack and\n                    # must surface — otherwise we would silently use a stale flow-embedded\n                    # config when DB config should have taken precedence.\n                    missing_module = e.name or \"\"\n                    is_langflow_standalone = missing_module == \"langflow\" or missing_module.startswith(\"langflow.\")\n                    if not is_langflow_standalone:\n                        raise\n                    await logger.ainfo(\n                        \"Langflow package not available; using MCP server config from flow value (LFX standalone mode).\"\n                    )\n                else:\n                    async with session_scope() as db:\n                        if not self.user_id:\n                            msg = \"User ID is required for fetching MCP tools.\"\n                            raise ValueError(msg)\n                        current_user = await get_user_by_id(db, self.user_id)\n\n                        # Try to get server config from DB/API\n                        server_config_from_db = await get_server(\n                            server_name,\n                            current_user,\n                            db,\n                            storage_service=get_storage_service(),\n                            settings_service=get_settings_service(),\n                        )\n\n                # Resolve config with proper precedence: DB takes priority, falls back to value\n                server_config = resolve_mcp_config(\n                    server_name=server_name,\n                    server_config_from_value=server_config_from_value,\n                    server_config_from_db=server_config_from_db,\n                )\n\n                if not server_config:\n                    self.tools = []\n                    await logger.awarning(\n                        \"MCP update_tool_list: no server_config after resolve server=%r\",\n                        server_name,\n                    )\n                    return [], {\"name\": server_name, \"config\": server_config}\n\n                # Add verify_ssl option to server config if not present\n                if \"verify_ssl\" not in server_config:\n                    verify_ssl = getattr(self, \"verify_ssl\", True)\n                    server_config[\"verify_ssl\"] = verify_ssl\n\n                # Merge headers from component input with server config headers\n                # Component headers take precedence over server config headers\n                component_headers = getattr(self, \"headers\", None) or []\n                if component_headers:\n                    # Convert list of {\"key\": k, \"value\": v} to dict\n                    component_headers_dict = {}\n                    if isinstance(component_headers, list):\n                        for item in component_headers:\n                            if isinstance(item, dict) and \"key\" in item and \"value\" in item:\n                                component_headers_dict[item[\"key\"]] = item[\"value\"]\n                    elif isinstance(component_headers, dict):\n                        component_headers_dict = component_headers\n\n                    if component_headers_dict:\n                        existing_headers = server_config.get(\"headers\", {}) or {}\n                        # Ensure existing_headers is a dict (convert from list if needed)\n                        if isinstance(existing_headers, list):\n                            existing_dict = {}\n                            for item in existing_headers:\n                                if isinstance(item, dict) and \"key\" in item and \"value\" in item:\n                                    existing_dict[item[\"key\"]] = item[\"value\"]\n                            existing_headers = existing_dict\n                        merged_headers = {**existing_headers, **component_headers_dict}\n                        server_config[\"headers\"] = merged_headers\n                # Get request_variables from graph context for global variable resolution\n                request_variables = None\n                if hasattr(self, \"graph\") and self.graph and hasattr(self.graph, \"context\"):\n                    request_variables = self.graph.context.get(\"request_variables\")\n\n                # Only load global variables from database if we have headers that might use them\n                # This avoids unnecessary database queries when headers are empty\n                has_headers = server_config.get(\"headers\") and len(server_config.get(\"headers\", {})) > 0\n                if not request_variables and has_headers:\n                    try:\n                        from lfx.services.deps import get_variable_service\n\n                        variable_service = get_variable_service()\n                        if variable_service:\n                            async with session_scope() as db:\n                                request_variables = await variable_service.get_all_decrypted_variables(\n                                    user_id=self.user_id, session=db\n                                )\n                    except Exception as e:  # noqa: BLE001\n                        await logger.awarning(f\"Failed to load global variables for MCP component: {e}\")\n\n                await logger.adebug(\n                    \"MCP update_tool_list: calling update_tools server=%r mode_headers=%s\",\n                    server_name,\n                    sorted((server_config.get(\"headers\") or {}).keys())\n                    if isinstance(server_config.get(\"headers\"), dict)\n                    else \"list-or-empty\",\n                )\n\n                timeout = self._normalize_tool_execution_timeout()\n\n                _, tool_list, tool_cache = await update_tools(\n                    server_name=server_name,\n                    server_config=server_config,\n                    mcp_stdio_client=self.stdio_client,\n                    mcp_streamable_http_client=self.streamable_http_client,\n                    request_variables=request_variables,\n                    tool_execution_timeout=timeout,\n                )\n\n                self.tool_names = [tool.name for tool in tool_list if hasattr(tool, \"name\")]\n                self._tool_cache = tool_cache\n                self.tools = tool_list\n\n                await logger.adebug(\n                    \"MCP update_tool_list: fetched from MCP count=%d server=%r\",\n                    len(tool_list),\n                    server_name,\n                )\n\n                # Cache the result only if caching is enabled\n                if use_cache:\n                    cache_data = {\n                        \"tools\": tool_list,\n                        \"tool_names\": self.tool_names,\n                        \"tool_cache\": tool_cache,\n                        \"config\": server_config,\n                    }\n\n                    # Safely update the servers cache with bounded size (FIFO eviction).\n                    current_servers_cache = safe_cache_get(self._shared_component_cache, \"servers\", {})\n                    if isinstance(current_servers_cache, dict):\n                        # Because the cache key now includes a header hash, a tenant that\n                        # rotates session tokens would grow this map without bound. Drop\n                        # the oldest entry when over the limit.\n                        max_entries = self.SHARED_SERVERS_CACHE_MAX_ENTRIES\n                        while (\n                            len(current_servers_cache) >= max_entries and servers_cache_key not in current_servers_cache\n                        ):\n                            oldest_key = next(iter(current_servers_cache))\n                            current_servers_cache.pop(oldest_key, None)\n                        current_servers_cache[servers_cache_key] = cache_data\n                        safe_cache_set(self._shared_component_cache, \"servers\", current_servers_cache)\n                        await logger.adebug(\n                            \"MCP update_tool_list: wrote shared_servers_cache key=%r size=%d\",\n                            servers_cache_key,\n                            len(current_servers_cache),\n                        )\n\n            except (TimeoutError, asyncio.TimeoutError) as e:\n                msg = (\n                    f\"Timeout updating tool list: {e!s}. \"\n                    \"Raise ``LANGFLOW_MCP_SERVER_TIMEOUT`` for the deployment if the MCP \"\n                    \"server legitimately needs more time to respond.\"\n                )\n                await logger.aexception(msg)\n                raise TimeoutError(msg) from e\n            except Exception as e:\n                msg = f\"Error updating tool list: {e!s}\"\n                await logger.aexception(msg)\n                raise ValueError(msg) from e\n            else:\n                return tool_list, {\"name\": server_name, \"config\": server_config}\n\n    async def update_build_config(self, build_config: dict, field_value: str, field_name: str | None = None) -> dict:\n        \"\"\"Toggle the visibility of connection-specific fields based on the selected mode.\"\"\"\n        try:\n            is_refresh = bool(build_config.get(\"is_refresh\", False))\n            if field_name == \"tool\":\n                try:\n                    # Always refresh tools when cache is disabled, or when tools list is empty\n                    # This ensures database edits are reflected immediately when cache is disabled\n                    use_cache = getattr(self, \"use_cache\", False)\n                    if is_refresh:\n                        self.tools = []\n                    if is_refresh or len(self.tools) == 0 or not use_cache:\n                        try:\n                            self.tools, build_config[\"mcp_server\"][\"value\"] = await self.update_tool_list()\n                            build_config[\"tool\"][\"options\"] = [tool.name for tool in self.tools]\n                            build_config[\"tool\"][\"placeholder\"] = \"Select a tool\"\n                        except (TimeoutError, asyncio.TimeoutError) as e:\n                            msg = f\"Timeout updating tool list: {e!s}\"\n                            await logger.aexception(msg)\n                            if not build_config[\"tools_metadata\"][\"show\"]:\n                                build_config[\"tool\"][\"show\"] = True\n                                build_config[\"tool\"][\"options\"] = []\n                                build_config[\"tool\"][\"value\"] = \"\"\n                                build_config[\"tool\"][\"placeholder\"] = msg\n                            else:\n                                build_config[\"tool\"][\"show\"] = False\n                        except ValueError as e:\n                            msg = f\"Error updating tool list: {e!s}\"\n                            await logger.aexception(msg)\n                            if not build_config[\"tools_metadata\"][\"show\"]:\n                                build_config[\"tool\"][\"show\"] = True\n                                build_config[\"tool\"][\"options\"] = []\n                                build_config[\"tool\"][\"value\"] = \"\"\n                                build_config[\"tool\"][\"placeholder\"] = msg\n                            else:\n                                build_config[\"tool\"][\"show\"] = False\n\n                    if field_value == \"\":\n                        return build_config\n                    tool_obj = None\n                    for tool in self.tools:\n                        if tool.name == field_value:\n                            tool_obj = tool\n                            break\n                    if tool_obj is None:\n                        msg = f\"Tool {field_value} not found in available tools: {self.tools}\"\n                        await logger.awarning(msg)\n                        return build_config\n                    await self._update_tool_config(build_config, field_value)\n                except Exception as e:\n                    build_config[\"tool\"][\"options\"] = []\n                    msg = f\"Failed to update tools: {e!s}\"\n                    raise ValueError(msg) from e\n                else:\n                    return build_config\n            elif field_name == \"mcp_server\":\n                if not field_value:\n                    build_config[\"tool\"][\"show\"] = False\n                    build_config[\"tool\"][\"options\"] = []\n                    build_config[\"tool\"][\"value\"] = \"\"\n                    build_config[\"tool\"][\"placeholder\"] = \"\"\n                    build_config[\"tool_placeholder\"][\"tool_mode\"] = False\n                    self.remove_non_default_keys(build_config)\n                    return build_config\n\n                build_config[\"tool_placeholder\"][\"tool_mode\"] = True\n\n                current_server_name = field_value.get(\"name\") if isinstance(field_value, dict) else field_value\n                build_config_server_value = build_config.get(\"mcp_server\", {}).get(\"value\")\n                build_config_server_name = (\n                    build_config_server_value.get(\"name\")\n                    if isinstance(build_config_server_value, dict)\n                    else build_config_server_value\n                )\n                servers_cache_key_ui = self._mcp_servers_cache_key(current_server_name) if current_server_name else \"\"\n                _last_selected_server = safe_cache_get(self._shared_component_cache, \"last_selected_server\", \"\")\n                # Only treat as a server change if there was a previous server selection.\n                # Cold cache (_last_selected_server=\"\") on initial flow load is NOT a server change —\n                # the user didn't switch anything, the backend just hasn't seen this component yet.\n                server_changed = bool(\n                    (_last_selected_server and current_server_name != _last_selected_server)\n                    or (build_config_server_name and current_server_name != build_config_server_name)\n                )\n\n                # Determine if \"Tool Mode\" is active by checking if the tool dropdown is hidden.\n                is_in_tool_mode = build_config[\"tools_metadata\"][\"show\"]\n\n                # Get use_cache setting to determine if we should use cached data\n                use_cache = getattr(self, \"use_cache\", False)\n\n                # Fast path: if server didn't change and we already have options, keep them as-is\n                # BUT only if caching is enabled, we're in tool mode, or it's the initial load\n                existing_options = build_config.get(\"tool\", {}).get(\"options\") or []\n                if not is_refresh and not server_changed and existing_options:\n                    # In non-tool mode with cache disabled, skip the fast path to force refresh\n                    # BUT on initial load (cold cache), always preserve saved options from the flow\n                    if not is_in_tool_mode and not use_cache and _last_selected_server:\n                        pass  # Continue to refresh logic below (user-initiated with cache disabled)\n                    else:\n                        if not is_in_tool_mode:\n                            build_config[\"tool\"][\"show\"] = True\n                        safe_cache_set(self._shared_component_cache, \"last_selected_server\", current_server_name)\n                        return build_config\n\n                # To avoid unnecessary updates, only proceed if the server has actually changed\n                # OR if caching is disabled (to force refresh in non-tool mode)\n                if (\n                    not is_refresh\n                    and (_last_selected_server in (current_server_name, \"\"))\n                    and build_config[\"tool\"][\"show\"]\n                    and use_cache\n                ):\n                    if current_server_name:\n                        servers_cache = safe_cache_get(self._shared_component_cache, \"servers\", {})\n                        if isinstance(servers_cache, dict):\n                            cached = servers_cache.get(servers_cache_key_ui)\n                            if cached is not None and cached.get(\"tool_names\"):\n                                cached_tools = cached[\"tool_names\"]\n                                current_tools = build_config[\"tool\"][\"options\"]\n                                if current_tools == cached_tools:\n                                    return build_config\n                    else:\n                        return build_config\n                safe_cache_set(self._shared_component_cache, \"last_selected_server\", current_server_name)\n\n                # When cache is disabled, clear any cached data for this server\n                # This ensures we always fetch fresh data from the database\n                if (is_refresh or not use_cache) and current_server_name:\n                    servers_cache = safe_cache_get(self._shared_component_cache, \"servers\", {})\n                    if isinstance(servers_cache, dict) and servers_cache_key_ui in servers_cache:\n                        servers_cache.pop(servers_cache_key_ui)\n                        safe_cache_set(self._shared_component_cache, \"servers\", servers_cache)\n\n                # Check if tools are already cached for this server before clearing\n                cached_tools = None\n                if current_server_name and use_cache and not is_refresh:\n                    servers_cache = safe_cache_get(self._shared_component_cache, \"servers\", {})\n                    if isinstance(servers_cache, dict):\n                        cached = servers_cache.get(servers_cache_key_ui)\n                        if cached is not None:\n                            try:\n                                cached_tools = cached[\"tools\"]\n                                self.tools = cached_tools\n                                self.tool_names = cached[\"tool_names\"]\n                                self._tool_cache = cached[\"tool_cache\"]\n                            except (TypeError, KeyError, AttributeError) as e:\n                                # Handle corrupted cache data by ignoring it\n                                msg = f\"Unable to use cached data for MCP Server,{current_server_name}: {e}\"\n                                await logger.awarning(msg)\n                                cached_tools = None\n\n                # Clear tools when cache is disabled OR when we don't have cached tools\n                # This ensures fresh tools are fetched after database edits\n                if is_refresh or not cached_tools or not use_cache:\n                    self.tools = []  # Clear previous tools to force refresh\n\n                # Clear previous tool inputs if:\n                # 1. Server actually changed\n                # 2. Cache is disabled (meaning tool list will be refreshed)\n                if is_refresh or server_changed or not use_cache:\n                    self.remove_non_default_keys(build_config)\n\n                # Only show the tool dropdown if not in tool_mode\n                if not is_in_tool_mode:\n                    build_config[\"tool\"][\"show\"] = True\n                    if cached_tools:\n                        # Use cached tools to populate options immediately\n                        build_config[\"tool\"][\"options\"] = [tool.name for tool in cached_tools]\n                        build_config[\"tool\"][\"placeholder\"] = \"Select a tool\"\n                    else:\n                        # Actually fetch tools now instead of deferring to a frontend callback.\n                        # The frontend has no reliable mechanism to trigger a second\n                        # update_build_config call for the \"tool\" field after this response,\n                        # so we must populate the options here.\n                        try:\n                            self.tools, build_config[\"mcp_server\"][\"value\"] = await self.update_tool_list(\n                                mcp_server_value=field_value\n                            )\n                            build_config[\"tool\"][\"options\"] = [tool.name for tool in self.tools]\n                            build_config[\"tool\"][\"placeholder\"] = \"Select a tool\"\n                        except (TimeoutError, asyncio.TimeoutError) as e:\n                            msg = f\"Timeout loading tools for MCP server: {e!s}\"\n                            await logger.aexception(msg)\n                            build_config[\"tool\"][\"options\"] = []\n                            build_config[\"tool\"][\"placeholder\"] = \"Timeout on MCP server\"\n                        except (ValueError, ImportError, ConnectionError, OSError, RuntimeError) as e:\n                            msg = f\"Error loading tools for MCP server: {e!s}\"\n                            await logger.aexception(msg)\n                            build_config[\"tool\"][\"options\"] = []\n                            build_config[\"tool\"][\"placeholder\"] = (\n                                \"Error on MCP Server\" if \"'NoneType' object has no attribute 'id'\" in msg else msg\n                            )\n                    # Force a value refresh only when the user genuinely switched servers.\n                    # server_changed is only True for real user-initiated changes (not initial load).\n                    if server_changed:\n                        build_config[\"tool\"][\"value\"] = uuid.uuid4()\n                else:\n                    # Keep the tool dropdown hidden if in tool_mode\n                    self._not_load_actions = True\n                    build_config[\"tool\"][\"show\"] = False\n\n            elif field_name == \"tool_mode\":\n                build_config[\"tool\"][\"placeholder\"] = \"\"\n                build_config[\"tool\"][\"show\"] = not bool(field_value) and bool(build_config[\"mcp_server\"])\n                self.remove_non_default_keys(build_config)\n                self.tool = build_config[\"tool\"][\"value\"]\n                if field_value:\n                    self._not_load_actions = True\n                else:\n                    build_config[\"tool\"][\"value\"] = uuid.uuid4()\n                    build_config[\"tool\"][\"show\"] = True\n                    # Fetch tools immediately instead of showing \"Loading tools...\"\n                    try:\n                        self.tools, build_config[\"mcp_server\"][\"value\"] = await self.update_tool_list()\n                        build_config[\"tool\"][\"options\"] = [tool.name for tool in self.tools]\n                        build_config[\"tool\"][\"placeholder\"] = \"Select a tool\"\n                    except (TimeoutError, asyncio.TimeoutError) as e:\n                        msg = f\"Timeout loading tools when toggling tool mode: {e!s}\"\n                        await logger.aexception(msg)\n                        build_config[\"tool\"][\"options\"] = []\n                        build_config[\"tool\"][\"placeholder\"] = msg\n                    except (ValueError, ImportError, ConnectionError, OSError, RuntimeError) as e:\n                        msg = f\"Error loading tools when toggling tool mode: {e!s}\"\n                        await logger.aexception(msg)\n                        build_config[\"tool\"][\"options\"] = []\n                        build_config[\"tool\"][\"placeholder\"] = msg\n            elif field_name == \"tool_execution_timeout\":\n                try:\n                    val = float(field_value) if field_value not in (None, \"\") else 0.0\n                except (ValueError, TypeError):\n                    val = 0.0\n                if val < 0:\n                    build_config[\"tool_execution_timeout\"][\"placeholder\"] = (\n                        \"⚠ Value must be ≥ 0. Negative timeouts cause immediate failures.\"\n                    )\n                    build_config[\"tool_execution_timeout\"][\"value\"] = 0.0\n                else:\n                    build_config[\"tool_execution_timeout\"][\"placeholder\"] = \"\"\n            elif field_name == \"tools_metadata\":\n                self._not_load_actions = False\n\n        except Exception as e:\n            msg = f\"Error in update_build_config: {e!s}\"\n            await logger.aexception(msg)\n            raise ValueError(msg) from e\n        else:\n            return build_config\n\n    @staticmethod\n    def _unwrap_optional_annotation(annotation: Any) -> Any:\n        \"\"\"Remove a single None branch from a union annotation.\"\"\"\n        if isinstance(annotation, UnionType):\n            non_none = [item for item in get_args(annotation) if item is not type(None)]\n            if len(non_none) == 1:\n                return non_none[0]\n            return annotation\n\n        if get_origin(annotation) is None:\n            return annotation\n\n        non_none = [item for item in get_args(annotation) if item is not type(None)]\n        if len(non_none) == 1 and len(non_none) != len(get_args(annotation)):\n            return non_none[0]\n        return annotation\n\n    @classmethod\n    def _is_object_like_annotation(cls, annotation: Any) -> bool:\n        \"\"\"Return True when the annotation represents a dict-like payload.\"\"\"\n        annotation = cls._unwrap_optional_annotation(annotation)\n        origin = get_origin(annotation)\n        if origin is dict:\n            return True\n        return annotation is dict or (isinstance(annotation, type) and issubclass(annotation, BaseModel))\n\n    @classmethod\n    def _should_include_tool_argument(cls, model_field: Any, value: Any) -> bool:\n        \"\"\"Omit blank optional values so MCP server defaults remain intact.\"\"\"\n        if value is None:\n            return False\n\n        if model_field.is_required():\n            return True\n\n        if isinstance(value, str) and value == \"\":\n            return False\n\n        return not (\n            value == {} and model_field.default is None and cls._is_object_like_annotation(model_field.annotation)\n        )\n\n    def _build_tool_kwargs(self, args_schema: type[BaseModel]) -> dict[str, Any]:\n        \"\"\"Collect tool kwargs from component inputs, omitting blank optional values.\"\"\"\n        kwargs: dict[str, Any] = {}\n        for arg_name, model_field in args_schema.model_fields.items():\n            value = getattr(self, arg_name, None)\n            if isinstance(value, Message):\n                value = value.text\n\n            if self._should_include_tool_argument(model_field, value):\n                kwargs[arg_name] = value\n\n        return kwargs\n\n    def get_inputs_for_all_tools(self, tools: list) -> dict:\n        \"\"\"Get input schemas for all tools.\"\"\"\n        inputs = {}\n        for tool in tools:\n            if not tool or not hasattr(tool, \"name\"):\n                continue\n            try:\n                langflow_inputs = schema_to_langflow_inputs(tool.args_schema)\n                inputs[tool.name] = langflow_inputs\n            except (AttributeError, ValueError, TypeError, KeyError) as e:\n                msg = f\"Error getting inputs for tool {getattr(tool, 'name', 'unknown')}: {e!s}\"\n                logger.exception(msg)\n                continue\n        return inputs\n\n    def remove_non_default_keys(self, build_config: dict) -> None:\n        \"\"\"Remove non-default keys from the build config.\"\"\"\n        for key in list(build_config.keys()):\n            if key not in self.default_keys:\n                build_config.pop(key)\n\n    async def _update_tool_config(self, build_config: dict, tool_name: str) -> None:\n        \"\"\"Update tool configuration with proper error handling.\"\"\"\n        if not self.tools:\n            self.tools, build_config[\"mcp_server\"][\"value\"] = await self.update_tool_list()\n\n        if not tool_name:\n            return\n\n        tool_obj = next((tool for tool in self.tools if tool.name == tool_name), None)\n        if not tool_obj:\n            msg = f\"Tool {tool_name} not found in available tools: {self.tools}\"\n            self.remove_non_default_keys(build_config)\n            build_config[\"tool\"][\"value\"] = \"\"\n            await logger.awarning(msg)\n            return\n\n        try:\n            # Store current values before removing inputs (only for the current tool)\n            current_values = {}\n            for key, value in build_config.items():\n                if key not in self.default_keys and isinstance(value, dict) and \"value\" in value:\n                    current_values[key] = value[\"value\"]\n\n            # Remove ALL non-default keys (all previous tool inputs)\n            self.remove_non_default_keys(build_config)\n\n            # Get and validate new inputs for the selected tool\n            self.schema_inputs = await self._validate_schema_inputs(tool_obj)\n            if not self.schema_inputs:\n                msg = f\"No input parameters to configure for tool '{tool_name}'\"\n                await logger.ainfo(msg)\n                return\n\n            # Add new inputs to build config for the selected tool only\n            for schema_input in self.schema_inputs:\n                if not schema_input or not hasattr(schema_input, \"name\"):\n                    msg = \"Invalid schema input detected, skipping\"\n                    await logger.awarning(msg)\n                    continue\n\n                try:\n                    name = schema_input.name\n                    input_dict = schema_input.to_dict()\n                    input_dict.setdefault(\"value\", None)\n                    input_dict.setdefault(\"required\", True)\n\n                    build_config[name] = input_dict\n\n                    # Preserve existing value if the parameter name exists in current_values\n                    if name in current_values:\n                        build_config[name][\"value\"] = current_values[name]\n\n                except (AttributeError, KeyError, TypeError) as e:\n                    msg = f\"Error processing schema input {schema_input}: {e!s}\"\n                    await logger.aexception(msg)\n                    continue\n        except ValueError as e:\n            msg = f\"Schema validation error for tool {tool_name}: {e!s}\"\n            await logger.aexception(msg)\n            self.schema_inputs = []\n            return\n        except (AttributeError, KeyError, TypeError) as e:\n            msg = f\"Error updating tool config: {e!s}\"\n            await logger.aexception(msg)\n            raise ValueError(msg) from e\n\n    async def build_output(self) -> DataFrame:\n        \"\"\"Build output with improved error handling and validation.\"\"\"\n        try:\n            self.tools, _ = await self.update_tool_list()\n            if self.tool != \"\":\n                # Set session context for persistent MCP sessions using Langflow session ID\n                session_context = self._get_session_context()\n                if session_context:\n                    self.stdio_client.set_session_context(session_context)\n                    self.streamable_http_client.set_session_context(session_context)\n                exec_tool = self._tool_cache[self.tool]\n                kwargs = self._build_tool_kwargs(exec_tool.args_schema)\n                unflattened_kwargs = maybe_unflatten_dict(kwargs)\n\n                output = await exec_tool.coroutine(**unflattened_kwargs)\n                tool_content = []\n                for item in output.content:\n                    item_dict = item.model_dump()\n                    item_dict = self.process_output_item(item_dict)\n                    tool_content.append(item_dict)\n\n                if isinstance(tool_content, list) and all(isinstance(x, dict) for x in tool_content):\n                    return DataFrame(tool_content)\n                return DataFrame(data=tool_content)\n            return DataFrame(data=[{\"error\": \"You must select a tool\"}])\n        except Exception as e:\n            msg = f\"Error in build_output: {e!s}\"\n            await logger.aexception(msg)\n            raise ValueError(msg) from e\n\n    def process_output_item(self, item_dict):\n        \"\"\"Process the output of a tool.\"\"\"\n        if item_dict.get(\"type\") == \"text\":\n            text = item_dict.get(\"text\")\n            try:\n                parsed = json.loads(text)\n                # Ensure we always return a dictionary for DataFrame compatibility\n                if isinstance(parsed, dict):\n                    return parsed\n                # Wrap non-dict parsed values in a dictionary\n                return {\"text\": text, \"parsed_value\": parsed, \"type\": \"text\"}  # noqa: TRY300\n            except json.JSONDecodeError:\n                return item_dict\n        return item_dict\n\n    def _get_session_context(self) -> str | None:\n        \"\"\"Get the Langflow session ID for MCP session caching.\"\"\"\n        # Try to get session ID from the component's execution context\n        if hasattr(self, \"graph\") and hasattr(self.graph, \"session_id\"):\n            session_id = self.graph.session_id\n            # Include server name to ensure different servers get different sessions\n            server_name = \"\"\n            mcp_server = getattr(self, \"mcp_server\", None)\n            if isinstance(mcp_server, dict):\n                server_name = mcp_server.get(\"name\", \"\")\n            elif mcp_server:\n                server_name = str(mcp_server)\n            return f\"{session_id}_{server_name}\" if session_id else None\n        return None\n\n    async def _get_tools(self):\n        \"\"\"Load tools for the agent toolkit; always refresh from ``update_tool_list``.\n\n        ``_not_load_actions`` only applies to UI build_config flows (tool dropdown). Agent\n        runs must always bind the current tool list (including after header/tweak changes).\n\n        A short-lived TTL cache (``TOOL_TTL_SECS``, header-hash-keyed) skips the MCP\n        round-trip when the same auth context is re-queried quickly (e.g. parallel agent\n        steps sharing the same tweaked headers). The cache is per component instance and\n        bounded by ``TOOL_TTL_MAX_ENTRIES``; it is distinct from the \"Use Cached Server\"\n        (``use_cache``) toggle which controls the shared cross-request cache.\n        \"\"\"\n        mcp_server = getattr(self, \"mcp_server\", None)\n        srv = mcp_server.get(\"name\") if isinstance(mcp_server, dict) else mcp_server\n\n        ttl = self.TOOL_TTL_SECS\n        ttl_key = self._mcp_servers_cache_key(srv or \"\") if ttl > 0 and srv else \"\"\n\n        # TTL cache lookup + expired-entry eviction.\n        if ttl > 0 and ttl_key:\n            cached = self._ttl_tool_cache.get(ttl_key)\n            if cached is not None:\n                ts, cached_tools = cached\n                age = time.monotonic() - ts\n                if age < ttl:\n                    await logger.adebug(\n                        \"MCP _get_tools: TTL cache hit count=%d age=%.1fs server=%r\",\n                        len(cached_tools),\n                        age,\n                        srv,\n                    )\n                    return cached_tools\n                # Stale — drop it so the size check below stays tight.\n                self._ttl_tool_cache.pop(ttl_key, None)\n\n        await logger.adebug(\"MCP _get_tools: fetching tool list server=%r\", srv)\n        tools, _ = await self.update_tool_list(mcp_server)\n        await logger.adebug(\"MCP _get_tools: fetched %d tools server=%r\", len(tools), srv)\n\n        # TTL cache store with bounded size (FIFO eviction of the oldest entry).\n        if ttl > 0 and ttl_key and tools:\n            if len(self._ttl_tool_cache) >= self.TOOL_TTL_MAX_ENTRIES:\n                # dict preserves insertion order — pop the oldest entry.\n                oldest_key = next(iter(self._ttl_tool_cache))\n                self._ttl_tool_cache.pop(oldest_key, None)\n            self._ttl_tool_cache[ttl_key] = (time.monotonic(), tools)\n\n        return tools\n"
+              },
+              "headers": {
+                "_input_type": "DictInput",
+                "advanced": true,
+                "display_name": "Headers",
+                "dynamic": false,
+                "info": "HTTP headers to include with MCP server requests. Useful for authentication (e.g., Authorization header). These headers override any headers configured in the MCP server settings.",
+                "list": true,
+                "list_add_label": "Add More",
+                "name": "headers",
+                "override_skip": false,
+                "placeholder": "",
                 "required": false,
                 "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "track_in_telemetry": false,
+                "type": "dict",
+                "value": {}
+              },
+              "is_refresh": false,
+              "mcp_server": {
+                "_input_type": "McpInput",
+                "advanced": false,
+                "display_name": "MCP Server",
+                "dynamic": false,
+                "info": "Select the MCP Server that will be used by this component",
+                "name": "mcp_server",
+                "override_skip": false,
+                "placeholder": "",
+                "real_time_refresh": true,
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "trace_as_metadata": true,
+                "track_in_telemetry": false,
+                "type": "mcp",
+                "value": {
+                  "config": {
+                    "url": "http://mcp-neo4j:8000/mcp/",
+                    "verify_ssl": true
+                  },
+                  "name": "hulubul_neo4j"
+                }
+              },
+              "tool": {
+                "_input_type": "DropdownInput",
+                "advanced": false,
+                "combobox": false,
+                "dialog_inputs": {},
+                "display_name": "Tool",
+                "dynamic": false,
+                "external_options": {},
+                "info": "Select the tool to execute",
+                "name": "tool",
+                "options": [
+                  "get_neo4j_schema",
+                  "read_neo4j_cypher",
+                  "write_neo4j_cypher"
+                ],
+                "options_metadata": [],
+                "override_skip": false,
+                "placeholder": "",
+                "real_time_refresh": true,
+                "refresh_button": true,
+                "required": true,
+                "show": false,
+                "title_case": false,
+                "toggle": false,
+                "tool_mode": false,
+                "trace_as_metadata": true,
+                "track_in_telemetry": true,
                 "type": "str",
                 "value": ""
+              },
+              "tool_execution_timeout": {
+                "_input_type": "FloatInput",
+                "advanced": true,
+                "display_name": "Tool Execution Timeout (seconds)",
+                "dynamic": false,
+                "info": "Maximum time to wait for tool execution before timing out. Supports decimal values for sub-second timeouts (e.g., 0.01 for 10ms). Set to 0 to use the system-configured MCP timeout.",
+                "list": false,
+                "list_add_label": "Add More",
+                "name": "tool_execution_timeout",
+                "override_skip": false,
+                "placeholder": "",
+                "range_spec": {
+                  "max": 3600,
+                  "min": 0,
+                  "step": 0.01,
+                  "step_type": "float"
+                },
+                "real_time_refresh": true,
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_metadata": true,
+                "track_in_telemetry": true,
+                "type": "float",
+                "value": 0
+              },
+              "tool_placeholder": {
+                "_input_type": "MessageTextInput",
+                "advanced": false,
+                "display_name": "Tool Placeholder",
+                "dynamic": false,
+                "info": "Placeholder for the tool",
+                "input_types": [
+                  "Message"
+                ],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "name": "tool_placeholder",
+                "override_skip": false,
+                "placeholder": "",
+                "required": false,
+                "show": false,
+                "title_case": false,
+                "tool_mode": true,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "track_in_telemetry": false,
+                "type": "str",
+                "value": ""
+              },
+              "tools_metadata": {
+                "_input_type": "ToolsInput",
+                "advanced": false,
+                "display_name": "Actions",
+                "dynamic": false,
+                "info": "Modify tool names and descriptions to help agents understand when to use each tool.",
+                "is_list": true,
+                "list_add_label": "Add More",
+                "name": "tools_metadata",
+                "override_skip": false,
+                "placeholder": "",
+                "real_time_refresh": true,
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_metadata": true,
+                "track_in_telemetry": false,
+                "type": "tools",
+                "value": [
+                  {
+                    "args": {
+                      "sample_size": {
+                        "anyOf": [
+                          {
+                            "type": "integer"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ],
+                        "default": 1000,
+                        "description": "The sample size used to infer the graph schema. Larger samples are slower, but more accurate. Smaller samples are faster, but might miss information.",
+                        "title": "Sample Size"
+                      }
+                    },
+                    "description": "Returns nodes, their properties (with types and indexed flags), and relationships\nusing APOC's schema inspection.\n\nYou should only provide a `sample_size` value if requested by the user, or tuning the retrieval performance.\n\nPerformance Notes:\n    - If `sample_size` is not provided, uses the server's default sample setting defined in the server configuration.\n    - If retrieving the schema times out, try lowering the sample size, e.g. `sample_size=100`.\n    - To sample the entire graph use `sample_size=-1`.",
+                    "display_description": "Returns nodes, their properties (with types and indexed flags), and relationships\nusing APOC's schema inspection.\n\nYou should only provide a `sample_size` value if requested by the user, or tuning the retrieval performance.\n\nPerformance Notes:\n    - If `sample_size` is not provided, uses the server's default sample setting defined in the server configuration.\n    - If retrieving the schema times out, try lowering the sample size, e.g. `sample_size=100`.\n    - To sample the entire graph use `sample_size=-1`.",
+                    "display_name": "get_neo4j_schema",
+                    "name": "get_neo4j_schema",
+                    "readonly": false,
+                    "status": true,
+                    "tags": [
+                      "get_neo4j_schema"
+                    ]
+                  },
+                  {
+                    "args": {
+                      "params": {
+                        "anyOf": [
+                          {
+                            "additionalProperties": true,
+                            "type": "object"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ],
+                        "default": {},
+                        "description": "The parameters to pass to the Cypher query.",
+                        "title": "Params"
+                      },
+                      "query": {
+                        "description": "The Cypher query to execute.",
+                        "title": "Query",
+                        "type": "string"
+                      }
+                    },
+                    "description": "Execute a read Cypher query on the neo4j database.",
+                    "display_description": "Execute a read Cypher query on the neo4j database.",
+                    "display_name": "read_neo4j_cypher",
+                    "name": "read_neo4j_cypher",
+                    "readonly": false,
+                    "status": true,
+                    "tags": [
+                      "read_neo4j_cypher"
+                    ]
+                  },
+                  {
+                    "args": {
+                      "params": {
+                        "anyOf": [
+                          {
+                            "additionalProperties": true,
+                            "type": "object"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ],
+                        "default": {},
+                        "description": "The parameters to pass to the Cypher query.",
+                        "title": "Params"
+                      },
+                      "query": {
+                        "description": "The Cypher query to execute.",
+                        "title": "Query",
+                        "type": "string"
+                      }
+                    },
+                    "description": "Execute a write Cypher query on the neo4j database.",
+                    "display_description": "Execute a write Cypher query on the neo4j database.",
+                    "display_name": "write_neo4j_cypher",
+                    "name": "write_neo4j_cypher",
+                    "readonly": false,
+                    "status": true,
+                    "tags": [
+                      "write_neo4j_cypher"
+                    ]
+                  }
+                ]
+              },
+              "use_cache": {
+                "_input_type": "BoolInput",
+                "advanced": true,
+                "display_name": "Use Cached Server",
+                "dynamic": false,
+                "info": "Enable caching of MCP Server and tools to improve performance. Disable to always fetch fresh tools and server updates.",
+                "list": false,
+                "list_add_label": "Add More",
+                "name": "use_cache",
+                "override_skip": false,
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_metadata": true,
+                "track_in_telemetry": true,
+                "type": "bool",
+                "value": false
+              },
+              "verify_ssl": {
+                "_input_type": "BoolInput",
+                "advanced": true,
+                "display_name": "Verify SSL Certificate",
+                "dynamic": false,
+                "info": "Enable SSL certificate verification for HTTPS connections. Disable only for development/testing with self-signed certificates.",
+                "list": false,
+                "list_add_label": "Add More",
+                "name": "verify_ssl",
+                "override_skip": false,
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_metadata": true,
+                "track_in_telemetry": true,
+                "type": "bool",
+                "value": true
               }
-            }
+            },
+            "tool_mode": true
           },
-          "selected_output": "component_as_tool",
           "showNode": true,
-          "type": "MCPToolkit"
+          "type": "MCPTools"
         },
         "dragging": false,
-        "height": 180,
-        "id": "MCPToolkit-hlb-lf-70-neo4j-v1",
-        "position": {
-          "x": 900,
-          "y": 100
+        "id": "MCPTools-hlb-lf-70-neo4j-v1",
+        "measured": {
+          "height": 321,
+          "width": 320
         },
-        "width": 300
+        "position": {
+          "x": 172.27032890409606,
+          "y": 484.84262347865837
+        },
+        "selected": false,
+        "type": "genericNode"
       },
       {
         "data": {
+          "_connectionMode": false,
           "id": "Agent-hlb-lf-70-agent-v1",
           "node": {
             "base_classes": [
-              "Agent"
+              "Data",
+              "JSON",
+              "Message"
             ],
-            "category": "agents",
-            "description": "Data access agent: executes five operations via Neo4j MCP tools",
+            "beta": false,
+            "conditional_paths": [],
+            "custom_fields": {},
+            "description": "LF-70's Data Access Agent: retries a transient read or model call once (DEC-015), never retries a dispatched write.",
             "display_name": "Data Access Agent",
+            "documentation": "https://docs.langflow.org/agents",
             "edited": false,
             "field_order": [
-              "input_value",
               "model",
-              "tools",
+              "api_key",
+              "base_url_ibm_watsonx",
+              "project_id",
               "system_prompt",
-              "temperature",
-              "agent_type"
+              "context_id",
+              "n_messages",
+              "max_tokens",
+              "format_instructions",
+              "output_schema",
+              "tools",
+              "input_value",
+              "handle_parsing_errors",
+              "max_iterations",
+              "stream",
+              "add_current_date_tool",
+              "add_calculator_tool"
             ],
-            "icon": "cpu",
-            "key": "Agent",
-            "lf_version": "1.10.2",
+            "frozen": false,
+            "icon": "bot",
+            "last_updated": "2026-07-27T14:25:45.377Z",
+            "legacy": false,
+            "metadata": {
+              "code_hash": "c675f1db6999",
+              "dependencies": {
+                "dependencies": [
+                  {
+                    "name": "langchain",
+                    "version": "1.3.11"
+                  },
+                  {
+                    "name": "lfx",
+                    "version": "1.10.2"
+                  }
+                ],
+                "total_dependencies": 2
+              },
+              "module": "custom_components.data_access_agent"
+            },
+            "minimized": false,
             "output_types": [],
             "outputs": [
               {
+                "allows_loop": false,
                 "cache": true,
-                "display_name": "Message",
-                "hidden": false,
-                "method": "build_output_message",
+                "display_name": "Response",
+                "group_outputs": false,
+                "hidden": null,
+                "loop_types": null,
+                "method": "message_response",
                 "name": "response",
+                "options": null,
+                "required_inputs": null,
+                "selected": "Message",
+                "tool_mode": true,
                 "types": [
                   "Message"
-                ]
+                ],
+                "value": "__UNDEFINED__"
+              },
+              {
+                "allows_loop": false,
+                "cache": true,
+                "display_name": "Structured Response",
+                "group_outputs": false,
+                "hidden": null,
+                "loop_types": null,
+                "method": "json_response",
+                "name": "structured_response",
+                "options": null,
+                "required_inputs": null,
+                "selected": "Data",
+                "tool_mode": true,
+                "types": [
+                  "Data",
+                  "JSON"
+                ],
+                "value": "__UNDEFINED__"
               }
             ],
+            "pinned": false,
             "template": {
+              "_frontend_node_flow_id": {
+                "input_types": [],
+                "value": "94f6774d-ebc7-5bf1-8486-886f91886a5f"
+              },
+              "_frontend_node_folder_id": {
+                "input_types": [],
+                "value": "a6f9eb0d-e26e-4d3d-9232-fe1704342cd4"
+              },
               "_type": "Component",
-              "agent_type": {
-                "advanced": false,
-                "default": "tool-calling",
-                "display_name": "Agent Type",
+              "add_calculator_tool": {
+                "_input_type": "BoolInput",
+                "advanced": true,
+                "display_name": "Calculator",
                 "dynamic": false,
-                "info": "Type of agent reasoning",
+                "info": "If true, adds a zero-config arithmetic calculator tool to the agent (safe: only +, -, *, /, ** operators via AST).",
                 "input_types": [],
                 "list": false,
-                "load_from_db": false,
-                "multiline": false,
-                "name": "agent_type",
+                "list_add_label": "Add More",
+                "name": "add_calculator_tool",
+                "override_skip": false,
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_metadata": true,
+                "track_in_telemetry": true,
+                "type": "bool",
+                "value": false
+              },
+              "add_current_date_tool": {
+                "_input_type": "BoolInput",
+                "advanced": true,
+                "display_name": "Current Date",
+                "dynamic": false,
+                "info": "If true, will add a tool to the agent that returns the current date.",
+                "input_types": [],
+                "list": false,
+                "list_add_label": "Add More",
+                "name": "add_current_date_tool",
+                "override_skip": false,
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_metadata": true,
+                "track_in_telemetry": true,
+                "type": "bool",
+                "value": false
+              },
+              "api_key": {
+                "_input_type": "SecretStrInput",
+                "advanced": true,
+                "display_name": "API Key",
+                "dynamic": false,
+                "info": "Falls back to OPENAI_API_KEY environment variable",
+                "input_types": [],
+                "load_from_db": true,
+                "name": "api_key",
+                "override_skip": false,
+                "password": true,
+                "placeholder": "",
+                "real_time_refresh": true,
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "track_in_telemetry": false,
+                "type": "str",
+                "value": "OPENAI_API_KEY"
+              },
+              "base_url_ibm_watsonx": {
+                "_input_type": "DropdownInput",
+                "advanced": false,
+                "combobox": true,
+                "dialog_inputs": {},
+                "display_name": "watsonx API Endpoint",
+                "dynamic": false,
+                "external_options": {},
+                "info": "The base URL of the API (IBM watsonx.ai only)",
+                "input_types": [],
+                "name": "base_url_ibm_watsonx",
                 "options": [
-                  "tool-calling",
-                  "structured-output"
+                  "https://us-south.ml.cloud.ibm.com",
+                  "https://eu-de.ml.cloud.ibm.com",
+                  "https://eu-gb.ml.cloud.ibm.com",
+                  "https://au-syd.ml.cloud.ibm.com",
+                  "https://jp-tok.ml.cloud.ibm.com",
+                  "https://ca-tor.ml.cloud.ibm.com"
                 ],
+                "options_metadata": [],
+                "override_skip": false,
                 "placeholder": "",
+                "real_time_refresh": true,
                 "required": false,
-                "show": true,
+                "show": false,
+                "title_case": false,
+                "toggle": false,
+                "tool_mode": false,
+                "trace_as_metadata": true,
+                "track_in_telemetry": true,
                 "type": "str",
-                "value": "tool-calling"
+                "value": "https://us-south.ml.cloud.ibm.com"
               },
-              "input_value": {
-                "advanced": false,
-                "display_name": "Input",
-                "dynamic": false,
-                "info": "Input message to the agent",
-                "input_types": [
-                  "Message",
-                  "str"
-                ],
-                "list": false,
-                "load_from_db": false,
-                "multiline": false,
-                "name": "input_value",
-                "placeholder": "",
-                "required": false,
-                "show": true,
-                "type": "str",
-                "value": ""
-              },
-              "model": {
-                "advanced": false,
-                "display_name": "Language Model",
-                "dynamic": false,
-                "info": "Language model for agent reasoning",
-                "input_types": [
-                  "LanguageModel"
-                ],
-                "list": false,
-                "load_from_db": false,
-                "multiline": false,
-                "name": "model",
-                "placeholder": "",
-                "required": false,
-                "show": true,
-                "type": "LanguageModel",
-                "value": ""
-              },
-              "system_prompt": {
-                "advanced": false,
-                "display_name": "System Prompt",
-                "dynamic": false,
-                "info": "System instructions for the agent",
+              "code": {
+                "advanced": true,
+                "dynamic": true,
+                "fileTypes": [],
+                "file_path": "",
+                "info": "",
                 "input_types": [],
                 "list": false,
                 "load_from_db": false,
                 "multiline": true,
-                "name": "system_prompt",
+                "name": "code",
+                "password": false,
+                "placeholder": "",
+                "required": true,
+                "show": true,
+                "title_case": false,
+                "type": "code",
+                "value": "\"\"\"LF-70 Data Access Agent: the stock Agent, scoped to a safe retry policy.\n\nPer DEC-015 (design.md), LF-70 must retry a transient MCP read or model call\nonce, but must NEVER retry a dispatched write -- Phase 1 has no idempotency\nkey, so replaying a write whose outcome is ambiguous could silently create a\nduplicate mutation (see brainstorm.md Q12 and the \"No write idempotency\nlimits safe retry behavior\" trade-off in design.md's risk list).\n\nLangChain's `create_agent` already ships exactly the retry primitives this\nneeds (`ModelRetryMiddleware`, `ToolRetryMiddleware` -- both used internally\nby LangFlow's own stock components, e.g. HuggingFace/embeddings retries), so\nthis is not a flow-graph loop: the retry happens inside a single Agent\ninvocation, transparent to the flow. But the stock `AgentComponent`'s\n`handle_parsing_errors` checkbox only ever constructs an UNSCOPED\n`ToolRetryMiddleware(max_retries=2)` -- applied to every tool, which would\nalso retry `write_neo4j_cypher`. This subclass overrides only the middleware\nassembly step to scope tool retry to the two read-only MCP tools, and adds\nmodel-call retry (which the stock component doesn't wire in at all).\n\nNOTE for whoever builds LF-10/LF-00 (checkpoint 9): this `tools=[...]`\nname-based scoping only works because LF-70 is the sole flow with a raw MCP\ntoolkit exposing separately-named read/write tools. LF-10/LF-00's agents call\n*other flows* (LF-70, LF-10) through a single \"Run Flow\" tool each -- there is\nno separate read-tool-name vs write-tool-name to filter by there. If those\nflows want the same protection, `retry_on` needs a callable that inspects the\ntool-call *arguments* (was this a read-type or write-type DataOperationRequest?),\nnot a plain `tools=[...]` name filter. See also the note in plan.md near the\nLF-10 agent/tool-wiring section.\n\"\"\"\n\nfrom typing import Any\n\nfrom langchain.agents.middleware import ModelRetryMiddleware, ToolRetryMiddleware\nfrom lfx.components.models_and_agents.agent import AgentComponent\n\n__all__ = [\"HulubulDataAccessAgentComponent\"]\n\n# MCP toolkit tool names exposed only inside LF-70 (tests/integration/conftest.py's\n# mcp_client fixture asserts this exact three-tool inventory). Only the two read\n# tools are eligible for retry; write_neo4j_cypher is intentionally excluded.\n_READ_ONLY_MCP_TOOL_NAMES = (\"read_neo4j_cypher\", \"get_neo4j_schema\")\n\n\nclass HulubulDataAccessAgentComponent(AgentComponent):\n    \"\"\"Agent scoped for LF-70: retries transient reads/model calls, never writes.\"\"\"\n\n    display_name = \"Data Access Agent\"\n    description = (\n        \"LF-70's Data Access Agent: retries a transient read or model call once \"\n        \"(DEC-015), never retries a dispatched write.\"\n    )\n    icon = \"bot\"\n    name = \"HulubulDataAccessAgent\"\n\n    def _build_middleware(self, llm: Any) -> list[Any]:\n        # Signature matches the installed lfx==1.10.2 AgentComponent._build_middleware\n        # exactly (verified via inspect.signature locally) -- GitHub's main branch\n        # has since added an `allow_interrupts` kwarg not present in this pinned\n        # release; do not add it here without re-verifying against the pinned version.\n        middleware = super()._build_middleware(llm)\n\n        # Drop the stock unscoped ToolRetryMiddleware (would also retry writes).\n        middleware = [m for m in middleware if not isinstance(m, ToolRetryMiddleware)]\n\n        if self.tools:\n            middleware.append(ToolRetryMiddleware(tools=list(_READ_ONLY_MCP_TOOL_NAMES)))\n        middleware.append(ModelRetryMiddleware())\n\n        return middleware\n"
+              },
+              "context_id": {
+                "_input_type": "MessageTextInput",
+                "advanced": true,
+                "display_name": "Context ID",
+                "dynamic": false,
+                "info": "The context ID of the chat. Adds an extra layer to the local memory.",
+                "input_types": [
+                  "Message"
+                ],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "name": "context_id",
+                "override_skip": false,
                 "placeholder": "",
                 "required": false,
                 "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "track_in_telemetry": false,
                 "type": "str",
-                "value": "You are the LF-70 Data Access Agent. You execute typed data operations against a Neo4j graph via the MCP toolkit.\n\nAvailable operations (call the appropriate MCP tool for each):\n\n1. **getRequestRoutingContext** (read-only)\n   - No payload needed\n   - Call: get_neo4j_schema to understand the graph structure, then read_neo4j_cypher to query routing context\n   - Returns: RoutingContext with binding presence, request ID/status, closed timestamp, routing stage\n   - No mutation\n\n2. **readDeliveryRequest** (read-only)\n   - Payload: { request_id: string }\n   - Call: read_neo4j_cypher with parameterized query (NEVER client-sourced text)\n   - Returns: DeliveryRequestSnapshot with sparse facts and optimistic concurrency timestamp (updated_at)\n   - No mutation\n\n3. **createDeliveryRequest** (write)\n   - Payload: { identifiers: {...}, facts: {...} }\n   - Call: write_neo4j_cypher to create request + binding in one transaction\n   - Neo4j returns both created and updated timestamps (must be equal)\n   - Returns: DeliveryRequestSnapshot with new request\n   - Atomic: if binding fails (duplicate sessionId), entire transaction rolls back; no orphan request\n\n4. **updateDeliveryRequest** (write)\n   - Payload: { request_id: string, expected_updated_at: datetime, expected_status: string, updates: {...}, identifiers?: {...} }\n   - Enforce: additive-only updates (no replacement of existing preferred_period or singular subgraphs)\n   - Call: write_neo4j_cypher with parameterized expected_updated_at and expected_status (compare-and-set)\n   - If zero rows: perform one non-mutating read to classify (CONCURRENT_MODIFICATION vs INVALID_EXPECTED_STATUS vs other)\n   - Returns: DeliveryRequestSnapshot with new updated timestamp\n   - Exactly one request must be affected\n\n5. **setRequestStatus** (write)\n   - Payload: { request_id: string, expected_updated_at: datetime, expected_status: string, target_status: string }\n   - Enforce: Only allowed transitions per fixed table (new→complete, new→needsClarification, needsClarification→complete, none→new)\n   - Call: write_neo4j_cypher with parameterized compare-and-set on both expected_updated_at and expected_status\n   - If zero rows: perform one non-mutating read to classify the failure type\n   - Returns: new updated timestamp\n   - Exactly one request must be affected\n\nGeneral rules:\n- All Cypher must use parameterized queries (never interpolate client values)\n- Never invent or bypass identifiers; trust pre-generated IDs from the caller\n- Validate record counts: writes affecting exactly 1 request, reads returning at most 1 request\n- Return typed DataOperationResult with outcome (confirmed/rejected/ambiguous), affected_count, status before/after\n- Write timeouts return MCP_WRITE_AMBIGUOUS with write_dispatched=true and retryable=false\n- Malformed results trigger tool-less repair (never replay a dispatched write)\n\nDo not:\n- Execute arbitrary Cypher (operations are strictly five named commands)\n- Bypass the expected_updated_at compare-and-set for updates\n- Replay writes after dispatch (handle ambiguity via independent Neo4j inspection)\n- Fabricate domain nodes or identifiers\n- Claim success without confirming affected-record counts"
+                "value": ""
               },
-              "temperature": {
-                "advanced": false,
-                "default": 0.0,
-                "display_name": "Temperature",
+              "format_instructions": {
+                "_input_type": "MultilineInput",
+                "advanced": true,
+                "ai_enabled": false,
+                "copy_field": false,
+                "display_name": "Output Format Instructions",
                 "dynamic": false,
-                "info": "Agent temperature (inherited from model)",
+                "info": "Generic Template for structured output formatting. Valid only with Structured response.",
+                "input_types": [
+                  "Message"
+                ],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "multiline": true,
+                "name": "format_instructions",
+                "override_skip": false,
+                "password": false,
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "track_in_telemetry": false,
+                "type": "str",
+                "value": "You are an AI that extracts structured JSON objects from unstructured text. Use a predefined schema with expected types (str, int, float, bool, dict). Extract ALL relevant instances that match the schema - if multiple patterns exist, capture them all. Fill missing or ambiguous values with defaults: null for missing values. Remove exact duplicates but keep variations that have different field values. Always return valid JSON in the expected format, never throw errors. If multiple objects can be extracted, return them all in the structured format."
+              },
+              "handle_parsing_errors": {
+                "_input_type": "BoolInput",
+                "advanced": true,
+                "display_name": "Handle Parse Errors",
+                "dynamic": false,
+                "info": "Adds tool-execution retry as a safety net. `create_agent` already feeds tool-call validation errors back to the LLM automatically; this flag layers `ToolRetryMiddleware` on top so transient tool runtime failures are retried (max 2 retries).",
                 "input_types": [],
                 "list": false,
+                "list_add_label": "Add More",
+                "name": "handle_parsing_errors",
+                "override_skip": false,
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_metadata": true,
+                "track_in_telemetry": true,
+                "type": "bool",
+                "value": true
+              },
+              "input_value": {
+                "_input_type": "MessageInput",
+                "advanced": false,
+                "display_name": "Input",
+                "dynamic": false,
+                "info": "The input provided by the user for the agent to process.",
+                "input_types": [
+                  "Message"
+                ],
+                "list": false,
+                "list_add_label": "Add More",
                 "load_from_db": false,
-                "multiline": false,
-                "name": "temperature",
+                "name": "input_value",
+                "override_skip": false,
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": true,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "track_in_telemetry": false,
+                "type": "str",
+                "value": ""
+              },
+              "is_refresh": false,
+              "max_iterations": {
+                "_input_type": "IntInput",
+                "advanced": true,
+                "display_name": "Max Iterations",
+                "dynamic": false,
+                "info": "Maximum number of model calls the agent can make before stopping (maps to `ModelCallLimitMiddleware.run_limit` on the create_agent path). Must be at least 1 — it is a safety cap, never 'unlimited'.",
+                "input_types": [],
+                "list": false,
+                "list_add_label": "Add More",
+                "name": "max_iterations",
+                "override_skip": false,
+                "placeholder": "",
+                "range_spec": {
+                  "max": 128000,
+                  "min": 1,
+                  "step": 1,
+                  "step_type": "int"
+                },
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_metadata": true,
+                "track_in_telemetry": true,
+                "type": "int",
+                "value": 15
+              },
+              "max_tokens": {
+                "_input_type": "IntInput",
+                "advanced": true,
+                "display_name": "Max Tokens",
+                "dynamic": false,
+                "info": "Maximum number of tokens to generate. Field name varies by provider.",
+                "input_types": [],
+                "list": false,
+                "list_add_label": "Add More",
+                "name": "max_tokens",
+                "override_skip": false,
+                "placeholder": "",
+                "range_spec": {
+                  "max": 128000,
+                  "min": 1,
+                  "step": 1,
+                  "step_type": "int"
+                },
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_metadata": true,
+                "track_in_telemetry": true,
+                "type": "int",
+                "value": 0
+              },
+              "model": {
+                "_input_type": "ModelInput",
+                "advanced": false,
+                "display_name": "Language Model",
+                "dynamic": false,
+                "external_options": {
+                  "fields": {
+                    "data": {
+                      "node": {
+                        "display_name": "Connect other models",
+                        "icon": "CornerDownLeft",
+                        "name": "connect_other_models"
+                      }
+                    }
+                  }
+                },
+                "filters": {
+                  "tool_calling": true
+                },
+                "info": "Select your model provider",
+                "input_types": [
+                  "LanguageModel"
+                ],
+                "list": false,
+                "list_add_label": "Add More",
+                "model_type": "language",
+                "name": "model",
+                "options": [
+                  {
+                    "category": "OpenAI",
+                    "icon": "OpenAI",
+                    "metadata": {
+                      "api_key_param": "api_key",
+                      "context_length": 128000,
+                      "max_tokens_field_name": "max_tokens",
+                      "model_class": "ChatOpenAI",
+                      "model_name_param": "model"
+                    },
+                    "name": "global/tinfoil/gemma-4-31b",
+                    "provider": "OpenAI"
+                  },
+                  {
+                    "category": "OpenAI",
+                    "icon": "OpenAI",
+                    "metadata": {
+                      "api_key_param": "api_key",
+                      "context_length": 128000,
+                      "max_tokens_field_name": "max_tokens",
+                      "model_class": "ChatOpenAI",
+                      "model_name_param": "model"
+                    },
+                    "name": "eu/privatemode/gemma-4-31b",
+                    "provider": "OpenAI"
+                  },
+                  {
+                    "category": "OpenAI",
+                    "icon": "OpenAI",
+                    "metadata": {
+                      "api_key_param": "api_key",
+                      "context_length": 128000,
+                      "max_tokens_field_name": "max_tokens",
+                      "model_class": "ChatOpenAI",
+                      "model_name_param": "model"
+                    },
+                    "name": "global/nearai/gemma-4-31b",
+                    "provider": "OpenAI"
+                  },
+                  {
+                    "category": "OpenAI",
+                    "icon": "OpenAI",
+                    "metadata": {
+                      "api_key_param": "api_key",
+                      "context_length": 128000,
+                      "max_tokens_field_name": "max_tokens",
+                      "model_class": "ChatOpenAI",
+                      "model_name_param": "model"
+                    },
+                    "name": "global/nearai/qwen3.6-27b",
+                    "provider": "OpenAI"
+                  },
+                  {
+                    "category": "OpenAI",
+                    "icon": "OpenAI",
+                    "metadata": {
+                      "api_key_param": "api_key",
+                      "context_length": 128000,
+                      "max_tokens_field_name": "max_tokens",
+                      "model_class": "ChatOpenAI",
+                      "model_name_param": "model"
+                    },
+                    "name": "global/chutes/qwen3.6-27b",
+                    "provider": "OpenAI"
+                  },
+                  {
+                    "icon": "OpenAI",
+                    "metadata": {
+                      "created": 0,
+                      "default": false,
+                      "deprecated": false,
+                      "icon": "OpenAI",
+                      "model_type": "llm",
+                      "not_enabled_locally": true,
+                      "not_supported": false,
+                      "preview": false,
+                      "reasoning": false,
+                      "search": false,
+                      "tool_calling": true
+                    },
+                    "name": "global/nearai/deepseek-v4-flash",
+                    "provider": "OpenAI"
+                  }
+                ],
+                "override_skip": false,
+                "placeholder": "Setup Provider",
+                "real_time_refresh": true,
+                "refresh_button": true,
+                "required": true,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "track_in_telemetry": false,
+                "type": "model",
+                "value": [
+                  {
+                    "icon": "OpenAI",
+                    "metadata": {
+                      "created": 0,
+                      "default": false,
+                      "deprecated": false,
+                      "icon": "OpenAI",
+                      "model_type": "llm",
+                      "not_supported": false,
+                      "preview": false,
+                      "reasoning": false,
+                      "search": false,
+                      "tool_calling": true
+                    },
+                    "name": "global/nearai/deepseek-v4-flash",
+                    "provider": "OpenAI"
+                  }
+                ]
+              },
+              "n_messages": {
+                "_input_type": "IntInput",
+                "advanced": true,
+                "display_name": "Number of Chat History Messages",
+                "dynamic": false,
+                "info": "Number of chat history messages to retrieve.",
+                "input_types": [],
+                "list": false,
+                "list_add_label": "Add More",
+                "name": "n_messages",
+                "override_skip": false,
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_metadata": true,
+                "track_in_telemetry": true,
+                "type": "int",
+                "value": 100
+              },
+              "output_schema": {
+                "_input_type": "TableInput",
+                "advanced": true,
+                "display_name": "Output Schema",
+                "dynamic": false,
+                "info": "Schema Validation: Define the structure and data types for structured output. No validation if no output schema.",
+                "input_types": [
+                  "DataFrame",
+                  "Table"
+                ],
+                "is_list": true,
+                "list_add_label": "Add More",
+                "name": "output_schema",
+                "override_skip": false,
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "table_icon": "Table",
+                "table_schema": [
+                  {
+                    "default": "field",
+                    "description": "Specify the name of the output field.",
+                    "display_name": "Name",
+                    "edit_mode": "inline",
+                    "formatter": "text",
+                    "name": "name",
+                    "type": "str"
+                  },
+                  {
+                    "default": "description of field",
+                    "description": "Describe the purpose of the output field.",
+                    "display_name": "Description",
+                    "edit_mode": "popover",
+                    "formatter": "text",
+                    "name": "description",
+                    "type": "str"
+                  },
+                  {
+                    "default": "str",
+                    "description": "Indicate the data type of the output field (e.g., str, int, float, bool, dict).",
+                    "display_name": "Type",
+                    "edit_mode": "inline",
+                    "formatter": "text",
+                    "name": "type",
+                    "options": [
+                      "str",
+                      "int",
+                      "float",
+                      "bool",
+                      "dict"
+                    ],
+                    "type": "str"
+                  },
+                  {
+                    "default": "False",
+                    "description": "Set to True if this output field should be a list of the specified type.",
+                    "display_name": "As List",
+                    "edit_mode": "inline",
+                    "formatter": "text",
+                    "name": "multiple",
+                    "type": "boolean"
+                  }
+                ],
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_metadata": true,
+                "track_in_telemetry": false,
+                "trigger_icon": "Table",
+                "trigger_text": "Open table",
+                "type": "table",
+                "value": []
+              },
+              "project_id": {
+                "_input_type": "StrInput",
+                "advanced": false,
+                "display_name": "watsonx Project ID",
+                "dynamic": false,
+                "info": "The project ID associated with the foundation model (IBM watsonx.ai only)",
+                "input_types": [],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "name": "project_id",
+                "override_skip": false,
                 "placeholder": "",
                 "required": false,
                 "show": false,
-                "type": "float",
-                "value": 0.0
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_metadata": true,
+                "track_in_telemetry": false,
+                "type": "str",
+                "value": ""
+              },
+              "stream": {
+                "_input_type": "BoolInput",
+                "advanced": true,
+                "display_name": "Stream",
+                "dynamic": false,
+                "info": "Stream the response from the model. Streaming works only in Chat.",
+                "input_types": [],
+                "list": false,
+                "list_add_label": "Add More",
+                "name": "stream",
+                "override_skip": false,
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_metadata": true,
+                "track_in_telemetry": true,
+                "type": "bool",
+                "value": true
+              },
+              "system_prompt": {
+                "_input_type": "MultilineInput",
+                "advanced": false,
+                "ai_enabled": false,
+                "copy_field": false,
+                "display_name": "Agent Instructions",
+                "dynamic": false,
+                "info": "System Prompt: Initial instructions and context provided to guide the agent's behavior. Supports dynamic placeholders: {current_date}, {model_name}, {optional_user_context}.",
+                "input_types": [
+                  "Message"
+                ],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "multiline": true,
+                "name": "system_prompt",
+                "override_skip": false,
+                "password": false,
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "track_in_telemetry": false,
+                "type": "str",
+                "value": "You are the LF-70 Data Access Agent. You execute typed data operations against a Neo4j graph via the MCP toolkit.\n\nAvailable operations (call the appropriate MCP tool for each):\n\n1. **getRequestRoutingContext** (read-only)\n   - No payload needed\n   - Call: get_neo4j_schema to understand the graph structure, then read_neo4j_cypher to query routing context\n   - Returns: RoutingContext with binding presence, request ID/status, closed timestamp, routing stage\n   - No mutation\n\n2. **readDeliveryRequest** (read-only)\n   - Payload: { request_id: string }\n   - Call: read_neo4j_cypher with parameterized query (NEVER client-sourced text)\n   - Returns: DeliveryRequestSnapshot with sparse facts and optimistic concurrency timestamp (updated_at)\n   - No mutation\n\n3. **createDeliveryRequest** (write)\n   - Payload: { identifiers: {...}, facts: {...} }\n   - Call: write_neo4j_cypher to create request + binding in one transaction\n   - Neo4j returns both created and updated timestamps (must be equal)\n   - Returns: DeliveryRequestSnapshot with new request\n   - Atomic: if binding fails (duplicate sessionId), entire transaction rolls back; no orphan request\n\n4. **updateDeliveryRequest** (write)\n   - Payload: { request_id: string, expected_updated_at: datetime, expected_status: string, updates: {...}, identifiers?: {...} }\n   - Enforce: additive-only updates (no replacement of existing preferred_period or singular subgraphs)\n   - Call: write_neo4j_cypher with parameterized expected_updated_at and expected_status (compare-and-set)\n   - If zero rows: perform one non-mutating read to classify (CONCURRENT_MODIFICATION vs INVALID_EXPECTED_STATUS vs other)\n   - Returns: DeliveryRequestSnapshot with new updated timestamp\n   - Exactly one request must be affected\n\n5. **setRequestStatus** (write)\n   - Payload: { request_id: string, expected_updated_at: datetime, expected_status: string, target_status: string }\n   - Enforce: Only allowed transitions per fixed table (new→complete, new→needsClarification, needsClarification→complete, none→new)\n   - Call: write_neo4j_cypher with parameterized compare-and-set on both expected_updated_at and expected_status\n   - If zero rows: perform one non-mutating read to classify the failure type\n   - Returns: new updated timestamp\n   - Exactly one request must be affected\n\nGeneral rules:\n- All Cypher must use parameterized queries (never interpolate client values)\n- Never invent or bypass identifiers; trust pre-generated IDs from the caller\n- Validate record counts: writes affecting exactly 1 request, reads returning at most 1 request\n- Return typed DataOperationResult with outcome (confirmed/rejected/ambiguous), affected_count, status before/after\n- Write timeouts return MCP_WRITE_AMBIGUOUS with write_dispatched=true and retryable=false\n- Malformed results trigger tool-less repair (never replay a dispatched write)\n\nDo not:\n- Execute arbitrary Cypher (operations are strictly five named commands)\n- Bypass the expected_updated_at compare-and-set for updates\n- Replay writes after dispatch (handle ambiguity via independent Neo4j inspection)\n- Fabricate domain nodes or identifiers\n- Claim success without confirming affected-record counts"
               },
               "tools": {
+                "_input_type": "HandleInput",
                 "advanced": false,
                 "display_name": "Tools",
                 "dynamic": false,
-                "info": "Tools available to the agent",
+                "info": "These are the tools that the agent can use to help with tasks.",
                 "input_types": [
                   "Tool"
                 ],
                 "list": true,
-                "load_from_db": false,
-                "multiline": false,
+                "list_add_label": "Add More",
                 "name": "tools",
+                "override_skip": false,
                 "placeholder": "",
                 "required": false,
                 "show": true,
-                "type": "Tool",
+                "title_case": false,
+                "trace_as_metadata": true,
+                "track_in_telemetry": false,
+                "type": "other",
                 "value": ""
               }
-            }
+            },
+            "tool_mode": false
           },
           "selected_output": "response",
           "showNode": true,
-          "type": "Agent"
+          "type": "HulubulDataAccessAgent"
         },
         "dragging": false,
-        "height": 400,
         "id": "Agent-hlb-lf-70-agent-v1",
+        "measured": {
+          "height": 447,
+          "width": 320
+        },
         "position": {
-          "x": 500,
-          "y": 500
+          "x": 610.0770456940947,
+          "y": 0
         },
-        "width": 350
-      },
-      {
-        "data": {
-          "id": "HulubulFailureClassifier-hlb-lf-70-classifier-v1",
-          "node": {
-            "base_classes": [
-              "str"
-            ],
-            "category": "components",
-            "description": "Classify failures from Agent output for retry decision (DEC-015)",
-            "display_name": "Failure Classifier",
-            "edited": false,
-            "field_order": [
-              "agent_response"
-            ],
-            "icon": "alert-triangle",
-            "key": "FailureClassifierComponent",
-            "lf_version": "1.10.2",
-            "output_types": [],
-            "outputs": [
-              {
-                "cache": true,
-                "display_name": "str",
-                "hidden": false,
-                "method": "classify_failure",
-                "name": "classify_failure",
-                "types": [
-                  "str"
-                ]
-              }
-            ],
-            "template": {
-              "_type": "Component",
-              "agent_response": {
-                "advanced": false,
-                "display_name": "Agent Response",
-                "dynamic": false,
-                "info": "Raw Message from Agent containing operation result",
-                "input_types": [
-                  "Message"
-                ],
-                "list": false,
-                "load_from_db": false,
-                "multiline": false,
-                "name": "agent_response",
-                "placeholder": "",
-                "required": false,
-                "show": true,
-                "type": "Message",
-                "value": ""
-              }
-            }
-          },
-          "selected_output": "classify_failure",
-          "showNode": true,
-          "type": "FailureClassifierComponent"
-        },
-        "dragging": false,
-        "height": 200,
-        "id": "HulubulFailureClassifier-hlb-lf-70-classifier-v1",
-        "position": {
-          "x": 900,
-          "y": 500
-        },
-        "width": 300
-      },
-      {
-        "data": {
-          "id": "ConditionalRouter-hlb-lf-70-retry-router-v1",
-          "node": {
-            "base_classes": [
-              "Message"
-            ],
-            "category": "flow_controls",
-            "description": "Routes to retry or final result based on should_retry classification",
-            "display_name": "Retry Router (Conditional)",
-            "edited": false,
-            "field_order": [
-              "input_text",
-              "match_text",
-              "operator",
-              "case_sensitive",
-              "max_iterations",
-              "true_case_message",
-              "false_case_message",
-              "default_route"
-            ],
-            "icon": "git-branch",
-            "key": "ConditionalRouter",
-            "lf_version": "1.10.2",
-            "output_types": [],
-            "outputs": [
-              {
-                "cache": true,
-                "display_name": "Message",
-                "hidden": false,
-                "method": "true_response",
-                "name": "true_result",
-                "types": [
-                  "Message"
-                ]
-              },
-              {
-                "cache": true,
-                "display_name": "Message",
-                "hidden": false,
-                "method": "false_response",
-                "name": "false_result",
-                "types": [
-                  "Message"
-                ]
-              }
-            ],
-            "template": {
-              "_type": "Component",
-              "case_sensitive": {
-                "advanced": false,
-                "default": false,
-                "display_name": "Case Sensitive",
-                "dynamic": false,
-                "info": "Whether text comparison is case-sensitive",
-                "input_types": [],
-                "list": false,
-                "load_from_db": false,
-                "multiline": false,
-                "name": "case_sensitive",
-                "placeholder": "",
-                "required": false,
-                "show": true,
-                "type": "bool",
-                "value": false
-              },
-              "default_route": {
-                "advanced": false,
-                "default": "false_result",
-                "display_name": "Default Route",
-                "dynamic": false,
-                "info": "Default route if no match",
-                "input_types": [],
-                "list": false,
-                "load_from_db": false,
-                "multiline": false,
-                "name": "default_route",
-                "options": [
-                  "true_result",
-                  "false_result"
-                ],
-                "placeholder": "",
-                "required": false,
-                "show": true,
-                "type": "str",
-                "value": "false_result"
-              },
-              "false_case_message": {
-                "advanced": false,
-                "display_name": "False Case Message",
-                "dynamic": false,
-                "info": "Message to return when condition is false",
-                "input_types": [
-                  "Message"
-                ],
-                "list": false,
-                "load_from_db": false,
-                "multiline": false,
-                "name": "false_case_message",
-                "placeholder": "",
-                "required": false,
-                "show": true,
-                "type": "Message",
-                "value": ""
-              },
-              "input_text": {
-                "advanced": false,
-                "display_name": "Input Text",
-                "dynamic": false,
-                "info": "Text to compare (from should_retry classification)",
-                "input_types": [
-                  "str"
-                ],
-                "list": false,
-                "load_from_db": false,
-                "multiline": false,
-                "name": "input_text",
-                "placeholder": "",
-                "required": false,
-                "show": true,
-                "type": "str",
-                "value": ""
-              },
-              "match_text": {
-                "advanced": false,
-                "display_name": "Match Text",
-                "dynamic": false,
-                "info": "Text to match against (should_retry='true' for retry)",
-                "input_types": [],
-                "list": false,
-                "load_from_db": false,
-                "multiline": false,
-                "name": "match_text",
-                "placeholder": "",
-                "required": false,
-                "show": true,
-                "type": "str",
-                "value": "true"
-              },
-              "max_iterations": {
-                "advanced": false,
-                "default": 1,
-                "display_name": "Max Iterations",
-                "dynamic": false,
-                "info": "Maximum loop iterations (1 = one retry per DEC-015)",
-                "input_types": [],
-                "list": false,
-                "load_from_db": false,
-                "multiline": false,
-                "name": "max_iterations",
-                "placeholder": "",
-                "required": false,
-                "show": true,
-                "type": "int",
-                "value": 1
-              },
-              "operator": {
-                "advanced": false,
-                "default": "equals",
-                "display_name": "Operator",
-                "dynamic": false,
-                "info": "Comparison operator",
-                "input_types": [],
-                "list": false,
-                "load_from_db": false,
-                "multiline": false,
-                "name": "operator",
-                "options": [
-                  "equals",
-                  "not equals",
-                  "contains",
-                  "starts with",
-                  "ends with",
-                  "regex",
-                  "less than",
-                  "greater than",
-                  "less than or equal",
-                  "greater than or equal"
-                ],
-                "placeholder": "",
-                "required": false,
-                "show": true,
-                "type": "str",
-                "value": "equals"
-              },
-              "true_case_message": {
-                "advanced": false,
-                "display_name": "True Case Message",
-                "dynamic": false,
-                "info": "Message to return when condition is true (retry)",
-                "input_types": [
-                  "Message"
-                ],
-                "list": false,
-                "load_from_db": false,
-                "multiline": false,
-                "name": "true_case_message",
-                "placeholder": "",
-                "required": false,
-                "show": true,
-                "type": "Message",
-                "value": ""
-              }
-            }
-          },
-          "selected_output": "false_result",
-          "showNode": true,
-          "type": "ConditionalRouter"
-        },
-        "dragging": false,
-        "height": 280,
-        "id": "ConditionalRouter-hlb-lf-70-retry-router-v1",
-        "position": {
-          "x": 1300,
-          "y": 500
-        },
-        "width": 300
+        "selected": false,
+        "type": "genericNode"
       },
       {
         "data": {
@@ -938,88 +1378,163 @@
             "base_classes": [
               "JSON"
             ],
-            "category": "components",
-            "description": "Validate operation result as terminal flow output (DEC-015 terminal node)",
-            "display_name": "Data Operation Result Boundary (Terminal)",
+            "beta": false,
+            "conditional_paths": [],
+            "custom_fields": {},
+            "description": "Validate and serialize DataOperationResult payloads (terminal node).",
+            "display_name": "Data Operation Result Boundary",
+            "documentation": "",
             "edited": false,
             "field_order": [
-              "result_value",
-              "request_value"
+              "raw_value",
+              "request_dict"
             ],
+            "frozen": false,
             "icon": "shield-check",
-            "key": "DataOperationResultBoundaryComponent",
-            "lf_version": "1.10.2",
+            "legacy": false,
+            "metadata": {
+              "code_hash": "aed66d1e94a2",
+              "dependencies": {
+                "dependencies": [
+                  {
+                    "name": "lfx",
+                    "version": "1.10.2"
+                  },
+                  {
+                    "name": "pydantic",
+                    "version": "2.13.4"
+                  },
+                  {
+                    "name": "hulubul",
+                    "version": null
+                  }
+                ],
+                "total_dependencies": 3
+              },
+              "module": "custom_components.data_operation_result_boundary"
+            },
+            "minimized": false,
             "output_types": [],
             "outputs": [
               {
+                "allows_loop": false,
                 "cache": true,
-                "display_name": "JSON",
+                "display_name": "Result",
+                "group_outputs": false,
                 "hidden": false,
-                "method": "validate_result_value",
-                "name": "validated_result",
+                "method": "build_output",
+                "name": "response",
+                "options": null,
+                "required_inputs": null,
+                "selected": "JSON",
+                "tool_mode": true,
                 "types": [
                   "JSON"
-                ]
+                ],
+                "value": "__UNDEFINED__"
               }
             ],
+            "pinned": false,
             "template": {
               "_type": "Component",
-              "request_value": {
+              "code": {
+                "advanced": true,
+                "dynamic": true,
+                "fileTypes": [],
+                "file_path": "",
+                "info": "",
+                "list": false,
+                "load_from_db": false,
+                "multiline": true,
+                "name": "code",
+                "password": false,
+                "placeholder": "",
+                "required": true,
+                "show": true,
+                "title_case": false,
+                "type": "code",
+                "value": "\"\"\"Data operation result boundary component: validation and serialization.\n\nSplit from the former data_operation_boundary.py (which held both the request\nand result boundary components) because LangFlow's directory-based custom\ncomponent loader registers exactly one component per file, named after the\nfile -- a second class in the same file is silently dropped from the sidebar\npalette. See data_operation_request_boundary.py for the paired component.\n\nRuns as the terminal node (last step before flow output). Failure\nclassification for retry decisioning is handled by a separate\nFailureClassifierComponent that runs on the Agent's raw output BEFORE this\ncomponent -- retries themselves now happen inside the Agent's own execution\n(ModelRetryMiddleware/ToolRetryMiddleware), not via a flow-level loop, so\nthis component's only job is validating the final result exactly once.\n\"\"\"\n\nimport json\nfrom typing import Any\nfrom uuid import UUID\n\nfrom lfx.custom.custom_component.component import Component\nfrom lfx.inputs.inputs import HandleInput\nfrom lfx.schema.data import JSON\nfrom lfx.schema.message import Message\nfrom lfx.template.field.base import Output\nfrom pydantic import ValidationError\n\nfrom hulubul.core.models.operational import (\n    DataOperationResult,\n    ErrorCode,\n    OperationalError,\n    validate_data_operation_request,\n)\nfrom hulubul.core.models.operational.errors import ERROR_POLICY\nfrom hulubul.request_intake.services.data_operation_policy import validate_result_postconditions\n\n__all__ = [\"DataOperationResultBoundaryComponent\"]\n\n\nclass DataOperationResultBoundaryComponent(Component):\n    \"\"\"Validate and serialize operation results.\n\n    Verifies result postconditions:\n    - Request/result operation match\n    - Affected count matches expectations (write operations)\n    - Timestamps and status consistency (as defined by operation type)\n    - Correlation/operation ID coherence\n\n    Returns JSON with typed result or error (INVALID_CONTRACT or other).\n    \"\"\"\n\n    display_name = \"Data Operation Result Boundary\"\n    description = \"Validate and serialize DataOperationResult payloads (terminal node).\"\n    icon = \"shield-check\"\n    name = \"HulubulDataOperationResultBoundary\"\n\n    inputs = [  # noqa: RUF012\n        HandleInput(  # type: ignore[call-arg]\n            name=\"raw_value\",\n            display_name=\"Raw Result\",\n            info=\"Raw result from the Agent's output (Message text, or Data/JSON).\",\n            input_types=[\"Message\", \"Data\", \"JSON\"],\n            required=True,\n        ),\n        HandleInput(  # type: ignore[call-arg]\n            name=\"request_dict\",\n            display_name=\"Original Request\",\n            info=\"The original validated DataOperationRequest (Message text, or Data/JSON).\",\n            input_types=[\"Message\", \"Data\", \"JSON\"],\n            required=True,\n        ),\n    ]\n\n    outputs = [  # noqa: RUF012\n        Output(  # type: ignore[call-arg]\n            display_name=\"Result\", name=\"response\", type_=JSON, method=\"build_output\"\n        ),\n    ]\n\n    @staticmethod\n    def _as_dict(value: Any) -> dict[str, Any]:\n        \"\"\"Coerce an incoming Message/Data/JSON edge value into a plain dict.\"\"\"\n        if isinstance(value, Message):\n            text = value.text\n            return json.loads(text) if isinstance(text, str) else {}\n        if hasattr(value, \"data\"):\n            return dict(value.data)\n        return dict(value)\n\n    def build_output(self) -> JSON:\n        \"\"\"LFX-facing output: validate self.raw_value against self.request_dict.\"\"\"\n        raw_value = self._as_dict(self.raw_value)\n        request_dict = self._as_dict(self.request_dict)\n        return self.validate_result_value(raw_value, request_dict)\n\n    def validate_result_value(\n        self, raw_value: dict[str, Any], request_dict: dict[str, Any]\n    ) -> JSON:\n        \"\"\"Validate result, return typed output or error.\n\n        Args:\n            raw_value: Raw result dict from MCP operation\n            request_dict: Original request dict\n\n        Returns:\n            JSON: Validated DataOperationResult or OperationalError with INVALID_CONTRACT\n                  or other error code\n        \"\"\"\n        # Extract correlation_id from request for error responses (string format)\n        correlation_id_str = request_dict.get(\"correlation_id\", \"\")\n\n        # Deserialize request first\n        try:\n            request = validate_data_operation_request(request_dict)\n        except ValidationError:\n            # Request should already be valid, but safety check\n            return self._make_error_response(\n                code=ErrorCode.INVALID_CONTRACT,\n                correlation_id_str=correlation_id_str,\n            )\n\n        # Update correlation_id from valid request (it's a string in DataOperationRequest)\n        correlation_id_str = request.correlation_id\n\n        # First validate result contract\n        try:\n            result = DataOperationResult.model_validate(raw_value)\n        except ValidationError:\n            # Result contract validation failed\n            return self._make_error_response(\n                code=ErrorCode.INVALID_CONTRACT,\n                correlation_id_str=correlation_id_str,\n            )\n\n        # Validate postconditions\n        postcond_error = validate_result_postconditions(request, result)\n        if postcond_error is not None:\n            # Create new error with correct correlation_id (model is frozen)\n            return self._make_error_response(\n                code=postcond_error.code,\n                correlation_id_str=correlation_id_str,\n            )\n\n        # Success: return typed JSON with result\n        return JSON(data=result.model_dump(mode=\"json\"))\n\n    def _make_error_response(\n        self,\n        code: ErrorCode,\n        correlation_id_str: str,\n    ) -> JSON:\n        \"\"\"Create error response with correlation_id.\n\n        Args:\n            code: The ErrorCode\n            correlation_id_str: The correlation_id string\n\n        Returns:\n            JSON: Serialized OperationalError\n        \"\"\"\n        from uuid import uuid4\n\n        # Try to parse correlation_id_str as UUID, otherwise generate new one\n        try:\n            correlation_id = UUID(correlation_id_str) if correlation_id_str else uuid4()\n        except (ValueError, TypeError):\n            correlation_id = uuid4()\n\n        policy = ERROR_POLICY[code]\n        error = OperationalError(\n            schema_version=\"1.0.0\",\n            code=code,\n            correlation_id=correlation_id,\n            category=policy.category,\n            message=policy.safe_message,\n            retryable=policy.retryable,\n        )\n\n        return JSON(data=error.model_dump(mode=\"json\"))\n"
+              },
+              "raw_value": {
+                "_input_type": "HandleInput",
+                "advanced": false,
+                "display_name": "Raw Result",
+                "dynamic": false,
+                "info": "Raw result from the Agent's output (Message text, or Data/JSON).",
+                "input_types": [
+                  "Message",
+                  "Data",
+                  "JSON"
+                ],
+                "list": false,
+                "list_add_label": "Add More",
+                "name": "raw_value",
+                "override_skip": false,
+                "placeholder": "",
+                "required": true,
+                "show": true,
+                "title_case": false,
+                "trace_as_metadata": true,
+                "track_in_telemetry": false,
+                "type": "other",
+                "value": ""
+              },
+              "request_dict": {
+                "_input_type": "HandleInput",
                 "advanced": false,
                 "display_name": "Original Request",
                 "dynamic": false,
-                "info": "Original DataOperationRequest dict",
+                "info": "The original validated DataOperationRequest (Message text, or Data/JSON).",
                 "input_types": [
+                  "Message",
                   "Data",
                   "JSON"
                 ],
                 "list": false,
-                "load_from_db": false,
-                "multiline": false,
-                "name": "request_value",
+                "list_add_label": "Add More",
+                "name": "request_dict",
+                "override_skip": false,
                 "placeholder": "",
-                "required": false,
+                "required": true,
                 "show": true,
-                "type": "any",
-                "value": ""
-              },
-              "result_value": {
-                "advanced": false,
-                "display_name": "Operation Result",
-                "dynamic": false,
-                "info": "Raw result dict from operation (Message or JSON)",
-                "input_types": [
-                  "Data",
-                  "JSON"
-                ],
-                "list": false,
-                "load_from_db": false,
-                "multiline": false,
-                "name": "result_value",
-                "placeholder": "",
-                "required": false,
-                "show": true,
-                "type": "any",
+                "title_case": false,
+                "trace_as_metadata": true,
+                "track_in_telemetry": false,
+                "type": "other",
                 "value": ""
               }
-            }
+            },
+            "tool_mode": false
           },
-          "selected_output": "validated_result",
           "showNode": true,
-          "type": "DataOperationResultBoundaryComponent"
+          "type": "HulubulDataOperationResultBoundary"
         },
         "dragging": false,
-        "height": 240,
         "id": "HulubulDataOperationResultBoundary-hlb-lf-70-result-v1",
-        "position": {
-          "x": 1700,
-          "y": 500
+        "measured": {
+          "height": 229,
+          "width": 320
         },
-        "width": 300
+        "position": {
+          "x": 1085.6186850257411,
+          "y": 44.27847333058087
+        },
+        "selected": false,
+        "type": "genericNode"
       }
-    ]
+    ],
+    "viewport": {
+      "x": 288.23146041745724,
+      "y": 221.05097540753576,
+      "zoom": 0.6041544596958938
+    }
   },
-  "description": "LF-70: Data Access Flow — typed Neo4j operations via MCP toolkit with DEC-015 retry loop (terminal Result Boundary)",
+  "description": "LF-70 Data Access: validates a typed DataOperationRequest, executes it via the Data Access Agent against Neo4j MCP, and returns a validated DataOperationResult.",
+  "endpoint_name": null,
   "id": "94f6774d-ebc7-5bf1-8486-886f91886a5f",
-  "name": "lf-70-data-access"
+  "is_component": false,
+  "last_tested_version": "1.10.2",
+  "locked": false,
+  "name": "lf-70-data-access",
+  "tags": null
 }

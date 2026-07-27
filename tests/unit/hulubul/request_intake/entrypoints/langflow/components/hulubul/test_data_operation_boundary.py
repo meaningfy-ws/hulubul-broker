@@ -17,8 +17,10 @@ from hulubul.core.models.operational import (
     RequestStatus,
     validate_data_operation_request,
 )
-from hulubul.request_intake.entrypoints.langflow.components.hulubul.data_operation_boundary import (
+from hulubul.request_intake.entrypoints.langflow.components.hulubul.data_operation_request_boundary import (
     DataOperationRequestBoundaryComponent,
+)
+from hulubul.request_intake.entrypoints.langflow.components.hulubul.data_operation_result_boundary import (
     DataOperationResultBoundaryComponent,
 )
 

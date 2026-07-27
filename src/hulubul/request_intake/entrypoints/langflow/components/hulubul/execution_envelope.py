@@ -5,8 +5,10 @@ from typing import Any
 from uuid import UUID, uuid4
 
 from lfx.custom.custom_component.component import Component
+from lfx.inputs.inputs import MessageInput
 from lfx.schema.data import Data
 from lfx.schema.message import Message
+from lfx.template.field.base import Output
 
 from hulubul.core.models.operational import (
     ActorContext,
@@ -32,6 +34,26 @@ class ExecutionEnvelopeComponent(Component):
     - Rejects: empty/malformed/mismatched sessions, flow-ID fallback, prose identity override
     - Generates unique message_id, correlation_id per call
     """
+
+    display_name = "Execution Envelope"
+    description = "Trust boundary: builds MainFlowInput from a Message plus trusted metadata."
+    icon = "shield-check"
+    name = "HulubulExecutionEnvelope"
+
+    inputs = [  # noqa: RUF012
+        MessageInput(  # type: ignore[call-arg]
+            name="message",
+            display_name="Message",
+            info="The inbound chat Message (never a free string).",
+            required=True,
+        ),
+    ]
+
+    outputs = [  # noqa: RUF012
+        Output(  # type: ignore[call-arg]
+            display_name="Envelope", name="response", type_=Data, method="build_envelope"
+        ),
+    ]
 
     def __init__(self, **kwargs: Any) -> None:
         """Initialize the ExecutionEnvelopeComponent."""

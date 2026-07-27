@@ -8,7 +8,9 @@ the retry decision logic.
 import json
 
 from lfx.custom.custom_component.component import Component
+from lfx.inputs.inputs import MessageInput
 from lfx.schema.message import Message
+from lfx.template.field.base import Output
 from pydantic import ValidationError
 
 from hulubul.core.models.operational import DataOperationResult
@@ -29,6 +31,33 @@ class FailureClassifierComponent(Component):
     Outputs the string value of should_retry ("true" or "false")
     for ConditionalRouter to use directly.
     """
+
+    display_name = "Failure Classifier"
+    description = "Classifies an Agent's raw response into a should_retry signal (DEC-015)."
+    icon = "shield-check"
+    name = "HulubulFailureClassifier"
+
+    inputs = [  # noqa: RUF012
+        MessageInput(  # type: ignore[call-arg]
+            name="agent_response",
+            display_name="Agent Response",
+            info="Agent's raw output Message containing the operation result.",
+            required=True,
+        ),
+    ]
+
+    outputs = [  # noqa: RUF012
+        Output(  # type: ignore[call-arg]
+            display_name="Should Retry",
+            name="response",
+            type_=Message,
+            method="build_classification",
+        ),
+    ]
+
+    def build_classification(self) -> Message:
+        """LFX-facing output: classify self.agent_response, wrapped as a Message."""
+        return Message(text=self.classify_failure(self.agent_response))
 
     def classify_failure(self, agent_response: Message | str | None) -> str:
         """Classify failure from Agent's raw response for retry decision.

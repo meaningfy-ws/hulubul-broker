@@ -2500,6 +2500,21 @@ Propose `feat(langflow): guard LF-70 write ambiguity`; wait for developer approv
 - Consumes: LF-70 deployed stable ID, component schema snapshot, fixed validated envelope/context inputs, IntakeInput/IntakeResult schemas.
 - Produces: LF-10 deterministic strict IntakeInput assembly, public direct-integration input/result, model, Agent, one LF-70 Run Flow Tool Mode component; no MCP/Chat Output and no model-substitutable trust metadata.
 
+> **Note on retry scoping (from checkpoint 8's `HulubulDataAccessAgentComponent`,
+> `src/hulubul/request_intake/entrypoints/langflow/components/hulubul/data_access_agent.py`):**
+> LF-70 scopes its `ToolRetryMiddleware` to read-only tools via a plain
+> `tools=["read_neo4j_cypher", "get_neo4j_schema"]` name filter, because its
+> MCP toolkit exposes reads and writes as separately-named tools. That trick
+> does **not** transfer here: LF-10's Agent has exactly one logical tool
+> (`RunFlow-hlb-lf-10-data-access-v1`, i.e. all of LF-70 behind one Run Flow
+> call), so there is no separate "read tool name" vs "write tool name" to
+> filter by -- the read/write distinction lives in the *content* of the
+> `DataOperationRequest` being dispatched, not in which tool got called. If
+> LF-10 (or LF-00, same shape) wants the same "never retry a write" protection,
+> it needs a `retry_on` callable that inspects the tool-call arguments (the
+> operation field of the outgoing request) rather than a `tools=[...]` name
+> filter. Don't copy the LF-70 pattern verbatim without re-deriving this.
+
 - [ ] **Step 1: Write LF-10 isolation test (2-5 min)**
 
 ```python
