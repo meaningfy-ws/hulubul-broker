@@ -14,7 +14,7 @@
 - [x] 2.4 Add `.coveragerc` populated from `[tool.coverage.*]`
 - [x] 2.5 Add `.pre-commit-config.yaml` wired to `make lint-python`/`typecheck`/`check-architecture`
 - [x] 2.6 Add `CHANGELOG.md` (Keep a Changelog format, seeded "Unreleased")
-- [x] 2.7 Add `SECURITY.md` (standard disclosure template)
+- [x] 2.7 ~~Add `SECURITY.md`~~ — added, then removed (DEC-9: doesn't fit an internal repo with no external disclosure audience)
 - [x] 2.8 Add `sonar-project.properties` stub (DEC-3, revised — not wired into CI)
 - [x] 2.9 Commit
 
@@ -37,7 +37,7 @@
 - [x] 5.1 Remove the broken `CLAUDE.md` symlink
 - [x] 5.2 Keep `AGENTS.md`'s content as canonical (DEC-8, reversed from CLAUDE-canonical per developer instruction); add the "Golden thread" spine note
 - [x] 5.3 Replace `CLAUDE.md` with a minimal pointer ("Read AGENTS.md"), not a symlink
-- [x] 5.4 Add `.claude/memory/MEMORY.md` (regenerable index, ≤200 lines)
+- [x] 5.4 ~~Add `.claude/memory/MEMORY.md`~~ — added, then removed (DEC-9: duplicated `openspec/config.yaml`'s `context:` field, OpenSpec's own native orientation index)
 - [x] 5.5 Verify `CLAUDE.md`/`AGENTS.md` resolve correctly from a clean `git clone` (portability check)
 - [x] 5.6 Commit
 

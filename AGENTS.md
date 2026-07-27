@@ -67,7 +67,7 @@ quality gates). The ones you'll use every session:
 - **Secrets never live in VCS.** `infra/.env` is gitignored; copy from
   `infra/.env.example` and edit passwords (Neo4j password ≥ 8 characters).
   Secret scanning is provided at the organization level (SonarQube, Snyk,
-  GitHub secret scanning) — see `SECURITY.md`.
+  GitHub secret scanning) — no in-repo scanner (see `f98729f`).
 - **`make lint` is schema linting** (`linkml-lint`); Python linting is
   `make lint-python`.
 - **Generated artifacts are committed** so they stay in sync with the schema; a
@@ -86,9 +86,10 @@ This repo uses the Meaningfy spine (`openspec/`, schema `meaningfy`):
 (`design.md` + `tasks.md`, scored by the clarity gate ≥9/10) → **specs**
 (`specs/` deltas, RFC-2119 SHALL + Given/When/Then) → commit. A PLAN's
 `tasks.md` cites its parent EPIC id on the first line; treat that citation as
-load-bearing, not decorative. `openspec/specs/` is the durable truth; this
-file and `.claude/memory/MEMORY.md` are regenerable indexes that point at it,
-never a parallel source. In-flight changes authored before the `meaningfy`
+load-bearing, not decorative. `openspec/specs/` is the durable truth;
+`openspec/config.yaml`'s `context:` field is the one orientation index
+(injected into every artifact's instructions) — point at it, never
+hand-maintain a second one. In-flight changes authored before the `meaningfy`
 schema pin (e.g. `deliver-phase-1-request-intake-thread`) keep their own
 schema in their `.openspec.yaml` — only newly authored changes use
 `meaningfy`, and that pointer, not a restated copy, is how you'll always
@@ -160,9 +161,10 @@ When all 5 hold → proactively suggest "ready to `/opsx:propose`?" — wait for
 - Do not grant commit approval implicitly. The developer retains approval of
   each commit unless they explicitly delegate it for the current task.
 
-### Skill routing (meaningfy-skillery + superpowers)
+### Meaningfy skill routing
 
-Neither skill family is otherwise routed here — this table is that routing.
+`meaningfy-skillery` (22 skills: core/building/consulting/architecture) isn't otherwise
+routed here — this table is that routing.
 
 | When | Skill |
 |---|---|
@@ -181,17 +183,11 @@ Neither skill family is otherwise routed here — this table is that routing.
 | New-repo or repo-wide scaffolding | `meaningfy-building:project-setup` |
 | Deploy/CD setup (real deployment, not local Compose) | `meaningfy-building:ci-cd-delivery` |
 | Release/versioning/publish | `meaningfy-building:meaningfy-release` |
-| Before creating a feature/component/behavior change | `superpowers:brainstorming` |
-| Before writing any implementation code | `superpowers:test-driven-development` (RED-GREEN-REFACTOR) |
-| Any bug, test failure, or unexpected behavior | `superpowers:systematic-debugging`, before proposing a fix |
-| Before claiming work done, fixed, or passing | `superpowers:verification-before-completion` |
-| Completing a task or before merging | `superpowers:requesting-code-review` |
-| Received review feedback | `superpowers:receiving-code-review` — verify, don't rubber-stamp |
-| 2+ independent tasks with no shared state | `superpowers:dispatching-parallel-agents` |
 
-`meaningfy-consulting:*` is **not applicable** to this repo (it's for running a
-consulting engagement, not building this product) — `/opsx:propose` and
-`proposal-writing` are unrelated despite the name overlap.
+`meaningfy-consulting:*` (coach/decision-package/proposal-writing/estimation/
+executive-communication) is **not applicable** to this repo — it's for running a consulting
+engagement, not building this product. `/opsx:propose` and `proposal-writing` are unrelated
+despite the name overlap.
 
 <!-- gitnexus:start -->
 # GitNexus — Code Intelligence

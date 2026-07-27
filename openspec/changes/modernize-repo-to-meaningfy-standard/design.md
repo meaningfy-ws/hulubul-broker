@@ -41,11 +41,12 @@ DEC-n, not repeated here):
   Tests are already type-split with the marker list in `pyproject.toml`, so
   the "test reorganization" step is reduced to nothing beyond what the
   `/src` lift's path updates require.
-- **`.claude/memory/MEMORY.md` scope**: this session's audit findings do not
-  belong in it (D9 says it must be a ≤200-line regenerable orientation
-  index, "truth = `openspec/specs/`", not a change log). It gets a minimal
-  index pointing at `openspec/config.yaml`'s `context:` and the spine, per
-  `agentic-setup.md` — not a dump of this migration's history.
+- **No `.claude/memory/MEMORY.md`** *(DEC-9, corrected during implementation)*:
+  originally added per D9, then removed after the developer questioned it —
+  it hand-restated the same facts already in `openspec/config.yaml`'s
+  `context:` field, which is OpenSpec's own native, auto-injected
+  orientation index. One index, not a hand-maintained duplicate at risk of
+  drifting from it.
 - **Per-change schema pinning**: rather than force-migrating the in-flight
   `deliver-phase-1-request-intake-thread` change's `superpowers-bridge`
   schema, this repo already scopes `schema:` per change via
@@ -83,8 +84,10 @@ operations, so there is no retry/replay concern; a slice that fails
    copied, not yet removed from `pyproject.toml` — that's slice 5);
    `.pre-commit-config.yaml` wired to run `make lint-python`/`typecheck`/
    `check-architecture`; `CHANGELOG.md` (Keep a Changelog format, seeded
-   with an "Unreleased" section); `SECURITY.md` (standard disclosure
-   template). Commit.
+   with an "Unreleased" section). `SECURITY.md` was added here too,
+   then removed (DEC-9) — its public-disclosure-process content doesn't
+   fit an internal repo with no external security-research audience.
+   Commit.
 3. **tox → Makefile** — port `evaluation`, `evaluation-live`, and the
    live-model judge eval envs from `tox.ini` into the existing commented-out
    Makefile target stubs (`test-evaluation-recorded`, `test-evaluation-live`,
@@ -101,8 +104,9 @@ operations, so there is no retry/replay concern; a slice that fails
    is the cross-tool standard name and the developer wants it real);
    replace `CLAUDE.md` with a minimal pointer ("Read AGENTS.md"), not a
    symlink, so any tool reading `CLAUDE.md` directly is forced to go read
-   the real file; add a "Golden thread" note per `spine-projection.md`; add
-   `.claude/memory/MEMORY.md`. Commit.
+   the real file; add a "Golden thread" note per `spine-projection.md`.
+   Commit. (`.claude/memory/MEMORY.md` was added here too, then removed —
+   DEC-9.)
 6. **pyproject normalization** — remove the `[tool.pytest.ini_options]`,
    `[tool.coverage.*]`, `[tool.ruff.*]`, `[tool.mypy]` blocks now that
    slice 2 has them in dedicated files; leave `[project]`/`[tool.poetry]`/

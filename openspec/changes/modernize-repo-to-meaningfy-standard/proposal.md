@@ -96,8 +96,22 @@ isolated commit, once everything else is stable.
   file. This is a deliberate, logged reversal of the Meaningfy
   project-setup standard's default (CLAUDE-canonical, D8/DEC-4) — every
   place that cited the original direction (this proposal, design.md,
-  tasks.md, specs/repository-tooling-standard/spec.md, `.claude/memory/MEMORY.md`,
-  `README.md`) was updated to match, not left silently stale.
+  tasks.md, specs/repository-tooling-standard/spec.md, `README.md`) was
+  updated to match, not left silently stale.
+- **DEC-9** *(removes two of this EPIC's own additions, per explicit
+  developer questioning — "why do we need X, don't we already have Y")*:
+  - `.claude/memory/MEMORY.md` is **removed**. It hand-restated the same
+    facts already in `openspec/config.yaml`'s `context:` field — OpenSpec's
+    own native, automatically-injected orientation index — which is
+    exactly the kind of duplicate-index drift risk D9's own text warned
+    about while this EPIC went ahead and created it anyway. One index
+    (`openspec/config.yaml`), not two.
+  - `SECURITY.md` is **removed**. Its content (a public vulnerability-
+    disclosure process) doesn't fit an internal product repo with no
+    external security-research audience; the org-level scanning note it
+    carried already lives in `AGENTS.md`'s "Visible conventions". Added
+    originally because the project-setup standard's file list names it as
+    a default additive file — that default doesn't fit here.
 
 ## Rabbit-holes
 
@@ -129,9 +143,10 @@ isolated commit, once everything else is stable.
 ## What Changes
 
 - Add dedicated root config files (`ruff.toml`, `mypy.ini`, `pytest.ini`,
-  `.coveragerc`, `.pre-commit-config.yaml`, `CHANGELOG.md`, `SECURITY.md`,
+  `.coveragerc`, `.pre-commit-config.yaml`, `CHANGELOG.md`,
   `sonar-project.properties` — stub only, not CI-wired, DEC-3) and strip the
-  equivalent `[tool.*]` blocks out of `pyproject.toml`.
+  equivalent `[tool.*]` blocks out of `pyproject.toml`. (`SECURITY.md` was
+  added, then removed — DEC-9.)
 - Remove `tox.ini`; port its 2 real eval-only environments (a 3rd,
   "judge", was only ever an already-broken Makefile placeholder — DEC-5)
   to real Makefile targets.
@@ -142,7 +157,6 @@ isolated commit, once everything else is stable.
   developer instruction), `CLAUDE.md` becomes a minimal pointer
   (**BREAKING** for any tooling that reads `CLAUDE.md` expecting it to
   carry the full instructions — none is known to exist).
-- Add `.claude/memory/MEMORY.md` as a regenerable orientation index.
 - Consolidate `infra/channel-gateway/Dockerfile` and `infra/mcp/Dockerfile`
   toward the prescribed multistage layout with co-located dockerignore.
 - **BREAKING**: move `src/hulubul/` → `hulubul/` (top-level package); update
@@ -171,7 +185,7 @@ None — no existing `openspec/specs/` capability's requirements change.
   `[dependency-groups]`/`[build-system]`), new `ruff.toml`, `mypy.ini`,
   `pytest.ini`, `.coveragerc`, `.pre-commit-config.yaml`; `tox.ini` removed.
 - **Build:** `Makefile` (new eval targets, updated paths post-`/src` lift).
-- **Agentic files:** `CLAUDE.md`, `AGENTS.md`, new `.claude/memory/MEMORY.md`.
+- **Agentic files:** `CLAUDE.md`, `AGENTS.md`.
 - **Spine:** `openspec/config.yaml`, `openspec/schemas/meaningfy/` (new).
 - **Infra:** `infra/channel-gateway/Dockerfile`, `infra/mcp/Dockerfile`
   (or their consolidated replacements), `.dockerignore` files.
