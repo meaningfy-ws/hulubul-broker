@@ -329,11 +329,17 @@ check-operational-schemas: ## Fail if operational schemas are stale
 check-secrets: ## Scan tracked files for committed secrets
 	poetry run python scripts/check_committed_secrets.py
 
-# check-flows: ## Validate LangFlow flow assets (normalize, manifest, lfx checks)
-# 	poetry run python scripts/normalize_langflow_flows.py --check langflow/flows/*.json
-# 	poetry run python scripts/validate_langflow_assets.py langflow/flow-manifest.yaml
-# 	poetry run lfx validate --level 4 --strict --skip-credentials langflow/flows/*.json
-# 	for flow in langflow/flows/*.json; do poetry run lfx upgrade --strict "$$flow"; done
+check-flows: ## Validate LangFlow flow assets (manifest, normalization, lfx checks)
+	# TODO(Checkpoint 8): re-enable once langflow/flows/*.json exist — until
+	# then this fails because all 3 manifest-declared flows are missing on disk.
+	# poetry run python scripts/validate_langflow_assets.py langflow/flow-manifest.yaml
+	@if [ -d langflow/flows ] && [ -n "$$(ls langflow/flows/*.json 2>/dev/null)" ]; then \
+		poetry run python scripts/normalize_langflow_flows.py --check langflow/flows/*.json; \
+		poetry run lfx validate --level 4 --strict --skip-credentials langflow/flows/*.json; \
+		for flow in langflow/flows/*.json; do poetry run lfx upgrade --strict "$$flow"; done; \
+	else \
+		echo "[!] No flow files to validate yet (expected in Checkpoint 8)"; \
+	fi
 
 test-integration: ## Run integration-marked tests
 	poetry run pytest -m integration

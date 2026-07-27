@@ -7,49 +7,51 @@
 
 ## 2. Operational Contract Foundation
 
-- [ ] 2.1 Implement the strict operational contract base, schema version, actor context, execution envelope, top-level `RouterInput`/`IntakeInput` equality and intake-only invariants, exact `ContractKind`, and centralized enums/error codes including `MODEL_AUTHENTICATION_FAILURE` and `MCP_OPERATION_FAILURE`, with focused unit tests
-- [ ] 2.2 Implement and exhaustively unit-test the internal `requestStatusRaw` lookup record, deterministic adaptation to typed/nullable `RoutingContext.request_status`, closed precedence, all 11 recognized statuses, unknown/null status, cardinality failures, and `RouterResult` invariants
-- [ ] 2.3 Implement and unit-test `IntakeFacts`, missing-field selection, `IntakeResult`, and sparse `DeliveryRequestSnapshot` contracts
-- [ ] 2.4 Implement and unit-test the discriminated `DataOperationRequest` union and `DataOperationResult` confirmed/rejected/ambiguous invariants for exactly five operations, with validation-first precedence for unknown/mismatched/raw-query/undeclared input and capability checks only after a valid contract
-- [ ] 2.5 Implement deterministic operational JSON Schema generation for exactly 11 `ContractKind` schemas including `router-input` and `intake-input`, commit the version-1 schemas and manifest, and add exact-inventory/regeneration drift tests
+- [x] 2.1 Implement the strict operational contract base, schema version, actor context, execution envelope, top-level `RouterInput`/`IntakeInput` equality and intake-only invariants, exact `ContractKind`, and centralized enums/error codes including `MODEL_AUTHENTICATION_FAILURE` and `MCP_OPERATION_FAILURE`, with focused unit tests
+- [x] 2.2 Implement and exhaustively unit-test the internal `requestStatusRaw` lookup record, deterministic adaptation to typed/nullable `RoutingContext.request_status`, closed precedence, all 11 recognized statuses, unknown/null status, cardinality failures, and `RouterResult` invariants
+- [x] 2.3 Implement and unit-test `IntakeFacts`, missing-field selection, `IntakeResult`, and sparse `DeliveryRequestSnapshot` contracts
+- [x] 2.4 Implement and unit-test the discriminated `DataOperationRequest` union and `DataOperationResult` confirmed/rejected/ambiguous invariants for exactly five operations, with validation-first precedence for unknown/mismatched/raw-query/undeclared input and capability checks only after a valid contract
+- [x] 2.5 Implement deterministic operational JSON Schema generation for exactly 11 `ContractKind` schemas including `router-input` and `intake-input`, commit the version-1 schemas and manifest, and add exact-inventory/regeneration drift tests
 
 ## 3. Pure Intake And Control Policy
 
-- [ ] 3.1 Implement the required-field completeness policy with immediate single-field and available cross-field validation, including free-text Place boundaries
-- [ ] 3.2 Implement the exact Change 1 transition table and compare-and-set policy requiring expected timestamp and status, with exhaustive positive/negative parameterized tests and non-mutating zero-row classification decisions
-- [ ] 3.3 Implement deterministic graph identifier generation for requests, roles, parcels, places, trusted Senders, and stable/request-scoped Receivers
-- [ ] 3.4 Implement validation-before-authorization caller capability and operation/result postcondition policy so only a known contract-valid out-of-capability operation yields `OPERATION_NOT_ALLOWED`, without importing LangFlow or MCP
-- [ ] 3.5 Implement the two-attempt retry classifier, 500 ms delay policy, non-retryable model-authentication/MCP-operation failures, write-dispatch prohibition, and tool-less malformed-result repair decision
-- [ ] 3.6 Implement deterministic success, clarification, informational, concurrency, ambiguous-write, model-authentication, MCP-operation, and other canonical failure rendering with no model dependency
+- [x] 3.1 Implement the required-field completeness policy with immediate single-field and available cross-field validation, including free-text Place boundaries
+- [x] 3.2 Implement the exact Change 1 transition table and compare-and-set policy requiring expected timestamp and status, with exhaustive positive/negative parameterized tests and non-mutating zero-row classification decisions
+- [x] 3.3 Implement deterministic graph identifier generation for requests, roles, parcels, places, trusted Senders, and stable/request-scoped Receivers
+- [x] 3.4 Implement validation-before-authorization caller capability and operation/result postcondition policy so only a known contract-valid out-of-capability operation yields `OPERATION_NOT_ALLOWED`, without importing LangFlow or MCP
+- [x] 3.5 Implement the two-attempt retry classifier, 500 ms delay policy, non-retryable model-authentication/MCP-operation failures, write-dispatch prohibition, and tool-less malformed-result repair decision
+- [x] 3.6 Implement deterministic success, clarification, informational, concurrency, ambiguous-write, model-authentication, MCP-operation, and other canonical failure rendering with no model dependency
 
 ## 4. LangFlow Component Entrypoints
 
-- [ ] 4.1 Implement and unit-test the Message-only execution-envelope component with exact API actor request-variable headers, ignored Playground actor environment inputs, constant role/assurance/source, strict message/graph session comparison, UUID normalization, and omitted-session flow-ID fallback rejection
-- [ ] 4.2 Implement and unit-test contract-boundary components that assemble strict `RouterInput`/`IntakeInput` from fixed advanced envelope/context edges, prevent model substitution, and translate LangFlow Data/JSON values to safe typed failures
-- [ ] 4.3 Implement and unit-test the LF-70 data-operation boundary enforcing contract-validation precedence, caller capabilities, expected timestamp/status, additive-only updates, non-mutating zero-row classification, dispatch state, and affected-record policy
-- [ ] 4.4 Implement and unit-test retry-decision and deterministic-renderer components without duplicating visual-flow orchestration
-- [ ] 4.5 Add import-linter contracts proving that core/intake models do not import services or LangFlow entrypoints and services do not import entrypoints
+- [x] 4.1 Implement and unit-test the Message-only execution-envelope component with exact API actor request-variable headers, ignored Playground actor environment inputs, constant role/assurance/source, strict message/graph session comparison, UUID normalization, and omitted-session flow-ID fallback rejection
+- [x] 4.2 Implement and unit-test contract-boundary components that assemble strict `RouterInput`/`IntakeInput` from fixed advanced envelope/context edges, prevent model substitution, and translate LangFlow Data/JSON values to safe typed failures
+- [x] 4.3 Implement and unit-test the LF-70 data-operation boundary enforcing contract-validation precedence, caller capabilities, expected timestamp/status, additive-only updates, non-mutating zero-row classification, dispatch state, and affected-record policy
+- [x] 4.4 Implement and unit-test retry-decision and deterministic-renderer components without duplicating visual-flow orchestration
+- [x] 4.5 Add import-linter contracts proving that core/intake models do not import services or LangFlow entrypoints and services do not import entrypoints
 
 ## 5. Neo4j Operational Schema And Test Isolation
 
-- [ ] 5.1 Add and test rejection by the unique `OperationalConversationBinding.sessionId` constraint plus the relationship-backed `BINDS_ACTIVE_REQUEST` operational schema outside LinkML-generated files; do not remove or bypass the constraint for duplicate tests
-- [ ] 5.2 Add direct Neo4j assertion helpers and deterministic fixtures for sparse/complete/all recognized and unknown statuses/closed precedence, using synthetic `binding_count=2` only in boundary tests and constrained duplicate relationships/targets in Neo4j integration tests
-- [ ] 5.3 Add a disposable Neo4j Testcontainer fixture, initialize domain plus operational constraints, and seed only deterministic Change 1 test data
-- [ ] 5.4 Add an isolated MCP test service pointed at the disposable Neo4j instance and verify protocol initialization plus exact schema/read/write tool inventory
+- [x] 5.1 Add and test rejection by the unique `OperationalConversationBinding.sessionId` constraint plus the relationship-backed `BINDS_ACTIVE_REQUEST` operational schema outside LinkML-generated files; do not remove or bypass the constraint for duplicate tests
+- [x] 5.2 Add direct Neo4j assertion helpers and deterministic fixtures for sparse/complete/all recognized and unknown statuses/closed precedence, using synthetic `binding_count=2` only in boundary tests and constrained duplicate relationships/targets in Neo4j integration tests
+- [x] 5.3 Add a disposable Neo4j Testcontainer fixture, initialize domain plus operational constraints, and seed only deterministic Change 1 test data
+- [x] 5.4 Add an isolated MCP test service pointed at the disposable Neo4j instance and verify protocol initialization plus exact schema/read/write tool inventory
 
 ## 6. Reproducible LangFlow Infrastructure
 
-- [ ] 6.1 Pin LangFlow, PostgreSQL, Neo4j, MCP base/runtime dependencies, and LFX to the approved versions/digests with an explicit reviewed upgrade path
-- [ ] 6.2 Add PostgreSQL and LangFlow health checks, protocol-level MCP readiness, dependency ordering, restart policies, local-only host bindings, and required-variable validation
-- [ ] 6.3 Mount tracked flows and custom components read-only, configure `PYTHONPATH`, disable starter-flow drift, and retain PostgreSQL/Neo4j persistence separately from Git source assets
-- [ ] 6.4 Add local and CI LangFlow API-key configuration plus API request-variable and ignored Playground simulated-actor inputs, preserving local UI usability while rejecting unauthenticated or missing-session programmatic invocation
+- [x] 6.1 Pin LangFlow, PostgreSQL, Neo4j, MCP base/runtime dependencies, and LFX to the approved versions/digests with an explicit reviewed upgrade path
+- [x] 6.2 Add PostgreSQL and LangFlow health checks, protocol-level MCP readiness, dependency ordering, restart policies, local-only host bindings, and required-variable validation
+- [x] 6.3 Mount tracked flows and custom components read-only, configure `PYTHONPATH`, disable starter-flow drift, and retain PostgreSQL/Neo4j persistence separately from Git source assets
+- [x] 6.4 Add local and CI LangFlow API-key configuration plus API request-variable and ignored Playground simulated-actor inputs, preserving local UI usability while rejecting unauthenticated or missing-session programmatic invocation
 
 ## 7. Flow-As-Code Toolchain
 
-- [ ] 7.1 Add the LangFlow directory, stable UUIDv5 flow manifest, LFX local/CI environment map, deployment order, and developer workflow documentation
-- [ ] 7.2 Implement deterministic LFX export normalization and idempotence checks without reordering semantic node/edge arrays
-- [ ] 7.3 Add strict level-4 flow validation, strict upgrade compatibility, required-input/edge checks, and structural environment-variable/secret validation
-- [ ] 7.4 Add LFX push/pull/status targets and a clean-instance drift check that fails for UI-only, missing, duplicate, or untracked remote flows
+- [x] 7.1 Add the LangFlow directory, stable UUIDv5 flow manifest, LFX local/CI environment map, and deployment order (developer workflow documentation addressed in 7.5)
+- [x] 7.2 Implement deterministic LFX export normalization and idempotence checks without reordering semantic node/edge arrays
+- [x] 7.3 Add strict level-4 flow validation, strict upgrade compatibility, required-input/edge checks, and structural environment-variable/secret validation
+- [x] 7.4 Implement operational policy validation scripts (`validate_langflow_assets.py` and `inspect_langflow_components.py`), component schema capture integration tests, and hard gates for manifest coherence, topology drift detection, UI-only flow rejection, and component schema pinning
+- [ ] 7.5 Create contributor workflow and operational policy documentation (`docs/flow-development.md`) covering flow edit cycle, manifest-as-source-of-truth principle, drift detection, stable UUID/component ID requirements, and local vs. CI workflow — link from README/CONTRIBUTING so new contributors reference it before modifying flows
+- [ ] 7.6 Add LFX push/pull/status Make targets and clean-instance drift check that fails for UI-only, missing, duplicate, or untracked remote flows
 
 ## 8. LF-70 Data Access Flow
 

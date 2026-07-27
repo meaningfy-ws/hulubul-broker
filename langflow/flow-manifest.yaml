@@ -1,0 +1,53 @@
+schema_version: "1.0.0"
+langflow_version: "1.10.2"
+deployment_order: [lf-70-data-access, lf-10-request-intake, lf-00-main-router]
+
+flows:
+  lf-70-data-access:
+    id: 94f6774d-ebc7-5bf1-8486-886f91886a5f
+    file: flows/10-lf-70-data-access.json
+    public_input_component_id: HulubulDataOperationRequestBoundary-hlb-lf-70-request-v1
+    public_result_component_id: HulubulDataOperationResultBoundary-hlb-lf-70-result-v1
+    chat_output_component_id: null
+    run_flow_references: []
+
+  lf-10-request-intake:
+    id: 6843ae79-147f-55d4-a25b-01d6143a12cc
+    file: flows/20-lf-10-request-intake.json
+    public_input_component_id: HulubulContractInputBoundary-hlb-lf-10-input-v1
+    public_result_component_id: HulubulContractResultBoundary-hlb-lf-10-result-v1
+    chat_output_component_id: null
+    run_flow_references:
+      - component_id: RunFlow-hlb-lf-10-data-access-v1
+        target_flow_id: 94f6774d-ebc7-5bf1-8486-886f91886a5f
+
+  lf-00-main-router:
+    id: 38b7ee64-26c8-5d4d-97e4-6e62a0fcb557
+    file: flows/30-lf-00-main-router.json
+    public_input_component_id: ChatInput-hlb-lf-00-message-v1
+    public_result_component_id: HulubulContractResultBoundary-hlb-lf-00-result-v1
+    chat_output_component_id: ChatOutput-hlb-lf-00-chat-v1
+    run_flow_references:
+      - component_id: RunFlow-hlb-lf-00-routing-context-v1
+        target_flow_id: 94f6774d-ebc7-5bf1-8486-886f91886a5f
+      - component_id: RunFlow-hlb-lf-00-request-intake-v1
+        target_flow_id: 6843ae79-147f-55d4-a25b-01d6143a12cc
+
+runtime_bindings:
+  - component_id: OpenAIModel-hlb-lf-70-model-v1
+    fields:
+      model_name: HULUBUL_LLM_MODEL
+      openai_api_base: HULUBUL_LLM_BASE_URL
+      api_key: HULUBUL_LLM_API_KEY
+
+  - component_id: OpenAIModel-hlb-lf-10-model-v1
+    fields:
+      model_name: HULUBUL_LLM_MODEL
+      openai_api_base: HULUBUL_LLM_BASE_URL
+      api_key: HULUBUL_LLM_API_KEY
+
+  - component_id: OpenAIModel-hlb-lf-00-model-v1
+    fields:
+      model_name: HULUBUL_LLM_MODEL
+      openai_api_base: HULUBUL_LLM_BASE_URL
+      api_key: HULUBUL_LLM_API_KEY
