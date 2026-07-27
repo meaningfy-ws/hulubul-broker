@@ -1,0 +1,1025 @@
+{
+  "data": {
+    "edges": [
+      {
+        "animated": false,
+        "data": {
+          "sourceHandle": {
+            "dataType": "Message",
+            "id": "HulubulDataOperationRequestBoundary-hlb-lf-70-request-v1",
+            "name": "response",
+            "output_types": [
+              "Message"
+            ]
+          },
+          "targetHandle": {
+            "fieldName": "input_value",
+            "id": "Agent-hlb-lf-70-agent-v1",
+            "inputTypes": [
+              "Message",
+              "str"
+            ],
+            "type": "Message"
+          }
+        },
+        "id": "edge-request-to-agent",
+        "source": "HulubulDataOperationRequestBoundary-hlb-lf-70-request-v1",
+        "sourceHandle": "{dataType:Message,id:HulubulDataOperationRequestBoundary-hlb-lf-70-request-v1,name:response,output_types:[Message]}",
+        "target": "Agent-hlb-lf-70-agent-v1",
+        "targetHandle": "{fieldName:input_value,id:Agent-hlb-lf-70-agent-v1,inputTypes:[Message,str],type:Message}"
+      },
+      {
+        "animated": false,
+        "data": {
+          "sourceHandle": {
+            "dataType": "LanguageModel",
+            "id": "OpenAIModel-hlb-lf-70-model-v1",
+            "name": "model_output",
+            "output_types": [
+              "LanguageModel"
+            ]
+          },
+          "targetHandle": {
+            "fieldName": "model",
+            "id": "Agent-hlb-lf-70-agent-v1",
+            "inputTypes": [
+              "LanguageModel"
+            ],
+            "type": "LanguageModel"
+          }
+        },
+        "id": "edge-model-to-agent",
+        "source": "OpenAIModel-hlb-lf-70-model-v1",
+        "sourceHandle": "{dataType:LanguageModel,id:OpenAIModel-hlb-lf-70-model-v1,name:model_output,output_types:[LanguageModel]}",
+        "target": "Agent-hlb-lf-70-agent-v1",
+        "targetHandle": "{fieldName:model,id:Agent-hlb-lf-70-agent-v1,inputTypes:[LanguageModel],type:LanguageModel}"
+      },
+      {
+        "animated": false,
+        "data": {
+          "sourceHandle": {
+            "dataType": "Tool",
+            "id": "MCPToolkit-hlb-lf-70-neo4j-v1",
+            "name": "component_as_tool",
+            "output_types": [
+              "Tool"
+            ]
+          },
+          "targetHandle": {
+            "fieldName": "tools",
+            "id": "Agent-hlb-lf-70-agent-v1",
+            "inputTypes": [
+              "Tool"
+            ],
+            "type": "Tool"
+          }
+        },
+        "id": "edge-tools-to-agent",
+        "source": "MCPToolkit-hlb-lf-70-neo4j-v1",
+        "sourceHandle": "{dataType:Tool,id:MCPToolkit-hlb-lf-70-neo4j-v1,name:component_as_tool,output_types:[Tool]}",
+        "target": "Agent-hlb-lf-70-agent-v1",
+        "targetHandle": "{fieldName:tools,id:Agent-hlb-lf-70-agent-v1,inputTypes:[Tool],type:Tool}"
+      },
+      {
+        "animated": false,
+        "data": {
+          "sourceHandle": {
+            "dataType": "Message",
+            "id": "Agent-hlb-lf-70-agent-v1",
+            "name": "response",
+            "output_types": [
+              "Message"
+            ]
+          },
+          "targetHandle": {
+            "fieldName": "agent_response",
+            "id": "HulubulFailureClassifier-hlb-lf-70-classifier-v1",
+            "inputTypes": [
+              "Message"
+            ],
+            "type": "Message"
+          }
+        },
+        "id": "edge-agent-to-classifier",
+        "source": "Agent-hlb-lf-70-agent-v1",
+        "sourceHandle": "{dataType:Message,id:Agent-hlb-lf-70-agent-v1,name:response,output_types:[Message]}",
+        "target": "HulubulFailureClassifier-hlb-lf-70-classifier-v1",
+        "targetHandle": "{fieldName:agent_response,id:HulubulFailureClassifier-hlb-lf-70-classifier-v1,inputTypes:[Message],type:Message}"
+      },
+      {
+        "animated": false,
+        "data": {
+          "sourceHandle": {
+            "dataType": "str",
+            "id": "HulubulFailureClassifier-hlb-lf-70-classifier-v1",
+            "name": "classify_failure",
+            "output_types": [
+              "str"
+            ]
+          },
+          "targetHandle": {
+            "fieldName": "input_text",
+            "id": "ConditionalRouter-hlb-lf-70-retry-router-v1",
+            "inputTypes": [
+              "str"
+            ],
+            "type": "str"
+          }
+        },
+        "id": "edge-classifier-to-router",
+        "source": "HulubulFailureClassifier-hlb-lf-70-classifier-v1",
+        "sourceHandle": "{dataType:str,id:HulubulFailureClassifier-hlb-lf-70-classifier-v1,name:classify_failure,output_types:[str]}",
+        "target": "ConditionalRouter-hlb-lf-70-retry-router-v1",
+        "targetHandle": "{fieldName:input_text,id:ConditionalRouter-hlb-lf-70-retry-router-v1,inputTypes:[str],type:str}"
+      },
+      {
+        "animated": false,
+        "data": {
+          "sourceHandle": {
+            "dataType": "Message",
+            "id": "ConditionalRouter-hlb-lf-70-retry-router-v1",
+            "name": "true_result",
+            "output_types": [
+              "Message"
+            ]
+          },
+          "targetHandle": {
+            "fieldName": "input_value",
+            "id": "Agent-hlb-lf-70-agent-v1",
+            "inputTypes": [
+              "Message",
+              "str"
+            ],
+            "type": "Message"
+          }
+        },
+        "id": "edge-router-true-to-agent-retry",
+        "source": "ConditionalRouter-hlb-lf-70-retry-router-v1",
+        "sourceHandle": "{dataType:Message,id:ConditionalRouter-hlb-lf-70-retry-router-v1,name:true_result,output_types:[Message]}",
+        "target": "Agent-hlb-lf-70-agent-v1",
+        "targetHandle": "{fieldName:input_value,id:Agent-hlb-lf-70-agent-v1,inputTypes:[Message,str],type:Message}"
+      },
+      {
+        "animated": false,
+        "data": {
+          "sourceHandle": {
+            "dataType": "Message",
+            "id": "ConditionalRouter-hlb-lf-70-retry-router-v1",
+            "name": "false_result",
+            "output_types": [
+              "Message"
+            ]
+          },
+          "targetHandle": {
+            "fieldName": "result_value",
+            "id": "HulubulDataOperationResultBoundary-hlb-lf-70-result-v1",
+            "inputTypes": [
+              "Data",
+              "JSON"
+            ],
+            "type": "Message"
+          }
+        },
+        "id": "edge-router-false-to-result",
+        "source": "ConditionalRouter-hlb-lf-70-retry-router-v1",
+        "sourceHandle": "{dataType:Message,id:ConditionalRouter-hlb-lf-70-retry-router-v1,name:false_result,output_types:[Message]}",
+        "target": "HulubulDataOperationResultBoundary-hlb-lf-70-result-v1",
+        "targetHandle": "{fieldName:result_value,id:HulubulDataOperationResultBoundary-hlb-lf-70-result-v1,inputTypes:[Data,JSON],type:Message}"
+      }
+    ],
+    "nodes": [
+      {
+        "data": {
+          "id": "HulubulDataOperationRequestBoundary-hlb-lf-70-request-v1",
+          "node": {
+            "base_classes": [
+              "Message"
+            ],
+            "category": "components",
+            "description": "Validate and authorize DataOperationRequest payloads",
+            "display_name": "Data Operation Request Boundary",
+            "edited": false,
+            "field_order": [
+              "input_value"
+            ],
+            "icon": "shield-check",
+            "key": "DataOperationRequestBoundaryComponent",
+            "lf_version": "1.10.2",
+            "output_types": [],
+            "outputs": [
+              {
+                "cache": true,
+                "display_name": "Message",
+                "hidden": false,
+                "method": "validate_request_value",
+                "name": "response",
+                "types": [
+                  "Message"
+                ]
+              }
+            ],
+            "template": {
+              "_type": "Component",
+              "input_value": {
+                "advanced": false,
+                "display_name": "Data Operation Request",
+                "dynamic": false,
+                "info": "Typed DataOperationRequest to validate and authorize",
+                "input_types": [
+                  "Data",
+                  "JSON"
+                ],
+                "list": false,
+                "load_from_db": false,
+                "multiline": false,
+                "name": "input_value",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "type": "any",
+                "value": ""
+              }
+            }
+          },
+          "selected_output": "response",
+          "showNode": true,
+          "type": "DataOperationRequestBoundaryComponent"
+        },
+        "dragging": false,
+        "height": 240,
+        "id": "HulubulDataOperationRequestBoundary-hlb-lf-70-request-v1",
+        "position": {
+          "x": 100,
+          "y": 100
+        },
+        "width": 300
+      },
+      {
+        "data": {
+          "id": "OpenAIModel-hlb-lf-70-model-v1",
+          "node": {
+            "base_classes": [
+              "LanguageModel"
+            ],
+            "category": "models",
+            "description": "OpenAI language model (deterministic settings for LF-70)",
+            "display_name": "OpenAI Model",
+            "edited": false,
+            "field_order": [
+              "model_name",
+              "temperature",
+              "seed",
+              "openai_api_base",
+              "api_key",
+              "max_retries",
+              "timeout"
+            ],
+            "icon": "openai",
+            "key": "OpenAIModel",
+            "lf_version": "1.10.2",
+            "output_types": [],
+            "outputs": [
+              {
+                "cache": true,
+                "display_name": "LanguageModel",
+                "hidden": false,
+                "method": "build",
+                "name": "model_output",
+                "types": [
+                  "LanguageModel"
+                ]
+              }
+            ],
+            "template": {
+              "_type": "Component",
+              "api_key": {
+                "advanced": false,
+                "display_name": "API Key",
+                "dynamic": false,
+                "info": "OpenAI API key",
+                "input_types": [],
+                "list": false,
+                "load_from_db": true,
+                "multiline": false,
+                "name": "api_key",
+                "password": true,
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "type": "password",
+                "value": ""
+              },
+              "max_retries": {
+                "advanced": false,
+                "default": 0,
+                "display_name": "Max Retries",
+                "dynamic": false,
+                "info": "Maximum retries for API calls (0 = no retries)",
+                "input_types": [],
+                "list": false,
+                "load_from_db": false,
+                "multiline": false,
+                "name": "max_retries",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "type": "int",
+                "value": 0
+              },
+              "model_name": {
+                "advanced": false,
+                "display_name": "Model Name",
+                "dynamic": false,
+                "info": "Model identifier (e.g., gpt-4, deepseek-v4-flash)",
+                "input_types": [],
+                "list": false,
+                "load_from_db": true,
+                "multiline": false,
+                "name": "model_name",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "type": "str",
+                "value": ""
+              },
+              "openai_api_base": {
+                "advanced": false,
+                "display_name": "API Base URL",
+                "dynamic": false,
+                "info": "Base URL for OpenAI-compatible API",
+                "input_types": [],
+                "list": false,
+                "load_from_db": true,
+                "multiline": false,
+                "name": "openai_api_base",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "type": "str",
+                "value": ""
+              },
+              "seed": {
+                "advanced": false,
+                "default": 1,
+                "display_name": "Seed",
+                "dynamic": false,
+                "info": "Random seed for reproducibility",
+                "input_types": [],
+                "list": false,
+                "load_from_db": false,
+                "multiline": false,
+                "name": "seed",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "type": "int",
+                "value": 1
+              },
+              "temperature": {
+                "advanced": false,
+                "default": 0.0,
+                "display_name": "Temperature",
+                "dynamic": false,
+                "info": "Temperature for determinism (0.0 for deterministic behavior)",
+                "input_types": [],
+                "list": false,
+                "load_from_db": false,
+                "multiline": false,
+                "name": "temperature",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "type": "float",
+                "value": 0.0
+              },
+              "timeout": {
+                "advanced": false,
+                "default": 5,
+                "display_name": "Timeout (seconds)",
+                "dynamic": false,
+                "info": "Timeout in seconds for API calls",
+                "input_types": [],
+                "list": false,
+                "load_from_db": false,
+                "multiline": false,
+                "name": "timeout",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "type": "int",
+                "value": 5
+              }
+            }
+          },
+          "selected_output": "model_output",
+          "showNode": true,
+          "type": "OpenAIModel"
+        },
+        "dragging": false,
+        "height": 300,
+        "id": "OpenAIModel-hlb-lf-70-model-v1",
+        "position": {
+          "x": 500,
+          "y": 100
+        },
+        "width": 300
+      },
+      {
+        "data": {
+          "id": "MCPToolkit-hlb-lf-70-neo4j-v1",
+          "node": {
+            "base_classes": [
+              "Tool"
+            ],
+            "category": "tools",
+            "description": "Neo4j MCP toolkit (schema, read, write operations)",
+            "display_name": "Neo4j MCP Toolkit",
+            "edited": false,
+            "field_order": [
+              "url"
+            ],
+            "icon": "server",
+            "key": "MCPToolkit",
+            "lf_version": "1.10.2",
+            "output_types": [],
+            "outputs": [
+              {
+                "cache": true,
+                "display_name": "Tool",
+                "hidden": false,
+                "method": "get_tools",
+                "name": "component_as_tool",
+                "types": [
+                  "Tool"
+                ]
+              }
+            ],
+            "template": {
+              "_type": "Component",
+              "url": {
+                "advanced": false,
+                "display_name": "MCP Server URL",
+                "dynamic": false,
+                "info": "URL of the Neo4j MCP server",
+                "input_types": [],
+                "list": false,
+                "load_from_db": true,
+                "multiline": false,
+                "name": "url",
+                "placeholder": "http://mcp-neo4j:8000/mcp/",
+                "required": false,
+                "show": true,
+                "type": "str",
+                "value": ""
+              }
+            }
+          },
+          "selected_output": "component_as_tool",
+          "showNode": true,
+          "type": "MCPToolkit"
+        },
+        "dragging": false,
+        "height": 180,
+        "id": "MCPToolkit-hlb-lf-70-neo4j-v1",
+        "position": {
+          "x": 900,
+          "y": 100
+        },
+        "width": 300
+      },
+      {
+        "data": {
+          "id": "Agent-hlb-lf-70-agent-v1",
+          "node": {
+            "base_classes": [
+              "Agent"
+            ],
+            "category": "agents",
+            "description": "Data access agent: executes five operations via Neo4j MCP tools",
+            "display_name": "Data Access Agent",
+            "edited": false,
+            "field_order": [
+              "input_value",
+              "model",
+              "tools",
+              "system_prompt",
+              "temperature",
+              "agent_type"
+            ],
+            "icon": "cpu",
+            "key": "Agent",
+            "lf_version": "1.10.2",
+            "output_types": [],
+            "outputs": [
+              {
+                "cache": true,
+                "display_name": "Message",
+                "hidden": false,
+                "method": "build_output_message",
+                "name": "response",
+                "types": [
+                  "Message"
+                ]
+              }
+            ],
+            "template": {
+              "_type": "Component",
+              "agent_type": {
+                "advanced": false,
+                "default": "tool-calling",
+                "display_name": "Agent Type",
+                "dynamic": false,
+                "info": "Type of agent reasoning",
+                "input_types": [],
+                "list": false,
+                "load_from_db": false,
+                "multiline": false,
+                "name": "agent_type",
+                "options": [
+                  "tool-calling",
+                  "structured-output"
+                ],
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "type": "str",
+                "value": "tool-calling"
+              },
+              "input_value": {
+                "advanced": false,
+                "display_name": "Input",
+                "dynamic": false,
+                "info": "Input message to the agent",
+                "input_types": [
+                  "Message",
+                  "str"
+                ],
+                "list": false,
+                "load_from_db": false,
+                "multiline": false,
+                "name": "input_value",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "type": "str",
+                "value": ""
+              },
+              "model": {
+                "advanced": false,
+                "display_name": "Language Model",
+                "dynamic": false,
+                "info": "Language model for agent reasoning",
+                "input_types": [
+                  "LanguageModel"
+                ],
+                "list": false,
+                "load_from_db": false,
+                "multiline": false,
+                "name": "model",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "type": "LanguageModel",
+                "value": ""
+              },
+              "system_prompt": {
+                "advanced": false,
+                "display_name": "System Prompt",
+                "dynamic": false,
+                "info": "System instructions for the agent",
+                "input_types": [],
+                "list": false,
+                "load_from_db": false,
+                "multiline": true,
+                "name": "system_prompt",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "type": "str",
+                "value": "You are the LF-70 Data Access Agent. You execute typed data operations against a Neo4j graph via the MCP toolkit.\n\nAvailable operations (call the appropriate MCP tool for each):\n\n1. **getRequestRoutingContext** (read-only)\n   - No payload needed\n   - Call: get_neo4j_schema to understand the graph structure, then read_neo4j_cypher to query routing context\n   - Returns: RoutingContext with binding presence, request ID/status, closed timestamp, routing stage\n   - No mutation\n\n2. **readDeliveryRequest** (read-only)\n   - Payload: { request_id: string }\n   - Call: read_neo4j_cypher with parameterized query (NEVER client-sourced text)\n   - Returns: DeliveryRequestSnapshot with sparse facts and optimistic concurrency timestamp (updated_at)\n   - No mutation\n\n3. **createDeliveryRequest** (write)\n   - Payload: { identifiers: {...}, facts: {...} }\n   - Call: write_neo4j_cypher to create request + binding in one transaction\n   - Neo4j returns both created and updated timestamps (must be equal)\n   - Returns: DeliveryRequestSnapshot with new request\n   - Atomic: if binding fails (duplicate sessionId), entire transaction rolls back; no orphan request\n\n4. **updateDeliveryRequest** (write)\n   - Payload: { request_id: string, expected_updated_at: datetime, expected_status: string, updates: {...}, identifiers?: {...} }\n   - Enforce: additive-only updates (no replacement of existing preferred_period or singular subgraphs)\n   - Call: write_neo4j_cypher with parameterized expected_updated_at and expected_status (compare-and-set)\n   - If zero rows: perform one non-mutating read to classify (CONCURRENT_MODIFICATION vs INVALID_EXPECTED_STATUS vs other)\n   - Returns: DeliveryRequestSnapshot with new updated timestamp\n   - Exactly one request must be affected\n\n5. **setRequestStatus** (write)\n   - Payload: { request_id: string, expected_updated_at: datetime, expected_status: string, target_status: string }\n   - Enforce: Only allowed transitions per fixed table (new→complete, new→needsClarification, needsClarification→complete, none→new)\n   - Call: write_neo4j_cypher with parameterized compare-and-set on both expected_updated_at and expected_status\n   - If zero rows: perform one non-mutating read to classify the failure type\n   - Returns: new updated timestamp\n   - Exactly one request must be affected\n\nGeneral rules:\n- All Cypher must use parameterized queries (never interpolate client values)\n- Never invent or bypass identifiers; trust pre-generated IDs from the caller\n- Validate record counts: writes affecting exactly 1 request, reads returning at most 1 request\n- Return typed DataOperationResult with outcome (confirmed/rejected/ambiguous), affected_count, status before/after\n- Write timeouts return MCP_WRITE_AMBIGUOUS with write_dispatched=true and retryable=false\n- Malformed results trigger tool-less repair (never replay a dispatched write)\n\nDo not:\n- Execute arbitrary Cypher (operations are strictly five named commands)\n- Bypass the expected_updated_at compare-and-set for updates\n- Replay writes after dispatch (handle ambiguity via independent Neo4j inspection)\n- Fabricate domain nodes or identifiers\n- Claim success without confirming affected-record counts"
+              },
+              "temperature": {
+                "advanced": false,
+                "default": 0.0,
+                "display_name": "Temperature",
+                "dynamic": false,
+                "info": "Agent temperature (inherited from model)",
+                "input_types": [],
+                "list": false,
+                "load_from_db": false,
+                "multiline": false,
+                "name": "temperature",
+                "placeholder": "",
+                "required": false,
+                "show": false,
+                "type": "float",
+                "value": 0.0
+              },
+              "tools": {
+                "advanced": false,
+                "display_name": "Tools",
+                "dynamic": false,
+                "info": "Tools available to the agent",
+                "input_types": [
+                  "Tool"
+                ],
+                "list": true,
+                "load_from_db": false,
+                "multiline": false,
+                "name": "tools",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "type": "Tool",
+                "value": ""
+              }
+            }
+          },
+          "selected_output": "response",
+          "showNode": true,
+          "type": "Agent"
+        },
+        "dragging": false,
+        "height": 400,
+        "id": "Agent-hlb-lf-70-agent-v1",
+        "position": {
+          "x": 500,
+          "y": 500
+        },
+        "width": 350
+      },
+      {
+        "data": {
+          "id": "HulubulFailureClassifier-hlb-lf-70-classifier-v1",
+          "node": {
+            "base_classes": [
+              "str"
+            ],
+            "category": "components",
+            "description": "Classify failures from Agent output for retry decision (DEC-015)",
+            "display_name": "Failure Classifier",
+            "edited": false,
+            "field_order": [
+              "agent_response"
+            ],
+            "icon": "alert-triangle",
+            "key": "FailureClassifierComponent",
+            "lf_version": "1.10.2",
+            "output_types": [],
+            "outputs": [
+              {
+                "cache": true,
+                "display_name": "str",
+                "hidden": false,
+                "method": "classify_failure",
+                "name": "classify_failure",
+                "types": [
+                  "str"
+                ]
+              }
+            ],
+            "template": {
+              "_type": "Component",
+              "agent_response": {
+                "advanced": false,
+                "display_name": "Agent Response",
+                "dynamic": false,
+                "info": "Raw Message from Agent containing operation result",
+                "input_types": [
+                  "Message"
+                ],
+                "list": false,
+                "load_from_db": false,
+                "multiline": false,
+                "name": "agent_response",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "type": "Message",
+                "value": ""
+              }
+            }
+          },
+          "selected_output": "classify_failure",
+          "showNode": true,
+          "type": "FailureClassifierComponent"
+        },
+        "dragging": false,
+        "height": 200,
+        "id": "HulubulFailureClassifier-hlb-lf-70-classifier-v1",
+        "position": {
+          "x": 900,
+          "y": 500
+        },
+        "width": 300
+      },
+      {
+        "data": {
+          "id": "ConditionalRouter-hlb-lf-70-retry-router-v1",
+          "node": {
+            "base_classes": [
+              "Message"
+            ],
+            "category": "flow_controls",
+            "description": "Routes to retry or final result based on should_retry classification",
+            "display_name": "Retry Router (Conditional)",
+            "edited": false,
+            "field_order": [
+              "input_text",
+              "match_text",
+              "operator",
+              "case_sensitive",
+              "max_iterations",
+              "true_case_message",
+              "false_case_message",
+              "default_route"
+            ],
+            "icon": "git-branch",
+            "key": "ConditionalRouter",
+            "lf_version": "1.10.2",
+            "output_types": [],
+            "outputs": [
+              {
+                "cache": true,
+                "display_name": "Message",
+                "hidden": false,
+                "method": "true_response",
+                "name": "true_result",
+                "types": [
+                  "Message"
+                ]
+              },
+              {
+                "cache": true,
+                "display_name": "Message",
+                "hidden": false,
+                "method": "false_response",
+                "name": "false_result",
+                "types": [
+                  "Message"
+                ]
+              }
+            ],
+            "template": {
+              "_type": "Component",
+              "case_sensitive": {
+                "advanced": false,
+                "default": false,
+                "display_name": "Case Sensitive",
+                "dynamic": false,
+                "info": "Whether text comparison is case-sensitive",
+                "input_types": [],
+                "list": false,
+                "load_from_db": false,
+                "multiline": false,
+                "name": "case_sensitive",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "type": "bool",
+                "value": false
+              },
+              "default_route": {
+                "advanced": false,
+                "default": "false_result",
+                "display_name": "Default Route",
+                "dynamic": false,
+                "info": "Default route if no match",
+                "input_types": [],
+                "list": false,
+                "load_from_db": false,
+                "multiline": false,
+                "name": "default_route",
+                "options": [
+                  "true_result",
+                  "false_result"
+                ],
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "type": "str",
+                "value": "false_result"
+              },
+              "false_case_message": {
+                "advanced": false,
+                "display_name": "False Case Message",
+                "dynamic": false,
+                "info": "Message to return when condition is false",
+                "input_types": [
+                  "Message"
+                ],
+                "list": false,
+                "load_from_db": false,
+                "multiline": false,
+                "name": "false_case_message",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "type": "Message",
+                "value": ""
+              },
+              "input_text": {
+                "advanced": false,
+                "display_name": "Input Text",
+                "dynamic": false,
+                "info": "Text to compare (from should_retry classification)",
+                "input_types": [
+                  "str"
+                ],
+                "list": false,
+                "load_from_db": false,
+                "multiline": false,
+                "name": "input_text",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "type": "str",
+                "value": ""
+              },
+              "match_text": {
+                "advanced": false,
+                "display_name": "Match Text",
+                "dynamic": false,
+                "info": "Text to match against (should_retry='true' for retry)",
+                "input_types": [],
+                "list": false,
+                "load_from_db": false,
+                "multiline": false,
+                "name": "match_text",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "type": "str",
+                "value": "true"
+              },
+              "max_iterations": {
+                "advanced": false,
+                "default": 1,
+                "display_name": "Max Iterations",
+                "dynamic": false,
+                "info": "Maximum loop iterations (1 = one retry per DEC-015)",
+                "input_types": [],
+                "list": false,
+                "load_from_db": false,
+                "multiline": false,
+                "name": "max_iterations",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "type": "int",
+                "value": 1
+              },
+              "operator": {
+                "advanced": false,
+                "default": "equals",
+                "display_name": "Operator",
+                "dynamic": false,
+                "info": "Comparison operator",
+                "input_types": [],
+                "list": false,
+                "load_from_db": false,
+                "multiline": false,
+                "name": "operator",
+                "options": [
+                  "equals",
+                  "not equals",
+                  "contains",
+                  "starts with",
+                  "ends with",
+                  "regex",
+                  "less than",
+                  "greater than",
+                  "less than or equal",
+                  "greater than or equal"
+                ],
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "type": "str",
+                "value": "equals"
+              },
+              "true_case_message": {
+                "advanced": false,
+                "display_name": "True Case Message",
+                "dynamic": false,
+                "info": "Message to return when condition is true (retry)",
+                "input_types": [
+                  "Message"
+                ],
+                "list": false,
+                "load_from_db": false,
+                "multiline": false,
+                "name": "true_case_message",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "type": "Message",
+                "value": ""
+              }
+            }
+          },
+          "selected_output": "false_result",
+          "showNode": true,
+          "type": "ConditionalRouter"
+        },
+        "dragging": false,
+        "height": 280,
+        "id": "ConditionalRouter-hlb-lf-70-retry-router-v1",
+        "position": {
+          "x": 1300,
+          "y": 500
+        },
+        "width": 300
+      },
+      {
+        "data": {
+          "id": "HulubulDataOperationResultBoundary-hlb-lf-70-result-v1",
+          "node": {
+            "base_classes": [
+              "JSON"
+            ],
+            "category": "components",
+            "description": "Validate operation result as terminal flow output (DEC-015 terminal node)",
+            "display_name": "Data Operation Result Boundary (Terminal)",
+            "edited": false,
+            "field_order": [
+              "result_value",
+              "request_value"
+            ],
+            "icon": "shield-check",
+            "key": "DataOperationResultBoundaryComponent",
+            "lf_version": "1.10.2",
+            "output_types": [],
+            "outputs": [
+              {
+                "cache": true,
+                "display_name": "JSON",
+                "hidden": false,
+                "method": "validate_result_value",
+                "name": "validated_result",
+                "types": [
+                  "JSON"
+                ]
+              }
+            ],
+            "template": {
+              "_type": "Component",
+              "request_value": {
+                "advanced": false,
+                "display_name": "Original Request",
+                "dynamic": false,
+                "info": "Original DataOperationRequest dict",
+                "input_types": [
+                  "Data",
+                  "JSON"
+                ],
+                "list": false,
+                "load_from_db": false,
+                "multiline": false,
+                "name": "request_value",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "type": "any",
+                "value": ""
+              },
+              "result_value": {
+                "advanced": false,
+                "display_name": "Operation Result",
+                "dynamic": false,
+                "info": "Raw result dict from operation (Message or JSON)",
+                "input_types": [
+                  "Data",
+                  "JSON"
+                ],
+                "list": false,
+                "load_from_db": false,
+                "multiline": false,
+                "name": "result_value",
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "type": "any",
+                "value": ""
+              }
+            }
+          },
+          "selected_output": "validated_result",
+          "showNode": true,
+          "type": "DataOperationResultBoundaryComponent"
+        },
+        "dragging": false,
+        "height": 240,
+        "id": "HulubulDataOperationResultBoundary-hlb-lf-70-result-v1",
+        "position": {
+          "x": 1700,
+          "y": 500
+        },
+        "width": 300
+      }
+    ]
+  },
+  "description": "LF-70: Data Access Flow — typed Neo4j operations via MCP toolkit with DEC-015 retry loop (terminal Result Boundary)",
+  "id": "94f6774d-ebc7-5bf1-8486-886f91886a5f",
+  "name": "lf-70-data-access"
+}

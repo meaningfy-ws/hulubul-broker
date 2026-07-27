@@ -13,6 +13,7 @@ This module provides two LFX components for handling data operation contracts:
    - Verifies postconditions (request/result operation match, count correctness)
    - Patches result's correlation_id into errors if available
    - Returns typed JSON output (never raw dict)
+   - Runs as the terminal node (last step before flow output)
 
 Both components enforce:
 - Validation-before-authorization (contract is prerequisite for capability check)
@@ -20,6 +21,11 @@ Both components enforce:
 - Error redaction (no user values exposed)
 - Type translation to INVALID_CONTRACT on contract failures
 - Output as typed Message/JSON, never raw dict
+
+Note: Failure classification for retry decision is handled by a separate
+FailureClassifierComponent that runs on Agent's raw output BEFORE result
+validation. This preserves the terminal-node contract (Result Boundary
+runs once, at the end).
 """
 
 from typing import Any

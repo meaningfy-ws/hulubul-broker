@@ -19,6 +19,7 @@ Usage:
 
 import argparse
 import json
+import re
 import subprocess
 import sys
 from dataclasses import dataclass
@@ -26,6 +27,17 @@ from pathlib import Path
 from typing import Any
 
 import yaml  # type: ignore[import-untyped]
+
+# lfx==1.10.2/1.10.3/1.11.0 (latest stable release as of 2026-07-27, verified
+# by downloading each wheel from PyPI): lfx's own Level-2 component-existence
+# check imports `initialize_components` from `lfx.interface.utils`, which that
+# module does not export in any released version -- a genuine upstream bug,
+# not a version-pinning issue on our side. lfx itself treats this as
+# severity="warning" internally (it degrades gracefully and skips component
+# checks); only our own --strict flag turns it into a nonzero exit. Matched
+# against whitespace-flattened output because lfx's rich console wraps long
+# messages across physical lines even in captured (non-tty) output.
+_LFX_UPSTREAM_REGISTRY_LOAD_BUG_SIGNATURE = "cannot import name 'initialize_components'"
 
 ALLOWED_ENV_VARS = {
     "HULUBUL_LLM_MODEL",
@@ -432,7 +444,7 @@ class LFXValidator:
         for flow_file in flow_files:
             self._validate_with_lfx_strict(flow_file)
 
-        return len(self.errors) == 0
+        return all(error.severity != "error" for error in self.errors)
 
     def _lfx_available(self) -> bool:
         """Check if lfx CLI is available."""
@@ -445,6 +457,21 @@ class LFXValidator:
             return result.returncode == 0
         except (FileNotFoundError, subprocess.TimeoutExpired):
             return False
+
+    @staticmethod
+    def _is_only_known_upstream_lfx_bug(output: str) -> bool:
+        """True if every reported lfx issue is the known upstream registry-load bug.
+
+        Splits on the `[L<n> SEVERITY]` marker after flattening whitespace
+        (see module-level comment on _LFX_UPSTREAM_REGISTRY_LOAD_BUG_SIGNATURE
+        for why flattening is needed). Any other reported issue -- a real
+        L3/L4 problem in the flow itself -- still fails validation.
+        """
+        flattened = " ".join(output.split())
+        issue_chunks = re.split(r"\[L\d+ (?:ERROR|WARNING)\]", flattened)[1:]
+        if not issue_chunks:
+            return False
+        return all(_LFX_UPSTREAM_REGISTRY_LOAD_BUG_SIGNATURE in chunk for chunk in issue_chunks)
 
     def _validate_with_lfx_strict(self, flow_file: Path) -> None:
         """Run lfx level-4 strict validation on a single flow."""
@@ -465,11 +492,16 @@ class LFXValidator:
             )
 
             if result.returncode != 0:
+                combined_output = f"{result.stdout}\n{result.stderr}"
+                severity = (
+                    "warning" if self._is_only_known_upstream_lfx_bug(combined_output) else "error"
+                )
                 self.errors.append(
                     ValidationError(
                         "lfx_validation",
                         f"Flow {flow_file.name} failed LFX level-4 validation:\n"
                         f"{result.stdout}\n{result.stderr}",
+                        severity=severity,
                     )
                 )
         except (FileNotFoundError, subprocess.TimeoutExpired) as e:
@@ -537,15 +569,19 @@ def main() -> int:
         for error in content_validator.errors:
             print(f"[{error.category}] {error.message}", file=sys.stderr)
 
-    # 4. LFX validation
+    # 4. LFX validation (validate() return value is not used for gating here:
+    # a warning-only outcome -- e.g. the known upstream lfx registry-load bug
+    # -- must still be extended/printed for visibility even though it isn't
+    # blocking; the final gate below filters by severity, not by this call)
     lfx_validator = LFXValidator(flows_dir)
-    if not lfx_validator.validate():
-        all_errors.extend(lfx_validator.errors)
-        for error in lfx_validator.errors:
-            print(f"[{error.category}] {error.message}", file=sys.stderr)
+    lfx_validator.validate()
+    all_errors.extend(lfx_validator.errors)
+    for error in lfx_validator.errors:
+        print(f"[{error.category}] {error.message}", file=sys.stderr)
 
-    if all_errors:
-        print(f"\n[VALIDATION FAILED] {len(all_errors)} error(s)", file=sys.stderr)
+    blocking_errors = [error for error in all_errors if error.severity == "error"]
+    if blocking_errors:
+        print(f"\n[VALIDATION FAILED] {len(blocking_errors)} error(s)", file=sys.stderr)
         return 1
 
     print("[VALIDATION PASSED] All checks passed", file=sys.stdout)
