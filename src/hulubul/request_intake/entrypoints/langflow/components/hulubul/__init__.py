@@ -1,6 +1,6 @@
 """Hulubul LFX custom components for Phase 1 request intake and data access.
 
-Ten thin adapters bridging LangFlow's Message/Data boundary to pure operational contracts
+Eleven thin adapters bridging LangFlow's Message/Data boundary to pure operational contracts
 and policies (Cosmic Python DEC-007 proportional architecture):
 
 1. ExecutionEnvelopeComponent (Task 16): Trusted actor context + message envelope
@@ -15,7 +15,11 @@ and policies (Cosmic Python DEC-007 proportional architecture):
 8. RetryDecisionComponent (Task 19): Retry policy delegation
 9. DeterministicRendererComponent (Task 19): Safe rendering delegation
 10. HulubulDataAccessAgentComponent (Task 32): Agent with LF-70-scoped retry
-    middleware (read-only tool retry + model-call retry; never retries writes)
+    middleware (read-only tool retry + model-call retry; never retries writes);
+    also short-circuits already-rejected requests before any LLM/MCP call
+11. RoutingContextAdapterComponent (Task 33): Deterministic
+    RoutingLookupRecord -> RoutingContext classification for
+    getRequestRoutingContext, replacing LLM-improvised business logic
 
 One component per file: LangFlow's directory-based custom component loader
 registers exactly one component per file, named after the file -- a second
@@ -34,6 +38,7 @@ from .failure_classifier import FailureClassifierComponent
 from .intake_input_boundary import IntakeInputBoundaryComponent
 from .retry_decision import RetryDecisionComponent
 from .router_input_boundary import RouterInputBoundaryComponent
+from .routing_context_adapter import RoutingContextAdapterComponent
 
 __all__ = [
     "ContractResultBoundaryComponent",
@@ -46,4 +51,5 @@ __all__ = [
     "IntakeInputBoundaryComponent",
     "RetryDecisionComponent",
     "RouterInputBoundaryComponent",
+    "RoutingContextAdapterComponent",
 ]

@@ -6,7 +6,10 @@ ModelRetryMiddleware/ToolRetryMiddleware, scoped so ToolRetryMiddleware only
 ever applies to the two read-only MCP tools, never write_neo4j_cypher.
 """
 
+import json
+
 from langchain.agents.middleware import ModelRetryMiddleware, ToolRetryMiddleware
+from lfx.schema.message import Message
 
 from hulubul.request_intake.entrypoints.langflow.components.hulubul.data_access_agent import (
     HulubulDataAccessAgentComponent,
@@ -82,3 +85,84 @@ class TestStockBehaviorPreserved:
         agent = HulubulDataAccessAgentComponent()
         input_names = {i.name for i in agent.inputs}
         assert {"input_value", "model", "tools", "system_prompt"} <= input_names
+
+
+class TestShortCircuitRejection:
+    """Requests rejected by DataOperationRequestBoundary before ever reaching this
+    Agent must resolve to a typed DataOperationResult(rejected) without ever
+    invoking the LLM/MCP tools -- confirmed live: without this, the model
+    treated the pre-formed error as an ill-formed task and asked the caller to
+    rephrase, burning iterations on a request that was never going anywhere.
+    """
+
+    def test_rejection_with_known_operation_short_circuits(self) -> None:
+        agent = HulubulDataAccessAgentComponent()
+        agent.input_value = Message(
+            text=json.dumps(
+                {
+                    "schema_version": "1.0.0",
+                    "correlation_id": "c0ffee00-0000-0000-0000-000000000000",
+                    "code": "OPERATION_NOT_ALLOWED",
+                    "category": "authorization",
+                    "message": "This operation is not allowed.",
+                    "retryable": False,
+                    "violations": [],
+                    "_raw_operation": "getRequestRoutingContext",
+                }
+            )
+        )
+        result = agent._short_circuit_rejection()
+        assert result is not None
+        payload = json.loads(str(result.text))
+        assert payload["outcome"] == "rejected"
+        assert payload["success"] is False
+        assert payload["error_code"] == "OPERATION_NOT_ALLOWED"
+        assert payload["operation"] == "getRequestRoutingContext"
+
+    def test_rejection_with_unknown_operation_falls_through(self) -> None:
+        """No _raw_operation resolvable: let the normal Agent path run (unchanged,
+        pre-existing behavior for a contract-invalid payload with no parseable
+        operation at all)."""
+        agent = HulubulDataAccessAgentComponent()
+        agent.input_value = Message(
+            text=json.dumps(
+                {
+                    "schema_version": "1.0.0",
+                    "correlation_id": "c0ffee00-0000-0000-0000-000000000000",
+                    "code": "INVALID_CONTRACT",
+                    "category": "contract",
+                    "message": "I could not produce a safe response.",
+                    "retryable": False,
+                    "violations": [],
+                    "_raw_operation": None,
+                }
+            )
+        )
+        assert agent._short_circuit_rejection() is None
+
+    def test_valid_request_is_not_short_circuited(self) -> None:
+        agent = HulubulDataAccessAgentComponent()
+        agent.input_value = Message(
+            text=json.dumps(
+                {
+                    "schema_version": "1.0.0",
+                    "correlation_id": "c0ffee00-0000-0000-0000-000000000000",
+                    "operation": "getRequestRoutingContext",
+                    "operation_id": "op-001",
+                    "caller": "LF-00",
+                    "session_id": "p1-001",
+                    "actor_id": "urn:uuid:test-actor",
+                }
+            )
+        )
+        assert agent._short_circuit_rejection() is None
+
+    def test_non_json_input_is_not_short_circuited(self) -> None:
+        agent = HulubulDataAccessAgentComponent()
+        agent.input_value = Message(text="not json at all")
+        assert agent._short_circuit_rejection() is None
+
+    def test_empty_input_is_not_short_circuited(self) -> None:
+        agent = HulubulDataAccessAgentComponent()
+        agent.input_value = Message(text="")
+        assert agent._short_circuit_rejection() is None

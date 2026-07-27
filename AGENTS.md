@@ -34,6 +34,28 @@ build-up plan.
 - `make neo4j-schema` / `neo4j-seed` / `neo4j-queries` / `neo4j-reset` / `neo4j-shell` / `neo4j-browser`
 - `make mcp-logs` / `mcp-restart`
 
+## Langflow MCP (flow debugging)
+
+When a `langflow` MCP server is configured, use it to inspect and drive LangFlow
+flows directly instead of asking the developer to export run logs by hand.
+
+- **Why:** first-hand debugging of LF-00/LF-10/LF-70 manual-test flows — list
+  flows, read a flow's wiring, run it, and inspect what each component actually
+  produced, without round-tripping through the developer.
+- **When:** troubleshooting a flow run (e.g. a boundary-component validation
+  error, an Agent producing the wrong shape) against a reachable Langflow
+  instance (local dev: `http://localhost:7860`).
+- **How:** `login` (or rely on `LANGFLOW_SERVER_URL`/`LANGFLOW_API_KEY` env
+  vars) → `list_flows` (filter by name) → `get_flow_info` for wiring →
+  `run_flow` to execute → `get_build_results` / `get_component_output` to
+  inspect each component's last output.
+- **Limitation:** there is no trace-by-ID lookup or resource listing exposed —
+  `get_build_results` only returns the *last* run tracked by this MCP
+  session's own build cache, populated only by runs it triggered itself (a
+  run started from the LangFlow Playground UI does not populate it). To debug
+  a specific historical Playground run, either reproduce it with `run_flow`
+  here, or ask the developer to export/paste the trace JSON.
+
 ## Top-level architecture
 
 | Path | Role |

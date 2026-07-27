@@ -26,6 +26,7 @@ from lfx.template.field.base import Output
 from pydantic import ValidationError
 
 from hulubul.core.models.operational import (
+    DataOperationOutcome,
     DataOperationResult,
     ErrorCode,
     OperationalError,
@@ -78,14 +79,63 @@ class DataOperationResultBoundaryComponent(Component):
     ]
 
     @staticmethod
-    def _as_dict(value: Any) -> dict[str, Any]:
-        """Coerce an incoming Message/Data/JSON edge value into a plain dict."""
+    def _extract_json_text(text: str) -> str:
+        """Best-effort extraction of a JSON object from LLM output that may be
+        wrapped in prose or markdown fences despite being instructed to emit
+        only JSON. A no-op on already-clean JSON text.
+
+        Confirmed live: the model sometimes "thinks out loud" with a fenced
+        *draft* JSON block, then produces the real (unfenced) final answer
+        afterwards ("Now producing the final JSON.\\n\\n{...}"). A naive
+        first-match regex grabs the draft. This scans for every balanced
+        top-level `{...}` block (brace-depth tracking, so nested nested
+        objects and fence markers don't confuse it) and tries each from
+        *last* to *first* -- the model's own "final answer comes last"
+        pattern -- returning the first one that's valid JSON.
+        """
+        text = text.strip()
+        candidates: list[str] = []
+        depth = 0
+        start: int | None = None
+        for i, char in enumerate(text):
+            if char == "{":
+                if depth == 0:
+                    start = i
+                depth += 1
+            elif char == "}" and depth > 0:
+                depth -= 1
+                if depth == 0 and start is not None:
+                    candidates.append(text[start : i + 1])
+        for candidate in reversed(candidates):
+            try:
+                json.loads(candidate)
+            except json.JSONDecodeError:
+                continue
+            return candidate
+        return text
+
+    @classmethod
+    def _as_dict(cls, value: Any) -> dict[str, Any]:
+        """Coerce an incoming Message/Data/JSON edge value into a plain dict.
+
+        The Agent's final text is LLM-generated and not guaranteed to be valid
+        JSON (e.g. it may explain a failure in prose instead of emitting the
+        DataOperationResult contract). Treat undecodable text as an empty dict
+        rather than raising, so it is validated normally and rejected as
+        INVALID_CONTRACT downstream instead of crashing the component build.
+        """
         if isinstance(value, Message):
             text = value.text
-            return json.loads(text) if isinstance(text, str) else {}
+            if not isinstance(text, str):
+                return {}
+            try:
+                decoded = json.loads(cls._extract_json_text(text))
+            except json.JSONDecodeError:
+                return {}
+            return decoded if isinstance(decoded, dict) else {}
         if hasattr(value, "data"):
             return dict(value.data)
-        return dict(value)
+        return dict(value) if value else {}
 
     def build_output(self) -> JSON:
         """LFX-facing output: validate self.raw_value against self.request_dict."""
@@ -113,7 +163,28 @@ class DataOperationResultBoundaryComponent(Component):
         try:
             request = validate_data_operation_request(request_dict)
         except ValidationError:
-            # Request should already be valid, but safety check
+            # `request_dict` isn't a valid DataOperationRequest -- expected when
+            # the request was rejected before ever reaching the Agent (e.g. by
+            # DataOperationRequestBoundary's authorization/contract check), so
+            # `request_dict` here is that rejection's own OperationalError, not
+            # the original request. If `raw_value` is nonetheless a complete,
+            # self-consistent, non-CONFIRMED DataOperationResult -- built
+            # deterministically by the Agent's own reject-short-circuit path,
+            # not claimed by an LLM -- trust it directly. Postcondition
+            # cross-checks against the original request only matter when an
+            # Agent is claiming a result, and CONFIRMED (success) outcomes
+            # always require a resolvable original request for the
+            # affected-count/operation-match checks, so both still fall
+            # through to INVALID_CONTRACT below.
+            try:
+                bypass_result = DataOperationResult.model_validate(raw_value)
+            except ValidationError:
+                bypass_result = None
+            if (
+                bypass_result is not None
+                and bypass_result.outcome != DataOperationOutcome.CONFIRMED
+            ):
+                return JSON(data=bypass_result.model_dump(mode="json"))
             return self._make_error_response(
                 code=ErrorCode.INVALID_CONTRACT,
                 correlation_id_str=correlation_id_str,

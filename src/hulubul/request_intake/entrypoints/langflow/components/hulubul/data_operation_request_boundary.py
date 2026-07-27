@@ -12,7 +12,7 @@ from typing import Any
 from uuid import UUID
 
 from lfx.custom.custom_component.component import Component
-from lfx.inputs.inputs import HandleInput
+from lfx.inputs.inputs import MessageTextInput
 from lfx.schema.data import JSON
 from lfx.schema.message import Message
 from lfx.template.field.base import Output
@@ -50,11 +50,19 @@ class DataOperationRequestBoundaryComponent(Component):
     name = "HulubulDataOperationRequestBoundary"
 
     inputs = [  # noqa: RUF012
-        HandleInput(  # type: ignore[call-arg]
+        MessageTextInput(  # type: ignore[call-arg]
             name="input_value",
             display_name="Data Operation Request",
-            info="Typed DataOperationRequest to validate and authorize",
-            input_types=["Data", "JSON"],
+            info=(
+                "Typed DataOperationRequest (JSON text) to validate and authorize. "
+                "MessageTextInput rather than HandleInput: HandleInput fields are "
+                "edge-only in LangFlow (they never read their own literal `value`, "
+                "confirmed by direct testing), which made this component's public "
+                "entry point unreachable via the plain Run Flow API -- and would "
+                "equally break LF-10's Tool Mode invocation of this flow later, "
+                "since that path sets the tool's arguments the same way. "
+                "MessageTextInput accepts both a literal value and a real edge."
+            ),
             required=True,
         ),
     ]
@@ -75,13 +83,44 @@ class DataOperationRequestBoundaryComponent(Component):
         check treats as a strict subset requirement against the (Message-only)
         target -- silently rejecting every edge into this output.
         """
-        raw_value = self.input_value
-        if hasattr(raw_value, "data"):
-            raw_value = raw_value.data
+        raw_value = self._input_value_as_dict()
         result = self.validate_request_value(raw_value)
         if isinstance(result, Message):
             return result
-        return Message(text=json.dumps(result.data))
+        # Rejection: carry the client-supplied operation string alongside the
+        # locked OperationalError shape (additive-only -- validate_request_value's
+        # own return contract, and every test targeting it directly, is
+        # untouched). This lets the downstream Agent recognize an
+        # already-rejected request and short-circuit to a typed
+        # DataOperationResult without ever invoking the LLM/MCP tools for a
+        # request that was never going to reach them.
+        error_dict = dict(result.data)
+        error_dict["_raw_operation"] = raw_value.get("operation")
+        return Message(text=json.dumps(error_dict))
+
+    def _input_value_as_dict(self) -> dict[str, Any]:
+        """Coerce self.input_value (Message, JSON text, or Data/JSON) into a dict.
+
+        A caller-supplied literal value is not guaranteed to be valid JSON.
+        Treat undecodable text as an empty dict rather than raising, so it is
+        rejected as INVALID_CONTRACT by the normal validation path below
+        instead of crashing the component build with an unhandled
+        JSONDecodeError.
+        """
+        value = self.input_value
+        if isinstance(value, Message):
+            value = value.text
+        if isinstance(value, str):
+            if not value:
+                return {}
+            try:
+                decoded = json.loads(value)
+            except json.JSONDecodeError:
+                return {}
+            return decoded if isinstance(decoded, dict) else {}
+        if hasattr(value, "data"):
+            return dict(value.data)
+        return dict(value) if value else {}
 
     def validate_request_value(self, raw_value: dict[str, Any]) -> Message | JSON:
         """Validate and authorize request, return typed output or error.

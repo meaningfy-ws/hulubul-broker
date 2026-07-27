@@ -28,10 +28,14 @@ not a plain `tools=[...]` name filter. See also the note in plan.md near the
 LF-10 agent/tool-wiring section.
 """
 
+import json
 from typing import Any
 
 from langchain.agents.middleware import ModelRetryMiddleware, ToolRetryMiddleware
 from lfx.components.models_and_agents.agent import AgentComponent
+from lfx.schema.message import Message
+
+from hulubul.core.models.operational import DataOperation, DataOperationOutcome, DataOperationResult
 
 __all__ = ["HulubulDataAccessAgentComponent"]
 
@@ -67,3 +71,54 @@ class HulubulDataAccessAgentComponent(AgentComponent):
         middleware.append(ModelRetryMiddleware())
 
         return middleware
+
+    async def message_response(self) -> Message:
+        rejection = self._short_circuit_rejection()
+        if rejection is not None:
+            return rejection
+        return await super().message_response()
+
+    def _short_circuit_rejection(self) -> Message | None:
+        """Detect a pre-rejected DataOperationRequest and skip the LLM/MCP entirely.
+
+        DataOperationRequestBoundaryComponent rejects contract-invalid or
+        unauthorized requests before they ever reach this Agent, emitting an
+        OperationalError enriched with `_raw_operation` (the client-supplied
+        operation string, best-effort -- see data_operation_request_boundary.py).
+        Building the final `DataOperationResult(rejected)` here, deterministically,
+        from that known operation and error code means an already-rejected
+        request never triggers a real model/tool call: cheaper, and avoids the
+        confusion observed live in this same investigation -- the model
+        treating a pre-formed error as an ill-formed task and asking the
+        caller to rephrase, burning iterations on a request that was never
+        going to reach it.
+
+        Returns None (falls through to the normal Agent path) whenever the
+        input isn't recognizably this shape, or `_raw_operation` can't be
+        resolved to a known operation -- e.g. a contract-invalid payload with
+        no parseable operation at all. That's today's existing (imperfect but
+        non-crashing) behavior, unchanged.
+        """
+        value = self.input_value
+        text = value.text if isinstance(value, Message) else value
+        if not isinstance(text, str) or not text:
+            return None
+        try:
+            payload = json.loads(text)
+        except json.JSONDecodeError:
+            return None
+        if not isinstance(payload, dict) or "code" not in payload or "operation" in payload:
+            return None  # Not a rejection shape: a valid request has "operation", not "code"
+
+        try:
+            operation = DataOperation(payload.get("_raw_operation"))
+        except ValueError:
+            return None
+
+        result = DataOperationResult(
+            operation=operation,
+            outcome=DataOperationOutcome.REJECTED,
+            success=False,
+            error_code=payload.get("code"),
+        )
+        return Message(text=result.model_dump_json())

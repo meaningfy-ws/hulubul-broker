@@ -7,6 +7,8 @@ Provides a typed client for programmatic LangFlow API calls with:
 - Safe repr (no secret exposure)
 """
 
+import json
+import uuid
 from dataclasses import dataclass
 from typing import Any, Protocol
 
@@ -86,7 +88,12 @@ class LangFlowClient:
         if display_name:
             headers["X-LANGFLOW-GLOBAL-VAR-HULUBUL_PHASE1_ACTOR_DISPLAY_NAME"] = display_name
         if self._api_key:
-            headers["Authorization"] = f"Bearer {self._api_key}"
+            # LangFlow's api_key_security dependency reads the literal header
+            # name "x-api-key" (see langflow.services.auth.utils.api_key_header),
+            # not a Bearer Authorization header -- confirmed live: every call
+            # through this client 403'd regardless of payload shape until this
+            # was fixed.
+            headers["x-api-key"] = self._api_key
         return headers
 
     def run_lf00(self, conversation: ConversationLike, message: str) -> FlowReply:
@@ -181,7 +188,7 @@ class LangFlowClient:
             FlowReply with HTTP status code
         """
         url = f"{self.base_url}/api/v1/run/{flow_id}"
-        headers = {"Authorization": "Bearer wrong-key-12345"}
+        headers = {"x-api-key": "wrong-key-12345"}
 
         try:
             if httpx is None:
@@ -195,3 +202,86 @@ class LangFlowClient:
                 return FlowReply(status_code=response.status_code)
         except Exception as e:
             return FlowReply(status_code=500, error=f"Connection error: {str(e)[:200]}")
+
+    def run_flow_with_actor(
+        self, flow_uuid: str, input_data: dict[str, Any], actor_id: str = "test-actor"
+    ) -> FlowReply:
+        """Call a flow by stable UUID with actor context headers.
+
+        Used for calling LF-70 and other data operation flows that require
+        typed actor context via request-variable headers.
+
+        Args:
+            flow_uuid: Stable flow UUID (e.g., "94f6774d-ebc7-5bf1-8486-886f91886a5f")
+            input_data: Input data payload (e.g., DataOperationRequest)
+            actor_id: Actor identifier for context (default: "test-actor")
+
+        Returns:
+            FlowReply with status, flow_id, correlation_id, result, or error
+        """
+        url = f"{self.base_url}/api/v1/run/{flow_uuid}"
+        headers = self._get_headers(actor_id)
+
+        # LangFlow's SimplifiedAPIRequest wants the payload serialized under
+        # `input_value` (a JSON string), not posted as the raw top-level body --
+        # a flat body silently validates as an empty request (input_value=None),
+        # which is dropped before it ever reaches the flow's entry component.
+        # `input_type`/`output_type` must be "any": LF-70 has no ChatInput/
+        # ChatOutput component, and "chat" (the API default) filters out every
+        # vertex whose declared type isn't literally "ChatInput". A distinct
+        # `session_id` per call keeps chat memory (if any) from bleeding
+        # between test invocations that hit the same flow_id.
+        session_id = str(input_data.get("correlation_id") or uuid.uuid4())
+        body = {
+            "input_value": json.dumps(input_data),
+            "input_type": "any",
+            "output_type": "any",
+            "session_id": session_id,
+        }
+
+        try:
+            if httpx is None:
+                return FlowReply(
+                    status_code=500,
+                    error="httpx not installed; run: poetry install --with integration",
+                )
+
+            with httpx.Client() as client:
+                response = client.post(url, json=body, headers=headers, timeout=60.0)
+
+                if response.status_code == 403:
+                    return FlowReply(
+                        status_code=403,
+                        error="Unauthorized (missing or invalid API key)",
+                    )
+
+                if response.status_code == 200:
+                    result = response.json()
+                    return FlowReply(
+                        status_code=200,
+                        flow_id=flow_uuid,
+                        result=self._extract_result_message(result),
+                    )
+
+                return FlowReply(
+                    status_code=response.status_code,
+                    error=f"LangFlow error: {response.text[:200]}",
+                )
+        except Exception as e:
+            error_str = str(e)
+            return FlowReply(status_code=500, error=f"Connection error: {error_str[:200]}")
+
+    @staticmethod
+    def _extract_result_message(response: dict[str, Any]) -> dict[str, Any] | None:
+        """Pull the terminal component's `DataOperationResult`/error dict out of
+        the Run API's nested response envelope (`outputs[0].outputs[0].outputs.response.message`).
+        """
+        try:
+            outputs = response["outputs"][0]["outputs"]
+        except (KeyError, IndexError, TypeError):
+            return None
+        for output in outputs:
+            message = output.get("outputs", {}).get("response", {}).get("message")
+            if isinstance(message, dict):
+                return message
+        return None
