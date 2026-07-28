@@ -7,7 +7,9 @@ from hulubul.channel_gateway.models.message import MediaMessage, TextMessage
 from hulubul.core.models.domain.hulubul_models import Medium
 
 
-def _fake_aiogram_message(text: str, chat_id: int, reply_to_message_id: int | None = None):
+def _fake_aiogram_message(
+    text: str, chat_id: int, reply_to_message_id: int | None = None
+) -> MagicMock:
     message = MagicMock()
     message.text = text
     message.chat.id = chat_id
@@ -18,7 +20,7 @@ def _fake_aiogram_message(text: str, chat_id: int, reply_to_message_id: int | No
     return message
 
 
-def test_receive_normalizes_a_plain_text_update():
+def test_receive_normalizes_a_plain_text_update() -> None:
     adapter = TelegramAdapter(bot=MagicMock())
     raw = _fake_aiogram_message(text="hello", chat_id=123456789)
 
@@ -30,7 +32,7 @@ def test_receive_normalizes_a_plain_text_update():
     assert inbound.reply_to_message_id is None
 
 
-def test_receive_captures_reply_to_message_id_when_present():
+def test_receive_captures_reply_to_message_id_when_present() -> None:
     adapter = TelegramAdapter(bot=MagicMock())
     raw = _fake_aiogram_message(text="yes", chat_id=123456789, reply_to_message_id=555)
 
@@ -40,7 +42,7 @@ def test_receive_captures_reply_to_message_id_when_present():
 
 
 @pytest.mark.asyncio
-async def test_send_text_message_calls_bot_send_message():
+async def test_send_text_message_calls_bot_send_message() -> None:
     bot = MagicMock()
     bot.send_message = AsyncMock()
     adapter = TelegramAdapter(bot=bot)
@@ -51,7 +53,7 @@ async def test_send_text_message_calls_bot_send_message():
 
 
 @pytest.mark.asyncio
-async def test_send_media_message_calls_bot_send_photo():
+async def test_send_media_message_calls_bot_send_photo() -> None:
     bot = MagicMock()
     bot.send_photo = AsyncMock()
     adapter = TelegramAdapter(bot=bot)

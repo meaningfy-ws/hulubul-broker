@@ -29,7 +29,7 @@ pytestmark = pytest.mark.skipif(
 
 
 @pytest.mark.asyncio
-async def test_adapter_send_reaches_the_real_telegram_api():
+async def test_adapter_send_reaches_the_real_telegram_api() -> None:
     token = os.environ["TELEGRAM_TEST_BOT_TOKEN"]
     chat_id = os.environ["TELEGRAM_TEST_CHAT_ID"]
 

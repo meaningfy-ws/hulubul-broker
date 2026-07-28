@@ -20,7 +20,7 @@ pytestmark = pytest.mark.skipif(
 
 
 @pytest.mark.asyncio
-async def test_a_real_message_gets_a_real_reply():
+async def test_a_real_message_gets_a_real_reply() -> None:
     token = os.environ["TELEGRAM_TEST_BOT_TOKEN"]
     chat_id = os.environ["TELEGRAM_TEST_CHAT_ID"]
     # Unique per run so the sent message (and any failure output) can be

@@ -7,7 +7,7 @@ from hulubul.channel_gateway.models.langflow import (
 from hulubul.core.models.domain.hulubul_models import Medium
 
 
-def test_run_request_serializes_channel_identity_as_plain_json():
+def test_run_request_serializes_channel_identity_as_plain_json() -> None:
     request = LangflowRunRequest(
         input_value="hello",
         session_id="Telegram:123",
@@ -23,7 +23,7 @@ def test_run_request_serializes_channel_identity_as_plain_json():
     }
 
 
-def test_run_reply_extracts_text_from_the_nested_response_shape():
+def test_run_reply_extracts_text_from_the_nested_response_shape() -> None:
     payload = {"outputs": [{"outputs": [{"results": {"message": {"data": {"text": "Got it!"}}}}]}]}
 
     assert LangflowRunReply.model_validate(payload).text == "Got it!"

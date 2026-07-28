@@ -11,7 +11,7 @@ from hulubul.channel_gateway.entrypoints.telegram_bot import (
 )
 
 
-def test_load_config_reads_required_environment_variables(monkeypatch):
+def test_load_config_reads_required_environment_variables(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("TELEGRAM_BOT_TOKEN", "123:abc")
     monkeypatch.setenv("LANGFLOW_API_URL", "http://langflow:7860")
     monkeypatch.setenv("LANGFLOW_FLOW_ID", "flow-1")
@@ -28,7 +28,9 @@ def test_load_config_reads_required_environment_variables(monkeypatch):
     )
 
 
-def test_load_config_raises_when_a_required_variable_is_missing(monkeypatch):
+def test_load_config_raises_when_a_required_variable_is_missing(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     monkeypatch.delenv("TELEGRAM_BOT_TOKEN", raising=False)
     monkeypatch.setenv("LANGFLOW_API_URL", "http://langflow:7860")
     monkeypatch.setenv("LANGFLOW_FLOW_ID", "flow-1")
@@ -38,7 +40,7 @@ def test_load_config_raises_when_a_required_variable_is_missing(monkeypatch):
         load_config()
 
 
-def test_load_config_rejects_an_unknown_gateway_mode(monkeypatch):
+def test_load_config_rejects_an_unknown_gateway_mode(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("TELEGRAM_BOT_TOKEN", "123:abc")
     monkeypatch.setenv("LANGFLOW_API_URL", "http://langflow:7860")
     monkeypatch.setenv("LANGFLOW_FLOW_ID", "flow-1")
@@ -48,7 +50,9 @@ def test_load_config_rejects_an_unknown_gateway_mode(monkeypatch):
         load_config()
 
 
-def test_load_config_requires_webhook_secret_in_webhook_mode(monkeypatch):
+def test_load_config_requires_webhook_secret_in_webhook_mode(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     monkeypatch.setenv("TELEGRAM_BOT_TOKEN", "123:abc")
     monkeypatch.setenv("LANGFLOW_API_URL", "http://langflow:7860")
     monkeypatch.setenv("LANGFLOW_FLOW_ID", "flow-1")
@@ -59,7 +63,9 @@ def test_load_config_requires_webhook_secret_in_webhook_mode(monkeypatch):
         load_config()
 
 
-def test_load_config_accepts_webhook_mode_when_secret_is_set(monkeypatch):
+def test_load_config_accepts_webhook_mode_when_secret_is_set(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     monkeypatch.setenv("TELEGRAM_BOT_TOKEN", "123:abc")
     monkeypatch.setenv("LANGFLOW_API_URL", "http://langflow:7860")
     monkeypatch.setenv("LANGFLOW_FLOW_ID", "flow-1")
@@ -77,7 +83,9 @@ def test_load_config_accepts_webhook_mode_when_secret_is_set(monkeypatch):
     )
 
 
-def test_load_config_does_not_require_webhook_secret_in_polling_mode(monkeypatch):
+def test_load_config_does_not_require_webhook_secret_in_polling_mode(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     monkeypatch.setenv("TELEGRAM_BOT_TOKEN", "123:abc")
     monkeypatch.setenv("LANGFLOW_API_URL", "http://langflow:7860")
     monkeypatch.setenv("LANGFLOW_FLOW_ID", "flow-1")
@@ -91,7 +99,9 @@ def test_load_config_does_not_require_webhook_secret_in_polling_mode(monkeypatch
 
 
 @pytest.mark.asyncio
-async def test_main_wires_telegram_adapter_and_starts_polling(monkeypatch):
+async def test_main_wires_telegram_adapter_and_starts_polling(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     monkeypatch.setenv("TELEGRAM_BOT_TOKEN", "123:abc")
     monkeypatch.setenv("LANGFLOW_API_URL", "http://langflow:7860")
     monkeypatch.setenv("LANGFLOW_FLOW_ID", "flow-1")
@@ -124,7 +134,7 @@ async def test_main_wires_telegram_adapter_and_starts_polling(monkeypatch):
     fake_dispatcher.start_polling.assert_awaited_once_with(fake_bot)
 
 
-def _webhook_config(webhook_secret="s3cr3t"):
+def _webhook_config(webhook_secret: str = "s3cr3t") -> GatewayConfig:
     return GatewayConfig(
         telegram_bot_token="123:abc",
         langflow_api_url="http://langflow:7860",
@@ -134,7 +144,7 @@ def _webhook_config(webhook_secret="s3cr3t"):
     )
 
 
-def _fake_ngrok_client(tunnels):
+def _fake_ngrok_client(tunnels: list[dict[str, str]]) -> AsyncMock:
     fake_client = AsyncMock()
     fake_client.__aenter__.return_value = fake_client
     fake_client.__aexit__.return_value = None
@@ -146,7 +156,9 @@ def _fake_ngrok_client(tunnels):
 
 
 @pytest.mark.asyncio
-async def test_run_webhook_registers_bot_webhook_with_secret_token_and_ngrok_url(monkeypatch):
+async def test_run_webhook_registers_bot_webhook_with_secret_token_and_ngrok_url(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     config = _webhook_config()
     monkeypatch.setenv("NGROK_API_URL", "http://ngrok:4040")
 
@@ -205,7 +217,9 @@ async def test_run_webhook_registers_bot_webhook_with_secret_token_and_ngrok_url
 
 
 @pytest.mark.asyncio
-async def test_run_webhook_picks_the_https_tunnel_when_ngrok_reports_several(monkeypatch):
+async def test_run_webhook_picks_the_https_tunnel_when_ngrok_reports_several(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     config = _webhook_config()
     monkeypatch.setenv("NGROK_API_URL", "http://ngrok:4040")
 
@@ -260,7 +274,9 @@ async def test_run_webhook_picks_the_https_tunnel_when_ngrok_reports_several(mon
 
 
 @pytest.mark.asyncio
-async def test_run_webhook_raises_a_clear_error_when_no_tunnel_is_https(monkeypatch):
+async def test_run_webhook_raises_a_clear_error_when_no_tunnel_is_https(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     config = _webhook_config()
     monkeypatch.setenv("NGROK_API_URL", "http://ngrok:4040")
 
@@ -279,7 +295,9 @@ async def test_run_webhook_raises_a_clear_error_when_no_tunnel_is_https(monkeypa
 
 
 @pytest.mark.asyncio
-async def test_run_webhook_raises_a_clear_error_when_ngrok_has_no_tunnels(monkeypatch):
+async def test_run_webhook_raises_a_clear_error_when_ngrok_has_no_tunnels(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     config = _webhook_config()
     monkeypatch.setenv("NGROK_API_URL", "http://ngrok:4040")
 
@@ -298,7 +316,9 @@ async def test_run_webhook_raises_a_clear_error_when_ngrok_has_no_tunnels(monkey
 
 
 @pytest.mark.asyncio
-async def test_run_webhook_raises_a_clear_error_when_the_ngrok_request_fails(monkeypatch):
+async def test_run_webhook_raises_a_clear_error_when_the_ngrok_request_fails(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     import httpx
 
     config = _webhook_config()

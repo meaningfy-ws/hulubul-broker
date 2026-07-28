@@ -11,8 +11,8 @@ _TELEGRAM_123 = ChannelRef(medium=Medium.Telegram, system_id="123")
 
 
 @pytest.mark.asyncio
-async def test_run_posts_session_id_and_channel_identity_and_returns_reply_text():
-    captured_request = {}
+async def test_run_posts_session_id_and_channel_identity_and_returns_reply_text() -> None:
+    captured_request: dict[str, object] = {}
 
     def handler(request: httpx.Request) -> httpx.Response:
         captured_request["json"] = httpx.Request.read(request) and request.content
@@ -34,7 +34,9 @@ async def test_run_posts_session_id_and_channel_identity_and_returns_reply_text(
     assert reply == "Got it!"
     assert captured_request["url"] == "http://langflow:7860/api/v1/run/abc123"
 
-    sent_payload = json.loads(captured_request["json"])
+    raw_body = captured_request["json"]
+    assert isinstance(raw_body, bytes)
+    sent_payload = json.loads(raw_body)
     assert sent_payload["session_id"] == "Telegram:123"
     assert sent_payload["tweaks"]["channel_identity"] == {
         "medium": "Telegram",
@@ -43,7 +45,7 @@ async def test_run_posts_session_id_and_channel_identity_and_returns_reply_text(
 
 
 @pytest.mark.asyncio
-async def test_run_returns_none_on_http_error():
+async def test_run_returns_none_on_http_error() -> None:
     def handler(request: httpx.Request) -> httpx.Response:
         return httpx.Response(500, json={"error": "boom"})
 
@@ -58,7 +60,7 @@ async def test_run_returns_none_on_http_error():
 
 
 @pytest.mark.asyncio
-async def test_run_returns_none_on_unexpected_response_shape():
+async def test_run_returns_none_on_unexpected_response_shape() -> None:
     def handler(request: httpx.Request) -> httpx.Response:
         return httpx.Response(200, json={"unexpected": "shape"})
 
@@ -73,7 +75,7 @@ async def test_run_returns_none_on_unexpected_response_shape():
 
 
 @pytest.mark.asyncio
-async def test_run_returns_none_on_malformed_json_response():
+async def test_run_returns_none_on_malformed_json_response() -> None:
     def handler(request: httpx.Request) -> httpx.Response:
         return httpx.Response(200, content=b"not json")
 

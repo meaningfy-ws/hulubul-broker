@@ -11,7 +11,7 @@ _TELEGRAM_123 = ChannelRef(medium=Medium.Telegram, system_id="123456789")
 
 
 @pytest.mark.asyncio
-async def test_relay_calls_langflow_with_derived_session_id_and_sends_reply_to_origin():
+async def test_relay_calls_langflow_with_derived_session_id_and_sends_reply_to_origin() -> None:
     adapter = MagicMock()
     adapter.receive.return_value = InboundMessage(
         channel=_TELEGRAM_123, text="I need to send a parcel"
@@ -32,7 +32,7 @@ async def test_relay_calls_langflow_with_derived_session_id_and_sends_reply_to_o
 
 
 @pytest.mark.asyncio
-async def test_relay_does_not_send_when_langflow_call_fails():
+async def test_relay_does_not_send_when_langflow_call_fails() -> None:
     adapter = MagicMock()
     adapter.receive.return_value = InboundMessage(channel=_TELEGRAM_123, text="hi")
     adapter.send = AsyncMock()
@@ -46,7 +46,7 @@ async def test_relay_does_not_send_when_langflow_call_fails():
 
 
 @pytest.mark.asyncio
-async def test_relay_does_not_crash_the_process_when_send_fails():
+async def test_relay_does_not_crash_the_process_when_send_fails() -> None:
     adapter = MagicMock()
     adapter.receive.return_value = InboundMessage(channel=_TELEGRAM_123, text="hi")
     adapter.send = AsyncMock(side_effect=RuntimeError("Telegram API: bot was blocked by the user"))
