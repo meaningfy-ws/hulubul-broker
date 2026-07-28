@@ -2500,6 +2500,21 @@ Propose `feat(langflow): guard LF-70 write ambiguity`; wait for developer approv
 - Consumes: LF-70 deployed stable ID, component schema snapshot, fixed validated envelope/context inputs, IntakeInput/IntakeResult schemas.
 - Produces: LF-10 deterministic strict IntakeInput assembly, public direct-integration input/result, model, Agent, one LF-70 Run Flow Tool Mode component; no MCP/Chat Output and no model-substitutable trust metadata.
 
+> **Note on retry scoping (from checkpoint 8's `HulubulDataAccessAgentComponent`,
+> `src/hulubul/request_intake/entrypoints/langflow/components/hulubul/data_access_agent.py`):**
+> LF-70 scopes its `ToolRetryMiddleware` to read-only tools via a plain
+> `tools=["read_neo4j_cypher", "get_neo4j_schema"]` name filter, because its
+> MCP toolkit exposes reads and writes as separately-named tools. That trick
+> does **not** transfer here: LF-10's Agent has exactly one logical tool
+> (`RunFlow-hlb-lf-10-data-access-v1`, i.e. all of LF-70 behind one Run Flow
+> call), so there is no separate "read tool name" vs "write tool name" to
+> filter by -- the read/write distinction lives in the *content* of the
+> `DataOperationRequest` being dispatched, not in which tool got called. If
+> LF-10 (or LF-00, same shape) wants the same "never retry a write" protection,
+> it needs a `retry_on` callable that inspects the tool-call arguments (the
+> operation field of the outgoing request) rather than a `tools=[...]` name
+> filter. Don't copy the LF-70 pattern verbatim without re-deriving this.
+
 - [ ] **Step 1: Write LF-10 isolation test (2-5 min)**
 
 ```python
@@ -3808,3 +3823,9 @@ Coverage arithmetic: sections contain `4 + 5 + 6 + 5 + 4 + 4 + 4 + 6 + 6 + 5 + 6
 ## Execution Handoff
 
 After developer approval of this plan, use subagent-driven development task by task. Under `AGENTS.md`, dispatch implementation to the project `implementer` agent, keep specification-conformance and code-quality reviews separate, and rerun each task's focused RED/GREEN evidence before presenting its commit proposal.
+
+## Known Issues / Follow-ups (post-implementation)
+
+- **RESOLVED — LF-70 write-operation decision-level nondeterminism** (found during tasks 34-36/8.3-8.5 verification, root-caused and fixed in tasks.md 14.1): a well-formed, schema-valid `DataOperationResult(outcome="rejected", success=false)` was observed for scenarios with a valid compare-and-set match that should have confirmed. Root cause: `write_neo4j_cypher` (the MCP tool) never returns a write query's own `RETURN` clause values, only a generic `{"_contains_updates": bool, "properties_set": int}` write-summary — the system prompt wrongly assumed otherwise. Faced with a successful write it couldn't read the new state from, the model made an unnecessary post-write verification read, which reflected its own just-completed write and no longer matched the pre-write `expected_updated_at` it still held — leading it to (wrongly) report `CONCURRENT_MODIFICATION` against its own success. Fixed by rewriting the prompt to explain the tool's real response shape and split the post-write read into an explicit fetch (after confirmed success) versus classification (only after a genuine zero-row match) mode. Verified: all 21 LF-70 integration tests across create/update/status/read now pass. Full investigation notes in `DEV/knowledge/checkpoint8-lf70-troubleshooting-runbook.md`, bug #20.
+
+- **OPEN — `neo4j-schema` Compose service is a no-op stub; fresh acceptance/CI stacks won't have the constraint LF-70's atomicity test depends on** (found while auditing checkpoint 8 completeness for follow-ups, not yet fixed): `infra/docker-compose.yaml`'s `neo4j-schema` service — which `acceptance-up` starts and which `mcp-neo4j`/others gate on via `condition: service_completed_successfully` — only runs `echo "Waiting for Neo4j schema setup signal..." && exit 0`. It never calls `infra/scripts/neo4j-setup-schema.sh`, so `operationalconversationbinding_sessionid_unique` (and every other constraint/index in `infra/cypher/schema.cypher`/`operational-schema.cypher`) is silently absent on any environment that hasn't had `make neo4j-schema` run against it by hand. This session's LF-70 verification (all 21 integration tests, including `test_atomicity_rollback_on_binding_conflict`) ran only against this machine's persistent dev Neo4j, where the constraint was applied manually mid-session — never against a stack brought up fresh via `acceptance-up`. Not biting anyone today only because `ci-acceptance`/`ci` isn't wired into `.github/workflows/ci.yaml` yet (it currently runs only `ci-static`) — this is a landmine for whoever wires that job up next, or for a new developer running `make acceptance-up && make test-integration` for the first time. Tracked as tasks.md 14.2; the real fix belongs inside tasks.md 13.2 ("start the clean stack, apply schemas, deploy exactly three flows...") when that CI stage is built — not done as part of checkpoint 8, which never exercised a fresh stack.

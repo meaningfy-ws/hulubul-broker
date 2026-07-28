@@ -54,6 +54,7 @@ from .intake import (
     IntakeInput,
     IntakeResult,
 )
+from .json_extraction import extract_json_object_text
 from .routing import (
     RouterInput,
     RouterResult,
@@ -119,5 +120,6 @@ __all__ = [
     "VersionedContract",
     "adapt_routing_lookup",
     "data_operation_request_schema",
+    "extract_json_object_text",
     "validate_data_operation_request",
 ]

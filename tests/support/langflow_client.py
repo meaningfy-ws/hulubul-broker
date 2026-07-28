@@ -7,8 +7,14 @@ Provides a typed client for programmatic LangFlow API calls with:
 - Safe repr (no secret exposure)
 """
 
+import json
+import logging
+import time
+import uuid
 from dataclasses import dataclass
 from typing import Any, Protocol
+
+logger = logging.getLogger(__name__)
 
 try:
     import httpx
@@ -86,7 +92,12 @@ class LangFlowClient:
         if display_name:
             headers["X-LANGFLOW-GLOBAL-VAR-HULUBUL_PHASE1_ACTOR_DISPLAY_NAME"] = display_name
         if self._api_key:
-            headers["Authorization"] = f"Bearer {self._api_key}"
+            # LangFlow's api_key_security dependency reads the literal header
+            # name "x-api-key" (see langflow.services.auth.utils.api_key_header),
+            # not a Bearer Authorization header -- confirmed live: every call
+            # through this client 403'd regardless of payload shape until this
+            # was fixed.
+            headers["x-api-key"] = self._api_key
         return headers
 
     def run_lf00(self, conversation: ConversationLike, message: str) -> FlowReply:
@@ -181,7 +192,7 @@ class LangFlowClient:
             FlowReply with HTTP status code
         """
         url = f"{self.base_url}/api/v1/run/{flow_id}"
-        headers = {"Authorization": "Bearer wrong-key-12345"}
+        headers = {"x-api-key": "wrong-key-12345"}
 
         try:
             if httpx is None:
@@ -195,3 +206,131 @@ class LangFlowClient:
                 return FlowReply(status_code=response.status_code)
         except Exception as e:
             return FlowReply(status_code=500, error=f"Connection error: {str(e)[:200]}")
+
+    def run_flow_with_actor(
+        self,
+        flow_uuid: str,
+        input_data: dict[str, Any],
+        actor_id: str = "test-actor",
+        *,
+        max_attempts: int = 2,
+    ) -> FlowReply:
+        """Call a flow by stable UUID with actor context headers.
+
+        Used for calling LF-70 and other data operation flows that require
+        typed actor context via request-variable headers.
+
+        Args:
+            flow_uuid: Stable flow UUID (e.g., "94f6774d-ebc7-5bf1-8486-886f91886a5f")
+            input_data: Input data payload (e.g., DataOperationRequest)
+            actor_id: Actor identifier for context (default: "test-actor")
+            max_attempts: Retry budget (default 2, one retry) for the case
+                where the flow returns HTTP 200 but the terminal component's
+                message can't be parsed as a DataOperationResult -- observed,
+                input-independent flakiness where the same well-formed
+                request sometimes gets a clean result and sometimes an
+                OperationalError, because the model's final answer wasn't
+                valid JSON or didn't extract cleanly (checkpoint8 runbook
+                bug #17). Retrying the whole flow call is safe here (unlike
+                DEC-015's prohibited write-retry): a retry of an
+                already-succeeded write comes back REJECTED/
+                CONCURRENT_MODIFICATION via the OperationalConversationBinding
+                uniqueness constraint or the update/status compare-and-set,
+                never a silent duplicate mutation. Pass 1 to disable.
+
+        Returns:
+            FlowReply with status, flow_id, correlation_id, result, or error
+        """
+        url = f"{self.base_url}/api/v1/run/{flow_uuid}"
+        headers = self._get_headers(actor_id)
+
+        # LangFlow's SimplifiedAPIRequest wants the payload serialized under
+        # `input_value` (a JSON string), not posted as the raw top-level body --
+        # a flat body silently validates as an empty request (input_value=None),
+        # which is dropped before it ever reaches the flow's entry component.
+        # `input_type`/`output_type` must be "any": LF-70 has no ChatInput/
+        # ChatOutput component, and "chat" (the API default) filters out every
+        # vertex whose declared type isn't literally "ChatInput". A distinct
+        # `session_id` per call keeps chat memory (if any) from bleeding
+        # between test invocations that hit the same flow_id.
+        session_id = str(input_data.get("correlation_id") or uuid.uuid4())
+        body = {
+            "input_value": json.dumps(input_data),
+            "input_type": "any",
+            "output_type": "any",
+            "session_id": session_id,
+        }
+
+        if httpx is None:
+            return FlowReply(
+                status_code=500,
+                error="httpx not installed; run: poetry install --with integration",
+            )
+
+        last_reply: FlowReply | None = None
+        for attempt in range(1, max_attempts + 1):
+            try:
+                with httpx.Client() as client:
+                    # Write operations (createDeliveryRequest especially) can
+                    # legitimately take 60-120s+ end-to-end (get_neo4j_schema +
+                    # write_neo4j_cypher, each a real LLM tool-call round trip) --
+                    # confirmed live: a correct, successful create took ~120s.
+                    # 60s was cutting off genuinely-succeeding calls, not timing
+                    # out on a stuck/looping one.
+                    response = client.post(url, json=body, headers=headers, timeout=240.0)
+
+                    if response.status_code == 403:
+                        return FlowReply(
+                            status_code=403,
+                            error="Unauthorized (missing or invalid API key)",
+                        )
+
+                    if response.status_code == 200:
+                        result = self._extract_result_message(response.json())
+                        if result is not None and "success" in result:
+                            return FlowReply(status_code=200, flow_id=flow_uuid, result=result)
+
+                        last_reply = FlowReply(status_code=200, flow_id=flow_uuid, result=result)
+                        if attempt < max_attempts:
+                            # Log shape only (type + top-level keys), never the payload
+                            # itself -- for LF-70, `result` can carry user-supplied
+                            # facts/identifiers, which the module docstring's "no secret
+                            # exposure" promise forbids putting in logs.
+                            logger.warning(
+                                "run_flow_with_actor: attempt %d/%d for flow %s got an "
+                                "unparseable result, retrying in 0.5s; result_type=%s, keys=%s",
+                                attempt,
+                                max_attempts,
+                                flow_uuid,
+                                type(result).__name__,
+                                sorted(result.keys()) if isinstance(result, dict) else None,
+                            )
+                            time.sleep(0.5)
+                            continue
+                        return last_reply
+
+                    return FlowReply(
+                        status_code=response.status_code,
+                        error=f"LangFlow error: {response.text[:200]}",
+                    )
+            except Exception as e:
+                error_str = str(e)
+                return FlowReply(status_code=500, error=f"Connection error: {error_str[:200]}")
+
+        # Unreachable: the loop above always returns on its final iteration.
+        raise AssertionError("run_flow_with_actor: retry loop exited without returning")
+
+    @staticmethod
+    def _extract_result_message(response: dict[str, Any]) -> dict[str, Any] | None:
+        """Pull the terminal component's `DataOperationResult`/error dict out of
+        the Run API's nested response envelope (`outputs[0].outputs[0].outputs.response.message`).
+        """
+        try:
+            outputs = response["outputs"][0]["outputs"]
+        except (KeyError, IndexError, TypeError):
+            return None
+        for output in outputs:
+            message = output.get("outputs", {}).get("response", {}).get("message")
+            if isinstance(message, dict):
+                return message
+        return None

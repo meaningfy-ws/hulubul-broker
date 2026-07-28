@@ -17,8 +17,10 @@ from hulubul.core.models.operational import (
     RequestStatus,
     validate_data_operation_request,
 )
-from hulubul.request_intake.entrypoints.langflow.components.hulubul.data_operation_boundary import (
+from hulubul.request_intake.entrypoints.langflow.components.hulubul.data_operation_request_boundary import (
     DataOperationRequestBoundaryComponent,
+)
+from hulubul.request_intake.entrypoints.langflow.components.hulubul.data_operation_result_boundary import (
     DataOperationResultBoundaryComponent,
 )
 
@@ -690,3 +692,279 @@ class TestCorrelationIdPatching:
         assert "correlation_id" in data
         assert isinstance(data["correlation_id"], str)
         json.dumps(data)  # must not raise
+
+
+class TestRequestInputValueCoercion:
+    """input_value is MessageTextInput (not HandleInput): it must accept a Message
+    (edge-connected), a plain JSON string (literal value/tweak), or a dict-like
+    Data/JSON object, and coerce all three into a dict for validate_request_value.
+
+    MessageTextInput was chosen over HandleInput specifically because HandleInput
+    fields never read their own literal `value` in LangFlow -- confirmed by
+    directly baking a value into a pushed flow and observing it stay None at
+    build time -- which made this component's public entry point unreachable via
+    the plain Run Flow API (and would equally break LF-10's future Tool Mode
+    invocation of this flow, which sets tool arguments the same way).
+    """
+
+    def test_message_input_is_parsed(
+        self, request_boundary: DataOperationRequestBoundaryComponent
+    ) -> None:
+        request_boundary.input_value = Message(text=json.dumps(lf00_get_routing_context_request()))
+        result = request_boundary.build_output()
+        assert isinstance(result, Message)
+
+    def test_json_string_input_is_parsed(
+        self, request_boundary: DataOperationRequestBoundaryComponent
+    ) -> None:
+        request_boundary.input_value = json.dumps(lf00_get_routing_context_request())
+        result = request_boundary.build_output()
+        assert isinstance(result, Message)
+
+    def test_dict_like_input_is_still_accepted(
+        self, request_boundary: DataOperationRequestBoundaryComponent
+    ) -> None:
+        from lfx.schema.data import Data
+
+        request_boundary.input_value = Data(data=lf00_get_routing_context_request())
+        result = request_boundary.build_output()
+        assert isinstance(result, Message)
+
+    def test_empty_string_input_is_invalid_contract(
+        self, request_boundary: DataOperationRequestBoundaryComponent
+    ) -> None:
+        request_boundary.input_value = ""
+        result = request_boundary.build_output()
+        assert isinstance(result, Message)
+        text = result.text
+        assert isinstance(text, str)
+        payload = json.loads(text)
+        assert payload["code"] == ErrorCode.INVALID_CONTRACT.value
+
+    def test_non_json_literal_input_is_invalid_contract(
+        self, request_boundary: DataOperationRequestBoundaryComponent
+    ) -> None:
+        """A malformed literal (not valid JSON) must not crash the component build.
+
+        Confirmed live: a plain-text `input_value` raised an unhandled
+        JSONDecodeError ("Expecting value: line 1 column 1 (char 0)") that
+        took down the whole flow with a 500, instead of being rejected as a
+        normal INVALID_CONTRACT response.
+        """
+        request_boundary.input_value = "not-json-at-all"
+        result = request_boundary.build_output()
+        assert isinstance(result, Message)
+        text = result.text
+        assert isinstance(text, str)
+        payload = json.loads(text)
+        assert payload["code"] == ErrorCode.INVALID_CONTRACT.value
+
+
+class TestResultRawValueCoercion:
+    """The Agent's final text is LLM-generated and not guaranteed to be valid
+    JSON (e.g. it may explain a failure in prose instead of emitting the
+    DataOperationResult contract). The result boundary must reject that as
+    INVALID_CONTRACT rather than crash the component build with an unhandled
+    JSONDecodeError -- confirmed live: a confused Agent run produced a prose
+    Message ("The error message `INVALID_CONTRACT`...") and json.loads() on
+    that text raised, taking down the whole flow with a 500.
+    """
+
+    def test_non_json_agent_text_is_invalid_contract(
+        self, result_boundary: DataOperationResultBoundaryComponent
+    ) -> None:
+        result_boundary.raw_value = Message(text="I could not produce a safe response.")
+        result_boundary.request_dict = Message(text=json.dumps(lf10_create_request()))
+        result = result_boundary.build_output()
+
+        assert isinstance(result, JSON)
+        assert result.data["code"] == ErrorCode.INVALID_CONTRACT.value
+
+    def test_empty_agent_text_is_invalid_contract(
+        self, result_boundary: DataOperationResultBoundaryComponent
+    ) -> None:
+        result_boundary.raw_value = Message(text="")
+        result_boundary.request_dict = Message(text=json.dumps(lf10_create_request()))
+        result = result_boundary.build_output()
+
+        assert isinstance(result, JSON)
+        assert result.data["code"] == ErrorCode.INVALID_CONTRACT.value
+
+
+class TestRepairFailedMarker:
+    """DEC-016: `_repair_failed` (set by HulubulDataAccessAgentComponent's
+    tool-less repair pass) distinguishes "the Agent already tried once to
+    reformat this and still couldn't" (MALFORMED_AGENT_RESULT) from "never
+    attempted" (INVALID_CONTRACT) -- both still shape-invalid, only the
+    error code differs.
+
+    This exact code path (repair attempted, still failed, boundary reports
+    MALFORMED_AGENT_RESULT) was also observed live against the real flow
+    during development -- a `createDeliveryRequest` run's client-side retry
+    log captured `"code": "MALFORMED_AGENT_RESULT"` where it would
+    previously have shown generic `INVALID_CONTRACT`. That specific
+    occurrence isn't reproducible on demand (it depends on the model
+    producing malformed output, which is inherently nondeterministic and
+    became rarer after other fixes landed the same session), so it isn't
+    attached as a log excerpt here -- the tests below are the actual
+    reproducible, deterministic proof of this mechanism's correctness. Full
+    investigation notes (not committed -- local development knowledge, see
+    the repo's git-ignore): `DEV/knowledge/checkpoint8-lf70-troubleshooting-
+    runbook.md`, bug #19.
+    """
+
+    def test_marked_still_invalid_result_is_malformed_agent_result(
+        self, result_boundary: DataOperationResultBoundaryComponent
+    ) -> None:
+        result_boundary.raw_value = Message(
+            text=json.dumps({"_repair_failed": True, "_raw_operation": "createDeliveryRequest"})
+        )
+        result_boundary.request_dict = Message(text=json.dumps(lf10_create_request()))
+        result = result_boundary.build_output()
+
+        assert isinstance(result, JSON)
+        assert result.data["code"] == ErrorCode.MALFORMED_AGENT_RESULT.value
+
+    def test_unmarked_invalid_result_is_still_invalid_contract(
+        self, result_boundary: DataOperationResultBoundaryComponent
+    ) -> None:
+        """No `_repair_failed` marker (e.g. getRequestRoutingContext's shape,
+        which never goes through result-shape repair) -- unchanged behavior."""
+        result_boundary.raw_value = Message(text=json.dumps({"foo": "bar"}))
+        result_boundary.request_dict = Message(text=json.dumps(lf10_create_request()))
+        result = result_boundary.build_output()
+
+        assert isinstance(result, JSON)
+        assert result.data["code"] == ErrorCode.INVALID_CONTRACT.value
+
+    def test_repair_failed_marker_ignored_when_result_is_actually_valid(
+        self, result_boundary: DataOperationResultBoundaryComponent
+    ) -> None:
+        """A stray `_repair_failed` key on an otherwise-valid result is just
+        an unexpected field -- DataOperationResult's extra='forbid' rejects
+        it as INVALID_CONTRACT, same as any other malformed shape; it must
+        not be misread as a successful result."""
+        payload = {
+            "operation": DataOperation.CREATE_DELIVERY_REQUEST.value,
+            "outcome": DataOperationOutcome.CONFIRMED.value,
+            "success": True,
+            "write_dispatched": True,
+            "count": 1,
+            "_repair_failed": True,
+        }
+        result_boundary.raw_value = Message(text=json.dumps(payload))
+        result_boundary.request_dict = Message(text=json.dumps(lf10_create_request()))
+        result = result_boundary.build_output()
+
+        assert isinstance(result, JSON)
+        assert result.data["code"] == ErrorCode.MALFORMED_AGENT_RESULT.value
+
+
+class TestRequestOperationEnrichment:
+    """build_output()'s rejection path enriches the OperationalError JSON with
+    `_raw_operation` -- the client-supplied operation string -- so a
+    downstream Agent can recognize and short-circuit an already-rejected
+    request (see HulubulDataAccessAgentComponent._short_circuit_rejection)
+    without ever calling the LLM/MCP tools for it. Additive only:
+    validate_request_value's own return contract is untouched.
+    """
+
+    def test_operation_not_allowed_carries_raw_operation(
+        self, request_boundary: DataOperationRequestBoundaryComponent
+    ) -> None:
+        raw_value = lf10_create_request()
+        raw_value["operation"] = DataOperation.GET_REQUEST_ROUTING_CONTEXT.value
+        del raw_value["identifiers"]
+        del raw_value["facts"]
+        request_boundary.input_value = json.dumps(raw_value)
+        result = request_boundary.build_output()
+        assert isinstance(result, Message)
+        payload = json.loads(str(result.text))
+        assert payload["code"] == ErrorCode.OPERATION_NOT_ALLOWED.value
+        assert payload["_raw_operation"] == DataOperation.GET_REQUEST_ROUTING_CONTEXT.value
+
+    def test_invalid_contract_carries_raw_operation_when_present(
+        self, request_boundary: DataOperationRequestBoundaryComponent
+    ) -> None:
+        payload_in = malformed_with_raw_query()
+        request_boundary.input_value = json.dumps(payload_in)
+        result = request_boundary.build_output()
+        assert isinstance(result, Message)
+        payload = json.loads(str(result.text))
+        assert payload["code"] == ErrorCode.INVALID_CONTRACT.value
+        assert payload["_raw_operation"] == payload_in.get("operation")
+
+
+class TestRejectionBypassTrust:
+    """A self-contained, non-CONFIRMED DataOperationResult -- built
+    deterministically by the Agent's reject-short-circuit path, not claimed by
+    an LLM -- is trusted directly when `request_dict` isn't a valid
+    DataOperationRequest (expected: it's the original rejection's own
+    OperationalError, since the request never reached the Agent to produce a
+    fresh one). CONFIRMED outcomes always still require a resolvable original
+    request, so they fall through to INVALID_CONTRACT unchanged.
+    """
+
+    def test_bypassed_rejection_is_trusted(
+        self, result_boundary: DataOperationResultBoundaryComponent
+    ) -> None:
+        rejection_error = Message(
+            text=json.dumps(
+                {
+                    "schema_version": "1.0.0",
+                    "correlation_id": str(FIXED_CORRELATION_ID),
+                    "code": "OPERATION_NOT_ALLOWED",
+                    "category": "authorization",
+                    "message": "This operation is not allowed.",
+                    "retryable": False,
+                    "violations": [],
+                    "_raw_operation": "getRequestRoutingContext",
+                }
+            )
+        )
+        bypass_result = {
+            "operation": DataOperation.GET_REQUEST_ROUTING_CONTEXT.value,
+            "outcome": DataOperationOutcome.REJECTED.value,
+            "success": False,
+            "write_dispatched": False,
+            "error_code": "OPERATION_NOT_ALLOWED",
+        }
+        result_boundary.raw_value = Message(text=json.dumps(bypass_result))
+        result_boundary.request_dict = rejection_error
+        result = result_boundary.build_output()
+
+        assert isinstance(result, JSON)
+        assert result.data["outcome"] == DataOperationOutcome.REJECTED.value
+        assert result.data["error_code"] == "OPERATION_NOT_ALLOWED"
+
+    def test_bypassed_confirmed_outcome_is_not_trusted(
+        self, result_boundary: DataOperationResultBoundaryComponent
+    ) -> None:
+        """A CONFIRMED outcome with no resolvable original request is rejected,
+        not trusted -- unlike REJECTED/AMBIGUOUS, a claimed success always needs
+        the original request for affected-count/operation-match cross-checks."""
+        rejection_error = Message(
+            text=json.dumps(
+                {
+                    "schema_version": "1.0.0",
+                    "correlation_id": str(FIXED_CORRELATION_ID),
+                    "code": "OPERATION_NOT_ALLOWED",
+                    "category": "authorization",
+                    "message": "This operation is not allowed.",
+                    "retryable": False,
+                    "violations": [],
+                }
+            )
+        )
+        suspicious_confirmed = {
+            "operation": DataOperation.GET_REQUEST_ROUTING_CONTEXT.value,
+            "outcome": DataOperationOutcome.CONFIRMED.value,
+            "success": True,
+            "write_dispatched": False,
+        }
+        result_boundary.raw_value = Message(text=json.dumps(suspicious_confirmed))
+        result_boundary.request_dict = rejection_error
+        result = result_boundary.build_output()
+
+        assert isinstance(result, JSON)
+        assert result.data["code"] == ErrorCode.INVALID_CONTRACT.value

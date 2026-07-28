@@ -338,7 +338,7 @@ def langflow_client() -> "Generator[Any, None, None]":
     from tests.support.langflow_client import LangFlowClient
 
     langflow_url = os.getenv("LANGFLOW_URL", "http://localhost:7860")
-    langflow_api_key = os.getenv("LANGFLOW_API_KEY", None)
+    langflow_api_key = os.getenv("LANGFLOW_API_KEY", "local-dev-key-hulubul-phase1")
 
     client = LangFlowClient(base_url=langflow_url, api_key=langflow_api_key)
     yield client

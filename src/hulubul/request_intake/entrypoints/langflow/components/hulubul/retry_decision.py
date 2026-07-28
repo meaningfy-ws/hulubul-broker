@@ -13,7 +13,9 @@ and makes no model calls. It is a thin, deterministic adapter.
 from typing import Any
 
 from lfx.custom.custom_component.component import Component
+from lfx.inputs.inputs import MessageTextInput
 from lfx.schema.data import JSON
+from lfx.template.field.base import Output
 
 from hulubul.core.models.operational.enums import FailureKind
 from hulubul.request_intake.services.retry_policy import (
@@ -31,6 +33,26 @@ class RetryDecisionComponent(Component):
     Validates failure_kind input and returns a typed JSON decision
     containing action, should_retry bool, and max_retries int.
     """
+
+    display_name = "Retry Decision"
+    description = "Delegates a classified failure_kind to the pure retry policy."
+    icon = "refresh-cw"
+    name = "HulubulRetryDecision"
+
+    inputs = [  # noqa: RUF012
+        MessageTextInput(  # type: ignore[call-arg]
+            name="failure_kind",
+            display_name="Failure Kind",
+            info="A FailureKind enum value (or its string value) to classify.",
+            required=True,
+        ),
+    ]
+
+    outputs = [  # noqa: RUF012
+        Output(  # type: ignore[call-arg]
+            display_name="Decision", name="response", type_=JSON, method="build_decision"
+        ),
+    ]
 
     def __init__(self, **kwargs: Any) -> None:
         """Initialize the RetryDecisionComponent."""

@@ -1,24 +1,21 @@
-"""Operational contract boundary components: validation, error translation, fixed-edge enforcement.
+"""Contract result boundary component: validates and serializes contract results.
 
-This module provides three LFX components for handling operational contracts:
-1. RouterInputBoundaryComponent: Assembles RouterInput from fixed envelope/context edges
-2. IntakeInputBoundaryComponent: Assembles IntakeInput from fixed envelope/context edges
-3. ContractResultBoundaryComponent: Validates and serializes contract results
-
-All components enforce:
-- Registry-driven conversion (all 11 ContractKind values)
-- Fixed envelope/context fields (advanced, cannot be overridden)
-- Error redaction (validation errors never expose user values)
-- Type translation to INVALID_CONTRACT on failure
-- Output as typed Message/JSON, never raw dict
+Split from the former contract_boundary.py (which held three components)
+because LangFlow's directory-based custom component loader registers exactly
+one component per file, named after the file -- extra classes in the same
+file are silently dropped from the sidebar palette. See
+router_input_boundary.py and intake_input_boundary.py for the other two.
 """
 
+import json
 from typing import Any
 from uuid import uuid4
 
 from lfx.custom.custom_component.component import Component
+from lfx.inputs.inputs import HandleInput
 from lfx.schema.data import JSON
 from lfx.schema.message import Message
+from lfx.template.field.base import Output
 from pydantic import BaseModel, TypeAdapter, ValidationError
 
 from hulubul.core.models.operational import (
@@ -38,12 +35,7 @@ from hulubul.core.models.operational import (
 from hulubul.core.models.operational.data_operations import DATA_OPERATION_ADAPTER
 from hulubul.core.models.operational.errors import ERROR_POLICY
 
-__all__ = [
-    "CONTRACT_TYPES",
-    "ContractResultBoundaryComponent",
-    "IntakeInputBoundaryComponent",
-    "RouterInputBoundaryComponent",
-]
+__all__ = ["CONTRACT_TYPES", "ContractResultBoundaryComponent"]
 
 # ============================================================================
 # Registry: All 11 ContractKind values → Model types
@@ -69,86 +61,6 @@ assert set(CONTRACT_TYPES.keys()) == set(ContractKind), (
 )
 
 
-class RouterInputBoundaryComponent(Component):
-    """Assembles RouterInput from fixed advanced envelope/context edges + validated Data payload.
-
-    The envelope and routing_context are advanced (fixed) fields, absent from model tool schemas.
-    They cannot be overridden by user input, model output, prose, or tweaks.
-    """
-
-    def __init__(self, **kwargs: Any) -> None:
-        """Initialize the RouterInputBoundaryComponent."""
-        super().__init__(**kwargs)
-        self.envelope: MainFlowInput | None = None
-        self.routing_context: RoutingContext | None = None
-
-    def build_router_input(self) -> Message:
-        """Build RouterInput from fixed envelope/context edges.
-
-        Returns:
-            Message: An LFX Message with RouterInput serialized as JSON
-
-        Raises:
-            ValueError: If envelope or routing_context is missing
-        """
-        if self.envelope is None:
-            raise ValueError("INVALID_CONFIGURATION: envelope is required")
-
-        if self.routing_context is None:
-            raise ValueError("INVALID_CONFIGURATION: routing_context is required")
-
-        # Assemble RouterInput from fixed edges
-        wrapper = RouterInput(
-            schema_version=self.envelope.schema_version,
-            correlation_id=self.envelope.correlation_id,
-            envelope=self.envelope,
-            routing_context=self.routing_context,
-        )
-
-        # Return as Message with JSON text
-        return Message(text=wrapper.model_dump_json())
-
-
-class IntakeInputBoundaryComponent(Component):
-    """Assembles IntakeInput from fixed advanced envelope/context edges + validated Data payload.
-
-    The envelope and routing_context are advanced (fixed) fields, absent from model tool schemas.
-    They cannot be overridden by user input, model output, prose, or tweaks.
-    """
-
-    def __init__(self, **kwargs: Any) -> None:
-        """Initialize the IntakeInputBoundaryComponent."""
-        super().__init__(**kwargs)
-        self.envelope: MainFlowInput | None = None
-        self.routing_context: RoutingContext | None = None
-
-    def build_intake_input(self) -> Message:
-        """Build IntakeInput from fixed envelope/context edges.
-
-        Returns:
-            Message: An LFX Message with IntakeInput serialized as JSON
-
-        Raises:
-            ValueError: If envelope or routing_context is missing
-        """
-        if self.envelope is None:
-            raise ValueError("INVALID_CONFIGURATION: envelope is required")
-
-        if self.routing_context is None:
-            raise ValueError("INVALID_CONFIGURATION: routing_context is required")
-
-        # Assemble IntakeInput from fixed edges
-        wrapper = IntakeInput(
-            schema_version=self.envelope.schema_version,
-            correlation_id=self.envelope.correlation_id,
-            envelope=self.envelope,
-            routing_context=self.routing_context,
-        )
-
-        # Return as Message with JSON text
-        return Message(text=wrapper.model_dump_json())
-
-
 class ContractResultBoundaryComponent(Component):
     """Validates and serializes contract results (OperationalError, RouterResult, IntakeResult).
 
@@ -157,9 +69,48 @@ class ContractResultBoundaryComponent(Component):
     Unexpected programming errors remain exceptions.
     """
 
+    display_name = "Contract Result Boundary"
+    description = "Validates and serializes a contract result against all 11 ContractKind types."
+    icon = "shield-check"
+    name = "HulubulContractResultBoundary"
+
+    inputs = [  # noqa: RUF012
+        HandleInput(  # type: ignore[call-arg]
+            name="value",
+            display_name="Contract Value",
+            info="The contract value to validate (Data/JSON, never free text).",
+            input_types=["Data", "JSON"],
+            required=True,
+        ),
+    ]
+
+    outputs = [  # noqa: RUF012
+        Output(  # type: ignore[call-arg]
+            display_name="Message", name="response", type_=Message, method="build_output"
+        ),
+    ]
+
     def __init__(self, **kwargs: Any) -> None:
         """Initialize the ContractResultBoundaryComponent."""
         super().__init__(**kwargs)
+
+    def build_output(self) -> Message:
+        """LFX-facing output: validate self.value.
+
+        Always returns Message (even for errors, wrapping the JSON error as
+        message text) so LFX registers a single declared output type. A
+        `Message | JSON` return annotation here makes LFX register
+        `output_types=["JSON", "Message"]`, which the frontend's connection
+        check treats as a strict subset requirement against a Message-only
+        target -- silently rejecting every edge into this output.
+        """
+        value = self.value
+        if hasattr(value, "data"):
+            value = value.data
+        result = self.validate_contract_value(value)
+        if isinstance(result, Message):
+            return result
+        return Message(text=json.dumps(result.data))
 
     def validate_contract_value(self, value: dict[str, Any] | Any) -> Message | JSON:
         """Validate and convert a contract value to typed model.

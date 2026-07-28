@@ -27,10 +27,14 @@ from hulubul.core.models.operational import (
     RoutingContext,
     RoutingStage,
 )
-from hulubul.request_intake.entrypoints.langflow.components.hulubul.contract_boundary import (
+from hulubul.request_intake.entrypoints.langflow.components.hulubul.contract_result_boundary import (
     CONTRACT_TYPES,
     ContractResultBoundaryComponent,
+)
+from hulubul.request_intake.entrypoints.langflow.components.hulubul.intake_input_boundary import (
     IntakeInputBoundaryComponent,
+)
+from hulubul.request_intake.entrypoints.langflow.components.hulubul.router_input_boundary import (
     RouterInputBoundaryComponent,
 )
 

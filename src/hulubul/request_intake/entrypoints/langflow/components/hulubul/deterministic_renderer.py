@@ -14,7 +14,9 @@ structured and chat output can never diverge (per DEC-014).
 from typing import Any
 
 from lfx.custom.custom_component.component import Component
+from lfx.inputs.inputs import HandleInput
 from lfx.schema.message import Message
+from lfx.template.field.base import Output
 from pydantic import ValidationError
 
 from hulubul.core.models.operational.enums import IntakeOutcome, RouterOutcome
@@ -37,6 +39,27 @@ class DeterministicRendererComponent(Component):
     safe, deterministic user-facing text. Never accepts Agent free text
     or unvalidated prose.
     """
+
+    display_name = "Deterministic Renderer"
+    description = "Renders a validated IntakeResult/RouterResult/OperationalError to safe text."
+    icon = "shield-check"
+    name = "HulubulDeterministicRenderer"
+
+    inputs = [  # noqa: RUF012
+        HandleInput(  # type: ignore[call-arg]
+            name="result",
+            display_name="Result",
+            info="Validated IntakeResult, RouterResult, or OperationalError (never free text).",
+            input_types=["Data", "JSON"],
+            required=True,
+        ),
+    ]
+
+    outputs = [  # noqa: RUF012
+        Output(  # type: ignore[call-arg]
+            display_name="Message", name="response", type_=Message, method="build_message"
+        ),
+    ]
 
     def __init__(self, **kwargs: Any) -> None:
         """Initialize the DeterministicRendererComponent."""

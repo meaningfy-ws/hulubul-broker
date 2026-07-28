@@ -9,8 +9,14 @@ import json
 import subprocess
 import tempfile
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import pytest
+
+from scripts.validate_langflow_assets import ValidationError
+
+if TYPE_CHECKING:
+    from scripts.validate_langflow_assets import LFXValidator
 
 REPO_ROOT = Path(__file__).parent.parent.parent.parent
 MANIFEST_PATH = REPO_ROOT / "langflow" / "flow-manifest.yaml"
@@ -276,6 +282,68 @@ class TestValidationScriptBasics:
         assert "validation" in output or "manifest" in output or "topology" in output, (
             f"Expected validation output, got stdout: {result.stdout}, stderr: {result.stderr}"
         )
+
+
+class TestKnownUpstreamLfxBugDowngrade:
+    """LFXValidator must downgrade only the known upstream registry-load bug.
+
+    lfx==1.10.2/1.10.3/1.11.0 all import a nonexistent `initialize_components`
+    symbol in their own Level-2 component-existence check. That specific,
+    exact failure must not block validation, but any other lfx-reported issue
+    -- even one that also happens to trigger this same registry-load failure
+    -- must still fail as before.
+    """
+
+    @staticmethod
+    def _make_validator() -> "LFXValidator":
+        from scripts.validate_langflow_assets import LFXValidator
+
+        return LFXValidator(FLOWS_DIR)
+
+    def test_only_known_bug_is_downgraded(self) -> None:
+        validator = self._make_validator()
+        output = (
+            "✗ some/flow.json\n"
+            "  [L2 ERROR] Could not load component registry (skipping component checks): \n"
+            "cannot import name 'initialize_components' from 'lfx.interface.utils' \n"
+            "(/some/path/lfx/interface/utils.py)\n"
+        )
+        assert validator._is_only_known_upstream_lfx_bug(output) is True
+
+    def test_real_error_alongside_known_bug_still_blocks(self) -> None:
+        validator = self._make_validator()
+        output = (
+            "✗ some/flow.json\n"
+            "  [L2 ERROR] Could not load component registry (skipping component checks): \n"
+            "cannot import name 'initialize_components' from 'lfx.interface.utils' \n"
+            "  [L3 ERROR] [Agent] Possible type mismatch on edge from 'X' -> 'Agent': "
+            "source emits 'Message', target expects 'str'\n"
+        )
+        assert validator._is_only_known_upstream_lfx_bug(output) is False
+
+    def test_unrelated_error_alone_still_blocks(self) -> None:
+        validator = self._make_validator()
+        output = "  [L4 ERROR] [Agent] Required input 'input_value' is not connected\n"
+        assert validator._is_only_known_upstream_lfx_bug(output) is False
+
+    def test_no_issue_lines_is_not_the_known_bug(self) -> None:
+        validator = self._make_validator()
+        assert validator._is_only_known_upstream_lfx_bug("") is False
+
+    def test_validate_returns_true_when_only_warning_severity_present(self) -> None:
+        validator = self._make_validator()
+        validator.errors.append(
+            ValidationError("lfx_validation", "known bug only", severity="warning")
+        )
+        assert all(error.severity != "error" for error in validator.errors) is True
+
+    def test_validate_returns_false_when_any_error_severity_present(self) -> None:
+        validator = self._make_validator()
+        validator.errors.append(
+            ValidationError("lfx_validation", "known bug only", severity="warning")
+        )
+        validator.errors.append(ValidationError("lfx_validation", "real problem"))
+        assert all(error.severity != "error" for error in validator.errors) is False
 
 
 class TestFlowFilesWhenPresent:
