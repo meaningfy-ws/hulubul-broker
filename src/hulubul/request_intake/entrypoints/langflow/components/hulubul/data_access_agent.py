@@ -246,8 +246,11 @@ class HulubulDataAccessAgentComponent(AgentComponent):
 
         try:
             parsed = json.loads(extract_json_object_text(response_text))
-        except json.JSONDecodeError:
-            logger.warning("LF-70 repair: repair attempt did not produce valid JSON")
+        except json.JSONDecodeError as exc:
+            # exc carries only position/reason (e.g. "Expecting value: line 1
+            # column 1"), never the malformed text itself -- safe to log
+            # under DEC-016 ("no secret/raw prompt logging").
+            logger.warning(f"LF-70 repair: repair attempt did not produce valid JSON: {exc}")
             return None
         if not isinstance(parsed, dict) or parsed.get("_unrepairable"):
             logger.warning("LF-70 repair: repair attempt reported unrepairable or wrong shape")
@@ -255,8 +258,14 @@ class HulubulDataAccessAgentComponent(AgentComponent):
 
         try:
             repaired_result = DataOperationResult.model_validate(parsed)
-        except ValidationError:
-            logger.warning("LF-70 repair: repair attempt still failed schema validation")
+        except ValidationError as exc:
+            # include_input/include_url=False: .errors() otherwise embeds the
+            # actual offending value per error, which could be repaired,
+            # LLM-extracted content -- DEC-016 forbids logging that.
+            safe_errors = exc.errors(include_input=False, include_url=False)
+            logger.warning(
+                f"LF-70 repair: repair attempt still failed schema validation: {safe_errors}"
+            )
             return None
 
         return Message(text=repaired_result.model_dump_json())

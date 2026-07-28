@@ -8,7 +8,6 @@ ever applies to the two read-only MCP tools, never write_neo4j_cypher.
 
 import asyncio
 import json
-from typing import Any
 from unittest.mock import AsyncMock, patch
 
 from langchain.agents.middleware import ModelRetryMiddleware, ToolRetryMiddleware
@@ -41,24 +40,31 @@ _VALID_RESULT_TEXT = json.dumps(
 )
 
 
+class _FakeAIMessage:
+    def __init__(self, content: str) -> None:
+        self.content = content
+
+
 class _FakeLLM:
-    """Stand-in for the plain (non-tool-bound) chat model `ainvoke` returns."""
+    """Stand-in for the plain (non-tool-bound) chat model `ainvoke` returns.
+
+    `_repair_malformed_result` only ever calls `ainvoke(prompt)` with a
+    single formatted `str` and reads back `.content`, matching a real
+    LangChain chat model's `ainvoke(str) -> BaseMessage` shape closely
+    enough for this component's own usage -- no need for the full
+    `Runnable`/`BaseLanguageModel` protocol here.
+    """
 
     def __init__(self, response_text: str | None = None, raise_error: bool = False) -> None:
         self.response_text = response_text
         self.raise_error = raise_error
-        self.calls: list[Any] = []
+        self.calls: list[str] = []
 
-    async def ainvoke(self, prompt: Any, *args: Any, **kwargs: Any) -> Any:
+    async def ainvoke(self, prompt: str) -> _FakeAIMessage:
         self.calls.append(prompt)
         if self.raise_error:
             raise RuntimeError("provider unavailable")
         return _FakeAIMessage(self.response_text or "")
-
-
-class _FakeAIMessage:
-    def __init__(self, content: str) -> None:
-        self.content = content
 
 
 def _agent_with_tools(tools: list[str] | None) -> HulubulDataAccessAgentComponent:

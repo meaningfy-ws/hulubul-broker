@@ -330,15 +330,39 @@ check-secrets: ## Scan tracked files for committed secrets
 	poetry run python scripts/check_committed_secrets.py
 
 check-flows: ## Validate LangFlow flow assets (manifest, normalization, lfx checks)
-	# TODO(Checkpoint 8): re-enable once langflow/flows/*.json exist — until
-	# then this fails because all 3 manifest-declared flows are missing on disk.
 	# poetry run python scripts/validate_langflow_assets.py langflow/flow-manifest.yaml
+	# ^ still disabled: that script validates against flow-manifest.yaml's full
+	# 3-flow declaration; only LF-70 (10-lf-70-data-access.json) exists on disk
+	# as of checkpoint 8 (LF-10/LF-00 land in checkpoint 9), so it still fails
+	# on the 2 not-yet-built flows. Re-enable once all 3 exist.
+	#
+	# NOT wired into ci-static/ci-acceptance yet, even though flows now exist
+	# (checkpoint 8), for two independent, currently out-of-scope-to-fix
+	# reasons -- see DEV/knowledge/checkpoint8-lf70-troubleshooting-runbook.md
+	# for the full writeup:
+	# 1. `lfx validate`'s own CLI (installed lfx==1.10.2) has an internal
+	#    incompatibility -- "cannot import name 'initialize_components' from
+	#    lfx.interface.utils" -- a bug inside the pinned third-party package
+	#    itself, not this project's code; it degrades gracefully (skips
+	#    component-registry checks) but still exits non-zero under --strict.
+	# 2. LF-70's is_input/is_output Run-API-injection design (the *only* way
+	#    this flow is reachable via the plain Run API at all -- see runbook
+	#    bug #2) is invisible to a pure static-topology checker: it correctly
+	#    but incorrectly-for-this-flow reports the request boundary's
+	#    `input_value` as "no value and no incoming edge" (it's injected by
+	#    the Run API at request time, not wired via a graph edge), and a
+	#    handful of "possible type mismatch" edge warnings (e.g. Message vs
+	#    str, Tool vs other) that are compatible-but-not-identical type
+	#    strings on edges already extensively live-verified working.
+	# Idempotence (`normalize_langflow_flows.py --check`) is still worth
+	# running standalone and does pass cleanly -- run `make check-flows`
+	# manually before merging flow changes to catch that class of drift.
 	@if [ -d langflow/flows ] && [ -n "$$(ls langflow/flows/*.json 2>/dev/null)" ]; then \
 		poetry run python scripts/normalize_langflow_flows.py --check langflow/flows/*.json; \
 		poetry run lfx validate --level 4 --strict --skip-credentials langflow/flows/*.json; \
 		for flow in langflow/flows/*.json; do poetry run lfx upgrade --strict "$$flow"; done; \
 	else \
-		echo "[!] No flow files to validate yet (expected in Checkpoint 8)"; \
+		echo "[!] No flow files to validate yet"; \
 	fi
 
 test-integration: ## Run integration-marked tests

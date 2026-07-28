@@ -35,6 +35,9 @@ def extract_json_object_text(text: str) -> str:
             depth -= 1
             if depth == 0 and start is not None:
                 candidates.append(text[start : i + 1])
+    # Last-to-first, not first-to-last: the model's real final answer comes
+    # after any fenced draft it thought out loud, so the last block that
+    # actually parses is the one to trust.
     for candidate in reversed(candidates):
         try:
             json.loads(candidate)

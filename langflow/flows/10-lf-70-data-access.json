@@ -196,6 +196,7 @@
             ],
             "frozen": false,
             "icon": "shield-check",
+            "is_input": true,
             "legacy": false,
             "metadata": {
               "code_hash": "b413777d7fe2",
@@ -222,69 +223,68 @@
             "output_types": [],
             "outputs": [
               {
+                "allows_loop": false,
+                "cache": true,
+                "display_name": "Message",
+                "group_outputs": false,
+                "method": "build_output",
+                "name": "response",
+                "selected": "Message",
+                "tool_mode": true,
                 "types": [
                   "Message"
                 ],
-                "selected": "Message",
-                "name": "response",
-                "display_name": "Message",
-                "method": "build_output",
-                "value": "__UNDEFINED__",
-                "cache": true,
-                "allows_loop": false,
-                "group_outputs": false,
-                "tool_mode": true
+                "value": "__UNDEFINED__"
               }
             ],
             "pinned": false,
             "template": {
               "_type": "Component",
               "code": {
-                "type": "code",
-                "required": true,
-                "placeholder": "",
-                "list": false,
-                "show": true,
-                "multiline": true,
-                "value": "\"\"\"Data operation request boundary component: validation and authorization.\n\nSplit from the former data_operation_boundary.py (which held both the request\nand result boundary components) because LangFlow's directory-based custom\ncomponent loader registers exactly one component per file, named after the\nfile -- a second class in the same file is silently dropped from the sidebar\npalette. See data_operation_result_boundary.py for the paired component.\n\"\"\"\n\nimport json\nfrom typing import Any\nfrom uuid import UUID\n\nfrom lfx.custom.custom_component.component import Component\nfrom lfx.inputs.inputs import MessageTextInput\nfrom lfx.schema.data import JSON\nfrom lfx.schema.message import Message\nfrom lfx.template.field.base import Output\nfrom pydantic import ValidationError\n\nfrom hulubul.core.models.operational import (\n    CallerFlow,\n    ErrorCode,\n    OperationalError,\n    validate_data_operation_request,\n)\nfrom hulubul.core.models.operational.errors import ERROR_POLICY\nfrom hulubul.request_intake.services.data_operation_policy import (\n    authorize_operation,\n    validate_operation_preconditions,\n)\n\n__all__ = [\"DataOperationRequestBoundaryComponent\"]\n\n\nclass DataOperationRequestBoundaryComponent(Component):\n    \"\"\"Validate and authorize data operation requests.\n\n    Enforces validation-before-authorization precedence:\n    1. Validate contract (rejects raw query/Cypher, undeclared fields, mismatched payload)\n    2. Authorize operation (caller capability check)\n    3. Validate preconditions (expected state, transition validity)\n\n    Returns Message (valid request) or JSON (error with INVALID_CONTRACT or OPERATION_NOT_ALLOWED).\n    \"\"\"\n\n    display_name = \"Data Operation Request Boundary\"\n    description = \"Validate and authorize DataOperationRequest payloads\"\n    icon = \"shield-check\"\n    name = \"HulubulDataOperationRequestBoundary\"\n\n    inputs = [  # noqa: RUF012\n        MessageTextInput(  # type: ignore[call-arg]\n            name=\"input_value\",\n            display_name=\"Data Operation Request\",\n            info=(\n                \"Typed DataOperationRequest (JSON text) to validate and authorize. \"\n                \"MessageTextInput rather than HandleInput: HandleInput fields are \"\n                \"edge-only in LangFlow (they never read their own literal `value`, \"\n                \"confirmed by direct testing), which made this component's public \"\n                \"entry point unreachable via the plain Run Flow API -- and would \"\n                \"equally break LF-10's Tool Mode invocation of this flow later, \"\n                \"since that path sets the tool's arguments the same way. \"\n                \"MessageTextInput accepts both a literal value and a real edge.\"\n            ),\n            required=True,\n        ),\n    ]\n\n    outputs = [  # noqa: RUF012\n        Output(  # type: ignore[call-arg]\n            display_name=\"Message\", name=\"response\", type_=Message, method=\"build_output\"\n        ),\n    ]\n\n    def build_output(self) -> Message:\n        \"\"\"LFX-facing output: validate self.input_value.\n\n        Always returns Message (even for errors, wrapping the JSON error as\n        message text) so LFX registers a single declared output type. A\n        `Message | JSON` return annotation here previously made LFX register\n        `output_types=[\"JSON\", \"Message\"]`, which the frontend's connection\n        check treats as a strict subset requirement against the (Message-only)\n        target -- silently rejecting every edge into this output.\n        \"\"\"\n        raw_value = self._input_value_as_dict()\n        result = self.validate_request_value(raw_value)\n        if isinstance(result, Message):\n            return result\n        # Rejection: carry the client-supplied operation string alongside the\n        # locked OperationalError shape (additive-only -- validate_request_value's\n        # own return contract, and every test targeting it directly, is\n        # untouched). This lets the downstream Agent recognize an\n        # already-rejected request and short-circuit to a typed\n        # DataOperationResult without ever invoking the LLM/MCP tools for a\n        # request that was never going to reach them.\n        error_dict = dict(result.data)\n        error_dict[\"_raw_operation\"] = raw_value.get(\"operation\")\n        return Message(text=json.dumps(error_dict))\n\n    def _input_value_as_dict(self) -> dict[str, Any]:\n        \"\"\"Coerce self.input_value (Message, JSON text, or Data/JSON) into a dict.\n\n        A caller-supplied literal value is not guaranteed to be valid JSON.\n        Treat undecodable text as an empty dict rather than raising, so it is\n        rejected as INVALID_CONTRACT by the normal validation path below\n        instead of crashing the component build with an unhandled\n        JSONDecodeError.\n        \"\"\"\n        value = self.input_value\n        if isinstance(value, Message):\n            value = value.text\n        if isinstance(value, str):\n            if not value:\n                return {}\n            try:\n                decoded = json.loads(value)\n            except json.JSONDecodeError:\n                return {}\n            return decoded if isinstance(decoded, dict) else {}\n        if hasattr(value, \"data\"):\n            return dict(value.data)\n        return dict(value) if value else {}\n\n    def validate_request_value(self, raw_value: dict[str, Any]) -> Message | JSON:\n        \"\"\"Validate and authorize request, return typed output or error.\n\n        Args:\n            raw_value: Raw request dict\n\n        Returns:\n            Message: If valid and authorized (serialized DataOperationRequest as JSON text)\n            JSON: If contract validation fails (INVALID_CONTRACT) or authorization fails\n                  (OPERATION_NOT_ALLOWED)\n        \"\"\"\n        # Extract correlation_id (string from request) for error responses\n        correlation_id_str = raw_value.get(\"correlation_id\", \"\")\n\n        # Step 1: Validate contract (ValidationError → INVALID_CONTRACT)\n        try:\n            request = validate_data_operation_request(raw_value)\n        except ValidationError:\n            # Contract validation failed: wrong operation, undeclared fields, etc.\n            return self._make_error_response(\n                code=ErrorCode.INVALID_CONTRACT,\n                correlation_id_str=correlation_id_str,\n            )\n\n        # Update correlation_id from valid request (it's a string in DataOperationRequest)\n        correlation_id_str = request.correlation_id\n\n        # Step 2: Authorize operation (capability check)\n        try:\n            caller = CallerFlow(request.caller)\n        except ValueError:\n            return self._make_error_response(\n                code=ErrorCode.INVALID_CONTRACT,\n                correlation_id_str=correlation_id_str,\n            )\n\n        auth_error = authorize_operation(caller, request.operation)\n        if auth_error is not None:\n            # Create new error with correct correlation_id (model is frozen)\n            return self._make_error_response(\n                code=auth_error.code,\n                correlation_id_str=correlation_id_str,\n            )\n\n        # Step 3: Validate preconditions (state transitions, timestamps, etc.)\n        precond_error = validate_operation_preconditions(request)\n        if precond_error is not None:\n            # Create new error with correct correlation_id (model is frozen)\n            return self._make_error_response(\n                code=precond_error.code,\n                correlation_id_str=correlation_id_str,\n            )\n\n        # Success: return typed Message with validated request\n        return Message(text=request.model_dump_json())\n\n    def _make_error_response(\n        self,\n        code: ErrorCode,\n        correlation_id_str: str,\n    ) -> JSON:\n        \"\"\"Create error response with request's correlation_id.\n\n        Args:\n            code: The ErrorCode\n            correlation_id_str: The request's correlation_id string\n\n        Returns:\n            JSON: Serialized OperationalError with correct correlation_id\n        \"\"\"\n        from uuid import uuid4\n\n        # Try to parse correlation_id_str as UUID, otherwise generate new one\n        try:\n            correlation_id = UUID(correlation_id_str) if correlation_id_str else uuid4()\n        except (ValueError, TypeError):\n            correlation_id = uuid4()\n\n        policy = ERROR_POLICY[code]\n        error = OperationalError(\n            schema_version=\"1.0.0\",\n            code=code,\n            correlation_id=correlation_id,\n            category=policy.category,\n            message=policy.safe_message,\n            retryable=policy.retryable,\n        )\n\n        return JSON(data=error.model_dump(mode=\"json\"))\n",
-                "fileTypes": [],
-                "file_path": "",
-                "password": false,
-                "name": "code",
                 "advanced": true,
                 "dynamic": true,
+                "fileTypes": [],
+                "file_path": "",
                 "info": "",
+                "list": false,
                 "load_from_db": false,
-                "title_case": false
+                "multiline": true,
+                "name": "code",
+                "password": false,
+                "placeholder": "",
+                "required": true,
+                "show": true,
+                "title_case": false,
+                "type": "code",
+                "value": "\"\"\"Data operation request boundary component: validation and authorization.\n\nSplit from the former data_operation_boundary.py (which held both the request\nand result boundary components) because LangFlow's directory-based custom\ncomponent loader registers exactly one component per file, named after the\nfile -- a second class in the same file is silently dropped from the sidebar\npalette. See data_operation_result_boundary.py for the paired component.\n\"\"\"\n\nimport json\nfrom typing import Any\nfrom uuid import UUID\n\nfrom lfx.custom.custom_component.component import Component\nfrom lfx.inputs.inputs import MessageTextInput\nfrom lfx.schema.data import JSON\nfrom lfx.schema.message import Message\nfrom lfx.template.field.base import Output\nfrom pydantic import ValidationError\n\nfrom hulubul.core.models.operational import (\n    CallerFlow,\n    ErrorCode,\n    OperationalError,\n    validate_data_operation_request,\n)\nfrom hulubul.core.models.operational.errors import ERROR_POLICY\nfrom hulubul.request_intake.services.data_operation_policy import (\n    authorize_operation,\n    validate_operation_preconditions,\n)\n\n__all__ = [\"DataOperationRequestBoundaryComponent\"]\n\n\nclass DataOperationRequestBoundaryComponent(Component):\n    \"\"\"Validate and authorize data operation requests.\n\n    Enforces validation-before-authorization precedence:\n    1. Validate contract (rejects raw query/Cypher, undeclared fields, mismatched payload)\n    2. Authorize operation (caller capability check)\n    3. Validate preconditions (expected state, transition validity)\n\n    Returns Message (valid request) or JSON (error with INVALID_CONTRACT or OPERATION_NOT_ALLOWED).\n    \"\"\"\n\n    display_name = \"Data Operation Request Boundary\"\n    description = \"Validate and authorize DataOperationRequest payloads\"\n    icon = \"shield-check\"\n    name = \"HulubulDataOperationRequestBoundary\"\n\n    inputs = [  # noqa: RUF012\n        MessageTextInput(  # type: ignore[call-arg]\n            name=\"input_value\",\n            display_name=\"Data Operation Request\",\n            info=(\n                \"Typed DataOperationRequest (JSON text) to validate and authorize. \"\n                \"MessageTextInput rather than HandleInput: HandleInput fields are \"\n                \"edge-only in LangFlow (they never read their own literal `value`, \"\n                \"confirmed by direct testing), which made this component's public \"\n                \"entry point unreachable via the plain Run Flow API -- and would \"\n                \"equally break LF-10's Tool Mode invocation of this flow later, \"\n                \"since that path sets the tool's arguments the same way. \"\n                \"MessageTextInput accepts both a literal value and a real edge.\"\n            ),\n            required=True,\n        ),\n    ]\n\n    outputs = [  # noqa: RUF012\n        Output(  # type: ignore[call-arg]\n            display_name=\"Message\", name=\"response\", type_=Message, method=\"build_output\"\n        ),\n    ]\n\n    def build_output(self) -> Message:\n        \"\"\"LFX-facing output: validate self.input_value.\n\n        Always returns Message (even for errors, wrapping the JSON error as\n        message text) so LFX registers a single declared output type. A\n        `Message | JSON` return annotation here previously made LFX register\n        `output_types=[\"JSON\", \"Message\"]`, which the frontend's connection\n        check treats as a strict subset requirement against the (Message-only)\n        target -- silently rejecting every edge into this output.\n        \"\"\"\n        raw_value = self._input_value_as_dict()\n        result = self.validate_request_value(raw_value)\n        if isinstance(result, Message):\n            return result\n        # Rejection: carry the client-supplied operation string alongside the\n        # locked OperationalError shape (additive-only -- validate_request_value's\n        # own return contract, and every test targeting it directly, is\n        # untouched). This lets the downstream Agent recognize an\n        # already-rejected request and short-circuit to a typed\n        # DataOperationResult without ever invoking the LLM/MCP tools for a\n        # request that was never going to reach them.\n        error_dict = dict(result.data)\n        error_dict[\"_raw_operation\"] = raw_value.get(\"operation\")\n        return Message(text=json.dumps(error_dict))\n\n    def _input_value_as_dict(self) -> dict[str, Any]:\n        \"\"\"Coerce self.input_value (Message, JSON text, or Data/JSON) into a dict.\n\n        A caller-supplied literal value is not guaranteed to be valid JSON.\n        Treat undecodable text as an empty dict rather than raising, so it is\n        rejected as INVALID_CONTRACT by the normal validation path below\n        instead of crashing the component build with an unhandled\n        JSONDecodeError.\n        \"\"\"\n        value = self.input_value\n        if isinstance(value, Message):\n            value = value.text\n        if isinstance(value, str):\n            if not value:\n                return {}\n            try:\n                decoded = json.loads(value)\n            except json.JSONDecodeError:\n                return {}\n            return decoded if isinstance(decoded, dict) else {}\n        if hasattr(value, \"data\"):\n            return dict(value.data)\n        return dict(value) if value else {}\n\n    def validate_request_value(self, raw_value: dict[str, Any]) -> Message | JSON:\n        \"\"\"Validate and authorize request, return typed output or error.\n\n        Args:\n            raw_value: Raw request dict\n\n        Returns:\n            Message: If valid and authorized (serialized DataOperationRequest as JSON text)\n            JSON: If contract validation fails (INVALID_CONTRACT) or authorization fails\n                  (OPERATION_NOT_ALLOWED)\n        \"\"\"\n        # Extract correlation_id (string from request) for error responses\n        correlation_id_str = raw_value.get(\"correlation_id\", \"\")\n\n        # Step 1: Validate contract (ValidationError → INVALID_CONTRACT)\n        try:\n            request = validate_data_operation_request(raw_value)\n        except ValidationError:\n            # Contract validation failed: wrong operation, undeclared fields, etc.\n            return self._make_error_response(\n                code=ErrorCode.INVALID_CONTRACT,\n                correlation_id_str=correlation_id_str,\n            )\n\n        # Update correlation_id from valid request (it's a string in DataOperationRequest)\n        correlation_id_str = request.correlation_id\n\n        # Step 2: Authorize operation (capability check)\n        try:\n            caller = CallerFlow(request.caller)\n        except ValueError:\n            return self._make_error_response(\n                code=ErrorCode.INVALID_CONTRACT,\n                correlation_id_str=correlation_id_str,\n            )\n\n        auth_error = authorize_operation(caller, request.operation)\n        if auth_error is not None:\n            # Create new error with correct correlation_id (model is frozen)\n            return self._make_error_response(\n                code=auth_error.code,\n                correlation_id_str=correlation_id_str,\n            )\n\n        # Step 3: Validate preconditions (state transitions, timestamps, etc.)\n        precond_error = validate_operation_preconditions(request)\n        if precond_error is not None:\n            # Create new error with correct correlation_id (model is frozen)\n            return self._make_error_response(\n                code=precond_error.code,\n                correlation_id_str=correlation_id_str,\n            )\n\n        # Success: return typed Message with validated request\n        return Message(text=request.model_dump_json())\n\n    def _make_error_response(\n        self,\n        code: ErrorCode,\n        correlation_id_str: str,\n    ) -> JSON:\n        \"\"\"Create error response with request's correlation_id.\n\n        Args:\n            code: The ErrorCode\n            correlation_id_str: The request's correlation_id string\n\n        Returns:\n            JSON: Serialized OperationalError with correct correlation_id\n        \"\"\"\n        from uuid import uuid4\n\n        # Try to parse correlation_id_str as UUID, otherwise generate new one\n        try:\n            correlation_id = UUID(correlation_id_str) if correlation_id_str else uuid4()\n        except (ValueError, TypeError):\n            correlation_id = uuid4()\n\n        policy = ERROR_POLICY[code]\n        error = OperationalError(\n            schema_version=\"1.0.0\",\n            code=code,\n            correlation_id=correlation_id,\n            category=policy.category,\n            message=policy.safe_message,\n            retryable=policy.retryable,\n        )\n\n        return JSON(data=error.model_dump(mode=\"json\"))\n"
               },
               "input_value": {
-                "tool_mode": false,
-                "trace_as_input": true,
-                "trace_as_metadata": true,
-                "load_from_db": false,
-                "list": false,
-                "list_add_label": "Add More",
-                "override_skip": false,
-                "required": true,
-                "placeholder": "",
-                "show": true,
-                "name": "input_value",
-                "value": "",
-                "display_name": "Data Operation Request",
+                "_input_type": "MessageTextInput",
                 "advanced": false,
+                "display_name": "Data Operation Request",
+                "dynamic": false,
+                "info": "Typed DataOperationRequest (JSON text) to validate and authorize. MessageTextInput rather than HandleInput: HandleInput fields are edge-only in LangFlow (they never read their own literal `value`, confirmed by direct testing), which made this component's public entry point unreachable via the plain Run Flow API -- and would equally break LF-10's Tool Mode invocation of this flow later, since that path sets the tool's arguments the same way. MessageTextInput accepts both a literal value and a real edge.",
                 "input_types": [
                   "Message"
                 ],
-                "dynamic": false,
-                "info": "Typed DataOperationRequest (JSON text) to validate and authorize. MessageTextInput rather than HandleInput: HandleInput fields are edge-only in LangFlow (they never read their own literal `value`, confirmed by direct testing), which made this component's public entry point unreachable via the plain Run Flow API -- and would equally break LF-10's Tool Mode invocation of this flow later, since that path sets the tool's arguments the same way. MessageTextInput accepts both a literal value and a real edge.",
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "name": "input_value",
+                "override_skip": false,
+                "placeholder": "",
+                "required": true,
+                "show": true,
                 "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
                 "track_in_telemetry": false,
                 "type": "str",
-                "_input_type": "MessageTextInput"
+                "value": ""
               }
             },
-            "tool_mode": false,
-            "is_input": true
+            "tool_mode": false
           },
           "showNode": true,
           "type": "HulubulDataOperationRequestBoundary"
@@ -762,33 +762,33 @@
             "output_types": [],
             "outputs": [
               {
+                "allows_loop": false,
+                "cache": true,
+                "display_name": "Response",
+                "group_outputs": false,
+                "method": "message_response",
+                "name": "response",
+                "selected": "Message",
+                "tool_mode": true,
                 "types": [
                   "Message"
                 ],
-                "selected": "Message",
-                "name": "response",
-                "display_name": "Response",
-                "method": "message_response",
-                "value": "__UNDEFINED__",
-                "cache": true,
-                "allows_loop": false,
-                "group_outputs": false,
-                "tool_mode": true
+                "value": "__UNDEFINED__"
               },
               {
+                "allows_loop": false,
+                "cache": true,
+                "display_name": "Structured Response",
+                "group_outputs": false,
+                "method": "json_response",
+                "name": "structured_response",
+                "selected": "Data",
+                "tool_mode": true,
                 "types": [
                   "Data",
                   "JSON"
                 ],
-                "selected": "Data",
-                "name": "structured_response",
-                "display_name": "Structured Response",
-                "method": "json_response",
-                "value": "__UNDEFINED__",
-                "cache": true,
-                "allows_loop": false,
-                "group_outputs": false,
-                "tool_mode": true
+                "value": "__UNDEFINED__"
               }
             ],
             "pinned": false,
@@ -898,22 +898,22 @@
                 "value": "https://us-south.ml.cloud.ibm.com"
               },
               "code": {
-                "type": "code",
-                "required": true,
-                "placeholder": "",
-                "list": false,
-                "show": true,
-                "multiline": true,
-                "value": "\"\"\"LF-70 Data Access Agent: the stock Agent, scoped to a safe retry policy.\n\nPer DEC-015 (design.md), LF-70 must retry a transient MCP read or model call\nonce, but must NEVER retry a dispatched write -- Phase 1 has no idempotency\nkey, so replaying a write whose outcome is ambiguous could silently create a\nduplicate mutation (see brainstorm.md Q12 and the \"No write idempotency\nlimits safe retry behavior\" trade-off in design.md's risk list).\n\nLangChain's `create_agent` already ships exactly the retry primitives this\nneeds (`ModelRetryMiddleware`, `ToolRetryMiddleware` -- both used internally\nby LangFlow's own stock components, e.g. HuggingFace/embeddings retries), so\nthis is not a flow-graph loop: the retry happens inside a single Agent\ninvocation, transparent to the flow. But the stock `AgentComponent`'s\n`handle_parsing_errors` checkbox only ever constructs an UNSCOPED\n`ToolRetryMiddleware(max_retries=2)` -- applied to every tool, which would\nalso retry `write_neo4j_cypher`. This subclass overrides only the middleware\nassembly step to scope tool retry to the two read-only MCP tools, and adds\nmodel-call retry (which the stock component doesn't wire in at all).\n\nNOTE for whoever builds LF-10/LF-00 (checkpoint 9): this `tools=[...]`\nname-based scoping only works because LF-70 is the sole flow with a raw MCP\ntoolkit exposing separately-named read/write tools. LF-10/LF-00's agents call\n*other flows* (LF-70, LF-10) through a single \"Run Flow\" tool each -- there is\nno separate read-tool-name vs write-tool-name to filter by there. If those\nflows want the same protection, `retry_on` needs a callable that inspects the\ntool-call *arguments* (was this a read-type or write-type DataOperationRequest?),\nnot a plain `tools=[...]` name filter. See also the note in plan.md near the\nLF-10 agent/tool-wiring section.\n\"\"\"\n\nimport json\nfrom typing import Any\n\nfrom langchain.agents.middleware import ModelRetryMiddleware, ToolRetryMiddleware\nfrom lfx.components.models_and_agents.agent import AgentComponent\nfrom lfx.log.logger import logger\nfrom lfx.schema.message import Message\nfrom pydantic import ValidationError\n\nfrom hulubul.core.models.operational import (\n    DataOperation,\n    DataOperationOutcome,\n    DataOperationResult,\n    extract_json_object_text,\n)\n\n__all__ = [\"HulubulDataAccessAgentComponent\"]\n\n# MCP toolkit tool names exposed only inside LF-70 (tests/integration/conftest.py's\n# mcp_client fixture asserts this exact three-tool inventory). Only the two read\n# tools are eligible for retry; write_neo4j_cypher is intentionally excluded.\n_READ_ONLY_MCP_TOOL_NAMES = (\"read_neo4j_cypher\", \"get_neo4j_schema\")\n\n# getRequestRoutingContext's raw output is a RoutingLookupRecord, not a\n# DataOperationResult -- RoutingContextAdapterComponent (downstream) owns its\n# extraction/validation. Result-shape repair below does not apply to it.\n_NO_RESULT_REPAIR_OPERATIONS = frozenset({DataOperation.GET_REQUEST_ROUTING_CONTEXT})\n\n# Design.md DEC-016: \"Malformed model result -> tool-less repair with\n# validation -> one repair; then MALFORMED_AGENT_RESULT\". This prompt asks\n# for a pure reformat of information already present in the malformed text --\n# never fabricate new facts -- since the repair call has no tools and cannot\n# independently verify anything against Neo4j.\n_REPAIR_PROMPT_TEMPLATE = \"\"\"\\\nThe text below was supposed to be a single JSON object matching this schema, \\\nbut failed validation. Reformat/extract the SAME information into valid \\\nJSON matching the schema exactly -- do not invent, guess, or add any fact \\\nthat is not already present in the text below. Output ONLY the JSON object, \\\nnothing else.\n\nIf the text does not contain enough information to fill the schema \\\ntruthfully, output exactly this JSON object instead: {{\"_unrepairable\": true}}\n\nSchema:\n{schema}\n\nText to reformat:\n{malformed_text}\n\"\"\"\n\n\nclass HulubulDataAccessAgentComponent(AgentComponent):\n    \"\"\"Agent scoped for LF-70: retries transient reads/model calls, never writes.\"\"\"\n\n    display_name = \"Data Access Agent\"\n    description = (\n        \"LF-70's Data Access Agent: retries a transient read or model call once \"\n        \"(DEC-015), never retries a dispatched write.\"\n    )\n    icon = \"bot\"\n    name = \"HulubulDataAccessAgent\"\n\n    def _build_middleware(self, llm: Any) -> list[Any]:\n        # Signature matches the installed lfx==1.10.2 AgentComponent._build_middleware\n        # exactly (verified via inspect.signature locally) -- GitHub's main branch\n        # has since added an `allow_interrupts` kwarg not present in this pinned\n        # release; do not add it here without re-verifying against the pinned version.\n        middleware = super()._build_middleware(llm)\n\n        # Drop the stock unscoped ToolRetryMiddleware (would also retry writes).\n        middleware = [m for m in middleware if not isinstance(m, ToolRetryMiddleware)]\n\n        if self.tools:\n            middleware.append(ToolRetryMiddleware(tools=list(_READ_ONLY_MCP_TOOL_NAMES)))\n        middleware.append(ModelRetryMiddleware())\n\n        return middleware\n\n    async def message_response(self) -> Message:\n        rejection = self._short_circuit_rejection()\n        if rejection is not None:\n            return rejection\n\n        result = await super().message_response()\n\n        if self._operation_from_input() in _NO_RESULT_REPAIR_OPERATIONS:\n            return result\n        if self._is_valid_data_operation_result_shape(result):\n            return result\n\n        repaired = await self._repair_malformed_result(result)\n        return repaired if repaired is not None else self._mark_repair_failed(result)\n\n    def _short_circuit_rejection(self) -> Message | None:\n        \"\"\"Detect a pre-rejected DataOperationRequest and skip the LLM/MCP entirely.\n\n        DataOperationRequestBoundaryComponent rejects contract-invalid or\n        unauthorized requests before they ever reach this Agent, emitting an\n        OperationalError enriched with `_raw_operation` (the client-supplied\n        operation string, best-effort -- see data_operation_request_boundary.py).\n        Building the final `DataOperationResult(rejected)` here, deterministically,\n        from that known operation and error code means an already-rejected\n        request never triggers a real model/tool call: cheaper, and avoids the\n        confusion observed live in this same investigation -- the model\n        treating a pre-formed error as an ill-formed task and asking the\n        caller to rephrase, burning iterations on a request that was never\n        going to reach it.\n\n        Returns None (falls through to the normal Agent path) whenever the\n        input isn't recognizably this shape, or `_raw_operation` can't be\n        resolved to a known operation -- e.g. a contract-invalid payload with\n        no parseable operation at all. That's today's existing (imperfect but\n        non-crashing) behavior, unchanged.\n        \"\"\"\n        value = self.input_value\n        text = value.text if isinstance(value, Message) else value\n        if not isinstance(text, str) or not text:\n            return None\n        try:\n            payload = json.loads(text)\n        except json.JSONDecodeError:\n            return None\n        if not isinstance(payload, dict) or \"code\" not in payload or \"operation\" in payload:\n            return None  # Not a rejection shape: a valid request has \"operation\", not \"code\"\n\n        try:\n            operation = DataOperation(payload.get(\"_raw_operation\"))\n        except ValueError:\n            return None\n\n        result = DataOperationResult(\n            operation=operation,\n            outcome=DataOperationOutcome.REJECTED,\n            success=False,\n            error_code=payload.get(\"code\"),\n        )\n        return Message(text=result.model_dump_json())\n\n    def _operation_from_input(self) -> DataOperation | None:\n        \"\"\"Best-effort: read this Agent's own request's `operation` field.\"\"\"\n        value = self.input_value\n        text = value.text if isinstance(value, Message) else value\n        if not isinstance(text, str) or not text:\n            return None\n        try:\n            payload = json.loads(text)\n        except json.JSONDecodeError:\n            return None\n        if not isinstance(payload, dict):\n            return None\n        try:\n            return DataOperation(payload.get(\"operation\"))\n        except ValueError:\n            return None\n\n    @staticmethod\n    def _is_valid_data_operation_result_shape(result: Message) -> bool:\n        \"\"\"Cheap shape check: does the Agent's final text parse as a DataOperationResult?\n\n        Postcondition correctness (affected count, timestamp equality,\n        operation match) is deliberately NOT checked here -- a tool-less\n        repair pass has no way to independently verify those against Neo4j,\n        and DataOperationResultBoundaryComponent already re-validates them\n        unconditionally downstream with its own specific error codes,\n        regardless of whether repair ran. This only decides whether the text\n        is even shaped like a DataOperationResult at all.\n        \"\"\"\n        text = result.text if isinstance(result, Message) else result\n        if not isinstance(text, str) or not text:\n            return False\n        try:\n            parsed = json.loads(extract_json_object_text(text))\n        except json.JSONDecodeError:\n            return False\n        if not isinstance(parsed, dict):\n            return False\n        try:\n            DataOperationResult.model_validate(parsed)\n        except ValidationError:\n            return False\n        return True\n\n    async def _repair_malformed_result(self, result: Message) -> Message | None:\n        \"\"\"DEC-016 tool-less repair: one reformat attempt, no tools, no MCP.\n\n        Calls the plain (non-tool-bound) chat model directly -- structurally\n        incapable of dispatching another write, since it is never wrapped\n        into the tool-calling agent runnable used by the normal Agent loop.\n        Returns None if repair could not produce valid DataOperationResult\n        JSON (caller falls back to `_mark_repair_failed`).\n        \"\"\"\n        text = result.text if isinstance(result, Message) else result\n        if not isinstance(text, str) or not text:\n            return None\n\n        try:\n            llm_model, _chat_history, _tools = await self.get_agent_requirements()  # type: ignore[no-untyped-call]\n        except (ValueError, TypeError) as exc:\n            logger.warning(f\"LF-70 repair: could not resolve a model for repair: {exc}\")\n            return None\n\n        prompt = _REPAIR_PROMPT_TEMPLATE.format(\n            schema=json.dumps(DataOperationResult.model_json_schema()),\n            malformed_text=text,\n        )\n\n        try:\n            response = await llm_model.ainvoke(prompt)\n        except Exception as exc:  # provider-specific exception types vary\n            logger.warning(f\"LF-70 repair: model call failed: {type(exc).__name__}\")\n            return None\n\n        response_text = response.content if hasattr(response, \"content\") else str(response)\n        if not isinstance(response_text, str):\n            return None\n\n        try:\n            parsed = json.loads(extract_json_object_text(response_text))\n        except json.JSONDecodeError:\n            logger.warning(\"LF-70 repair: repair attempt did not produce valid JSON\")\n            return None\n        if not isinstance(parsed, dict) or parsed.get(\"_unrepairable\"):\n            logger.warning(\"LF-70 repair: repair attempt reported unrepairable or wrong shape\")\n            return None\n\n        try:\n            repaired_result = DataOperationResult.model_validate(parsed)\n        except ValidationError:\n            logger.warning(\"LF-70 repair: repair attempt still failed schema validation\")\n            return None\n\n        return Message(text=repaired_result.model_dump_json())\n\n    def _mark_repair_failed(self, result: Message) -> Message:\n        \"\"\"Tag a still-malformed result so the boundary reports MALFORMED_AGENT_RESULT.\n\n        Mirrors the `_raw_operation` marker convention used by\n        DataOperationRequestBoundaryComponent's rejection enrichment: a\n        private key the downstream boundary recognizes, distinguishing\n        \"repair was attempted and still failed\" from \"no repair was ever\n        attempted\" (plain INVALID_CONTRACT). Never carries the raw/malformed\n        text itself -- see DEC-016 (\"no secret/raw prompt logging\").\n        \"\"\"\n        operation = self._operation_from_input()\n        payload: dict[str, Any] = {\"_repair_failed\": True}\n        if operation is not None:\n            payload[\"_raw_operation\"] = operation.value\n        return Message(text=json.dumps(payload))\n",
-                "fileTypes": [],
-                "file_path": "",
-                "password": false,
-                "name": "code",
                 "advanced": true,
                 "dynamic": true,
+                "fileTypes": [],
+                "file_path": "",
                 "info": "",
+                "list": false,
                 "load_from_db": false,
-                "title_case": false
+                "multiline": true,
+                "name": "code",
+                "password": false,
+                "placeholder": "",
+                "required": true,
+                "show": true,
+                "title_case": false,
+                "type": "code",
+                "value": "\"\"\"LF-70 Data Access Agent: the stock Agent, scoped to a safe retry policy.\n\nPer DEC-015 (design.md), LF-70 must retry a transient MCP read or model call\nonce, but must NEVER retry a dispatched write -- Phase 1 has no idempotency\nkey, so replaying a write whose outcome is ambiguous could silently create a\nduplicate mutation (see brainstorm.md Q12 and the \"No write idempotency\nlimits safe retry behavior\" trade-off in design.md's risk list).\n\nLangChain's `create_agent` already ships exactly the retry primitives this\nneeds (`ModelRetryMiddleware`, `ToolRetryMiddleware` -- both used internally\nby LangFlow's own stock components, e.g. HuggingFace/embeddings retries), so\nthis is not a flow-graph loop: the retry happens inside a single Agent\ninvocation, transparent to the flow. But the stock `AgentComponent`'s\n`handle_parsing_errors` checkbox only ever constructs an UNSCOPED\n`ToolRetryMiddleware(max_retries=2)` -- applied to every tool, which would\nalso retry `write_neo4j_cypher`. This subclass overrides only the middleware\nassembly step to scope tool retry to the two read-only MCP tools, and adds\nmodel-call retry (which the stock component doesn't wire in at all).\n\nNOTE for whoever builds LF-10/LF-00 (checkpoint 9): this `tools=[...]`\nname-based scoping only works because LF-70 is the sole flow with a raw MCP\ntoolkit exposing separately-named read/write tools. LF-10/LF-00's agents call\n*other flows* (LF-70, LF-10) through a single \"Run Flow\" tool each -- there is\nno separate read-tool-name vs write-tool-name to filter by there. If those\nflows want the same protection, `retry_on` needs a callable that inspects the\ntool-call *arguments* (was this a read-type or write-type DataOperationRequest?),\nnot a plain `tools=[...]` name filter. See also the note in plan.md near the\nLF-10 agent/tool-wiring section.\n\"\"\"\n\nimport json\nfrom typing import Any\n\nfrom langchain.agents.middleware import ModelRetryMiddleware, ToolRetryMiddleware\nfrom lfx.components.models_and_agents.agent import AgentComponent\nfrom lfx.log.logger import logger\nfrom lfx.schema.message import Message\nfrom pydantic import ValidationError\n\nfrom hulubul.core.models.operational import (\n    DataOperation,\n    DataOperationOutcome,\n    DataOperationResult,\n    extract_json_object_text,\n)\n\n__all__ = [\"HulubulDataAccessAgentComponent\"]\n\n# MCP toolkit tool names exposed only inside LF-70 (tests/integration/conftest.py's\n# mcp_client fixture asserts this exact three-tool inventory). Only the two read\n# tools are eligible for retry; write_neo4j_cypher is intentionally excluded.\n_READ_ONLY_MCP_TOOL_NAMES = (\"read_neo4j_cypher\", \"get_neo4j_schema\")\n\n# getRequestRoutingContext's raw output is a RoutingLookupRecord, not a\n# DataOperationResult -- RoutingContextAdapterComponent (downstream) owns its\n# extraction/validation. Result-shape repair below does not apply to it.\n_NO_RESULT_REPAIR_OPERATIONS = frozenset({DataOperation.GET_REQUEST_ROUTING_CONTEXT})\n\n# Design.md DEC-016: \"Malformed model result -> tool-less repair with\n# validation -> one repair; then MALFORMED_AGENT_RESULT\". This prompt asks\n# for a pure reformat of information already present in the malformed text --\n# never fabricate new facts -- since the repair call has no tools and cannot\n# independently verify anything against Neo4j.\n_REPAIR_PROMPT_TEMPLATE = \"\"\"\\\nThe text below was supposed to be a single JSON object matching this schema, \\\nbut failed validation. Reformat/extract the SAME information into valid \\\nJSON matching the schema exactly -- do not invent, guess, or add any fact \\\nthat is not already present in the text below. Output ONLY the JSON object, \\\nnothing else.\n\nIf the text does not contain enough information to fill the schema \\\ntruthfully, output exactly this JSON object instead: {{\"_unrepairable\": true}}\n\nSchema:\n{schema}\n\nText to reformat:\n{malformed_text}\n\"\"\"\n\n\nclass HulubulDataAccessAgentComponent(AgentComponent):\n    \"\"\"Agent scoped for LF-70: retries transient reads/model calls, never writes.\"\"\"\n\n    display_name = \"Data Access Agent\"\n    description = (\n        \"LF-70's Data Access Agent: retries a transient read or model call once \"\n        \"(DEC-015), never retries a dispatched write.\"\n    )\n    icon = \"bot\"\n    name = \"HulubulDataAccessAgent\"\n\n    def _build_middleware(self, llm: Any) -> list[Any]:\n        # Signature matches the installed lfx==1.10.2 AgentComponent._build_middleware\n        # exactly (verified via inspect.signature locally) -- GitHub's main branch\n        # has since added an `allow_interrupts` kwarg not present in this pinned\n        # release; do not add it here without re-verifying against the pinned version.\n        middleware = super()._build_middleware(llm)\n\n        # Drop the stock unscoped ToolRetryMiddleware (would also retry writes).\n        middleware = [m for m in middleware if not isinstance(m, ToolRetryMiddleware)]\n\n        if self.tools:\n            middleware.append(ToolRetryMiddleware(tools=list(_READ_ONLY_MCP_TOOL_NAMES)))\n        middleware.append(ModelRetryMiddleware())\n\n        return middleware\n\n    async def message_response(self) -> Message:\n        rejection = self._short_circuit_rejection()\n        if rejection is not None:\n            return rejection\n\n        result = await super().message_response()\n\n        if self._operation_from_input() in _NO_RESULT_REPAIR_OPERATIONS:\n            return result\n        if self._is_valid_data_operation_result_shape(result):\n            return result\n\n        repaired = await self._repair_malformed_result(result)\n        return repaired if repaired is not None else self._mark_repair_failed(result)\n\n    def _short_circuit_rejection(self) -> Message | None:\n        \"\"\"Detect a pre-rejected DataOperationRequest and skip the LLM/MCP entirely.\n\n        DataOperationRequestBoundaryComponent rejects contract-invalid or\n        unauthorized requests before they ever reach this Agent, emitting an\n        OperationalError enriched with `_raw_operation` (the client-supplied\n        operation string, best-effort -- see data_operation_request_boundary.py).\n        Building the final `DataOperationResult(rejected)` here, deterministically,\n        from that known operation and error code means an already-rejected\n        request never triggers a real model/tool call: cheaper, and avoids the\n        confusion observed live in this same investigation -- the model\n        treating a pre-formed error as an ill-formed task and asking the\n        caller to rephrase, burning iterations on a request that was never\n        going to reach it.\n\n        Returns None (falls through to the normal Agent path) whenever the\n        input isn't recognizably this shape, or `_raw_operation` can't be\n        resolved to a known operation -- e.g. a contract-invalid payload with\n        no parseable operation at all. That's today's existing (imperfect but\n        non-crashing) behavior, unchanged.\n        \"\"\"\n        value = self.input_value\n        text = value.text if isinstance(value, Message) else value\n        if not isinstance(text, str) or not text:\n            return None\n        try:\n            payload = json.loads(text)\n        except json.JSONDecodeError:\n            return None\n        if not isinstance(payload, dict) or \"code\" not in payload or \"operation\" in payload:\n            return None  # Not a rejection shape: a valid request has \"operation\", not \"code\"\n\n        try:\n            operation = DataOperation(payload.get(\"_raw_operation\"))\n        except ValueError:\n            return None\n\n        result = DataOperationResult(\n            operation=operation,\n            outcome=DataOperationOutcome.REJECTED,\n            success=False,\n            error_code=payload.get(\"code\"),\n        )\n        return Message(text=result.model_dump_json())\n\n    def _operation_from_input(self) -> DataOperation | None:\n        \"\"\"Best-effort: read this Agent's own request's `operation` field.\"\"\"\n        value = self.input_value\n        text = value.text if isinstance(value, Message) else value\n        if not isinstance(text, str) or not text:\n            return None\n        try:\n            payload = json.loads(text)\n        except json.JSONDecodeError:\n            return None\n        if not isinstance(payload, dict):\n            return None\n        try:\n            return DataOperation(payload.get(\"operation\"))\n        except ValueError:\n            return None\n\n    @staticmethod\n    def _is_valid_data_operation_result_shape(result: Message) -> bool:\n        \"\"\"Cheap shape check: does the Agent's final text parse as a DataOperationResult?\n\n        Postcondition correctness (affected count, timestamp equality,\n        operation match) is deliberately NOT checked here -- a tool-less\n        repair pass has no way to independently verify those against Neo4j,\n        and DataOperationResultBoundaryComponent already re-validates them\n        unconditionally downstream with its own specific error codes,\n        regardless of whether repair ran. This only decides whether the text\n        is even shaped like a DataOperationResult at all.\n        \"\"\"\n        text = result.text if isinstance(result, Message) else result\n        if not isinstance(text, str) or not text:\n            return False\n        try:\n            parsed = json.loads(extract_json_object_text(text))\n        except json.JSONDecodeError:\n            return False\n        if not isinstance(parsed, dict):\n            return False\n        try:\n            DataOperationResult.model_validate(parsed)\n        except ValidationError:\n            return False\n        return True\n\n    async def _repair_malformed_result(self, result: Message) -> Message | None:\n        \"\"\"DEC-016 tool-less repair: one reformat attempt, no tools, no MCP.\n\n        Calls the plain (non-tool-bound) chat model directly -- structurally\n        incapable of dispatching another write, since it is never wrapped\n        into the tool-calling agent runnable used by the normal Agent loop.\n        Returns None if repair could not produce valid DataOperationResult\n        JSON (caller falls back to `_mark_repair_failed`).\n        \"\"\"\n        text = result.text if isinstance(result, Message) else result\n        if not isinstance(text, str) or not text:\n            return None\n\n        try:\n            llm_model, _chat_history, _tools = await self.get_agent_requirements()  # type: ignore[no-untyped-call]\n        except (ValueError, TypeError) as exc:\n            logger.warning(f\"LF-70 repair: could not resolve a model for repair: {exc}\")\n            return None\n\n        prompt = _REPAIR_PROMPT_TEMPLATE.format(\n            schema=json.dumps(DataOperationResult.model_json_schema()),\n            malformed_text=text,\n        )\n\n        try:\n            response = await llm_model.ainvoke(prompt)\n        except Exception as exc:  # provider-specific exception types vary\n            logger.warning(f\"LF-70 repair: model call failed: {type(exc).__name__}\")\n            return None\n\n        response_text = response.content if hasattr(response, \"content\") else str(response)\n        if not isinstance(response_text, str):\n            return None\n\n        try:\n            parsed = json.loads(extract_json_object_text(response_text))\n        except json.JSONDecodeError as exc:\n            # exc carries only position/reason (e.g. \"Expecting value: line 1\n            # column 1\"), never the malformed text itself -- safe to log\n            # under DEC-016 (\"no secret/raw prompt logging\").\n            logger.warning(f\"LF-70 repair: repair attempt did not produce valid JSON: {exc}\")\n            return None\n        if not isinstance(parsed, dict) or parsed.get(\"_unrepairable\"):\n            logger.warning(\"LF-70 repair: repair attempt reported unrepairable or wrong shape\")\n            return None\n\n        try:\n            repaired_result = DataOperationResult.model_validate(parsed)\n        except ValidationError as exc:\n            # include_input/include_url=False: .errors() otherwise embeds the\n            # actual offending value per error, which could be repaired,\n            # LLM-extracted content -- DEC-016 forbids logging that.\n            safe_errors = exc.errors(include_input=False, include_url=False)\n            logger.warning(\n                f\"LF-70 repair: repair attempt still failed schema validation: {safe_errors}\"\n            )\n            return None\n\n        return Message(text=repaired_result.model_dump_json())\n\n    def _mark_repair_failed(self, result: Message) -> Message:\n        \"\"\"Tag a still-malformed result so the boundary reports MALFORMED_AGENT_RESULT.\n\n        Mirrors the `_raw_operation` marker convention used by\n        DataOperationRequestBoundaryComponent's rejection enrichment: a\n        private key the downstream boundary recognizes, distinguishing\n        \"repair was attempted and still failed\" from \"no repair was ever\n        attempted\" (plain INVALID_CONTRACT). Never carries the raw/malformed\n        text itself -- see DEC-016 (\"no secret/raw prompt logging\").\n        \"\"\"\n        operation = self._operation_from_input()\n        payload: dict[str, Any] = {\"_repair_failed\": True}\n        if operation is not None:\n            payload[\"_raw_operation\"] = operation.value\n        return Message(text=json.dumps(payload))\n"
               },
               "context_id": {
                 "_input_type": "MessageTextInput",
@@ -1440,6 +1440,7 @@
             ],
             "frozen": false,
             "icon": "shield-check",
+            "is_output": true,
             "legacy": false,
             "metadata": {
               "code_hash": "aed66d1e94a2",
@@ -1466,40 +1467,40 @@
             "output_types": [],
             "outputs": [
               {
+                "allows_loop": false,
+                "cache": true,
+                "display_name": "Result",
+                "group_outputs": false,
+                "method": "build_output",
+                "name": "response",
+                "selected": "JSON",
+                "tool_mode": true,
                 "types": [
                   "JSON"
                 ],
-                "selected": "JSON",
-                "name": "response",
-                "display_name": "Result",
-                "method": "build_output",
-                "value": "__UNDEFINED__",
-                "cache": true,
-                "allows_loop": false,
-                "group_outputs": false,
-                "tool_mode": true
+                "value": "__UNDEFINED__"
               }
             ],
             "pinned": false,
             "template": {
               "_type": "Component",
               "code": {
-                "type": "code",
-                "required": true,
-                "placeholder": "",
-                "list": false,
-                "show": true,
-                "multiline": true,
-                "value": "\"\"\"Data operation result boundary component: validation and serialization.\n\nSplit from the former data_operation_boundary.py (which held both the request\nand result boundary components) because LangFlow's directory-based custom\ncomponent loader registers exactly one component per file, named after the\nfile -- a second class in the same file is silently dropped from the sidebar\npalette. See data_operation_request_boundary.py for the paired component.\n\nRuns as the terminal node (last step before flow output). Failure\nclassification for retry decisioning is handled by a separate\nFailureClassifierComponent that runs on the Agent's raw output BEFORE this\ncomponent -- retries themselves now happen inside the Agent's own execution\n(ModelRetryMiddleware/ToolRetryMiddleware), not via a flow-level loop, so\nthis component's only job is validating the final result exactly once.\n\"\"\"\n\nimport json\nfrom typing import Any\nfrom uuid import UUID\n\nfrom lfx.custom.custom_component.component import Component\nfrom lfx.inputs.inputs import HandleInput\nfrom lfx.schema.data import JSON\nfrom lfx.schema.message import Message\nfrom lfx.template.field.base import Output\nfrom pydantic import ValidationError\n\nfrom hulubul.core.models.operational import (\n    DataOperationOutcome,\n    DataOperationResult,\n    ErrorCode,\n    OperationalError,\n    extract_json_object_text,\n    validate_data_operation_request,\n)\nfrom hulubul.core.models.operational.errors import ERROR_POLICY\nfrom hulubul.request_intake.services.data_operation_policy import validate_result_postconditions\n\n__all__ = [\"DataOperationResultBoundaryComponent\"]\n\n\nclass DataOperationResultBoundaryComponent(Component):\n    \"\"\"Validate and serialize operation results.\n\n    Verifies result postconditions:\n    - Request/result operation match\n    - Affected count matches expectations (write operations)\n    - Timestamps and status consistency (as defined by operation type)\n    - Correlation/operation ID coherence\n\n    Returns JSON with typed result or error (INVALID_CONTRACT or other).\n    \"\"\"\n\n    display_name = \"Data Operation Result Boundary\"\n    description = \"Validate and serialize DataOperationResult payloads (terminal node).\"\n    icon = \"shield-check\"\n    name = \"HulubulDataOperationResultBoundary\"\n\n    inputs = [  # noqa: RUF012\n        HandleInput(  # type: ignore[call-arg]\n            name=\"raw_value\",\n            display_name=\"Raw Result\",\n            info=\"Raw result from the Agent's output (Message text, or Data/JSON).\",\n            input_types=[\"Message\", \"Data\", \"JSON\"],\n            required=True,\n        ),\n        HandleInput(  # type: ignore[call-arg]\n            name=\"request_dict\",\n            display_name=\"Original Request\",\n            info=\"The original validated DataOperationRequest (Message text, or Data/JSON).\",\n            input_types=[\"Message\", \"Data\", \"JSON\"],\n            required=True,\n        ),\n    ]\n\n    outputs = [  # noqa: RUF012\n        Output(  # type: ignore[call-arg]\n            display_name=\"Result\", name=\"response\", type_=JSON, method=\"build_output\"\n        ),\n    ]\n\n    @classmethod\n    def _as_dict(cls, value: Any) -> dict[str, Any]:\n        \"\"\"Coerce an incoming Message/Data/JSON edge value into a plain dict.\n\n        The Agent's final text is LLM-generated and not guaranteed to be valid\n        JSON (e.g. it may explain a failure in prose instead of emitting the\n        DataOperationResult contract). Treat undecodable text as an empty dict\n        rather than raising, so it is validated normally and rejected as\n        INVALID_CONTRACT downstream instead of crashing the component build.\n        \"\"\"\n        if isinstance(value, Message):\n            text = value.text\n            if not isinstance(text, str):\n                return {}\n            try:\n                decoded = json.loads(extract_json_object_text(text))\n            except json.JSONDecodeError:\n                return {}\n            return decoded if isinstance(decoded, dict) else {}\n        if hasattr(value, \"data\"):\n            return dict(value.data)\n        return dict(value) if value else {}\n\n    def build_output(self) -> JSON:\n        \"\"\"LFX-facing output: validate self.raw_value against self.request_dict.\"\"\"\n        raw_value = self._as_dict(self.raw_value)\n        request_dict = self._as_dict(self.request_dict)\n        return self.validate_result_value(raw_value, request_dict)\n\n    def validate_result_value(\n        self, raw_value: dict[str, Any], request_dict: dict[str, Any]\n    ) -> JSON:\n        \"\"\"Validate result, return typed output or error.\n\n        Args:\n            raw_value: Raw result dict from MCP operation\n            request_dict: Original request dict\n\n        Returns:\n            JSON: Validated DataOperationResult or OperationalError with INVALID_CONTRACT\n                  or other error code\n        \"\"\"\n        # Extract correlation_id from request for error responses (string format)\n        correlation_id_str = request_dict.get(\"correlation_id\", \"\")\n\n        # Deserialize request first\n        try:\n            request = validate_data_operation_request(request_dict)\n        except ValidationError:\n            # `request_dict` isn't a valid DataOperationRequest -- expected when\n            # the request was rejected before ever reaching the Agent (e.g. by\n            # DataOperationRequestBoundary's authorization/contract check), so\n            # `request_dict` here is that rejection's own OperationalError, not\n            # the original request. If `raw_value` is nonetheless a complete,\n            # self-consistent, non-CONFIRMED DataOperationResult -- built\n            # deterministically by the Agent's own reject-short-circuit path,\n            # not claimed by an LLM -- trust it directly. Postcondition\n            # cross-checks against the original request only matter when an\n            # Agent is claiming a result, and CONFIRMED (success) outcomes\n            # always require a resolvable original request for the\n            # affected-count/operation-match checks, so both still fall\n            # through to INVALID_CONTRACT below.\n            try:\n                bypass_result = DataOperationResult.model_validate(raw_value)\n            except ValidationError:\n                bypass_result = None\n            if (\n                bypass_result is not None\n                and bypass_result.outcome != DataOperationOutcome.CONFIRMED\n            ):\n                return JSON(data=bypass_result.model_dump(mode=\"json\"))\n            return self._make_error_response(\n                code=ErrorCode.INVALID_CONTRACT,\n                correlation_id_str=correlation_id_str,\n            )\n\n        # Update correlation_id from valid request (it's a string in DataOperationRequest)\n        correlation_id_str = request.correlation_id\n\n        # First validate result contract\n        try:\n            result = DataOperationResult.model_validate(raw_value)\n        except ValidationError:\n            # Result contract validation failed. `_repair_failed` (set by\n            # HulubulDataAccessAgentComponent's tool-less repair pass, DEC-016)\n            # distinguishes \"the Agent already tried once to reformat this and\n            # still couldn't\" (MALFORMED_AGENT_RESULT) from \"never attempted\"\n            # (INVALID_CONTRACT, e.g. getRequestRoutingContext's own shape,\n            # which never goes through result-shape repair).\n            code = (\n                ErrorCode.MALFORMED_AGENT_RESULT\n                if raw_value.get(\"_repair_failed\")\n                else ErrorCode.INVALID_CONTRACT\n            )\n            return self._make_error_response(\n                code=code,\n                correlation_id_str=correlation_id_str,\n            )\n\n        # Validate postconditions\n        postcond_error = validate_result_postconditions(request, result)\n        if postcond_error is not None:\n            # Create new error with correct correlation_id (model is frozen)\n            return self._make_error_response(\n                code=postcond_error.code,\n                correlation_id_str=correlation_id_str,\n            )\n\n        # Success: return typed JSON with result\n        return JSON(data=result.model_dump(mode=\"json\"))\n\n    def _make_error_response(\n        self,\n        code: ErrorCode,\n        correlation_id_str: str,\n    ) -> JSON:\n        \"\"\"Create error response with correlation_id.\n\n        Args:\n            code: The ErrorCode\n            correlation_id_str: The correlation_id string\n\n        Returns:\n            JSON: Serialized OperationalError\n        \"\"\"\n        from uuid import uuid4\n\n        # Try to parse correlation_id_str as UUID, otherwise generate new one\n        try:\n            correlation_id = UUID(correlation_id_str) if correlation_id_str else uuid4()\n        except (ValueError, TypeError):\n            correlation_id = uuid4()\n\n        policy = ERROR_POLICY[code]\n        error = OperationalError(\n            schema_version=\"1.0.0\",\n            code=code,\n            correlation_id=correlation_id,\n            category=policy.category,\n            message=policy.safe_message,\n            retryable=policy.retryable,\n        )\n\n        return JSON(data=error.model_dump(mode=\"json\"))\n",
-                "fileTypes": [],
-                "file_path": "",
-                "password": false,
-                "name": "code",
                 "advanced": true,
                 "dynamic": true,
+                "fileTypes": [],
+                "file_path": "",
                 "info": "",
+                "list": false,
                 "load_from_db": false,
-                "title_case": false
+                "multiline": true,
+                "name": "code",
+                "password": false,
+                "placeholder": "",
+                "required": true,
+                "show": true,
+                "title_case": false,
+                "type": "code",
+                "value": "\"\"\"Data operation result boundary component: validation and serialization.\n\nSplit from the former data_operation_boundary.py (which held both the request\nand result boundary components) because LangFlow's directory-based custom\ncomponent loader registers exactly one component per file, named after the\nfile -- a second class in the same file is silently dropped from the sidebar\npalette. See data_operation_request_boundary.py for the paired component.\n\nRuns as the terminal node (last step before flow output). Failure\nclassification for retry decisioning is handled by a separate\nFailureClassifierComponent that runs on the Agent's raw output BEFORE this\ncomponent -- retries themselves now happen inside the Agent's own execution\n(ModelRetryMiddleware/ToolRetryMiddleware), not via a flow-level loop, so\nthis component's only job is validating the final result exactly once.\n\"\"\"\n\nimport json\nfrom typing import Any\nfrom uuid import UUID\n\nfrom lfx.custom.custom_component.component import Component\nfrom lfx.inputs.inputs import HandleInput\nfrom lfx.schema.data import JSON\nfrom lfx.schema.message import Message\nfrom lfx.template.field.base import Output\nfrom pydantic import ValidationError\n\nfrom hulubul.core.models.operational import (\n    DataOperationOutcome,\n    DataOperationResult,\n    ErrorCode,\n    OperationalError,\n    extract_json_object_text,\n    validate_data_operation_request,\n)\nfrom hulubul.core.models.operational.errors import ERROR_POLICY\nfrom hulubul.request_intake.services.data_operation_policy import validate_result_postconditions\n\n__all__ = [\"DataOperationResultBoundaryComponent\"]\n\n\nclass DataOperationResultBoundaryComponent(Component):\n    \"\"\"Validate and serialize operation results.\n\n    Verifies result postconditions:\n    - Request/result operation match\n    - Affected count matches expectations (write operations)\n    - Timestamps and status consistency (as defined by operation type)\n    - Correlation/operation ID coherence\n\n    Returns JSON with typed result or error (INVALID_CONTRACT or other).\n    \"\"\"\n\n    display_name = \"Data Operation Result Boundary\"\n    description = \"Validate and serialize DataOperationResult payloads (terminal node).\"\n    icon = \"shield-check\"\n    name = \"HulubulDataOperationResultBoundary\"\n\n    inputs = [  # noqa: RUF012\n        HandleInput(  # type: ignore[call-arg]\n            name=\"raw_value\",\n            display_name=\"Raw Result\",\n            info=\"Raw result from the Agent's output (Message text, or Data/JSON).\",\n            input_types=[\"Message\", \"Data\", \"JSON\"],\n            required=True,\n        ),\n        HandleInput(  # type: ignore[call-arg]\n            name=\"request_dict\",\n            display_name=\"Original Request\",\n            info=\"The original validated DataOperationRequest (Message text, or Data/JSON).\",\n            input_types=[\"Message\", \"Data\", \"JSON\"],\n            required=True,\n        ),\n    ]\n\n    outputs = [  # noqa: RUF012\n        Output(  # type: ignore[call-arg]\n            display_name=\"Result\", name=\"response\", type_=JSON, method=\"build_output\"\n        ),\n    ]\n\n    @classmethod\n    def _as_dict(cls, value: Any) -> dict[str, Any]:\n        \"\"\"Coerce an incoming Message/Data/JSON edge value into a plain dict.\n\n        The Agent's final text is LLM-generated and not guaranteed to be valid\n        JSON (e.g. it may explain a failure in prose instead of emitting the\n        DataOperationResult contract). Treat undecodable text as an empty dict\n        rather than raising, so it is validated normally and rejected as\n        INVALID_CONTRACT downstream instead of crashing the component build.\n        \"\"\"\n        if isinstance(value, Message):\n            text = value.text\n            if not isinstance(text, str):\n                return {}\n            try:\n                decoded = json.loads(extract_json_object_text(text))\n            except json.JSONDecodeError:\n                return {}\n            return decoded if isinstance(decoded, dict) else {}\n        if hasattr(value, \"data\"):\n            return dict(value.data)\n        return dict(value) if value else {}\n\n    def build_output(self) -> JSON:\n        \"\"\"LFX-facing output: validate self.raw_value against self.request_dict.\"\"\"\n        raw_value = self._as_dict(self.raw_value)\n        request_dict = self._as_dict(self.request_dict)\n        return self.validate_result_value(raw_value, request_dict)\n\n    def validate_result_value(\n        self, raw_value: dict[str, Any], request_dict: dict[str, Any]\n    ) -> JSON:\n        \"\"\"Validate result, return typed output or error.\n\n        Args:\n            raw_value: Raw result dict from MCP operation\n            request_dict: Original request dict\n\n        Returns:\n            JSON: Validated DataOperationResult or OperationalError with INVALID_CONTRACT\n                  or other error code\n        \"\"\"\n        # Extract correlation_id from request for error responses (string format)\n        correlation_id_str = request_dict.get(\"correlation_id\", \"\")\n\n        # Deserialize request first\n        try:\n            request = validate_data_operation_request(request_dict)\n        except ValidationError:\n            # `request_dict` isn't a valid DataOperationRequest -- expected when\n            # the request was rejected before ever reaching the Agent (e.g. by\n            # DataOperationRequestBoundary's authorization/contract check), so\n            # `request_dict` here is that rejection's own OperationalError, not\n            # the original request. If `raw_value` is nonetheless a complete,\n            # self-consistent, non-CONFIRMED DataOperationResult -- built\n            # deterministically by the Agent's own reject-short-circuit path,\n            # not claimed by an LLM -- trust it directly. Postcondition\n            # cross-checks against the original request only matter when an\n            # Agent is claiming a result, and CONFIRMED (success) outcomes\n            # always require a resolvable original request for the\n            # affected-count/operation-match checks, so both still fall\n            # through to INVALID_CONTRACT below.\n            try:\n                bypass_result = DataOperationResult.model_validate(raw_value)\n            except ValidationError:\n                bypass_result = None\n            if (\n                bypass_result is not None\n                and bypass_result.outcome != DataOperationOutcome.CONFIRMED\n            ):\n                return JSON(data=bypass_result.model_dump(mode=\"json\"))\n            return self._make_error_response(\n                code=ErrorCode.INVALID_CONTRACT,\n                correlation_id_str=correlation_id_str,\n            )\n\n        # Update correlation_id from valid request (it's a string in DataOperationRequest)\n        correlation_id_str = request.correlation_id\n\n        # First validate result contract\n        try:\n            result = DataOperationResult.model_validate(raw_value)\n        except ValidationError:\n            # Result contract validation failed. `_repair_failed` (set by\n            # HulubulDataAccessAgentComponent's tool-less repair pass, DEC-016)\n            # distinguishes \"the Agent already tried once to reformat this and\n            # still couldn't\" (MALFORMED_AGENT_RESULT) from \"never attempted\"\n            # (INVALID_CONTRACT, e.g. getRequestRoutingContext's own shape,\n            # which never goes through result-shape repair).\n            code = (\n                ErrorCode.MALFORMED_AGENT_RESULT\n                if raw_value.get(\"_repair_failed\")\n                else ErrorCode.INVALID_CONTRACT\n            )\n            return self._make_error_response(\n                code=code,\n                correlation_id_str=correlation_id_str,\n            )\n\n        # Validate postconditions\n        postcond_error = validate_result_postconditions(request, result)\n        if postcond_error is not None:\n            # Create new error with correct correlation_id (model is frozen)\n            return self._make_error_response(\n                code=postcond_error.code,\n                correlation_id_str=correlation_id_str,\n            )\n\n        # Success: return typed JSON with result\n        return JSON(data=result.model_dump(mode=\"json\"))\n\n    def _make_error_response(\n        self,\n        code: ErrorCode,\n        correlation_id_str: str,\n    ) -> JSON:\n        \"\"\"Create error response with correlation_id.\n\n        Args:\n            code: The ErrorCode\n            correlation_id_str: The correlation_id string\n\n        Returns:\n            JSON: Serialized OperationalError\n        \"\"\"\n        from uuid import uuid4\n\n        # Try to parse correlation_id_str as UUID, otherwise generate new one\n        try:\n            correlation_id = UUID(correlation_id_str) if correlation_id_str else uuid4()\n        except (ValueError, TypeError):\n            correlation_id = uuid4()\n\n        policy = ERROR_POLICY[code]\n        error = OperationalError(\n            schema_version=\"1.0.0\",\n            code=code,\n            correlation_id=correlation_id,\n            category=policy.category,\n            message=policy.safe_message,\n            retryable=policy.retryable,\n        )\n\n        return JSON(data=error.model_dump(mode=\"json\"))\n"
               },
               "raw_value": {
                 "_input_type": "HandleInput",
@@ -1550,8 +1551,7 @@
                 "value": ""
               }
             },
-            "tool_mode": false,
-            "is_output": true
+            "tool_mode": false
           },
           "showNode": true,
           "type": "HulubulDataOperationResultBoundary"
@@ -1570,126 +1570,29 @@
         "type": "genericNode"
       },
       {
-        "id": "HulubulRoutingContextAdapter-hlb-lf-70-routing-v1",
-        "type": "genericNode",
-        "position": {
-          "x": 1010.0770456940947,
-          "y": 0
-        },
         "data": {
           "id": "HulubulRoutingContextAdapter-hlb-lf-70-routing-v1",
-          "type": "HulubulRoutingContextAdapter",
           "node": {
-            "template": {
-              "_type": "Component",
-              "raw_value": {
-                "trace_as_metadata": true,
-                "list": false,
-                "list_add_label": "Add More",
-                "override_skip": false,
-                "required": true,
-                "placeholder": "",
-                "show": true,
-                "name": "raw_value",
-                "value": "",
-                "display_name": "Raw Agent Result",
-                "advanced": false,
-                "input_types": [
-                  "Message",
-                  "Data",
-                  "JSON"
-                ],
-                "dynamic": false,
-                "info": "Raw result from the Agent's output (Message text, or Data/JSON).",
-                "title_case": false,
-                "track_in_telemetry": false,
-                "type": "other",
-                "_input_type": "HandleInput"
-              },
-              "request_dict": {
-                "trace_as_metadata": true,
-                "list": false,
-                "list_add_label": "Add More",
-                "override_skip": false,
-                "required": true,
-                "placeholder": "",
-                "show": true,
-                "name": "request_dict",
-                "value": "",
-                "display_name": "Original Request",
-                "advanced": false,
-                "input_types": [
-                  "Message",
-                  "Data",
-                  "JSON"
-                ],
-                "dynamic": false,
-                "info": "The original validated DataOperationRequest (Message text, or Data/JSON).",
-                "title_case": false,
-                "track_in_telemetry": false,
-                "type": "other",
-                "_input_type": "HandleInput"
-              },
-              "code": {
-                "type": "code",
-                "required": true,
-                "placeholder": "",
-                "list": false,
-                "show": true,
-                "multiline": true,
-                "value": "\"\"\"Routing context adapter: deterministic RoutingLookupRecord -> RoutingContext.\n\nSits between the Data Access Agent and the Result Boundary. Per design.md\n(\"LF-70 does not instantiate RoutingContext directly from a Neo4j row\"), the\nAgent's job for getRequestRoutingContext is only to run one fixed Cypher query\nand return the raw binding/relationship/target cardinality counts plus request\nrows -- it must not classify binding state, routing stage, or status itself.\nadapt_routing_lookup() applies that closed-precedence classification\ndeterministically and is independently unit-tested; leaving it to the LLM was\nthe root cause of a live recursion-limit crash (the model had no schema\ngrounding to work from and burned all iterations on blind exploration).\n\nFor every other operation this component passes the Agent's raw output\nthrough unchanged.\n\"\"\"\n\nimport json\nfrom typing import Any\nfrom uuid import NAMESPACE_URL, UUID, uuid5\n\nfrom lfx.custom.custom_component.component import Component\nfrom lfx.inputs.inputs import HandleInput\nfrom lfx.schema.message import Message\nfrom lfx.template.field.base import Output\nfrom pydantic import ValidationError\n\nfrom hulubul.core.models.operational import (\n    DataOperation,\n    DataOperationOutcome,\n    DataOperationResult,\n    ErrorCode,\n    extract_json_object_text,\n)\nfrom hulubul.core.models.operational.routing import RoutingLookupRecord, adapt_routing_lookup\n\n__all__ = [\"RoutingContextAdapterComponent\"]\n\n\nclass RoutingContextAdapterComponent(Component):\n    \"\"\"Deterministically adapt raw routing-lookup rows for getRequestRoutingContext.\n\n    Passes every other operation's raw_value through unchanged.\n    \"\"\"\n\n    display_name = \"Routing Context Adapter\"\n    description = (\n        \"Applies adapt_routing_lookup's closed-precedence classification to \"\n        \"getRequestRoutingContext results; passes other operations through unchanged.\"\n    )\n    icon = \"route\"\n    name = \"HulubulRoutingContextAdapter\"\n\n    inputs = [  # noqa: RUF012\n        HandleInput(  # type: ignore[call-arg]\n            name=\"raw_value\",\n            display_name=\"Raw Agent Result\",\n            info=\"Raw result from the Agent's output (Message text, or Data/JSON).\",\n            input_types=[\"Message\", \"Data\", \"JSON\"],\n            required=True,\n        ),\n        HandleInput(  # type: ignore[call-arg]\n            name=\"request_dict\",\n            display_name=\"Original Request\",\n            info=\"The original validated DataOperationRequest (Message text, or Data/JSON).\",\n            input_types=[\"Message\", \"Data\", \"JSON\"],\n            required=True,\n        ),\n    ]\n\n    outputs = [  # noqa: RUF012\n        Output(  # type: ignore[call-arg]\n            display_name=\"Message\", name=\"response\", type_=Message, method=\"build_output\"\n        ),\n    ]\n\n    @classmethod\n    def _as_dict(cls, value: Any) -> dict[str, Any]:\n        \"\"\"Coerce an incoming Message/str/Data/JSON edge value into a plain dict.\"\"\"\n        if isinstance(value, Message):\n            value = value.text\n        if isinstance(value, str):\n            if not value:\n                return {}\n            try:\n                decoded = json.loads(extract_json_object_text(value))\n            except json.JSONDecodeError:\n                return {}\n            return decoded if isinstance(decoded, dict) else {}\n        if hasattr(value, \"data\"):\n            return dict(value.data)\n        return dict(value) if value else {}\n\n    def build_output(self) -> Message:\n        request_dict = self._as_dict(self.request_dict)\n\n        if request_dict.get(\"operation\") != DataOperation.GET_REQUEST_ROUTING_CONTEXT.value:\n            # Not our operation: forward the Agent's raw output unchanged.\n            if isinstance(self.raw_value, Message):\n                return self.raw_value\n            return Message(text=json.dumps(self._as_dict(self.raw_value)))\n\n        raw_value = self._as_dict(self.raw_value)\n        schema_version = request_dict.get(\"schema_version\", \"1.0.0\")\n        correlation_id = self._coerce_correlation_id(request_dict.get(\"correlation_id\", \"\"))\n\n        try:\n            record = RoutingLookupRecord.model_validate(raw_value)\n        except ValidationError:\n            return self._rejected(\n                DataOperation.GET_REQUEST_ROUTING_CONTEXT, ErrorCode.MALFORMED_AGENT_RESULT\n            )\n\n        context = adapt_routing_lookup(\n            record,\n            schema_version=schema_version,\n            correlation_id=correlation_id,\n            session_id=request_dict.get(\"session_id\", \"\"),\n        )\n\n        if context.error is not None:\n            return self._rejected(DataOperation.GET_REQUEST_ROUTING_CONTEXT, context.error.code)\n\n        result = DataOperationResult(\n            operation=DataOperation.GET_REQUEST_ROUTING_CONTEXT,\n            outcome=DataOperationOutcome.CONFIRMED,\n            success=True,\n            write_dispatched=False,\n            result=context.model_dump(mode=\"json\"),\n        )\n        return Message(text=result.model_dump_json())\n\n    @staticmethod\n    def _coerce_correlation_id(correlation_id_str: str) -> UUID:\n        \"\"\"Bridge DataOperationRequest.correlation_id (a plain str, any format)\n        to RoutingContext's stricter VersionedContract.correlation_id (a real\n        UUID). When the caller's value isn't UUID-formatted, derive a\n        deterministic UUID5 surrogate (the same input string always maps to\n        the same UUID) rather than rejecting an otherwise-legitimate\n        operation over a traceability ID's format.\n\n        Confirmed live: a plain \"corr-no-binding-001\" -- a perfectly valid\n        DataOperationRequest.correlation_id -- caused every\n        getRequestRoutingContext call to be rejected as MALFORMED_AGENT_RESULT,\n        mislabeling a client-supplied value as a bad Agent result.\n        \"\"\"\n        try:\n            return UUID(correlation_id_str)\n        except (ValueError, TypeError, AttributeError):\n            return uuid5(NAMESPACE_URL, f\"hulubul:correlation_id:{correlation_id_str}\")\n\n    @staticmethod\n    def _rejected(operation: DataOperation, error_code: ErrorCode) -> Message:\n        result = DataOperationResult(\n            operation=operation,\n            outcome=DataOperationOutcome.REJECTED,\n            success=False,\n            error_code=error_code.value,\n        )\n        return Message(text=result.model_dump_json())\n",
-                "fileTypes": [],
-                "file_path": "",
-                "password": false,
-                "name": "code",
-                "advanced": true,
-                "dynamic": true,
-                "info": "",
-                "load_from_db": false,
-                "title_case": false
-              }
-            },
-            "description": "Applies adapt_routing_lookup's closed-precedence classification to getRequestRoutingContext results; passes other operations through unchanged.",
-            "icon": "route",
             "base_classes": [
               "Message"
             ],
+            "beta": false,
+            "conditional_paths": [],
+            "custom_fields": {},
+            "description": "Applies adapt_routing_lookup's closed-precedence classification to getRequestRoutingContext results; passes other operations through unchanged.",
             "display_name": "Routing Context Adapter",
             "documentation": "",
-            "minimized": false,
-            "custom_fields": {},
-            "output_types": [],
-            "pinned": false,
-            "conditional_paths": [],
-            "frozen": false,
-            "outputs": [
-              {
-                "types": [
-                  "Message"
-                ],
-                "selected": "Message",
-                "name": "response",
-                "display_name": "Message",
-                "method": "build_output",
-                "value": "__UNDEFINED__",
-                "cache": true,
-                "allows_loop": false,
-                "group_outputs": false,
-                "tool_mode": true
-              }
-            ],
+            "edited": false,
             "field_order": [
               "raw_value",
               "request_dict"
             ],
-            "beta": false,
+            "frozen": false,
+            "icon": "route",
             "legacy": false,
-            "edited": false,
             "metadata": {
-              "module": "custom_components.routing_context_adapter",
               "code_hash": "57406ac42906",
               "dependencies": {
-                "total_dependencies": 3,
                 "dependencies": [
                   {
                     "name": "lfx",
@@ -1703,12 +1606,109 @@
                     "name": "hulubul",
                     "version": null
                   }
-                ]
+                ],
+                "total_dependencies": 3
+              },
+              "module": "custom_components.routing_context_adapter"
+            },
+            "minimized": false,
+            "output_types": [],
+            "outputs": [
+              {
+                "allows_loop": false,
+                "cache": true,
+                "display_name": "Message",
+                "group_outputs": false,
+                "method": "build_output",
+                "name": "response",
+                "selected": "Message",
+                "tool_mode": true,
+                "types": [
+                  "Message"
+                ],
+                "value": "__UNDEFINED__"
+              }
+            ],
+            "pinned": false,
+            "template": {
+              "_type": "Component",
+              "code": {
+                "advanced": true,
+                "dynamic": true,
+                "fileTypes": [],
+                "file_path": "",
+                "info": "",
+                "list": false,
+                "load_from_db": false,
+                "multiline": true,
+                "name": "code",
+                "password": false,
+                "placeholder": "",
+                "required": true,
+                "show": true,
+                "title_case": false,
+                "type": "code",
+                "value": "\"\"\"Routing context adapter: deterministic RoutingLookupRecord -> RoutingContext.\n\nSits between the Data Access Agent and the Result Boundary. Per design.md\n(\"LF-70 does not instantiate RoutingContext directly from a Neo4j row\"), the\nAgent's job for getRequestRoutingContext is only to run one fixed Cypher query\nand return the raw binding/relationship/target cardinality counts plus request\nrows -- it must not classify binding state, routing stage, or status itself.\nadapt_routing_lookup() applies that closed-precedence classification\ndeterministically and is independently unit-tested; leaving it to the LLM was\nthe root cause of a live recursion-limit crash (the model had no schema\ngrounding to work from and burned all iterations on blind exploration).\n\nFor every other operation this component passes the Agent's raw output\nthrough unchanged.\n\"\"\"\n\nimport json\nfrom typing import Any\nfrom uuid import NAMESPACE_URL, UUID, uuid5\n\nfrom lfx.custom.custom_component.component import Component\nfrom lfx.inputs.inputs import HandleInput\nfrom lfx.schema.message import Message\nfrom lfx.template.field.base import Output\nfrom pydantic import ValidationError\n\nfrom hulubul.core.models.operational import (\n    DataOperation,\n    DataOperationOutcome,\n    DataOperationResult,\n    ErrorCode,\n    extract_json_object_text,\n)\nfrom hulubul.core.models.operational.routing import RoutingLookupRecord, adapt_routing_lookup\n\n__all__ = [\"RoutingContextAdapterComponent\"]\n\n\nclass RoutingContextAdapterComponent(Component):\n    \"\"\"Deterministically adapt raw routing-lookup rows for getRequestRoutingContext.\n\n    Passes every other operation's raw_value through unchanged.\n    \"\"\"\n\n    display_name = \"Routing Context Adapter\"\n    description = (\n        \"Applies adapt_routing_lookup's closed-precedence classification to \"\n        \"getRequestRoutingContext results; passes other operations through unchanged.\"\n    )\n    icon = \"route\"\n    name = \"HulubulRoutingContextAdapter\"\n\n    inputs = [  # noqa: RUF012\n        HandleInput(  # type: ignore[call-arg]\n            name=\"raw_value\",\n            display_name=\"Raw Agent Result\",\n            info=\"Raw result from the Agent's output (Message text, or Data/JSON).\",\n            input_types=[\"Message\", \"Data\", \"JSON\"],\n            required=True,\n        ),\n        HandleInput(  # type: ignore[call-arg]\n            name=\"request_dict\",\n            display_name=\"Original Request\",\n            info=\"The original validated DataOperationRequest (Message text, or Data/JSON).\",\n            input_types=[\"Message\", \"Data\", \"JSON\"],\n            required=True,\n        ),\n    ]\n\n    outputs = [  # noqa: RUF012\n        Output(  # type: ignore[call-arg]\n            display_name=\"Message\", name=\"response\", type_=Message, method=\"build_output\"\n        ),\n    ]\n\n    @classmethod\n    def _as_dict(cls, value: Any) -> dict[str, Any]:\n        \"\"\"Coerce an incoming Message/str/Data/JSON edge value into a plain dict.\"\"\"\n        if isinstance(value, Message):\n            value = value.text\n        if isinstance(value, str):\n            if not value:\n                return {}\n            try:\n                decoded = json.loads(extract_json_object_text(value))\n            except json.JSONDecodeError:\n                return {}\n            return decoded if isinstance(decoded, dict) else {}\n        if hasattr(value, \"data\"):\n            return dict(value.data)\n        return dict(value) if value else {}\n\n    def build_output(self) -> Message:\n        request_dict = self._as_dict(self.request_dict)\n\n        if request_dict.get(\"operation\") != DataOperation.GET_REQUEST_ROUTING_CONTEXT.value:\n            # Not our operation: forward the Agent's raw output unchanged.\n            if isinstance(self.raw_value, Message):\n                return self.raw_value\n            return Message(text=json.dumps(self._as_dict(self.raw_value)))\n\n        raw_value = self._as_dict(self.raw_value)\n        schema_version = request_dict.get(\"schema_version\", \"1.0.0\")\n        correlation_id = self._coerce_correlation_id(request_dict.get(\"correlation_id\", \"\"))\n\n        try:\n            record = RoutingLookupRecord.model_validate(raw_value)\n        except ValidationError:\n            return self._rejected(\n                DataOperation.GET_REQUEST_ROUTING_CONTEXT, ErrorCode.MALFORMED_AGENT_RESULT\n            )\n\n        context = adapt_routing_lookup(\n            record,\n            schema_version=schema_version,\n            correlation_id=correlation_id,\n            session_id=request_dict.get(\"session_id\", \"\"),\n        )\n\n        if context.error is not None:\n            return self._rejected(DataOperation.GET_REQUEST_ROUTING_CONTEXT, context.error.code)\n\n        result = DataOperationResult(\n            operation=DataOperation.GET_REQUEST_ROUTING_CONTEXT,\n            outcome=DataOperationOutcome.CONFIRMED,\n            success=True,\n            write_dispatched=False,\n            result=context.model_dump(mode=\"json\"),\n        )\n        return Message(text=result.model_dump_json())\n\n    @staticmethod\n    def _coerce_correlation_id(correlation_id_str: str) -> UUID:\n        \"\"\"Bridge DataOperationRequest.correlation_id (a plain str, any format)\n        to RoutingContext's stricter VersionedContract.correlation_id (a real\n        UUID). When the caller's value isn't UUID-formatted, derive a\n        deterministic UUID5 surrogate (the same input string always maps to\n        the same UUID) rather than rejecting an otherwise-legitimate\n        operation over a traceability ID's format.\n\n        Confirmed live: a plain \"corr-no-binding-001\" -- a perfectly valid\n        DataOperationRequest.correlation_id -- caused every\n        getRequestRoutingContext call to be rejected as MALFORMED_AGENT_RESULT,\n        mislabeling a client-supplied value as a bad Agent result.\n        \"\"\"\n        try:\n            return UUID(correlation_id_str)\n        except (ValueError, TypeError, AttributeError):\n            return uuid5(NAMESPACE_URL, f\"hulubul:correlation_id:{correlation_id_str}\")\n\n    @staticmethod\n    def _rejected(operation: DataOperation, error_code: ErrorCode) -> Message:\n        result = DataOperationResult(\n            operation=operation,\n            outcome=DataOperationOutcome.REJECTED,\n            success=False,\n            error_code=error_code.value,\n        )\n        return Message(text=result.model_dump_json())\n"
+              },
+              "raw_value": {
+                "_input_type": "HandleInput",
+                "advanced": false,
+                "display_name": "Raw Agent Result",
+                "dynamic": false,
+                "info": "Raw result from the Agent's output (Message text, or Data/JSON).",
+                "input_types": [
+                  "Message",
+                  "Data",
+                  "JSON"
+                ],
+                "list": false,
+                "list_add_label": "Add More",
+                "name": "raw_value",
+                "override_skip": false,
+                "placeholder": "",
+                "required": true,
+                "show": true,
+                "title_case": false,
+                "trace_as_metadata": true,
+                "track_in_telemetry": false,
+                "type": "other",
+                "value": ""
+              },
+              "request_dict": {
+                "_input_type": "HandleInput",
+                "advanced": false,
+                "display_name": "Original Request",
+                "dynamic": false,
+                "info": "The original validated DataOperationRequest (Message text, or Data/JSON).",
+                "input_types": [
+                  "Message",
+                  "Data",
+                  "JSON"
+                ],
+                "list": false,
+                "list_add_label": "Add More",
+                "name": "request_dict",
+                "override_skip": false,
+                "placeholder": "",
+                "required": true,
+                "show": true,
+                "title_case": false,
+                "trace_as_metadata": true,
+                "track_in_telemetry": false,
+                "type": "other",
+                "value": ""
               }
             },
             "tool_mode": false
-          }
-        }
+          },
+          "type": "HulubulRoutingContextAdapter"
+        },
+        "id": "HulubulRoutingContextAdapter-hlb-lf-70-routing-v1",
+        "position": {
+          "x": 1010.0770456940947,
+          "y": 0
+        },
+        "type": "genericNode"
       }
     ],
     "viewport": {

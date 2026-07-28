@@ -797,6 +797,20 @@ class TestRepairFailedMarker:
     reformat this and still couldn't" (MALFORMED_AGENT_RESULT) from "never
     attempted" (INVALID_CONTRACT) -- both still shape-invalid, only the
     error code differs.
+
+    This exact code path (repair attempted, still failed, boundary reports
+    MALFORMED_AGENT_RESULT) was also observed live against the real flow
+    during development -- a `createDeliveryRequest` run's client-side retry
+    log captured `"code": "MALFORMED_AGENT_RESULT"` where it would
+    previously have shown generic `INVALID_CONTRACT`. That specific
+    occurrence isn't reproducible on demand (it depends on the model
+    producing malformed output, which is inherently nondeterministic and
+    became rarer after other fixes landed the same session), so it isn't
+    attached as a log excerpt here -- the tests below are the actual
+    reproducible, deterministic proof of this mechanism's correctness. Full
+    investigation notes (not committed -- local development knowledge, see
+    the repo's git-ignore): `DEV/knowledge/checkpoint8-lf70-troubleshooting-
+    runbook.md`, bug #19.
     """
 
     def test_marked_still_invalid_result_is_malformed_agent_result(
