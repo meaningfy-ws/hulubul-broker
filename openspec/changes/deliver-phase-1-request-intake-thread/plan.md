@@ -3823,3 +3823,7 @@ Coverage arithmetic: sections contain `4 + 5 + 6 + 5 + 4 + 4 + 4 + 6 + 6 + 5 + 6
 ## Execution Handoff
 
 After developer approval of this plan, use subagent-driven development task by task. Under `AGENTS.md`, dispatch implementation to the project `implementer` agent, keep specification-conformance and code-quality reviews separate, and rerun each task's focused RED/GREEN evidence before presenting its commit proposal.
+
+## Known Issues / Follow-ups (post-implementation)
+
+- **LF-70 `updateDeliveryRequest` decision-level nondeterminism** (found during task 34/8.4 verification): a well-formed, schema-valid `DataOperationResult(outcome="rejected", success=false)` was observed for a scenario with a valid compare-and-set match that should have confirmed; a later rerun of the identical scenario succeeded cleanly. This is a distinct failure mode from the JSON parse/validation failures that `LangFlowClient.run_flow_with_actor`'s bounded retry now covers — retrying on `success: false` generically would be wrong (it would also retry genuine rejections, e.g. a real duplicate-binding conflict). Tracked as tasks.md 14.1; full investigation notes in `DEV/knowledge/checkpoint8-lf70-troubleshooting-runbook.md`, bug #17.

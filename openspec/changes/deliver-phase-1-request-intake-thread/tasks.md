@@ -103,3 +103,7 @@
 - [ ] 13.3 Keep live model and LLM-judge workflows explicitly soft/non-blocking while documenting the manual trigger, required secret names, and evidence retention
 - [ ] 13.4 Update repository and infrastructure documentation for setup, simulated Phase 1 metadata inputs, flow development, clean test execution, credential handling, troubleshooting, rollback, and the Change 1/Change 2 cut line
 - [ ] 13.5 Run the complete clean-environment gate, verify all 95 named capability scenarios and all 34 expanded Gherkin examples map to automated evidence (with internal engineering tasks mapped to pytest-only evidence), and record flow/schema/image hashes for review
+
+## 14. Known Issues / Follow-ups
+
+- [ ] 14.1 Investigate LF-70 `updateDeliveryRequest` decision-level nondeterminism: a well-formed, schema-valid `DataOperationResult(outcome="rejected", success=false)` was observed for a scenario that should have confirmed (valid compare-and-set match), with an unrelated rerun of the identical scenario then succeeding cleanly. Distinct from, and not fixed by, the parse-failure retry added to `LangFlowClient.run_flow_with_actor` (task 8.4 work). Needs a live-traced reproduction (see the reusable Agent-tracing technique) to see whether the model is mis-reading its own tool result or second-guessing a correct match, plus a product decision on whether an occasional false-rejection is tolerable for Phase 1 or needs a stronger guardrail. Full details: `DEV/knowledge/checkpoint8-lf70-troubleshooting-runbook.md`, bug #17.

@@ -188,8 +188,12 @@ class TestLF70CreateDeliveryRequest:
         assert result["status"] == "new"
 
         # CRITICAL: created_at and updated_at must be equal (same Neo4j transaction time)
-        created_at = datetime.fromisoformat(result["created_at"])
-        updated_at = datetime.fromisoformat(result["updated_at"])
+        # datetime.fromisoformat() only accepts a trailing "Z" UTC designator on
+        # Python 3.11+; this project targets 3.10, so normalize it to "+00:00"
+        # first -- confirmed live: the Agent's real (valid RFC3339) timestamp
+        # "...112000Z" raised ValueError under 3.10's stricter parser.
+        created_at = datetime.fromisoformat(result["created_at"].replace("Z", "+00:00"))
+        updated_at = datetime.fromisoformat(result["updated_at"].replace("Z", "+00:00"))
         assert created_at == updated_at, (
             f"created_at ({created_at}) must equal updated_at ({updated_at}); "
             "design requires one Neo4j transaction time for both"

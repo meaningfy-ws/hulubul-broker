@@ -58,14 +58,17 @@ class Neo4jHelper:
 
         if status is None:
             # Node exists but has no status set
-            cypher = "CREATE (r:DeliveryRequest {id: $request_id, updated_at: $updated_at})"
+            cypher = "CREATE (r:DeliveryRequest {id: $request_id, updated: $updated_at})"
             with self.driver.session() as session:
                 session.run(cypher, request_id=request_id, updated_at=updated_at)
         else:
-            # Node exists with status
+            # Node exists with status. Property names (hasStatus/updated) match the
+            # real domain schema (model/generated/neo4j/constraints.cypher) -- an
+            # earlier version of this fixture used status/updated_at, which silently
+            # never matched setRequestStatus's compare-and-set query.
             cypher = (
-                "CREATE (r:DeliveryRequest {id: $request_id, status: $status, "
-                "updated_at: $updated_at})"
+                "CREATE (r:DeliveryRequest {id: $request_id, hasStatus: $status, "
+                "updated: $updated_at})"
             )
             with self.driver.session() as session:
                 session.run(
@@ -83,7 +86,7 @@ class Neo4jHelper:
         """
         cypher = (
             "MATCH (r:DeliveryRequest {id: $request_id}) "
-            "RETURN r.status as status, r.updated_at as updated_at"
+            "RETURN r.hasStatus as status, r.updated as updated_at"
         )
         with self.driver.session() as session:
             result = session.run(cypher, request_id=request_id)

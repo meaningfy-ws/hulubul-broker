@@ -8,9 +8,13 @@ Provides a typed client for programmatic LangFlow API calls with:
 """
 
 import json
+import logging
+import time
 import uuid
 from dataclasses import dataclass
 from typing import Any, Protocol
+
+logger = logging.getLogger(__name__)
 
 try:
     import httpx
@@ -204,7 +208,12 @@ class LangFlowClient:
             return FlowReply(status_code=500, error=f"Connection error: {str(e)[:200]}")
 
     def run_flow_with_actor(
-        self, flow_uuid: str, input_data: dict[str, Any], actor_id: str = "test-actor"
+        self,
+        flow_uuid: str,
+        input_data: dict[str, Any],
+        actor_id: str = "test-actor",
+        *,
+        max_attempts: int = 2,
     ) -> FlowReply:
         """Call a flow by stable UUID with actor context headers.
 
@@ -215,6 +224,19 @@ class LangFlowClient:
             flow_uuid: Stable flow UUID (e.g., "94f6774d-ebc7-5bf1-8486-886f91886a5f")
             input_data: Input data payload (e.g., DataOperationRequest)
             actor_id: Actor identifier for context (default: "test-actor")
+            max_attempts: Retry budget (default 2, one retry) for the case
+                where the flow returns HTTP 200 but the terminal component's
+                message can't be parsed as a DataOperationResult -- observed,
+                input-independent flakiness where the same well-formed
+                request sometimes gets a clean result and sometimes an
+                OperationalError, because the model's final answer wasn't
+                valid JSON or didn't extract cleanly (checkpoint8 runbook
+                bug #17). Retrying the whole flow call is safe here (unlike
+                DEC-015's prohibited write-retry): a retry of an
+                already-succeeded write comes back REJECTED/
+                CONCURRENT_MODIFICATION via the OperationalConversationBinding
+                uniqueness constraint or the update/status compare-and-set,
+                never a silent duplicate mutation. Pass 1 to disable.
 
         Returns:
             FlowReply with status, flow_id, correlation_id, result, or error
@@ -239,37 +261,59 @@ class LangFlowClient:
             "session_id": session_id,
         }
 
-        try:
-            if httpx is None:
-                return FlowReply(
-                    status_code=500,
-                    error="httpx not installed; run: poetry install --with integration",
-                )
+        if httpx is None:
+            return FlowReply(
+                status_code=500,
+                error="httpx not installed; run: poetry install --with integration",
+            )
 
-            with httpx.Client() as client:
-                response = client.post(url, json=body, headers=headers, timeout=60.0)
+        last_reply: FlowReply | None = None
+        for attempt in range(1, max_attempts + 1):
+            try:
+                with httpx.Client() as client:
+                    # Write operations (createDeliveryRequest especially) can
+                    # legitimately take 60-120s+ end-to-end (get_neo4j_schema +
+                    # write_neo4j_cypher, each a real LLM tool-call round trip) --
+                    # confirmed live: a correct, successful create took ~120s.
+                    # 60s was cutting off genuinely-succeeding calls, not timing
+                    # out on a stuck/looping one.
+                    response = client.post(url, json=body, headers=headers, timeout=240.0)
 
-                if response.status_code == 403:
+                    if response.status_code == 403:
+                        return FlowReply(
+                            status_code=403,
+                            error="Unauthorized (missing or invalid API key)",
+                        )
+
+                    if response.status_code == 200:
+                        result = self._extract_result_message(response.json())
+                        if result is not None and "success" in result:
+                            return FlowReply(status_code=200, flow_id=flow_uuid, result=result)
+
+                        last_reply = FlowReply(status_code=200, flow_id=flow_uuid, result=result)
+                        if attempt < max_attempts:
+                            logger.warning(
+                                "run_flow_with_actor: attempt %d/%d for flow %s got an "
+                                "unparseable result, retrying in 0.5s; raw result=%r",
+                                attempt,
+                                max_attempts,
+                                flow_uuid,
+                                result,
+                            )
+                            time.sleep(0.5)
+                            continue
+                        return last_reply
+
                     return FlowReply(
-                        status_code=403,
-                        error="Unauthorized (missing or invalid API key)",
+                        status_code=response.status_code,
+                        error=f"LangFlow error: {response.text[:200]}",
                     )
+            except Exception as e:
+                error_str = str(e)
+                return FlowReply(status_code=500, error=f"Connection error: {error_str[:200]}")
 
-                if response.status_code == 200:
-                    result = response.json()
-                    return FlowReply(
-                        status_code=200,
-                        flow_id=flow_uuid,
-                        result=self._extract_result_message(result),
-                    )
-
-                return FlowReply(
-                    status_code=response.status_code,
-                    error=f"LangFlow error: {response.text[:200]}",
-                )
-        except Exception as e:
-            error_str = str(e)
-            return FlowReply(status_code=500, error=f"Connection error: {error_str[:200]}")
+        # Unreachable: the loop above always returns on its final iteration.
+        raise AssertionError("run_flow_with_actor: retry loop exited without returning")
 
     @staticmethod
     def _extract_result_message(response: dict[str, Any]) -> dict[str, Any] | None:

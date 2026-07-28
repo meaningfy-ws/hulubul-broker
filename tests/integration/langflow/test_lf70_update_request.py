@@ -56,24 +56,28 @@ def _seed_delivery_request(
         session_id = str(uuid4())
 
     now = datetime.now(timezone.utc)
-    timestamp_iso = now.isoformat()
 
+    # Pass the raw Python datetime (the neo4j driver converts it to a native
+    # Neo4j DateTime) rather than an ISO string -- createDeliveryRequest's own
+    # Cypher stores `created`/`updated` the same way, and updateDeliveryRequest's
+    # compare-and-set does `request.updated = datetime($p.expected_updated_at)`,
+    # which never matches a `updated` property that was stored as a plain string.
     cypher = """
     CREATE (r:DeliveryRequest {
         id: $request_id,
         created: $timestamp,
         updated: $timestamp,
-        status: 'new'
+        hasStatus: 'new'
     })
     RETURN r.created as created_at, r.updated as updated_at
     """
 
     with driver.session(database=NEO4J_DATABASE) as session:
-        result = session.run(cypher, request_id=request_id, timestamp=timestamp_iso)
+        result = session.run(cypher, request_id=request_id, timestamp=now)
         record = result.single()
         if record:
-            return record["created_at"], record["updated_at"]
-    return timestamp_iso, timestamp_iso
+            return record["created_at"].isoformat(), record["updated_at"].isoformat()
+    return now.isoformat(), now.isoformat()
 
 
 def _read_request_from_neo4j(driver: "Driver", request_id: str) -> dict[str, Any] | None:
@@ -170,7 +174,7 @@ class TestLF70UpdateRequest:
             # Verify Neo4j state
             updated_request = _read_request_from_neo4j(driver, request_id)
             assert updated_request is not None
-            assert updated_request["status"] == "new"
+            assert updated_request["hasStatus"] == "new"
 
             # Verify that updated_at changed
             assert result.get("updated_at") is not None
