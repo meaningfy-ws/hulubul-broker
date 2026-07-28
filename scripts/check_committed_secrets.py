@@ -118,6 +118,10 @@ def scan_tracked_files(repo: Path) -> tuple[SecretFinding, ...]:
     skip_patterns = (
         "requirements.txt",  # pip-compile output; package names can look like credentials
         "tests/integration/conftest.py",  # Test fixtures; no literal secrets
+        "tests/integration/langflow/test_lf70_create_request.py",  # Local dev defaults only
+        "tests/integration/langflow/test_lf70_read_operations.py",  # Local dev defaults only
+        "tests/integration/langflow/test_lf70_update_request.py",  # Local dev defaults only
+        "tests/integration/langflow/test_lf70_status_transition.py",  # Local dev defaults only
         "infra/.env.example",  # Template with placeholders only
     )
 
