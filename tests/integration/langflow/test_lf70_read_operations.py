@@ -164,10 +164,16 @@ class TestLF70ReadOperations:
         driver = GraphDatabase.driver(neo4j_url, auth=(neo4j_user, neo4j_password))
 
         try:
-            # Seed: Create binding and request
-            now_iso = datetime.now(timezone.utc).isoformat()
+            # Seed: Create Agent, Sender, binding and request
+            now_dt = datetime.now(timezone.utc)
             seed_query = """
-            MATCH (s:Sender {trustedId: 'default-test-sender'})
+            MERGE (a:Agent {id: $agent_id})
+            SET a.name = $agent_name,
+                a.identifier = $agent_identifier
+            WITH a
+            MERGE (s:Sender {id: $sender_id})
+            WITH s, a
+            MERGE (s)-[:PLAYED_BY]->(a)
             WITH s
             MERGE (b:OperationalConversationBinding {sessionId: $session_id})
             SET b.createdAt = $now,
@@ -181,11 +187,18 @@ class TestLF70ReadOperations:
             RETURN b.sessionId AS session_id, r.id AS request_id, r.hasStatus AS status
             """
 
+            agent_id = f"ag-test-sender-{session_id[:8]}"
+            sender_id = f"s-test-{session_id[:8]}"
+
             result = driver.execute_query(
                 seed_query,
+                agent_id=agent_id,
+                agent_name="Test Sender",
+                agent_identifier=f"test-sender-{session_id[:8]}",
+                sender_id=sender_id,
                 session_id=session_id,
                 request_id=request_id,
-                now=now_iso,
+                now=now_dt,
                 status=RequestStatus.NEW,
                 database=neo4j_database,
             )
@@ -321,7 +334,7 @@ class TestLF70ReadOperations:
 
         try:
             # Seed: Create a delivery request with only partial facts
-            now_iso = datetime.now(timezone.utc).isoformat()
+            now_dt = datetime.now(timezone.utc)
             seed_query = """
             MERGE (r:DeliveryRequest {id: $request_id})
             SET r.created = $now,
@@ -333,7 +346,7 @@ class TestLF70ReadOperations:
             result = driver.execute_query(
                 seed_query,
                 request_id=request_id,
-                now=now_iso,
+                now=now_dt,
                 status=RequestStatus.NEW,
                 database=neo4j_database,
             )

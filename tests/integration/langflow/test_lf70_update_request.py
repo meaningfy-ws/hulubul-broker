@@ -284,7 +284,7 @@ class TestLF70UpdateRequest:
                 "request_id": request_id,
                 "expected_updated_at": updated_at_t1,
                 "expected_status": RequestStatus.NEW,
-                "updates": {"field1": "value1"},
+                "updates": {"preferred_period": "morning"},
                 "identifiers": {},
             }
 
@@ -317,7 +317,7 @@ class TestLF70UpdateRequest:
                 "request_id": request_id,
                 "expected_updated_at": updated_at_t1,  # STALE timestamp
                 "expected_status": RequestStatus.NEW,
-                "updates": {"field2": "value2"},
+                "updates": {"preferred_period": "evening"},
                 "identifiers": {},
             }
 
@@ -332,12 +332,19 @@ class TestLF70UpdateRequest:
             assert result2["outcome"] in ["rejected", "ambiguous"]
             assert result2.get("error_code") == ErrorCode.CONCURRENT_MODIFICATION
 
-            # Verify Neo4j: no extra mutations occurred
+            # Verify Neo4j: no extra mutations occurred. "preferredPeriod" is
+            # the real, schema-backed DeliveryRequest property (see
+            # model/generated/neo4j/constraints.cypher) -- an earlier version
+            # of this test used made-up "field1"/"field2" keys that the
+            # update Cypher has no way to persist (additive-only updates only
+            # support preferredPeriod and the singular subgraphs), so the
+            # assertion below was checking a key that could never be set,
+            # regardless of whether the second (stale) update wrongly
+            # mutated anything.
             updated_request = _read_request_from_neo4j(driver, request_id)
             assert updated_request is not None
-            # Should still have field1 from first update, NOT field2
-            assert updated_request.get("field1") == "value1"
-            assert "field2" not in updated_request or updated_request.get("field2") is None
+            # Should still have the first update's value, not the second's.
+            assert updated_request.get("preferredPeriod") == "morning"
 
         finally:
             _cleanup_request(driver, request_id)
