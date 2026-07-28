@@ -78,7 +78,16 @@ async def run_webhook(config: GatewayConfig, bot: Bot, dispatcher: Dispatcher) -
                     "may still be starting up. Wait for it to finish establishing a tunnel "
                     "and retry."
                 )
-            public_url = tunnels[0]["public_url"]
+            public_url = next(
+                (t["public_url"] for t in tunnels if t["public_url"].startswith("https://")),
+                None,
+            )
+            if public_url is None:
+                raise RuntimeError(
+                    "None of the ngrok tunnels reported at "
+                    f"{ngrok_api_url}/api/tunnels is https:// (Telegram requires an https "
+                    f"webhook URL): {[t['public_url'] for t in tunnels]}"
+                )
         except (httpx.HTTPError, KeyError, ValueError) as exc:
             raise RuntimeError(
                 f"Could not read the ngrok tunnel list from {ngrok_api_url}/api/tunnels: "

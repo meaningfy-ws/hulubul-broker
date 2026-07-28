@@ -1,7 +1,11 @@
 # gateway-deployment-setup Specification
 
 ## Purpose
-TBD - created by archiving change build-telegram-gateway. Update Purpose after archive.
+Stand up the `channel-gateway` service in the local Docker Compose stack — configured, wired
+to an ngrok tunnel for webhook-mode testing, documented end-to-end for a working Telegram bot,
+and covered by a three-tier test suite (unit, feature, e2e) — so a developer can run and test
+the gateway locally without a real public deployment.
+
 ## Requirements
 ### Requirement: Local Docker Compose service for the gateway
 The system SHALL provide a `channel-gateway` service in `infra/docker-compose.yaml`, built

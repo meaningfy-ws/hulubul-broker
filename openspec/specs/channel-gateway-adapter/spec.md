@@ -1,7 +1,10 @@
 # channel-gateway-adapter Specification
 
 ## Purpose
-TBD - created by archiving change build-telegram-gateway. Update Purpose after archive.
+Define a channel-agnostic `ChannelPort` interface and a Telegram implementation so the gateway
+core and LangFlow-relay logic never depend on a specific channel's SDK or wire format, and
+prove the interface generalizes to a second channel via a WhatsApp stub.
+
 ## Requirements
 ### Requirement: ChannelPort interface
 The system SHALL define a `ChannelPort` interface with a `receive()` operation returning an

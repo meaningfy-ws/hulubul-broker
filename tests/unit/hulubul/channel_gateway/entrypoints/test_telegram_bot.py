@@ -205,6 +205,80 @@ async def test_run_webhook_registers_bot_webhook_with_secret_token_and_ngrok_url
 
 
 @pytest.mark.asyncio
+async def test_run_webhook_picks_the_https_tunnel_when_ngrok_reports_several(monkeypatch):
+    config = _webhook_config()
+    monkeypatch.setenv("NGROK_API_URL", "http://ngrok:4040")
+
+    fake_bot = MagicMock()
+    fake_bot.set_webhook = AsyncMock()
+    fake_dispatcher = MagicMock()
+    fake_dispatcher.resolve_used_update_types = MagicMock(return_value=["message"])
+    fake_ngrok_client = _fake_ngrok_client(
+        [
+            {"public_url": "http://abc123.ngrok.io"},
+            {"public_url": "https://abc123.ngrok.io"},
+        ]
+    )
+
+    fake_runner = MagicMock()
+    fake_runner.setup = AsyncMock()
+    fake_runner.cleanup = AsyncMock()
+    fake_site = MagicMock()
+    fake_site.start = AsyncMock()
+    fake_event = MagicMock()
+    fake_event.wait = AsyncMock()
+
+    with (
+        patch(
+            "hulubul.channel_gateway.entrypoints.telegram_bot.httpx.AsyncClient",
+            return_value=fake_ngrok_client,
+        ),
+        patch("hulubul.channel_gateway.entrypoints.telegram_bot.web.Application"),
+        patch(
+            "hulubul.channel_gateway.entrypoints.telegram_bot.web.AppRunner",
+            return_value=fake_runner,
+        ),
+        patch(
+            "hulubul.channel_gateway.entrypoints.telegram_bot.web.TCPSite",
+            return_value=fake_site,
+        ),
+        patch("hulubul.channel_gateway.entrypoints.telegram_bot.SimpleRequestHandler"),
+        patch("hulubul.channel_gateway.entrypoints.telegram_bot.setup_application"),
+        patch(
+            "hulubul.channel_gateway.entrypoints.telegram_bot.asyncio.Event",
+            return_value=fake_event,
+        ),
+    ):
+        await run_webhook(config, fake_bot, fake_dispatcher)
+
+    fake_bot.set_webhook.assert_awaited_once_with(
+        url="https://abc123.ngrok.io/webhook",
+        secret_token="s3cr3t",
+        allowed_updates=["message"],
+        drop_pending_updates=True,
+    )
+
+
+@pytest.mark.asyncio
+async def test_run_webhook_raises_a_clear_error_when_no_tunnel_is_https(monkeypatch):
+    config = _webhook_config()
+    monkeypatch.setenv("NGROK_API_URL", "http://ngrok:4040")
+
+    fake_bot = MagicMock()
+    fake_dispatcher = MagicMock()
+    fake_ngrok_client = _fake_ngrok_client([{"public_url": "http://abc123.ngrok.io"}])
+
+    with (
+        patch(
+            "hulubul.channel_gateway.entrypoints.telegram_bot.httpx.AsyncClient",
+            return_value=fake_ngrok_client,
+        ),
+        pytest.raises(RuntimeError, match="is https://"),
+    ):
+        await run_webhook(config, fake_bot, fake_dispatcher)
+
+
+@pytest.mark.asyncio
 async def test_run_webhook_raises_a_clear_error_when_ngrok_has_no_tunnels(monkeypatch):
     config = _webhook_config()
     monkeypatch.setenv("NGROK_API_URL", "http://ngrok:4040")

@@ -1,7 +1,11 @@
 # domain-model-reachability Specification
 
 ## Purpose
-TBD - created by archiving change build-telegram-gateway. Update Purpose after archive.
+Make the LinkML-generated Pydantic domain models importable as a normal part of the installed
+`hulubul` package, so any bounded context can depend on them without `sys.path` tricks, while
+keeping them clearly generated, deterministic, and isolated from every other LinkML generation
+target.
+
 ## Requirements
 ### Requirement: Generated domain models are importable from the hulubul package
 LinkML-generated Pydantic domain models SHALL be written to a location inside the installed

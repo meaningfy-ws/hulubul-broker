@@ -1,7 +1,11 @@
 # langflow-message-relay Specification
 
 ## Purpose
-TBD - created by archiving change build-telegram-gateway. Update Purpose after archive.
+Relay inbound channel messages to the LangFlow message-relay flow and route LangFlow's
+structured reply back to the originating channel, deriving a deterministic `session_id` and
+attaching the trusted `(medium, systemID)` channel identity to every call so LangFlow can
+resolve the correct `Channel`/`Agent` without a network round trip.
+
 ## Requirements
 ### Requirement: Deterministic session_id derivation
 The system SHALL derive `session_id` as a pure, deterministic function of the channel's
