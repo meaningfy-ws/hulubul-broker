@@ -26,7 +26,7 @@ from uuid import uuid4
 
 import pytest
 
-from hulubul.core.models.operational.enums import DataOperationOutcome, RequestStatus
+from hulubul.core.models.operational.enums import DataOperationOutcome, ErrorCode, RequestStatus
 from tests.support.langflow_client import FlowReply, LangFlowClient
 
 # LF-70 stable flow ID from task 29/32
@@ -158,15 +158,25 @@ def _skip_if_langflow_unavailable(response: FlowReply) -> None:
 class TestSetRequestStatusTransitions:
     """Test valid status transitions via LF-70 setRequestStatus operation."""
 
-    def test_transition_none_to_new(
+    def test_transition_none_to_new_is_rejected(
         self,
         langflow_helper: LangFlowClient,
         neo4j_helper: Neo4jHelper,
     ) -> None:
-        """None → NEW is allowed: seed request without status, transition to NEW.
+        """None → NEW is NOT a setRequestStatus transition -- it is contract-invalid.
 
-        Transition table: None can only go to NEW.
-        Expected: Flow returns success, Neo4j shows status=new with updated timestamp.
+        Per plan.md's setRequestStatus transition table (`new->needsClarification`,
+        `new->complete`, `needsClarification->complete` only) and its explicit
+        note that "`none->new` exists only inside atomic create": a request
+        with no status is not yet a DeliveryRequest row this operation can act
+        on, and `SetRequestStatusRequest.expected_status` is typed as a
+        required `str`, not `str | None` -- there is no way to construct a
+        contract-valid payload asserting "no status" as the expected current
+        state. The only path from "doesn't exist yet" to `new` is
+        createDeliveryRequest's atomic create.
+
+        Expected: rejected as INVALID_CONTRACT before the request ever
+        reaches the Agent (write_dispatched=False), with no Neo4j mutation.
         """
         request_id = f"req-test-none-to-new-{uuid4()}"
         now = datetime.now(timezone.utc)
@@ -178,7 +188,7 @@ class TestSetRequestStatusTransitions:
             assert state_before is not None
             assert state_before["status"] is None
 
-            # Call setRequestStatus: None → NEW
+            # Attempt setRequestStatus: None → NEW (contract-invalid)
             payload = _build_set_status_payload(
                 request_id=request_id,
                 expected_status=None,
@@ -201,18 +211,17 @@ class TestSetRequestStatusTransitions:
             assert response.result is not None
             result_data = response.result
 
-            # Verify outcome
-            assert result_data.get("outcome") == DataOperationOutcome.CONFIRMED.value
-            assert result_data.get("success") is True
-            assert result_data.get("status") == RequestStatus.NEW.value
-            assert result_data.get("updated_at") is not None
-            assert result_data.get("count") == 1
+            # Verify rejection
+            assert result_data.get("outcome") == DataOperationOutcome.REJECTED.value
+            assert result_data.get("success") is False
+            assert result_data.get("write_dispatched") is False
+            assert result_data.get("error_code") == ErrorCode.INVALID_CONTRACT.value
 
-            # Verify Neo4j mutation
+            # Verify no Neo4j mutation
             state_after = neo4j_helper.get_request_state(request_id)
             assert state_after is not None
-            assert state_after["status"] == RequestStatus.NEW.value
-            assert state_after["updated_at"] != now  # Timestamp should be newer
+            assert state_after["status"] is None
+            assert state_after["updated_at"] == state_before["updated_at"]
         finally:
             neo4j_helper.cleanup_request(request_id)
 
