@@ -89,7 +89,7 @@ linkml_meta = LinkMLMeta({'default_prefix': 'hlb',
      'name': 'hulubul',
      'prefixes': {'hlb': {'prefix_prefix': 'hlb',
                           'prefix_reference': 'http://meaningfy.ws/ontology/hulubul/'}},
-     'source_file': '/home/greg/PROJECTS/hulubul-broker/model/linkml/hulubul.yaml',
+     'source_file': 'model/linkml/hulubul.yaml',
      'title': 'Hulubul V1 Conceptual Model'} )
 
 class Medium(str, Enum):

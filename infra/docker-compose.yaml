@@ -64,6 +64,37 @@ services:
 
     restart: unless-stopped
 
+  channel-gateway:
+    build:
+      context: ../
+      dockerfile: infra/channel-gateway/Dockerfile
+
+    depends_on:
+      langflow:
+        condition: service_started
+
+    environment:
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
+      LANGFLOW_API_URL: http://langflow:7860
+      LANGFLOW_FLOW_ID: ${LANGFLOW_FLOW_ID}
+      GATEWAY_MODE: ${GATEWAY_MODE:-polling}
+      TELEGRAM_WEBHOOK_SECRET: ${TELEGRAM_WEBHOOK_SECRET:-}
+      NGROK_API_URL: http://ngrok:4040
+
+    expose: ["8080"]
+
+  # ngrok tunnel — only started in webhook mode (`--profile webhook`), exposing
+  # channel-gateway's aiohttp webhook server to the public internet for local
+  # Telegram webhook testing.
+  ngrok:
+    image: ngrok/ngrok:3
+    command: ["http", "channel-gateway:8080"]
+    environment:
+      NGROK_AUTHTOKEN: ${NGROK_AUTHTOKEN}
+    ports:
+      - "4040:4040"
+    profiles: ["webhook"]
+
   postgres:
     image: postgres:16-trixie@sha256:33f923b05f64ca54ac4401c01126a6b92afe839a0aa0a52bc5aeb5cc958e5f20
 
