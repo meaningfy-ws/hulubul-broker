@@ -29,6 +29,7 @@ from hulubul.core.models.operational import (
     DataOperationOutcome,
     DataOperationResult,
     ErrorCode,
+    extract_json_object_text,
 )
 from hulubul.core.models.operational.routing import RoutingLookupRecord, adapt_routing_lookup
 
@@ -72,42 +73,6 @@ class RoutingContextAdapterComponent(Component):
         ),
     ]
 
-    @staticmethod
-    def _extract_json_text(text: str) -> str:
-        """Best-effort extraction of a JSON object from LLM output that may be
-        wrapped in prose or markdown fences despite being instructed to emit
-        only JSON. A no-op on already-clean JSON text.
-
-        Confirmed live: the model sometimes "thinks out loud" with a fenced
-        *draft* JSON block, then produces the real (unfenced) final answer
-        afterwards ("Now producing the final JSON.\\n\\n{...}"). A naive
-        first-match regex grabs the draft. This scans for every balanced
-        top-level `{...}` block (brace-depth tracking, so nested objects and
-        fence markers don't confuse it) and tries each from *last* to
-        *first* -- the model's own "final answer comes last" pattern --
-        returning the first one that's valid JSON.
-        """
-        text = text.strip()
-        candidates: list[str] = []
-        depth = 0
-        start: int | None = None
-        for i, char in enumerate(text):
-            if char == "{":
-                if depth == 0:
-                    start = i
-                depth += 1
-            elif char == "}" and depth > 0:
-                depth -= 1
-                if depth == 0 and start is not None:
-                    candidates.append(text[start : i + 1])
-        for candidate in reversed(candidates):
-            try:
-                json.loads(candidate)
-            except json.JSONDecodeError:
-                continue
-            return candidate
-        return text
-
     @classmethod
     def _as_dict(cls, value: Any) -> dict[str, Any]:
         """Coerce an incoming Message/str/Data/JSON edge value into a plain dict."""
@@ -117,7 +82,7 @@ class RoutingContextAdapterComponent(Component):
             if not value:
                 return {}
             try:
-                decoded = json.loads(cls._extract_json_text(value))
+                decoded = json.loads(extract_json_object_text(value))
             except json.JSONDecodeError:
                 return {}
             return decoded if isinstance(decoded, dict) else {}

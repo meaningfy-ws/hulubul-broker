@@ -33,9 +33,16 @@ from typing import Any
 
 from langchain.agents.middleware import ModelRetryMiddleware, ToolRetryMiddleware
 from lfx.components.models_and_agents.agent import AgentComponent
+from lfx.log.logger import logger
 from lfx.schema.message import Message
+from pydantic import ValidationError
 
-from hulubul.core.models.operational import DataOperation, DataOperationOutcome, DataOperationResult
+from hulubul.core.models.operational import (
+    DataOperation,
+    DataOperationOutcome,
+    DataOperationResult,
+    extract_json_object_text,
+)
 
 __all__ = ["HulubulDataAccessAgentComponent"]
 
@@ -43,6 +50,33 @@ __all__ = ["HulubulDataAccessAgentComponent"]
 # mcp_client fixture asserts this exact three-tool inventory). Only the two read
 # tools are eligible for retry; write_neo4j_cypher is intentionally excluded.
 _READ_ONLY_MCP_TOOL_NAMES = ("read_neo4j_cypher", "get_neo4j_schema")
+
+# getRequestRoutingContext's raw output is a RoutingLookupRecord, not a
+# DataOperationResult -- RoutingContextAdapterComponent (downstream) owns its
+# extraction/validation. Result-shape repair below does not apply to it.
+_NO_RESULT_REPAIR_OPERATIONS = frozenset({DataOperation.GET_REQUEST_ROUTING_CONTEXT})
+
+# Design.md DEC-016: "Malformed model result -> tool-less repair with
+# validation -> one repair; then MALFORMED_AGENT_RESULT". This prompt asks
+# for a pure reformat of information already present in the malformed text --
+# never fabricate new facts -- since the repair call has no tools and cannot
+# independently verify anything against Neo4j.
+_REPAIR_PROMPT_TEMPLATE = """\
+The text below was supposed to be a single JSON object matching this schema, \
+but failed validation. Reformat/extract the SAME information into valid \
+JSON matching the schema exactly -- do not invent, guess, or add any fact \
+that is not already present in the text below. Output ONLY the JSON object, \
+nothing else.
+
+If the text does not contain enough information to fill the schema \
+truthfully, output exactly this JSON object instead: {{"_unrepairable": true}}
+
+Schema:
+{schema}
+
+Text to reformat:
+{malformed_text}
+"""
 
 
 class HulubulDataAccessAgentComponent(AgentComponent):
@@ -76,7 +110,16 @@ class HulubulDataAccessAgentComponent(AgentComponent):
         rejection = self._short_circuit_rejection()
         if rejection is not None:
             return rejection
-        return await super().message_response()
+
+        result = await super().message_response()
+
+        if self._operation_from_input() in _NO_RESULT_REPAIR_OPERATIONS:
+            return result
+        if self._is_valid_data_operation_result_shape(result):
+            return result
+
+        repaired = await self._repair_malformed_result(result)
+        return repaired if repaired is not None else self._mark_repair_failed(result)
 
     def _short_circuit_rejection(self) -> Message | None:
         """Detect a pre-rejected DataOperationRequest and skip the LLM/MCP entirely.
@@ -122,3 +165,114 @@ class HulubulDataAccessAgentComponent(AgentComponent):
             error_code=payload.get("code"),
         )
         return Message(text=result.model_dump_json())
+
+    def _operation_from_input(self) -> DataOperation | None:
+        """Best-effort: read this Agent's own request's `operation` field."""
+        value = self.input_value
+        text = value.text if isinstance(value, Message) else value
+        if not isinstance(text, str) or not text:
+            return None
+        try:
+            payload = json.loads(text)
+        except json.JSONDecodeError:
+            return None
+        if not isinstance(payload, dict):
+            return None
+        try:
+            return DataOperation(payload.get("operation"))
+        except ValueError:
+            return None
+
+    @staticmethod
+    def _is_valid_data_operation_result_shape(result: Message) -> bool:
+        """Cheap shape check: does the Agent's final text parse as a DataOperationResult?
+
+        Postcondition correctness (affected count, timestamp equality,
+        operation match) is deliberately NOT checked here -- a tool-less
+        repair pass has no way to independently verify those against Neo4j,
+        and DataOperationResultBoundaryComponent already re-validates them
+        unconditionally downstream with its own specific error codes,
+        regardless of whether repair ran. This only decides whether the text
+        is even shaped like a DataOperationResult at all.
+        """
+        text = result.text if isinstance(result, Message) else result
+        if not isinstance(text, str) or not text:
+            return False
+        try:
+            parsed = json.loads(extract_json_object_text(text))
+        except json.JSONDecodeError:
+            return False
+        if not isinstance(parsed, dict):
+            return False
+        try:
+            DataOperationResult.model_validate(parsed)
+        except ValidationError:
+            return False
+        return True
+
+    async def _repair_malformed_result(self, result: Message) -> Message | None:
+        """DEC-016 tool-less repair: one reformat attempt, no tools, no MCP.
+
+        Calls the plain (non-tool-bound) chat model directly -- structurally
+        incapable of dispatching another write, since it is never wrapped
+        into the tool-calling agent runnable used by the normal Agent loop.
+        Returns None if repair could not produce valid DataOperationResult
+        JSON (caller falls back to `_mark_repair_failed`).
+        """
+        text = result.text if isinstance(result, Message) else result
+        if not isinstance(text, str) or not text:
+            return None
+
+        try:
+            llm_model, _chat_history, _tools = await self.get_agent_requirements()  # type: ignore[no-untyped-call]
+        except (ValueError, TypeError) as exc:
+            logger.warning(f"LF-70 repair: could not resolve a model for repair: {exc}")
+            return None
+
+        prompt = _REPAIR_PROMPT_TEMPLATE.format(
+            schema=json.dumps(DataOperationResult.model_json_schema()),
+            malformed_text=text,
+        )
+
+        try:
+            response = await llm_model.ainvoke(prompt)
+        except Exception as exc:  # provider-specific exception types vary
+            logger.warning(f"LF-70 repair: model call failed: {type(exc).__name__}")
+            return None
+
+        response_text = response.content if hasattr(response, "content") else str(response)
+        if not isinstance(response_text, str):
+            return None
+
+        try:
+            parsed = json.loads(extract_json_object_text(response_text))
+        except json.JSONDecodeError:
+            logger.warning("LF-70 repair: repair attempt did not produce valid JSON")
+            return None
+        if not isinstance(parsed, dict) or parsed.get("_unrepairable"):
+            logger.warning("LF-70 repair: repair attempt reported unrepairable or wrong shape")
+            return None
+
+        try:
+            repaired_result = DataOperationResult.model_validate(parsed)
+        except ValidationError:
+            logger.warning("LF-70 repair: repair attempt still failed schema validation")
+            return None
+
+        return Message(text=repaired_result.model_dump_json())
+
+    def _mark_repair_failed(self, result: Message) -> Message:
+        """Tag a still-malformed result so the boundary reports MALFORMED_AGENT_RESULT.
+
+        Mirrors the `_raw_operation` marker convention used by
+        DataOperationRequestBoundaryComponent's rejection enrichment: a
+        private key the downstream boundary recognizes, distinguishing
+        "repair was attempted and still failed" from "no repair was ever
+        attempted" (plain INVALID_CONTRACT). Never carries the raw/malformed
+        text itself -- see DEC-016 ("no secret/raw prompt logging").
+        """
+        operation = self._operation_from_input()
+        payload: dict[str, Any] = {"_repair_failed": True}
+        if operation is not None:
+            payload["_raw_operation"] = operation.value
+        return Message(text=json.dumps(payload))

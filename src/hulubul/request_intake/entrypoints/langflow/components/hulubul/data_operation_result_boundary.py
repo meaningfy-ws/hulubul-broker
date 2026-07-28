@@ -30,6 +30,7 @@ from hulubul.core.models.operational import (
     DataOperationResult,
     ErrorCode,
     OperationalError,
+    extract_json_object_text,
     validate_data_operation_request,
 )
 from hulubul.core.models.operational.errors import ERROR_POLICY
@@ -78,42 +79,6 @@ class DataOperationResultBoundaryComponent(Component):
         ),
     ]
 
-    @staticmethod
-    def _extract_json_text(text: str) -> str:
-        """Best-effort extraction of a JSON object from LLM output that may be
-        wrapped in prose or markdown fences despite being instructed to emit
-        only JSON. A no-op on already-clean JSON text.
-
-        Confirmed live: the model sometimes "thinks out loud" with a fenced
-        *draft* JSON block, then produces the real (unfenced) final answer
-        afterwards ("Now producing the final JSON.\\n\\n{...}"). A naive
-        first-match regex grabs the draft. This scans for every balanced
-        top-level `{...}` block (brace-depth tracking, so nested nested
-        objects and fence markers don't confuse it) and tries each from
-        *last* to *first* -- the model's own "final answer comes last"
-        pattern -- returning the first one that's valid JSON.
-        """
-        text = text.strip()
-        candidates: list[str] = []
-        depth = 0
-        start: int | None = None
-        for i, char in enumerate(text):
-            if char == "{":
-                if depth == 0:
-                    start = i
-                depth += 1
-            elif char == "}" and depth > 0:
-                depth -= 1
-                if depth == 0 and start is not None:
-                    candidates.append(text[start : i + 1])
-        for candidate in reversed(candidates):
-            try:
-                json.loads(candidate)
-            except json.JSONDecodeError:
-                continue
-            return candidate
-        return text
-
     @classmethod
     def _as_dict(cls, value: Any) -> dict[str, Any]:
         """Coerce an incoming Message/Data/JSON edge value into a plain dict.
@@ -129,7 +94,7 @@ class DataOperationResultBoundaryComponent(Component):
             if not isinstance(text, str):
                 return {}
             try:
-                decoded = json.loads(cls._extract_json_text(text))
+                decoded = json.loads(extract_json_object_text(text))
             except json.JSONDecodeError:
                 return {}
             return decoded if isinstance(decoded, dict) else {}
@@ -197,9 +162,19 @@ class DataOperationResultBoundaryComponent(Component):
         try:
             result = DataOperationResult.model_validate(raw_value)
         except ValidationError:
-            # Result contract validation failed
+            # Result contract validation failed. `_repair_failed` (set by
+            # HulubulDataAccessAgentComponent's tool-less repair pass, DEC-016)
+            # distinguishes "the Agent already tried once to reformat this and
+            # still couldn't" (MALFORMED_AGENT_RESULT) from "never attempted"
+            # (INVALID_CONTRACT, e.g. getRequestRoutingContext's own shape,
+            # which never goes through result-shape repair).
+            code = (
+                ErrorCode.MALFORMED_AGENT_RESULT
+                if raw_value.get("_repair_failed")
+                else ErrorCode.INVALID_CONTRACT
+            )
             return self._make_error_response(
-                code=ErrorCode.INVALID_CONTRACT,
+                code=code,
                 correlation_id_str=correlation_id_str,
             )
 

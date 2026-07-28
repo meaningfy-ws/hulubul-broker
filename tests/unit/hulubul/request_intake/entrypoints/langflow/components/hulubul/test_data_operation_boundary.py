@@ -791,6 +791,61 @@ class TestResultRawValueCoercion:
         assert result.data["code"] == ErrorCode.INVALID_CONTRACT.value
 
 
+class TestRepairFailedMarker:
+    """DEC-016: `_repair_failed` (set by HulubulDataAccessAgentComponent's
+    tool-less repair pass) distinguishes "the Agent already tried once to
+    reformat this and still couldn't" (MALFORMED_AGENT_RESULT) from "never
+    attempted" (INVALID_CONTRACT) -- both still shape-invalid, only the
+    error code differs.
+    """
+
+    def test_marked_still_invalid_result_is_malformed_agent_result(
+        self, result_boundary: DataOperationResultBoundaryComponent
+    ) -> None:
+        result_boundary.raw_value = Message(
+            text=json.dumps({"_repair_failed": True, "_raw_operation": "createDeliveryRequest"})
+        )
+        result_boundary.request_dict = Message(text=json.dumps(lf10_create_request()))
+        result = result_boundary.build_output()
+
+        assert isinstance(result, JSON)
+        assert result.data["code"] == ErrorCode.MALFORMED_AGENT_RESULT.value
+
+    def test_unmarked_invalid_result_is_still_invalid_contract(
+        self, result_boundary: DataOperationResultBoundaryComponent
+    ) -> None:
+        """No `_repair_failed` marker (e.g. getRequestRoutingContext's shape,
+        which never goes through result-shape repair) -- unchanged behavior."""
+        result_boundary.raw_value = Message(text=json.dumps({"foo": "bar"}))
+        result_boundary.request_dict = Message(text=json.dumps(lf10_create_request()))
+        result = result_boundary.build_output()
+
+        assert isinstance(result, JSON)
+        assert result.data["code"] == ErrorCode.INVALID_CONTRACT.value
+
+    def test_repair_failed_marker_ignored_when_result_is_actually_valid(
+        self, result_boundary: DataOperationResultBoundaryComponent
+    ) -> None:
+        """A stray `_repair_failed` key on an otherwise-valid result is just
+        an unexpected field -- DataOperationResult's extra='forbid' rejects
+        it as INVALID_CONTRACT, same as any other malformed shape; it must
+        not be misread as a successful result."""
+        payload = {
+            "operation": DataOperation.CREATE_DELIVERY_REQUEST.value,
+            "outcome": DataOperationOutcome.CONFIRMED.value,
+            "success": True,
+            "write_dispatched": True,
+            "count": 1,
+            "_repair_failed": True,
+        }
+        result_boundary.raw_value = Message(text=json.dumps(payload))
+        result_boundary.request_dict = Message(text=json.dumps(lf10_create_request()))
+        result = result_boundary.build_output()
+
+        assert isinstance(result, JSON)
+        assert result.data["code"] == ErrorCode.MALFORMED_AGENT_RESULT.value
+
+
 class TestRequestOperationEnrichment:
     """build_output()'s rejection path enriches the OperationalError JSON with
     `_raw_operation` -- the client-supplied operation string -- so a

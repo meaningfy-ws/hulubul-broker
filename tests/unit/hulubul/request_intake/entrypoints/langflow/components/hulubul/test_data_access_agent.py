@@ -6,14 +6,59 @@ ModelRetryMiddleware/ToolRetryMiddleware, scoped so ToolRetryMiddleware only
 ever applies to the two read-only MCP tools, never write_neo4j_cypher.
 """
 
+import asyncio
 import json
+from typing import Any
+from unittest.mock import AsyncMock, patch
 
 from langchain.agents.middleware import ModelRetryMiddleware, ToolRetryMiddleware
+from lfx.components.models_and_agents.agent import AgentComponent
 from lfx.schema.message import Message
 
 from hulubul.request_intake.entrypoints.langflow.components.hulubul.data_access_agent import (
     HulubulDataAccessAgentComponent,
 )
+
+
+def _request_text_with_operation(operation: str = "createDeliveryRequest") -> str:
+    """A minimal JSON body carrying just an `operation` field.
+
+    `_operation_from_input` only reads that one field -- it does not (and
+    should not) fully validate the request contract, so this deliberately
+    stays minimal rather than building a complete per-operation payload.
+    """
+    return json.dumps({"operation": operation})
+
+
+_VALID_RESULT_TEXT = json.dumps(
+    {
+        "operation": "createDeliveryRequest",
+        "outcome": "confirmed",
+        "success": True,
+        "write_dispatched": True,
+        "count": 1,
+    }
+)
+
+
+class _FakeLLM:
+    """Stand-in for the plain (non-tool-bound) chat model `ainvoke` returns."""
+
+    def __init__(self, response_text: str | None = None, raise_error: bool = False) -> None:
+        self.response_text = response_text
+        self.raise_error = raise_error
+        self.calls: list[Any] = []
+
+    async def ainvoke(self, prompt: Any, *args: Any, **kwargs: Any) -> Any:
+        self.calls.append(prompt)
+        if self.raise_error:
+            raise RuntimeError("provider unavailable")
+        return _FakeAIMessage(self.response_text or "")
+
+
+class _FakeAIMessage:
+    def __init__(self, content: str) -> None:
+        self.content = content
 
 
 def _agent_with_tools(tools: list[str] | None) -> HulubulDataAccessAgentComponent:
@@ -166,3 +211,239 @@ class TestShortCircuitRejection:
         agent = HulubulDataAccessAgentComponent()
         agent.input_value = Message(text="")
         assert agent._short_circuit_rejection() is None
+
+
+class TestOperationFromInput:
+    def test_reads_operation_from_valid_json(self) -> None:
+        agent = HulubulDataAccessAgentComponent()
+        agent.input_value = Message(text=_request_text_with_operation("updateDeliveryRequest"))
+        operation = agent._operation_from_input()
+        assert operation is not None
+        assert operation.value == "updateDeliveryRequest"
+
+    def test_returns_none_for_unknown_operation(self) -> None:
+        agent = HulubulDataAccessAgentComponent()
+        agent.input_value = Message(text=json.dumps({"operation": "notARealOperation"}))
+        assert agent._operation_from_input() is None
+
+    def test_returns_none_for_non_json(self) -> None:
+        agent = HulubulDataAccessAgentComponent()
+        agent.input_value = Message(text="not json")
+        assert agent._operation_from_input() is None
+
+    def test_returns_none_for_empty_input(self) -> None:
+        agent = HulubulDataAccessAgentComponent()
+        agent.input_value = Message(text="")
+        assert agent._operation_from_input() is None
+
+
+class TestResultShapeValidation:
+    """DEC-016: deciding whether a result even NEEDS repair.
+
+    Deliberately checks shape only (DataOperationResult.model_validate), not
+    postconditions -- see the docstring on _is_valid_data_operation_result_shape
+    for why postcondition checks are left entirely to the boundary.
+    """
+
+    def test_valid_result_passes(self) -> None:
+        message = Message(text=_VALID_RESULT_TEXT)
+        assert HulubulDataAccessAgentComponent._is_valid_data_operation_result_shape(message)
+
+    def test_prose_wrapped_valid_json_passes(self) -> None:
+        message = Message(text=f"Here is my answer:\n\n{_VALID_RESULT_TEXT}\n\nDone.")
+        assert HulubulDataAccessAgentComponent._is_valid_data_operation_result_shape(message)
+
+    def test_non_json_text_fails(self) -> None:
+        message = Message(text="I could not complete this operation.")
+        assert not HulubulDataAccessAgentComponent._is_valid_data_operation_result_shape(message)
+
+    def test_wrong_shape_json_fails(self) -> None:
+        message = Message(text=json.dumps({"foo": "bar"}))
+        assert not HulubulDataAccessAgentComponent._is_valid_data_operation_result_shape(message)
+
+    def test_empty_text_fails(self) -> None:
+        message = Message(text="")
+        assert not HulubulDataAccessAgentComponent._is_valid_data_operation_result_shape(message)
+
+    def test_postcondition_violation_still_passes_shape_check(self) -> None:
+        """A result with an impossible count (postcondition violation) is still
+        shape-valid -- that's the boundary's job to catch, not repair's."""
+        text = json.dumps(
+            {
+                "operation": "createDeliveryRequest",
+                "outcome": "confirmed",
+                "success": True,
+                "write_dispatched": True,
+                "count": 99,
+            }
+        )
+        assert HulubulDataAccessAgentComponent._is_valid_data_operation_result_shape(
+            Message(text=text)
+        )
+
+
+class TestMarkRepairFailed:
+    def test_carries_raw_operation_when_resolvable(self) -> None:
+        agent = HulubulDataAccessAgentComponent()
+        agent.input_value = Message(text=_request_text_with_operation("setRequestStatus"))
+        marked = agent._mark_repair_failed(Message(text="garbage"))
+        payload = json.loads(str(marked.text))
+        assert payload["_repair_failed"] is True
+        assert payload["_raw_operation"] == "setRequestStatus"
+
+    def test_omits_raw_operation_when_unresolvable(self) -> None:
+        agent = HulubulDataAccessAgentComponent()
+        agent.input_value = Message(text="not json")
+        marked = agent._mark_repair_failed(Message(text="garbage"))
+        payload = json.loads(str(marked.text))
+        assert payload["_repair_failed"] is True
+        assert "_raw_operation" not in payload
+
+    def test_never_carries_the_raw_malformed_text(self) -> None:
+        """DEC-016: 'no secret/raw prompt logging' -- the marker must not echo
+        the original malformed content back out."""
+        agent = HulubulDataAccessAgentComponent()
+        agent.input_value = Message(text=_request_text_with_operation())
+        marked = agent._mark_repair_failed(
+            Message(text="some sensitive extracted PII that must not leak: 555-1234")
+        )
+        assert "555-1234" not in str(marked.text)
+
+
+class TestRepairMalformedResult:
+    """DEC-016 tool-less repair: one reformat attempt via the plain,
+    non-tool-bound chat model already resolved for the Agent."""
+
+    def _agent_with_fake_llm(self, fake_llm: _FakeLLM) -> HulubulDataAccessAgentComponent:
+        agent = HulubulDataAccessAgentComponent()
+        agent.get_agent_requirements = AsyncMock(return_value=(fake_llm, None, []))  # type: ignore[method-assign]
+        return agent
+
+    def test_successful_repair_returns_valid_message(self) -> None:
+        fake_llm = _FakeLLM(response_text=_VALID_RESULT_TEXT)
+        agent = self._agent_with_fake_llm(fake_llm)
+
+        result = asyncio.run(agent._repair_malformed_result(Message(text="I think it worked?")))
+
+        assert result is not None
+        payload = json.loads(str(result.text))
+        assert payload["outcome"] == "confirmed"
+        assert payload["success"] is True
+        # Exactly one call: the repair pass calls the plain model once, no loop.
+        assert len(fake_llm.calls) == 1
+
+    def test_repair_call_never_receives_a_tool_bound_model(self) -> None:
+        """Structural guarantee, not just a prompt instruction: the object
+        _repair_malformed_result calls has no tools attached at all."""
+        fake_llm = _FakeLLM(response_text=_VALID_RESULT_TEXT)
+        agent = self._agent_with_fake_llm(fake_llm)
+
+        asyncio.run(agent._repair_malformed_result(Message(text="I think it worked?")))
+
+        assert not hasattr(fake_llm, "tools") or not fake_llm.__dict__.get("tools")
+
+    def test_unrepairable_sentinel_returns_none(self) -> None:
+        fake_llm = _FakeLLM(response_text=json.dumps({"_unrepairable": True}))
+        agent = self._agent_with_fake_llm(fake_llm)
+
+        result = asyncio.run(agent._repair_malformed_result(Message(text="not enough info here")))
+
+        assert result is None
+
+    def test_still_invalid_json_returns_none(self) -> None:
+        fake_llm = _FakeLLM(response_text="I tried but here is more prose, not JSON.")
+        agent = self._agent_with_fake_llm(fake_llm)
+
+        result = asyncio.run(agent._repair_malformed_result(Message(text="garbage")))
+
+        assert result is None
+
+    def test_still_wrong_shape_returns_none(self) -> None:
+        fake_llm = _FakeLLM(response_text=json.dumps({"foo": "bar"}))
+        agent = self._agent_with_fake_llm(fake_llm)
+
+        result = asyncio.run(agent._repair_malformed_result(Message(text="garbage")))
+
+        assert result is None
+
+    def test_model_error_returns_none(self) -> None:
+        fake_llm = _FakeLLM(raise_error=True)
+        agent = self._agent_with_fake_llm(fake_llm)
+
+        result = asyncio.run(agent._repair_malformed_result(Message(text="garbage")))
+
+        assert result is None
+
+    def test_empty_original_text_returns_none_without_calling_model(self) -> None:
+        fake_llm = _FakeLLM(response_text=_VALID_RESULT_TEXT)
+        agent = self._agent_with_fake_llm(fake_llm)
+
+        result = asyncio.run(agent._repair_malformed_result(Message(text="")))
+
+        assert result is None
+        assert len(fake_llm.calls) == 0
+
+
+class TestMessageResponseRepairDispatch:
+    """End-to-end dispatch inside message_response(): valid results pass
+    through untouched, routing-context is exempt, malformed results get one
+    repair attempt, and a failed repair is marked for the boundary."""
+
+    def _agent(self, input_operation: str) -> HulubulDataAccessAgentComponent:
+        agent = HulubulDataAccessAgentComponent()
+        agent.input_value = Message(text=_request_text_with_operation(input_operation))
+        return agent
+
+    def test_valid_result_passes_through_unchanged(self) -> None:
+        agent = self._agent("createDeliveryRequest")
+        with patch.object(
+            AgentComponent,
+            "message_response",
+            new=AsyncMock(return_value=Message(text=_VALID_RESULT_TEXT)),
+        ):
+            result = asyncio.run(agent.message_response())
+        assert str(result.text) == _VALID_RESULT_TEXT
+
+    def test_routing_context_result_skips_repair_even_if_not_data_operation_result_shaped(
+        self,
+    ) -> None:
+        """getRequestRoutingContext's raw shape is a RoutingLookupRecord, not a
+        DataOperationResult -- must never be routed into repair."""
+        routing_shape_text = json.dumps({"binding_count": 0, "requests": []})
+        agent = self._agent("getRequestRoutingContext")
+        with patch.object(
+            AgentComponent,
+            "message_response",
+            new=AsyncMock(return_value=Message(text=routing_shape_text)),
+        ):
+            result = asyncio.run(agent.message_response())
+        assert str(result.text) == routing_shape_text
+
+    def test_malformed_result_gets_repaired_and_returns_valid_result(self) -> None:
+        agent = self._agent("createDeliveryRequest")
+        agent.get_agent_requirements = AsyncMock(  # type: ignore[method-assign]
+            return_value=(_FakeLLM(response_text=_VALID_RESULT_TEXT), None, [])
+        )
+        with patch.object(
+            AgentComponent,
+            "message_response",
+            new=AsyncMock(return_value=Message(text="not valid json at all")),
+        ):
+            result = asyncio.run(agent.message_response())
+        payload = json.loads(str(result.text))
+        assert payload["outcome"] == "confirmed"
+
+    def test_malformed_result_still_unrepairable_is_marked_for_boundary(self) -> None:
+        agent = self._agent("createDeliveryRequest")
+        agent.get_agent_requirements = AsyncMock(  # type: ignore[method-assign]
+            return_value=(_FakeLLM(response_text="still not JSON"), None, [])
+        )
+        with patch.object(
+            AgentComponent,
+            "message_response",
+            new=AsyncMock(return_value=Message(text="not valid json at all")),
+        ):
+            result = asyncio.run(agent.message_response())
+        payload = json.loads(str(result.text))
+        assert payload["_repair_failed"] is True
+        assert payload["_raw_operation"] == "createDeliveryRequest"

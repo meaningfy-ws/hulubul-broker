@@ -55,12 +55,12 @@
 
 ## 8. LF-70 Data Access Flow
 
-- [ ] 8.1 Build the stable-ID LF-70 skeleton with typed request/result boundaries and Neo4j schema/read/write MCP tools exposed only inside this flow
-- [ ] 8.2 Implement `getRequestRoutingContext` through strict raw-record validation and exhaustive closed/status/cardinality adaptation, plus `readDeliveryRequest` sparse snapshots, one safe transient read retry, and direct Neo4j integration assertions
-- [ ] 8.3 Implement atomic `createDeliveryRequest` with trusted/pre-generated IDs, no caller timestamp, one Neo4j transaction time returned as equal created/updated, truthful available subgraphs, and request-plus-binding rollback on conflict
-- [ ] 8.4 Implement optimistic `updateDeliveryRequest` requiring `expected_updated_at` and `expected_status`, immediate fact validation, additive-only absent facts/preferred period, exactly-one-request postconditions, non-mutating zero-row classification, and concurrent-update rejection
-- [ ] 8.5 Implement `setRequestStatus` with expected timestamp/status, the exact Change 1 transition table, returned updated timestamp, non-mutating zero-row classification, and invalid-transition no-mutation tests
-- [ ] 8.6 Implement LF-70 ambiguous-write and malformed-result behavior so dispatched writes are never replayed and only existing raw output may enter tool-less repair
+- [x] 8.1 Build the stable-ID LF-70 skeleton with typed request/result boundaries and Neo4j schema/read/write MCP tools exposed only inside this flow
+- [~] 8.2 Implement `getRequestRoutingContext` through strict raw-record validation and exhaustive closed/status/cardinality adaptation, plus `readDeliveryRequest` sparse snapshots, one safe transient read retry, and direct Neo4j integration assertions — **4/5 integration tests passing; 1 skipped** (`test_get_routing_context_binding_with_status`, `tests/integration/langflow/test_lf70_read_operations.py`), not failing: its Neo4j seed-data setup itself fails ("Failed to seed binding and request in Neo4j") before the flow is ever exercised. That one scenario (a binding whose target request has a live status) has never actually been verified end-to-end; needs the seed fixture debugged before this can be marked done.
+- [x] 8.3 Implement atomic `createDeliveryRequest` with trusted/pre-generated IDs, no caller timestamp, one Neo4j transaction time returned as equal created/updated, truthful available subgraphs, and request-plus-binding rollback on conflict — 4/4 integration tests passing, including the atomicity/conflict case.
+- [~] 8.4 Implement optimistic `updateDeliveryRequest` requiring `expected_updated_at` and `expected_status`, immediate fact validation, additive-only absent facts/preferred period, exactly-one-request postconditions, non-mutating zero-row classification, and concurrent-update rejection — **3/5 integration tests passing.** The 2 remaining failures are not a defect in this task's own logic (query/prompt design confirmed correct via direct reproduction); they are task 14.1's decision-level model nondeterminism (the same well-formed request occasionally gets a well-formed wrong rejection). Blocked on resolving 14.1, not on further work here.
+- [~] 8.5 Implement `setRequestStatus` with expected timestamp/status, the exact Change 1 transition table, returned updated timestamp, non-mutating zero-row classification, and invalid-transition no-mutation tests — **5/7 integration tests passing.** Same as 8.4: the 2 remaining failures reproduce task 14.1's nondeterminism, not a defect here.
+- [x] 8.6 Implement LF-70 ambiguous-write and malformed-result behavior so dispatched writes are never replayed and only existing raw output may enter tool-less repair
 
 ## 9. LF-10 Request Intake Flow
 
