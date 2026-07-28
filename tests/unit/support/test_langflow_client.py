@@ -9,8 +9,11 @@ uniqueness constraint / compare-and-set makes a retry of an
 already-succeeded write come back rejected, never a silent duplicate.
 """
 
+import logging
 from typing import Any
 from unittest.mock import MagicMock, patch
+
+import pytest
 
 from tests.support.langflow_client import LangFlowClient
 
@@ -62,6 +65,33 @@ class TestRetryOnUnparseableResult:
         assert reply.result == _VALID_RESULT
         assert client.post.call_count == 2
         mock_sleep.assert_called_once_with(0.5)
+
+    def test_retry_log_never_leaks_raw_result_payload(
+        self, caplog: pytest.LogCaptureFixture
+    ) -> None:
+        """The retry-warning log carries shape only (type/keys), never values.
+
+        For LF-70, an unparseable ``result`` can still carry user-supplied
+        facts/identifiers -- logging it raw would contradict this module's own
+        "Safe repr (no secret exposure)" docstring promise.
+        """
+        client = _mock_client(
+            _mock_response(200, _UNPARSEABLE_RESULT),
+            _mock_response(200, _VALID_RESULT),
+        )
+
+        with (
+            patch("tests.support.langflow_client.httpx.Client", return_value=client),
+            patch("tests.support.langflow_client.time.sleep"),
+            caplog.at_level(logging.WARNING),
+        ):
+            LangFlowClient(base_url="http://x", api_key="k").run_flow_with_actor(
+                "flow-1", {"correlation_id": "c1"}
+            )
+
+        for value in _UNPARSEABLE_RESULT.values():
+            assert str(value) not in caplog.text
+        assert "result_type=dict" in caplog.text
 
     def test_no_retry_when_first_result_is_valid(self) -> None:
         client = _mock_client(_mock_response(200, _VALID_RESULT))

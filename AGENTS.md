@@ -75,6 +75,15 @@ flows directly instead of asking the developer to export run logs by hand.
   them. Commit generated artifacts in the same commit as the schema edit.
 - **Secrets never live in VCS.** `infra/.env` is gitignored; copy from
   `infra/.env.example` and edit passwords (Neo4j password ≥ 8 characters).
+- **Never hardcode a developer's local filesystem path into committed code.**
+  No `/home/<user>/...`, `/Users/<user>/...`, `C:\Users\<user>\...`, or any
+  other absolute path rooted outside the repo checkout — in source, tests,
+  fixtures, docstrings, or comments. It breaks on every other machine and CI
+  runner, and it leaks a specific developer's local directory layout into a
+  shared repo. Resolve paths relative to the file (`Path(__file__).resolve().parents[N]`)
+  or the repo root, or read them from an environment variable/config file
+  instead. This applies to AI coding assistants generating code exactly as
+  much as it does to humans typing it by hand.
 - **`make lint` is schema linting** (`linkml-lint`), not Python linting — there
   is no Python application code or test suite yet.
 - **Generated artifacts are committed** so they stay in sync with the schema; a

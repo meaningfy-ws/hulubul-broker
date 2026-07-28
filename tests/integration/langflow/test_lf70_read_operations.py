@@ -12,6 +12,7 @@ Task 8.2: LF-70 read operations with typed DataOperationRequest/DataOperationRes
 import os
 import time
 from datetime import datetime, timezone
+from pathlib import Path
 
 import pytest
 
@@ -140,7 +141,7 @@ class TestLF70ReadOperations:
             pytest.skip("neo4j driver not installed; run: poetry install --with integration")
 
         # Load credentials from infra/.env
-        env_file = "/home/greg/PROJECTS/hulubul-broker/infra/.env"
+        env_file = Path(__file__).resolve().parents[3] / "infra" / ".env"
         neo4j_config = {}
         if os.path.exists(env_file):
             with open(env_file) as f:
@@ -309,7 +310,7 @@ class TestLF70ReadOperations:
             pytest.skip("neo4j driver not installed; run: poetry install --with integration")
 
         # Load credentials from infra/.env
-        env_file = "/home/greg/PROJECTS/hulubul-broker/infra/.env"
+        env_file = Path(__file__).resolve().parents[3] / "infra" / ".env"
         neo4j_config = {}
         if os.path.exists(env_file):
             with open(env_file) as f:

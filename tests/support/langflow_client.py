@@ -292,13 +292,18 @@ class LangFlowClient:
 
                         last_reply = FlowReply(status_code=200, flow_id=flow_uuid, result=result)
                         if attempt < max_attempts:
+                            # Log shape only (type + top-level keys), never the payload
+                            # itself -- for LF-70, `result` can carry user-supplied
+                            # facts/identifiers, which the module docstring's "no secret
+                            # exposure" promise forbids putting in logs.
                             logger.warning(
                                 "run_flow_with_actor: attempt %d/%d for flow %s got an "
-                                "unparseable result, retrying in 0.5s; raw result=%r",
+                                "unparseable result, retrying in 0.5s; result_type=%s, keys=%s",
                                 attempt,
                                 max_attempts,
                                 flow_uuid,
-                                result,
+                                type(result).__name__,
+                                sorted(result.keys()) if isinstance(result, dict) else None,
                             )
                             time.sleep(0.5)
                             continue

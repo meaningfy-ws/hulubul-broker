@@ -51,7 +51,7 @@ def _read_neo4j_credentials_from_env_file() -> tuple[str, str, str]:
 
     Falls back to defaults if .env does not exist or values are missing.
     """
-    env_file = Path("/home/greg/PROJECTS/hulubul-broker/infra/.env")
+    env_file = Path(__file__).resolve().parents[3] / "infra" / ".env"
     if not env_file.exists():
         return NEO4J_USERNAME, NEO4J_PASSWORD, NEO4J_DATABASE
 
@@ -207,7 +207,7 @@ class TestLF70CreateDeliveryRequest:
             request_result = session.run(
                 """
                 MATCH (r:DeliveryRequest {id: $request_id})
-                RETURN r.id as id, r.hasStatus as status, r.createdAt as created_at, r.updatedAt as updated_at
+                RETURN r.id as id, r.hasStatus as status, r.created as created_at, r.updated as updated_at
                 """,
                 {"request_id": graph_ids.request_id},
             )
@@ -215,6 +215,11 @@ class TestLF70CreateDeliveryRequest:
 
             assert request_row is not None, f"Request node not found: {graph_ids.request_id}"
             assert request_row["status"] == "new"
+            assert request_row["created_at"] == request_row["updated_at"], (
+                "Neo4j's own created/updated properties must be equal, independent of "
+                "the flow's reported created_at/updated_at (verifies the graph write "
+                "itself, not just the Agent's report of it)"
+            )
 
             # Verify binding exists and is unique
             binding_result = session.run(
