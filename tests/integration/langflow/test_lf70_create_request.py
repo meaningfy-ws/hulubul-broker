@@ -37,7 +37,7 @@ LF_70_FLOW_UUID = "94f6774d-ebc7-5bf1-8486-886f91886a5f"
 
 # LangFlow connection
 LANGFLOW_URL = os.getenv("LANGFLOW_URL", "http://localhost:7860")
-LANGFLOW_API_KEY = os.getenv("LANGFLOW_API_KEY", "local-dev-key-xyz")
+LANGFLOW_API_KEY = os.getenv("LANGFLOW_API_KEY", "local-dev-key-hulubul-phase1")
 
 # Neo4j dev instance connection (live, shared, not isolated testcontainer)
 NEO4J_BOLT_URL = os.getenv("NEO4J_BOLT_URL", "bolt://localhost:7687")

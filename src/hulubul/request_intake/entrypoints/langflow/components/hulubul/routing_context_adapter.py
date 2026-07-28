@@ -44,8 +44,11 @@ class RoutingContextAdapterComponent(Component):
 
     display_name = "Routing Context Adapter"
     description = (
-        "Applies adapt_routing_lookup's closed-precedence classification to "
-        "getRequestRoutingContext results; passes other operations through unchanged."
+        "Deterministic post-Agent classifier for getRequestRoutingContext: turns the "
+        "Agent's raw Neo4j lookup (binding presence, active relationship/target counts, "
+        "request rows) into binding state, routing stage, and status-precedence facts -- "
+        "so business rules live in tested code, not LLM prompting. Every other "
+        "operation's Agent result passes through unchanged."
     )
     icon = "route"
     name = "HulubulRoutingContextAdapter"

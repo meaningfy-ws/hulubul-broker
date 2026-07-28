@@ -6,12 +6,18 @@ component loader registers exactly one component per file, named after the
 file -- a second class in the same file is silently dropped from the sidebar
 palette. See data_operation_request_boundary.py for the paired component.
 
-Runs as the terminal node (last step before flow output). Failure
-classification for retry decisioning is handled by a separate
-FailureClassifierComponent that runs on the Agent's raw output BEFORE this
-component -- retries themselves now happen inside the Agent's own execution
-(ModelRetryMiddleware/ToolRetryMiddleware), not via a flow-level loop, so
-this component's only job is validating the final result exactly once.
+Runs as the terminal node (last step before flow output). There is no
+flow-level retry/repair loop and no separate failure-classification node --
+both retry (transient reads/model calls, via ModelRetryMiddleware/
+ToolRetryMiddleware) and DEC-016's tool-less malformed-result repair happen
+inside HulubulDataAccessAgentComponent's own execution, upstream of this
+node (see that component's module docstring). This component's only job is
+validating whatever final result the Agent produced -- already
+retried/repaired or not -- exactly once: contract shape, then postconditions.
+It distinguishes MALFORMED_AGENT_RESULT (the Agent's repair pass ran and
+still failed) from plain INVALID_CONTRACT (repair was never attempted, e.g.
+not applicable to this operation) via the `_repair_failed` marker -- see
+`validate_result_value()` below.
 """
 
 import json

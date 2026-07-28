@@ -84,8 +84,10 @@ class HulubulDataAccessAgentComponent(AgentComponent):
 
     display_name = "Data Access Agent"
     description = (
-        "LF-70's Data Access Agent: retries a transient read or model call once "
-        "(DEC-015), never retries a dispatched write."
+        "LF-70's tool-using Agent: executes each data operation against Neo4j via "
+        "MCP. Retries only transient reads/model calls, never a dispatched write "
+        "(DEC-015); short-circuits already-rejected requests; makes one tool-less "
+        "repair attempt on a malformed final result (DEC-016)."
     )
     icon = "bot"
     name = "HulubulDataAccessAgent"
