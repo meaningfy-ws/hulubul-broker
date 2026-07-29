@@ -45,6 +45,55 @@ async def test_run_posts_session_id_and_channel_identity_and_returns_reply_text(
 
 
 @pytest.mark.asyncio
+async def test_run_sends_x_api_key_header_when_api_key_is_configured() -> None:
+    captured_headers: dict[str, str] = {}
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        captured_headers.update(request.headers)
+        return httpx.Response(
+            200,
+            json={
+                "outputs": [{"outputs": [{"results": {"message": {"data": {"text": "ok"}}}}]}]
+            },
+        )
+
+    transport = httpx.MockTransport(handler)
+    async with httpx.AsyncClient(transport=transport) as http_client:
+        client = LangflowClient(
+            base_url="http://langflow:7860",
+            flow_id="abc123",
+            client=http_client,
+            api_key="secret-key",
+        )
+        await client.run(session_id="Telegram:123", channel=_TELEGRAM_123, text="hello")
+
+    assert captured_headers["x-api-key"] == "secret-key"
+
+
+@pytest.mark.asyncio
+async def test_run_omits_x_api_key_header_when_no_api_key_is_configured() -> None:
+    captured_headers: dict[str, str] = {}
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        captured_headers.update(request.headers)
+        return httpx.Response(
+            200,
+            json={
+                "outputs": [{"outputs": [{"results": {"message": {"data": {"text": "ok"}}}}]}]
+            },
+        )
+
+    transport = httpx.MockTransport(handler)
+    async with httpx.AsyncClient(transport=transport) as http_client:
+        client = LangflowClient(
+            base_url="http://langflow:7860", flow_id="abc123", client=http_client
+        )
+        await client.run(session_id="Telegram:123", channel=_TELEGRAM_123, text="hello")
+
+    assert "x-api-key" not in captured_headers
+
+
+@pytest.mark.asyncio
 async def test_run_returns_none_on_http_error() -> None:
     def handler(request: httpx.Request) -> httpx.Response:
         return httpx.Response(500, json={"error": "boom"})

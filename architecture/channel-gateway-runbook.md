@@ -74,11 +74,27 @@ Polling mode needs no inbound port and no tunnel, so it's the default for first 
    make up
    ```
 2. Set `GATEWAY_MODE=polling` alongside `TELEGRAM_BOT_TOKEN` (from the previous section),
-   `LANGFLOW_API_URL`, and `LANGFLOW_FLOW_ID` in `infra/.env` — these are the environment
-   variables `entrypoints/telegram_bot.py` reads at startup (`load_config()` in
-   `src/hulubul/channel_gateway/entrypoints/telegram_bot.py`).
+   `LANGFLOW_API_URL`, `LANGFLOW_FLOW_ID`, and `LANGFLOW_API_KEY` in `infra/.env` — these are the
+   environment variables `entrypoints/telegram_bot.py` reads at startup (`load_config()` in
+   `src/hulubul/channel_gateway/entrypoints/telegram_bot.py`). `LANGFLOW_API_KEY` is required:
+   LangFlow rejects unauthenticated Run API calls regardless of `LANGFLOW_AUTO_LOGIN` (that
+   setting only auto-logs in the browser UI, not server-to-server calls); `LangflowClient`
+   sends it as an `x-api-key` header.
 3. Message your bot on Telegram. In polling mode the gateway calls Telegram to fetch updates
    itself, so no public URL or tunnel is required.
+
+### Quick smoke test with the dev echo flow
+
+The three real Change-1 flows (`lf-70-data-access`, `lf-10-request-intake`, `lf-00-main-router`)
+aren't built yet, so there's nothing to set `LANGFLOW_FLOW_ID` to out of the box. To confirm the
+gateway itself is wired correctly (Telegram polling, LangFlow auth, the reply round-trip) without
+waiting on those, import the trivial `ChatInput -> ChatOutput` echo flow committed at
+`tests/fixtures/langflow/dev_echo_flow.json` — see that directory's `README.md` for the one-line
+`curl` import command. Point `LANGFLOW_FLOW_ID` at the id it prints, restart `channel-gateway`
+(`docker compose up -d --no-deps channel-gateway` from `infra/`), and message your bot: whatever
+text you send comes straight back. A successful run also shows up in
+`docker logs infra-channel-gateway-1` as a `200 OK` POST to
+`http://langflow:7860/api/v1/run/<flow_id>` followed by an "Update ... is handled" line.
 
 ### Webhook mode (via the `ngrok` tunnel)
 
