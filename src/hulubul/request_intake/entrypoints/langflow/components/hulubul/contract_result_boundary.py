@@ -34,6 +34,7 @@ from hulubul.core.models.operational import (
 )
 from hulubul.core.models.operational.data_operations import DATA_OPERATION_ADAPTER
 from hulubul.core.models.operational.errors import ERROR_POLICY
+from hulubul.core.models.operational.json_extraction import extract_json_object_text
 
 __all__ = ["CONTRACT_TYPES", "ContractResultBoundaryComponent"]
 
@@ -78,8 +79,8 @@ class ContractResultBoundaryComponent(Component):
         HandleInput(  # type: ignore[call-arg]
             name="value",
             display_name="Contract Value",
-            info="The contract value to validate (Data/JSON, never free text).",
-            input_types=["Data", "JSON"],
+            info="The contract value to validate (Message/Data/JSON).",
+            input_types=["Message", "Data", "JSON"],
             required=True,
         ),
     ]
@@ -94,6 +95,29 @@ class ContractResultBoundaryComponent(Component):
         """Initialize the ContractResultBoundaryComponent."""
         super().__init__(**kwargs)
 
+    @classmethod
+    def _as_dict(cls, value: Any) -> dict[str, Any]:
+        """Coerce an incoming Message/Data/JSON edge value into a plain dict.
+
+        An Agent's final text is LLM-generated and not guaranteed to be valid
+        JSON, or may wrap the real answer in prose/markdown/a draft block.
+        Treat undecodable text as an empty dict rather than raising, so it is
+        validated normally and rejected as INVALID_CONTRACT downstream
+        instead of crashing the component build.
+        """
+        if isinstance(value, Message):
+            text = value.text
+            if not isinstance(text, str):
+                return {}
+            try:
+                decoded = json.loads(extract_json_object_text(text))
+            except json.JSONDecodeError:
+                return {}
+            return decoded if isinstance(decoded, dict) else {}
+        if hasattr(value, "data"):
+            return dict(value.data)
+        return dict(value) if value else {}
+
     def build_output(self) -> Message:
         """LFX-facing output: validate self.value.
 
@@ -104,9 +128,7 @@ class ContractResultBoundaryComponent(Component):
         check treats as a strict subset requirement against a Message-only
         target -- silently rejecting every edge into this output.
         """
-        value = self.value
-        if hasattr(value, "data"):
-            value = value.data
+        value = self._as_dict(self.value)
         result = self.validate_contract_value(value)
         if isinstance(result, Message):
             return result
@@ -133,12 +155,22 @@ class ContractResultBoundaryComponent(Component):
         if not isinstance(value, dict):
             return self._make_error_response(ErrorCode.INVALID_CONTRACT)
 
+        # JSON-mode validation, not python-mode: a real edge value (e.g. an
+        # Agent's JSON-decoded text output) is a dict of JSON primitives
+        # (string UUIDs, string enum values), which these strict-typed
+        # contracts reject via plain `model_validate`/`validate_python`
+        # (`Input should be an instance of UUID`/enum) -- confirmed live
+        # against the real router Agent output. `default=str` also makes
+        # this tolerate native-instance dicts (e.g. a `UUID` object), same
+        # rationale as `ContractInputBoundaryComponent._coerce_model`.
+        value_json = json.dumps(value, default=str)
+
         # Try to validate against each registered contract type
         for _contract_kind, model_type in CONTRACT_TYPES.items():
             try:
                 # Handle TypeAdapter (for DATA_OPERATION_REQUEST)
                 if isinstance(model_type, TypeAdapter):
-                    instance = model_type.validate_python(value)
+                    instance = model_type.validate_json(value_json)
                     # Success: return as JSON
                     if hasattr(instance, "model_dump"):
                         data = instance.model_dump(mode="json")
@@ -147,7 +179,7 @@ class ContractResultBoundaryComponent(Component):
                     return JSON(data=data)
                 # Handle BaseModel classes
                 elif isinstance(model_type, type) and issubclass(model_type, BaseModel):
-                    instance = model_type.model_validate(value)
+                    instance = model_type.model_validate_json(value_json)
                     # Success: return as JSON
                     return JSON(data=instance.model_dump(mode="json"))
                 else:

@@ -11,6 +11,7 @@ and makes no decisions. It is a thin, deterministic adapter that ensures
 structured and chat output can never diverge (per DEC-014).
 """
 
+import json
 from typing import Any
 
 from lfx.custom.custom_component.component import Component
@@ -50,7 +51,7 @@ class DeterministicRendererComponent(Component):
             name="result",
             display_name="Result",
             info="Validated IntakeResult, RouterResult, or OperationalError (never free text).",
-            input_types=["Data", "JSON"],
+            input_types=["Message", "Data", "JSON"],
             required=True,
         ),
     ]
@@ -61,10 +62,31 @@ class DeterministicRendererComponent(Component):
         ),
     ]
 
-    def __init__(self, **kwargs: Any) -> None:
-        """Initialize the DeterministicRendererComponent."""
-        super().__init__(**kwargs)
-        self.result: dict[str, Any] | Any = None
+    @staticmethod
+    def _as_dict(value: Any) -> dict[str, Any]:
+        """Coerce a Message/Data/JSON edge value into a plain dict.
+
+        `ContractResultBoundaryComponent` (the predecessor in every wiring
+        that reaches this component) emits its validated contract as a
+        `Message` wrapping JSON text, not a `Data`/`JSON` object -- discovered
+        only when actually building a live LF-00 flow (Result Boundary ->
+        Renderer edge), not by any prior unit test. Undecodable text becomes
+        an empty dict, matching this codebase's established
+        never-crash-on-malformed-JSON convention, so it is rejected as
+        INVALID_INPUT below rather than raising here.
+        """
+        if isinstance(value, Message):
+            text = value.text
+            if not isinstance(text, str):
+                return {}
+            try:
+                decoded = json.loads(text)
+            except json.JSONDecodeError:
+                return {}
+            return decoded if isinstance(decoded, dict) else {}
+        if hasattr(value, "data"):
+            return dict(value.data)
+        return dict(value) if value else {}
 
     def build_message(self) -> Message:
         """Build rendered message from validated result contract.
@@ -84,13 +106,15 @@ class DeterministicRendererComponent(Component):
         if self.result is None:
             raise ValueError("INVALID_INPUT: result is required")
 
-        if not isinstance(self.result, dict):
+        result_dict = self._as_dict(self.result)
+        if not result_dict:
             raise ValueError(
-                "INVALID_INPUT: result must be a dict (validated contract), not raw text or prose"
+                "INVALID_INPUT: result must be a non-empty dict (validated contract), "
+                "not raw text or prose"
             )
 
         # Attempt to detect and validate contract type
-        rendered_text = self._render_result(self.result)
+        rendered_text = self._render_result(result_dict)
 
         return Message(text=rendered_text)
 
@@ -110,13 +134,22 @@ class DeterministicRendererComponent(Component):
             ValueError: If result_dict does not match any valid contract
             KeyError: If required discriminator fields are missing
         """
-        # Strategy: Try to match based on discriminators, then validate
+        # Strategy: Try to match based on discriminators, then validate.
+        # `model_validate_json` (not `.model_validate(dict)`) on purpose: this
+        # project's contracts are strict-typed and reject a plain python dict
+        # containing JSON-primitive values (string UUIDs, string enum values --
+        # exactly what a real Message-wrapped edge value decodes to) via
+        # ordinary python-mode construction; only JSON-mode coercion applies
+        # the standard UUID/enum/datetime parsing rules. `default=str` handles
+        # the other calling shape too (a dict of already-native UUID/enum
+        # instances, from `.model_dump()` rather than a decoded wire payload).
+        result_json = json.dumps(result_dict, default=str)
         outcome_value = result_dict.get("outcome")
 
         # Try IntakeResult if outcome is IntakeOutcome value
         if isinstance(outcome_value, str) and outcome_value in {e.value for e in IntakeOutcome}:
             try:
-                intake_result = IntakeResult.model_validate(result_dict)
+                intake_result = IntakeResult.model_validate_json(result_json)
                 return render_intake_result(intake_result)
             except (ValidationError, ValueError):
                 pass
@@ -124,7 +157,7 @@ class DeterministicRendererComponent(Component):
         # Try RouterResult if outcome is RouterOutcome value
         if isinstance(outcome_value, str) and outcome_value in {e.value for e in RouterOutcome}:
             try:
-                router_result = RouterResult.model_validate(result_dict)
+                router_result = RouterResult.model_validate_json(result_json)
                 return render_router_result(router_result)
             except (ValidationError, ValueError):
                 pass
@@ -132,7 +165,7 @@ class DeterministicRendererComponent(Component):
         # Try OperationalError (has code discriminator)
         if "code" in result_dict:
             try:
-                error = OperationalError.model_validate(result_dict)
+                error = OperationalError.model_validate_json(result_json)
                 return render_operational_error(error)
             except (ValidationError, ValueError):
                 pass

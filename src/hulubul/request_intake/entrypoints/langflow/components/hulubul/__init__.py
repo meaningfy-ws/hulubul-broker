@@ -1,6 +1,6 @@
 """Hulubul LFX custom components for Phase 1 request intake and data access.
 
-Ten thin adapters bridging LangFlow's Message/Data boundary to pure operational contracts
+Eleven thin adapters bridging LangFlow's Message/Data boundary to pure operational contracts
 and policies (Cosmic Python DEC-007 proportional architecture):
 
 1. ExecutionEnvelopeComponent (Task 16): Trusted actor context + message envelope
@@ -13,11 +13,14 @@ and policies (Cosmic Python DEC-007 proportional architecture):
    validation and serialization
 7. RetryDecisionComponent (Task 19): Retry policy delegation
 8. DeterministicRendererComponent (Task 19): Safe rendering delegation
-9. HulubulDataAccessAgentComponent (Task 32): Agent with LF-70-scoped retry
-   middleware (read-only tool retry + model-call retry; never retries writes);
-   also short-circuits already-rejected requests before any LLM/MCP call, and
-   runs a tool-less repair pass on a malformed final result (DEC-016)
-10. RoutingContextAdapterComponent (Task 33): Deterministic
+9. HulubulGraphIdentifiersGenerator (Task 9.2): Deterministic graph identifier
+   allocation (request_id, sender_id, receiver_id, parcel_id, place_ids) before
+   the operation reaches LF-70, preventing the LLM from inventing IDs
+10. HulubulDataAccessAgentComponent (Task 32): Agent with LF-70-scoped retry
+    middleware (read-only tool retry + model-call retry; never retries writes);
+    also short-circuits already-rejected requests before any LLM/MCP call, and
+    runs a tool-less repair pass on a malformed final result (DEC-016)
+11. RoutingContextAdapterComponent (Task 33): Deterministic
     RoutingLookupRecord -> RoutingContext classification for
     getRequestRoutingContext, replacing LLM-improvised business logic
 
@@ -42,6 +45,7 @@ from .data_operation_request_boundary import DataOperationRequestBoundaryCompone
 from .data_operation_result_boundary import DataOperationResultBoundaryComponent
 from .deterministic_renderer import DeterministicRendererComponent
 from .execution_envelope import ExecutionEnvelopeComponent
+from .graph_identifiers_generator import HulubulGraphIdentifiersGenerator
 from .intake_input_boundary import IntakeInputBoundaryComponent
 from .retry_decision import RetryDecisionComponent
 from .router_input_boundary import RouterInputBoundaryComponent
@@ -54,6 +58,7 @@ __all__ = [
     "DeterministicRendererComponent",
     "ExecutionEnvelopeComponent",
     "HulubulDataAccessAgentComponent",
+    "HulubulGraphIdentifiersGenerator",
     "IntakeInputBoundaryComponent",
     "RetryDecisionComponent",
     "RouterInputBoundaryComponent",

@@ -1,6 +1,6 @@
 """Tests for ExecutionEnvelopeComponent: trust boundary isolation and session normalization."""
 
-from unittest.mock import patch
+from unittest.mock import PropertyMock, patch
 from uuid import UUID
 
 import pytest
@@ -27,6 +27,91 @@ TRUSTED_DISPLAY_NAME = "Test Sender"
 def component() -> ExecutionEnvelopeComponent:
     """Create an ExecutionEnvelopeComponent instance."""
     return ExecutionEnvelopeComponent()
+
+
+class TestRequestVariableExtraction:
+    """Test the real `self.ctx` extraction logic (not mocked).
+
+    Regression tests: confirmed live -- `self.ctx` never carries the
+    request-variable names as flat top-level keys (a debug print showed
+    `self.ctx.keys() == ['request_variables']` for a real LF-00 API
+    invocation with both actor headers set). The previous implementation
+    checked `"HULUBUL_PHASE1_ACTOR_ID" in self.ctx` directly, which was
+    always False, so `_get_api_actor_id`/`_get_api_display_name` always
+    silently fell through to the (unset) environment-variable fallback --
+    breaking every LF-00 API invocation regardless of headers sent. Every
+    other test in this file mocks `_get_api_actor_id` directly via
+    `patch.object`, so none of them exercised this real extraction path;
+    that's why this went undetected until a live debug trace caught it.
+    """
+
+    def test_get_request_variable_reads_nested_dict(
+        self, component: ExecutionEnvelopeComponent
+    ) -> None:
+        """Reads the real `self.ctx["request_variables"][name]` shape.
+
+        `Component.ctx` is a read-only property that proxies to
+        `self.graph.context` (see `lfx.custom.custom_component.component
+        .Component.ctx`'s own source) -- mock the property at the class
+        level via `PropertyMock`, the only way to override a property
+        without a setter; a plain `component.ctx = ...` raises
+        `AttributeError: can't set attribute 'ctx'` at runtime.
+        """
+        with patch.object(
+            ExecutionEnvelopeComponent,
+            "ctx",
+            new_callable=PropertyMock,
+            return_value={
+                "request_variables": {
+                    "HULUBUL_PHASE1_ACTOR_ID": TRUSTED_ACTOR_ID,
+                    "HULUBUL_PHASE1_ACTOR_DISPLAY_NAME": TRUSTED_DISPLAY_NAME,
+                }
+            },
+        ):
+            assert component._get_api_actor_id() == TRUSTED_ACTOR_ID
+            assert component._get_api_display_name() == TRUSTED_DISPLAY_NAME
+
+    def test_get_request_variable_missing_key_returns_none(
+        self, component: ExecutionEnvelopeComponent
+    ) -> None:
+        """A `request_variables` dict without the named variable yields None."""
+        with patch.object(
+            ExecutionEnvelopeComponent,
+            "ctx",
+            new_callable=PropertyMock,
+            return_value={"request_variables": {}},
+        ):
+            assert component._get_api_actor_id() is None
+            assert component._get_api_display_name() is None
+
+    def test_get_request_variable_ctx_raises_returns_none(
+        self, component: ExecutionEnvelopeComponent
+    ) -> None:
+        """`ctx` raising ValueError (the real behavior before a graph is
+        attached -- confirmed by reading `Component.ctx`'s source: "Graph
+        not found. Please build the graph first.") never crashes; it's
+        treated as "no request variables available" instead."""
+        with patch.object(
+            ExecutionEnvelopeComponent,
+            "ctx",
+            new_callable=PropertyMock,
+            side_effect=ValueError("Graph not found. Please build the graph first."),
+        ):
+            assert component._get_api_actor_id() is None
+
+    def test_get_graph_session_id_falls_back_to_session_id_attribute(
+        self, component: ExecutionEnvelopeComponent
+    ) -> None:
+        """Falls back to `self._session_id` when there is no `.graph`."""
+        component._session_id = SESSION
+
+        assert component._get_graph_session_id() == SESSION
+
+    def test_get_graph_session_id_returns_none_when_unavailable(
+        self, component: ExecutionEnvelopeComponent
+    ) -> None:
+        """No graph and no `_session_id` -> None, not a crash."""
+        assert component._get_graph_session_id() is None
 
 
 class TestActorIdResolution:
@@ -435,7 +520,7 @@ class TestMessageAcceptance:
     def test_rejects_string_input(self, component: ExecutionEnvelopeComponent) -> None:
         """Component rejects plain string input (no free prose as input)."""
         # The component should have message as Message type, not str
-        component.message = "Not a Message object"  # type: ignore[assignment]
+        component.message = "Not a Message object"
 
         with patch.object(component, "_get_api_actor_id", return_value=TRUSTED_ACTOR_ID):
             with patch.object(

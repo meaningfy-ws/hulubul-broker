@@ -40,6 +40,17 @@ class FlowReply:
         correlation_id: Request correlation ID (optional)
         result: Flow result data (optional)
         error: Error message (optional)
+        message_id: The terminal Message's own `.id` (globally unique per
+            LangFlow-generated message) -- LF-00's plain Run API response
+            (output_type=chat) only exposes the terminal ChatOutput
+            component's Message, not intermediate components' structured
+            output, so this is the practical proxy for
+            "generated metadata is unique per call" rather than a
+            hulubul-internal correlation_id, which lives inside the
+            RouterInput/RouterResult contract and isn't surfaced at the
+            Message-envelope level via this endpoint.
+        chat_text: The rendered chat text (DeterministicRenderer's output,
+            what a real chat client would display).
     """
 
     status_code: int
@@ -47,6 +58,8 @@ class FlowReply:
     correlation_id: str | None = None
     result: dict[str, Any] | None = None
     error: str | None = None
+    message_id: str | None = None
+    chat_text: str | None = None
 
     def __repr__(self) -> str:
         """Safe repr: never expose API key or sensitive data."""
@@ -100,6 +113,12 @@ class LangFlowClient:
             headers["x-api-key"] = self._api_key
         return headers
 
+    # Pinned per langflow/flow-manifest.yaml -- POST /api/v1/run/lf-00 (a name,
+    # not this UUID) 404s: LangFlow's Run API resolves by exact flow name or
+    # UUID, and this flow's registered name is "lf-00-main-router", not
+    # "lf-00". Confirmed live.
+    LF00_FLOW_ID = "38b7ee64-26c8-5d4d-97e4-6e62a0fcb557"
+
     def run_lf00(self, conversation: ConversationLike, message: str) -> FlowReply:
         """Run LF-00 (main router) flow with actor context.
 
@@ -109,19 +128,17 @@ class LangFlowClient:
             message: User message to process
 
         Returns:
-            FlowReply with status, flow_id, correlation_id, result, or error
+            FlowReply with status, flow_id, message_id, chat_text, result, or error
         """
         if not conversation.actor_id:
             return FlowReply(status_code=400, error="Missing required actor_id")
 
-        url = f"{self.base_url}/api/v1/run/lf-00"
+        url = f"{self.base_url}/api/v1/run/{self.LF00_FLOW_ID}"
         headers = self._get_headers(conversation.actor_id, conversation.display_name)
-        payload = {
-            "input": {
-                "message": message,
-                "session_id": conversation.session_id,
-            }
-        }
+        # LF-00 has a genuine ChatInput entry point (unlike LF-70/LF-10's
+        # custom-component entry points), so the API default input_type
+        # "chat" actually reaches it -- no "any" override needed here.
+        body = {"input_value": message, "session_id": conversation.session_id}
 
         try:
             if httpx is None:
@@ -131,7 +148,13 @@ class LangFlowClient:
                 )
 
             with httpx.Client() as client:
-                response = client.post(url, json=payload, headers=headers, timeout=30.0)
+                response = client.post(
+                    url,
+                    json=body,
+                    headers=headers,
+                    params={"output_type": "chat", "input_type": "chat"},
+                    timeout=60.0,
+                )
 
                 if response.status_code == 403:
                     return FlowReply(
@@ -141,10 +164,15 @@ class LangFlowClient:
 
                 if response.status_code == 200:
                     result = response.json()
+                    message_data = self._extract_chat_message_data(result)
                     return FlowReply(
                         status_code=200,
-                        flow_id="lf-00",
-                        correlation_id=result.get("correlation_id"),
+                        flow_id=self.LF00_FLOW_ID,
+                        correlation_id=(message_data or {})
+                        .get("session_metadata", {})
+                        .get("graph_run_id"),
+                        message_id=(message_data or {}).get("id"),
+                        chat_text=(message_data or {}).get("text"),
                         result=result,
                     )
 
@@ -155,6 +183,29 @@ class LangFlowClient:
         except Exception as e:
             error_str = str(e)
             return FlowReply(status_code=500, error=f"Connection error: {error_str[:200]}")
+
+    @staticmethod
+    def _extract_chat_message_data(response: dict[str, Any]) -> dict[str, Any] | None:
+        """Pull the terminal ChatOutput Message's own `.data` dict out of the
+        Run API's nested response envelope
+        (`outputs[0].outputs[0].results.message.data`).
+
+        This is LangFlow's own Message-envelope metadata (id, text,
+        session_metadata.graph_run_id, ...), not a hulubul contract --
+        `output_type=chat` only ever exposes the terminal component's
+        output, confirmed live: setting `is_output` on an earlier component
+        (e.g. the Contract Result Boundary) too does not make the plain Run
+        API return more than one component's result.
+        """
+        try:
+            outputs = response["outputs"][0]["outputs"]
+        except (KeyError, IndexError, TypeError):
+            return None
+        for output in outputs:
+            data = output.get("results", {}).get("message", {}).get("data")
+            if isinstance(data, dict):
+                return data
+        return None
 
     def run_without_key(self, flow_id: str, input_data: dict[str, Any]) -> FlowReply:
         """Unauthenticated request (for testing 403 rejection).
