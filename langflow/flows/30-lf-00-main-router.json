@@ -2057,7 +2057,7 @@
             "frozen": false,
             "icon": "shield-check",
             "id": "HulubulContractResultBoundary-hlb-lf-00-result-v1",
-            "is_output": null,
+            "is_output": true,
             "legacy": false,
             "metadata": {
               "code_hash": "819958678986",

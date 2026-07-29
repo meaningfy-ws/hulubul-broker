@@ -314,6 +314,9 @@ test-unit: ## Run unit tests with coverage (fails under 80%)
 	@ mkdir -p reports
 	poetry run pytest tests/unit --cov=hulubul --cov-branch --cov-fail-under=80 --junitxml=reports/junit-unit.xml
 
+test-static: ## Run static flow-topology tests (no live services, no coverage)
+	poetry run pytest tests/static
+
 check-architecture: ## Enforce import boundaries with import-linter
 	poetry run lint-imports
 
@@ -406,7 +409,7 @@ test-bdd: ## Run BDD step-definition tests
 # (or as part of pre-commit) rather than blocking ci-static on a known
 # false positive; the target itself is unchanged and still catches real
 # committed secrets elsewhere.
-ci-static: lint check-model-generated lint-python format-check-python typecheck check-architecture check-operational-schemas test-unit
+ci-static: lint check-model-generated lint-python format-check-python typecheck check-architecture check-operational-schemas test-unit test-static
 
 # Acceptance CI: integration + system + BDD tests + evidence report.
 ci-acceptance: test-integration test-system test-bdd release-evidence
