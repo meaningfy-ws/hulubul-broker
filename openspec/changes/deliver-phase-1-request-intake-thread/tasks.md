@@ -64,20 +64,20 @@
 
 ## 9. LF-10 Request Intake Flow
 
-- [ ] 9.1 Build the stable-ID LF-10 skeleton with deterministic strict `IntakeInput` assembly from fixed advanced envelope/context inputs that the model cannot substitute, intake extraction, strict result boundaries, LF-70 Run Flow access, and no raw MCP component
-- [ ] 9.2 Implement one-message complete intake from trusted Sender context through complete graph persistence and confirmed `new -> complete` transition
-- [ ] 9.3 Implement sparse draft capture that persists every valid supplied fact, creates no placeholder domain nodes, and confirms `new -> needsClarification`
-- [ ] 9.4 Implement focused clarification selection that reports the complete missing set while asking for exactly one field
-- [ ] 9.5 Implement multi-turn accumulation against the same sparse snapshot, immediate validation on each turn, optimistic updates, and final `needsClarification -> complete`
-- [ ] 9.6 Add direct LF-10 API tests for complete, partial, invalid-fact, several-missing-field, concurrent-update, malformed-result, and same-request outcomes
+- [x] 9.1 Build the stable-ID LF-10 skeleton with deterministic strict `IntakeInput` assembly from fixed advanced envelope/context inputs that the model cannot substitute, intake extraction, strict result boundaries, LF-70 Run Flow access, and no raw MCP component — flow built and deployed; static topology coverage in `tests/static/test_flow_topology.py::TestLF10RequestIntakeTopology`
+- [ ] 9.2 Implement one-message complete intake from trusted Sender context through complete graph persistence and confirmed `new -> complete` transition — behavior verified live against the running instance (checkpoint 9), but `tests/integration/langflow/test_lf10_request_intake.py` does not exist yet; no automated evidence
+- [ ] 9.3 Implement sparse draft capture that persists every valid supplied fact, creates no placeholder domain nodes, and confirms `new -> needsClarification` — not automated (see 9.2)
+- [ ] 9.4 Implement focused clarification selection that reports the complete missing set while asking for exactly one field — not automated (see 9.2)
+- [ ] 9.5 Implement multi-turn accumulation against the same sparse snapshot, immediate validation on each turn, optimistic updates, and final `needsClarification -> complete` — not automated (see 9.2)
+- [ ] 9.6 Add direct LF-10 API tests for complete, partial, invalid-fact, several-missing-field, concurrent-update, malformed-result, and same-request outcomes — not started
 
 ## 10. LF-00 Main Router Flow
 
-- [ ] 10.1 Build the stable-ID LF-00 skeleton with Chat Input, internally managed simulated-trust metadata, mandatory LF-70 context prefetch, deterministic strict `RouterInput` assembly on non-model-substitutable edges, LF-10 Run Flow access, structured result, and deterministic Chat Output
-- [ ] 10.2 Implement no-binding, `new`, and `needsClarification` routes to LF-10 using the authoritative request identifier
-- [ ] 10.3 Implement the exhaustive route matrix: informational no-mutation for `complete` and closed precedence, unsupported no-mutation for all eight other recognized statuses, and safe failures for unknown raw or inconsistent contexts, with parameterized evidence
-- [ ] 10.4 Add static and runtime trace assertions proving LF-00 always loads routing context first, invokes no raw MCP tool, and does not trigger duplicate model calls
-- [ ] 10.5 Add direct LF-00 API contract tests for authentication, exact actor request variables, Message-only session normalization/mismatch/fallback rejection, generated metadata, exhaustive route matrix, safe failures, and deterministic dual structured/chat output
+- [x] 10.1 Build the stable-ID LF-00 skeleton with Chat Input, internally managed simulated-trust metadata, mandatory LF-70 context prefetch, deterministic strict `RouterInput` assembly on non-model-substitutable edges, LF-10 Run Flow access, structured result, and deterministic Chat Output — flow built and deployed; static topology coverage in `tests/static/test_lf00_topology.py`
+- [ ] 10.2 Implement no-binding, `new`, and `needsClarification` routes to LF-10 using the authoritative request identifier — only the no-binding route is automated (`tests/integration/langflow/test_lf00_main_router.py::TestAbsentBindingRoute`); `new`/`needsClarification` routes verified live but not automated, need Neo4j fixtures
+- [ ] 10.3 Implement the exhaustive route matrix: informational no-mutation for `complete` and closed precedence, unsupported no-mutation for all eight other recognized statuses, and safe failures for unknown raw or inconsistent contexts, with parameterized evidence — all 6 core scenarios verified live (checkpoint 9), zero automated coverage
+- [ ] 10.4 Add static and runtime trace assertions proving LF-00 always loads routing context first, invokes no raw MCP tool, and does not trigger duplicate model calls — not started (`tests/support/trace_metadata_probe.py`, `tests/fixtures/langflow/trace_topology_v1.json`, `tests/integration/langflow/test_lf00_traces.py` all absent); note this is distinct from the static topology checks in `test_lf00_topology.py`, which only prove wiring, not runtime trace order
+- [ ] 10.5 Add direct LF-00 API contract tests for authentication, exact actor request variables, Message-only session normalization/mismatch/fallback rejection, generated metadata, exhaustive route matrix, safe failures, and deterministic dual structured/chat output — auth/session-normalization/generated-metadata/one-route chat-structured-parity done and passing (`test_api_authentication.py`, `test_lf00_main_router.py`); exhaustive route matrix and safe-failure coverage still missing (depends on 10.3)
 
 ## 11. BDD And Full-Stack Acceptance
 
