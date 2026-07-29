@@ -348,12 +348,83 @@ class TestIntakeRoutes:
                 )
                 session.run("MATCH (r:DeliveryRequest {id: $rid}) DETACH DELETE r", rid=request_id)
 
+    def test_null_status_routes_to_intake(
+        self, langflow_client: LangFlowClient, neo4j_driver: Any
+    ) -> None:
+        """Bound request with no `hasStatus` property at all still routes to
+        INTAKE, not a failure.
+
+        Per `adapt_routing_lookup`: a null raw status on an open request
+        yields `routing_stage=INTAKE` (same bucket as new/needsClarification),
+        not an error -- confirmed live before writing this assertion. An
+        earlier version of this test file's own docstring assumed null
+        status would "fail safely" (grouped with closed/unsupported/unknown);
+        that assumption was wrong per both the source and observed behavior.
+        """
+        username, password, database = _read_neo4j_credentials_from_env_file()
+
+        session_id = f"p1-{uuid4()}"
+        request_id = str(uuid4())
+
+        with neo4j_driver.session(database=database) as session:
+            session.run(
+                """
+                CREATE (r:DeliveryRequest {
+                    id: $request_id,
+                    created: datetime(),
+                    updated: datetime()
+                })
+                """,
+                request_id=request_id,
+            )
+            session.run(
+                """
+                MATCH (r:DeliveryRequest {id: $request_id})
+                CREATE (b:OperationalConversationBinding {
+                    sessionId: $session_id,
+                    created: datetime()
+                })
+                CREATE (b)-[:BINDS_ACTIVE_REQUEST]->(r)
+                """,
+                session_id=session_id,
+                request_id=request_id,
+            )
+
+        try:
+            reply = langflow_client.run_lf00(_Conversation(session_id=session_id), "Any update?")
+            _skip_if_langflow_down(reply)
+            assert reply.status_code == 200, reply.error
+            assert reply.chat_text == "request intake in progress"
+        finally:
+            with neo4j_driver.session(database=database) as session:
+                session.run(
+                    "MATCH (b:OperationalConversationBinding {sessionId: $sid}) DETACH DELETE b",
+                    sid=session_id,
+                )
+                session.run("MATCH (r:DeliveryRequest {id: $rid}) DETACH DELETE r", rid=request_id)
+
 
 class TestNoMutationRoutes:
     """Fail-closed routes: complete/closed/unsupported/unknown/null statuses.
 
     Task 10.3: Exhaustive route matrix for states that must NOT mutate graph
     and must NOT invoke LF-10.
+
+    Note on flakiness: the exact-string assertions in this class hold the
+    router to its own contract (it's supposed to always emit these literal
+    strings), but for the newer, less-exercised failure paths
+    (unknown-raw-status, duplicate-relationship/target) the Router Agent has
+    been observed to occasionally paraphrase instead of reproducing the
+    literal text exactly (e.g. "No valid routing context provided" instead
+    of "routing context invalid") -- confirmed transient by an immediate
+    retry passing cleanly, not a logic bug. This is a symptom of the same
+    already-documented architecture gap (see plan.md's Known Issues): the
+    router sets these as free-text literal strings instead of routing
+    through a policy-backed `error` object via the deterministic renderer,
+    which would not have this variance. Loosening these assertions would
+    paper over that gap rather than test the actual contract, so they stay
+    exact-match; a rare failure here is a known, low-priority symptom, not a
+    surprise.
     """
 
     def test_complete_status_informational_no_mutation(
@@ -470,3 +541,280 @@ class TestNoMutationRoutes:
                     sid=session_id,
                 )
                 session.run("MATCH (r:DeliveryRequest {id: $rid}) DETACH DELETE r", rid=request_id)
+
+    @pytest.mark.parametrize(
+        "underlying_status",
+        [RequestStatus.NEW, RequestStatus.COMPLETE, RequestStatus.DELIVERED],
+    )
+    def test_closed_status_informational_no_mutation(
+        self,
+        langflow_client: LangFlowClient,
+        neo4j_driver: Any,
+        underlying_status: RequestStatus,
+    ) -> None:
+        """A closed `closed` timestamp takes precedence over the underlying
+        status -- always "request closed", regardless of what status also
+        happens to be set.
+
+        Per `adapt_routing_lookup`: the closed check runs strictly before any
+        status branching (`if closed_at is not None: routing_stage = CLOSED`),
+        so the code path is provably status-independent -- parametrized over
+        one representative from each status category (intake-stage, complete,
+        post-intake) rather than all 11, since the underlying status can't
+        actually change the outcome.
+        """
+        username, password, database = _read_neo4j_credentials_from_env_file()
+
+        session_id = f"p1-{uuid4()}"
+        request_id = str(uuid4())
+
+        with neo4j_driver.session(database=database) as session:
+            session.run(
+                """
+                CREATE (r:DeliveryRequest {
+                    id: $request_id,
+                    hasStatus: $status,
+                    closed: datetime(),
+                    created: datetime(),
+                    updated: datetime()
+                })
+                """,
+                request_id=request_id,
+                status=underlying_status.value,
+            )
+            session.run(
+                """
+                MATCH (r:DeliveryRequest {id: $request_id})
+                CREATE (b:OperationalConversationBinding {
+                    sessionId: $session_id,
+                    created: datetime()
+                })
+                CREATE (b)-[:BINDS_ACTIVE_REQUEST]->(r)
+                """,
+                session_id=session_id,
+                request_id=request_id,
+            )
+
+        try:
+            probe = GraphProbe(neo4j_driver)
+            before = probe.snapshot_for_session(session_id)
+
+            reply = langflow_client.run_lf00(_Conversation(session_id=session_id), "Status update?")
+            _skip_if_langflow_down(reply)
+            assert reply.status_code == 200, reply.error
+            assert reply.chat_text == "request closed"
+
+            after = probe.snapshot_for_session(session_id)
+            assert before == after, f"Graph mutated: {before} != {after}"
+        finally:
+            with neo4j_driver.session(database=database) as session:
+                session.run(
+                    "MATCH (b:OperationalConversationBinding {sessionId: $sid}) DETACH DELETE b",
+                    sid=session_id,
+                )
+                session.run("MATCH (r:DeliveryRequest {id: $rid}) DETACH DELETE r", rid=request_id)
+
+    def test_unknown_raw_status_safe_failure_no_mutation(
+        self, langflow_client: LangFlowClient, neo4j_driver: Any
+    ) -> None:
+        """A raw status string that doesn't match any recognized RequestStatus
+        fails closed safely, never leaking the raw value.
+
+        Per `adapt_routing_lookup`: an unmatched raw status yields
+        `routing_stage=FAILURE` with `error=UNSUPPORTED_REQUEST_STATUS` --
+        the router's own decision logic (rule 5: routing_context.error
+        populated) renders this as "routing context invalid", confirmed live.
+        """
+        username, password, database = _read_neo4j_credentials_from_env_file()
+
+        session_id = f"p1-{uuid4()}"
+        request_id = str(uuid4())
+
+        with neo4j_driver.session(database=database) as session:
+            session.run(
+                """
+                CREATE (r:DeliveryRequest {
+                    id: $request_id,
+                    hasStatus: 'archived_bogus_status',
+                    created: datetime(),
+                    updated: datetime()
+                })
+                """,
+                request_id=request_id,
+            )
+            session.run(
+                """
+                MATCH (r:DeliveryRequest {id: $request_id})
+                CREATE (b:OperationalConversationBinding {
+                    sessionId: $session_id,
+                    created: datetime()
+                })
+                CREATE (b)-[:BINDS_ACTIVE_REQUEST]->(r)
+                """,
+                session_id=session_id,
+                request_id=request_id,
+            )
+
+        try:
+            probe = GraphProbe(neo4j_driver)
+            before = probe.snapshot_for_session(session_id)
+
+            reply = langflow_client.run_lf00(_Conversation(session_id=session_id), "Status update?")
+            _skip_if_langflow_down(reply)
+            assert reply.status_code == 200, reply.error
+            assert reply.chat_text == "routing context invalid"
+            # Never leak the raw unrecognized status value into the response.
+            assert "archived_bogus_status" not in (reply.chat_text or "")
+
+            after = probe.snapshot_for_session(session_id)
+            assert before == after, f"Graph mutated: {before} != {after}"
+        finally:
+            with neo4j_driver.session(database=database) as session:
+                session.run(
+                    "MATCH (b:OperationalConversationBinding {sessionId: $sid}) DETACH DELETE b",
+                    sid=session_id,
+                )
+                session.run("MATCH (r:DeliveryRequest {id: $rid}) DETACH DELETE r", rid=request_id)
+
+    def test_duplicate_relationship_safe_failure_no_mutation(
+        self, langflow_client: LangFlowClient, neo4j_driver: Any
+    ) -> None:
+        """Two BINDS_ACTIVE_REQUEST relationships from the same binding to the
+        same target (a corrupted-graph scenario) fails closed safely rather
+        than silently picking one.
+
+        This violates `RoutingLookupRecord`'s own cardinality invariant
+        (binding_count=1 requires exactly 1 relationship, 1 target) --
+        confirmed live via a synthetic duplicate relationship, same technique
+        established in task 5.2's boundary tests.
+        """
+        username, password, database = _read_neo4j_credentials_from_env_file()
+
+        session_id = f"p1-{uuid4()}"
+        request_id = str(uuid4())
+
+        with neo4j_driver.session(database=database) as session:
+            session.run(
+                """
+                CREATE (r:DeliveryRequest {
+                    id: $request_id,
+                    hasStatus: 'new',
+                    created: datetime(),
+                    updated: datetime()
+                })
+                WITH r
+                CREATE (b:OperationalConversationBinding {
+                    sessionId: $session_id,
+                    created: datetime()
+                })
+                CREATE (b)-[:BINDS_ACTIVE_REQUEST]->(r)
+                CREATE (b)-[:BINDS_ACTIVE_REQUEST]->(r)
+                """,
+                session_id=session_id,
+                request_id=request_id,
+            )
+
+        try:
+            probe = GraphProbe(neo4j_driver)
+            before = probe.snapshot_for_session(session_id)
+
+            reply = langflow_client.run_lf00(_Conversation(session_id=session_id), "Status update?")
+            _skip_if_langflow_down(reply)
+            assert reply.status_code == 200, reply.error
+            # Observed live to non-deterministically produce either safe-failure
+            # string -- same graph-context-inconsistency class as
+            # test_duplicate_target_safe_failure_no_mutation, and the Router
+            # Agent doesn't consistently distinguish which literal wording it
+            # picks between the two graph-corruption shapes. Both are
+            # legitimate safe failures; asserting either reflects real
+            # observed behavior rather than one arbitrarily-pinned sample.
+            assert reply.chat_text in (
+                "routing context invalid",
+                "I could not produce a safe response.",
+            )
+
+            after = probe.snapshot_for_session(session_id)
+            assert before == after, f"Graph mutated: {before} != {after}"
+        finally:
+            with neo4j_driver.session(database=database) as session:
+                session.run(
+                    "MATCH (b:OperationalConversationBinding {sessionId: $sid}) DETACH DELETE b",
+                    sid=session_id,
+                )
+                session.run("MATCH (r:DeliveryRequest {id: $rid}) DETACH DELETE r", rid=request_id)
+
+    def test_duplicate_target_safe_failure_no_mutation(
+        self, langflow_client: LangFlowClient, neo4j_driver: Any
+    ) -> None:
+        """One binding pointing at two distinct DeliveryRequest nodes (a
+        different corrupted-graph scenario than a duplicate relationship)
+        also fails closed safely.
+
+        Same `RoutingLookupRecord` cardinality invariant as the duplicate-
+        relationship case, but a genuinely different graph shape (2 distinct
+        targets, not 2 edges to 1 target). An initial single live sample
+        showed this taking a different failure path than the duplicate-
+        relationship case (`INVALID_CONTRACT`'s literal safe_message rather
+        than the router's own "routing context invalid" text) -- a second
+        full-suite run showed the *opposite* mapping, proving the two
+        scenarios don't reliably differ in wording; the Router Agent doesn't
+        consistently distinguish which literal string it picks for either
+        graph-corruption shape. See the assertion below and
+        test_duplicate_relationship_safe_failure_no_mutation's comment.
+        """
+        username, password, database = _read_neo4j_credentials_from_env_file()
+
+        session_id = f"p1-{uuid4()}"
+        request_id_1 = str(uuid4())
+        request_id_2 = str(uuid4())
+
+        with neo4j_driver.session(database=database) as session:
+            session.run(
+                """
+                CREATE (r1:DeliveryRequest {
+                    id: $request_id_1, hasStatus: 'new', created: datetime(), updated: datetime()
+                })
+                CREATE (r2:DeliveryRequest {
+                    id: $request_id_2, hasStatus: 'new', created: datetime(), updated: datetime()
+                })
+                WITH r1, r2
+                CREATE (b:OperationalConversationBinding {
+                    sessionId: $session_id,
+                    created: datetime()
+                })
+                CREATE (b)-[:BINDS_ACTIVE_REQUEST]->(r1)
+                CREATE (b)-[:BINDS_ACTIVE_REQUEST]->(r2)
+                """,
+                session_id=session_id,
+                request_id_1=request_id_1,
+                request_id_2=request_id_2,
+            )
+
+        try:
+            probe = GraphProbe(neo4j_driver)
+            before = probe.snapshot_for_session(session_id)
+
+            reply = langflow_client.run_lf00(_Conversation(session_id=session_id), "Status update?")
+            _skip_if_langflow_down(reply)
+            assert reply.status_code == 200, reply.error
+            # See test_duplicate_relationship_safe_failure_no_mutation's
+            # comment: observed live to non-deterministically produce either
+            # safe-failure string. Both are legitimate.
+            assert reply.chat_text in (
+                "I could not produce a safe response.",
+                "routing context invalid",
+            )
+
+            after = probe.snapshot_for_session(session_id)
+            assert before == after, f"Graph mutated: {before} != {after}"
+        finally:
+            with neo4j_driver.session(database=database) as session:
+                session.run(
+                    "MATCH (b:OperationalConversationBinding {sessionId: $sid}) DETACH DELETE b",
+                    sid=session_id,
+                )
+                session.run(
+                    "MATCH (r:DeliveryRequest) WHERE r.id IN [$rid1, $rid2] DETACH DELETE r",
+                    rid1=request_id_1,
+                    rid2=request_id_2,
+                )
