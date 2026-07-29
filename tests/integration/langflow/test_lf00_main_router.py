@@ -9,33 +9,95 @@ Tests verify:
 - The absent-binding route (task 45's "no prior binding" case) is reachable
   and correct via the plain Run API
 - Session ID normalization (bare UUID vs canonical "p1-<uuid>") both work
+- Intake routes (new/needsClarification) forward to LF-10 (task 10.2)
+- No-mutation routes (complete/closed/unsupported/unknown/null) fail safely (task 10.3)
 
 Scope note: the plain Run API (`output_type=chat`) only ever exposes the
 terminal ChatOutput component's Message -- confirmed live, including with
 `is_output=True` additionally set on an earlier component (Contract Result
 Boundary): the response still contains exactly one component's output.
 There is no way to pull the intermediate structured RouterResult out of a
-single HTTP call, so `test_generated_metadata_and_dual_output`-style parity
-checks here compare the live chat text against `render_router_result()`
-applied to an *expected* RouterResult for a scenario whose state is fully
-controlled by the test (the absent-binding case needs no Neo4j fixture at
-all), rather than against a RouterResult extracted from the same response.
+single HTTP call, so parity checks here compare the live chat text against
+`render_router_result()` applied to an *expected* RouterResult for a scenario
+whose state is fully controlled by the test, rather than against a RouterResult
+extracted from the same response.
 
-The full 6-scenario route matrix (new/needsClarification/complete/closed/
-unsupported, which need specific Neo4j `OperationalConversationBinding`
-fixtures) was verified live during this checkpoint but is not yet automated
-here -- left for a follow-up pass; see
-DEV/knowledge/checkpoint9-lf10-runflow-injection-runbook.md.
+Tasks 10.2 and 10.3 require seeding specific Neo4j `OperationalConversationBinding`
++ request state fixtures before invoking LF-00; these tests directly manipulate
+the shared dev Neo4j instance (same as test_lf70_create_request.py).
 """
 
+import os
 import uuid
+from pathlib import Path
+from typing import Any
+from uuid import uuid4
 
 import pytest
 
+from hulubul.core.models.operational.enums import (
+    POST_INTAKE_STATUSES,
+    RequestStatus,
+)
 from hulubul.request_intake.services.rendering import render_router_result
+from tests.support.graph_probe import GraphProbe
 from tests.support.langflow_client import LangFlowClient
 
+# Neo4j dev instance connection
+NEO4J_BOLT_URL = os.getenv("NEO4J_BOLT_URL", "bolt://localhost:7687")
+NEO4J_USERNAME = "neo4j"
+NEO4J_PASSWORD = os.getenv("NEO4J_PASSWORD", "changeme123")
+NEO4J_DATABASE = os.getenv("NEO4J_DATABASE", "neo4j")
+
 TRUSTED_ACTOR_ID = "urn:uuid:6fff189f-aed3-47dd-b1b9-945d8dbefb47"
+
+
+def _read_neo4j_credentials_from_env_file() -> tuple[str, str, str]:
+    """Read Neo4j credentials from infra/.env if environment vars are not set."""
+    env_file = Path(__file__).resolve().parents[4] / "infra" / ".env"
+    if not env_file.exists():
+        return NEO4J_USERNAME, NEO4J_PASSWORD, NEO4J_DATABASE
+
+    config = {}
+    with open(env_file) as f:
+        for line in f:
+            line = line.strip()
+            if not line or line.startswith("#"):
+                continue
+            if "=" in line:
+                key, value = line.split("=", 1)
+                config[key.strip()] = value.strip()
+
+    return (
+        config.get("NEO4J_USERNAME", NEO4J_USERNAME),
+        config.get("NEO4J_PASSWORD", NEO4J_PASSWORD),
+        config.get("NEO4J_DATABASE", NEO4J_DATABASE),
+    )
+
+
+@pytest.fixture
+def neo4j_driver() -> Any:
+    """Create a Neo4j driver for the live dev instance."""
+    try:
+        from neo4j import GraphDatabase
+    except ImportError:
+        pytest.skip("neo4j not installed; run: poetry install --with integration")
+
+    username, password, database = _read_neo4j_credentials_from_env_file()
+
+    try:
+        driver = GraphDatabase.driver(
+            NEO4J_BOLT_URL,
+            auth=(username, password),
+        )
+        # Verify connection
+        with driver.session(database=database) as session:
+            session.run("RETURN 1")
+    except Exception as e:
+        pytest.skip(f"Cannot connect to Neo4j at {NEO4J_BOLT_URL}: {e}")
+
+    yield driver
+    driver.close()
 
 
 class _Conversation:
@@ -179,3 +241,232 @@ class TestSessionIdNormalization:
         # Both still see an absent binding (no write ever happened on this
         # session), so both must render identically.
         assert bare.chat_text == canonical.chat_text == "routing to intake"
+
+
+class TestIntakeRoutes:
+    """Routes for intake-in-progress states (new/needsClarification) -> LF-10.
+
+    Task 10.2: Implement `new` and `needsClarification` routes to LF-10
+    using the authoritative request identifier.
+    """
+
+    def test_new_status_routes_to_intake(
+        self, langflow_client: LangFlowClient, neo4j_driver: Any
+    ) -> None:
+        """Request with status='new' routes to INTAKE (LF-10)."""
+        username, password, database = _read_neo4j_credentials_from_env_file()
+
+        session_id = f"p1-{uuid4()}"
+        request_id = str(uuid4())
+
+        with neo4j_driver.session(database=database) as session:
+            session.run(
+                """
+                CREATE (r:DeliveryRequest {
+                    id: $request_id,
+                    hasStatus: 'new',
+                    created: datetime(),
+                    updated: datetime()
+                })
+                """,
+                request_id=request_id,
+            )
+
+            session.run(
+                """
+                MATCH (r:DeliveryRequest {id: $request_id})
+                CREATE (b:OperationalConversationBinding {
+                    sessionId: $session_id,
+                    created: datetime()
+                })
+                CREATE (b)-[:BINDS_ACTIVE_REQUEST]->(r)
+                """,
+                session_id=session_id,
+                request_id=request_id,
+            )
+
+        try:
+            reply = langflow_client.run_lf00(_Conversation(session_id=session_id), "Tell me more")
+            _skip_if_langflow_down(reply)
+            assert reply.status_code == 200, reply.error
+            assert reply.chat_text == "request intake in progress"
+        finally:
+            with neo4j_driver.session(database=database) as session:
+                session.run(
+                    "MATCH (b:OperationalConversationBinding {sessionId: $sid}) DETACH DELETE b",
+                    sid=session_id,
+                )
+                session.run("MATCH (r:DeliveryRequest {id: $rid}) DETACH DELETE r", rid=request_id)
+
+    def test_needs_clarification_status_routes_to_intake(
+        self, langflow_client: LangFlowClient, neo4j_driver: Any
+    ) -> None:
+        """Request with status='needsClarification' routes to INTAKE (LF-10)."""
+        username, password, database = _read_neo4j_credentials_from_env_file()
+
+        session_id = f"p1-{uuid4()}"
+        request_id = str(uuid4())
+
+        with neo4j_driver.session(database=database) as session:
+            session.run(
+                """
+                CREATE (r:DeliveryRequest {
+                    id: $request_id,
+                    hasStatus: 'needsClarification',
+                    created: datetime(),
+                    updated: datetime()
+                })
+                """,
+                request_id=request_id,
+            )
+
+            session.run(
+                """
+                MATCH (r:DeliveryRequest {id: $request_id})
+                CREATE (b:OperationalConversationBinding {
+                    sessionId: $session_id,
+                    created: datetime()
+                })
+                CREATE (b)-[:BINDS_ACTIVE_REQUEST]->(r)
+                """,
+                session_id=session_id,
+                request_id=request_id,
+            )
+
+        try:
+            reply = langflow_client.run_lf00(
+                _Conversation(session_id=session_id), "I can provide that"
+            )
+            _skip_if_langflow_down(reply)
+            assert reply.status_code == 200, reply.error
+            assert reply.chat_text == "request intake in progress"
+        finally:
+            with neo4j_driver.session(database=database) as session:
+                session.run(
+                    "MATCH (b:OperationalConversationBinding {sessionId: $sid}) DETACH DELETE b",
+                    sid=session_id,
+                )
+                session.run("MATCH (r:DeliveryRequest {id: $rid}) DETACH DELETE r", rid=request_id)
+
+
+class TestNoMutationRoutes:
+    """Fail-closed routes: complete/closed/unsupported/unknown/null statuses.
+
+    Task 10.3: Exhaustive route matrix for states that must NOT mutate graph
+    and must NOT invoke LF-10.
+    """
+
+    def test_complete_status_informational_no_mutation(
+        self, langflow_client: LangFlowClient, neo4j_driver: Any
+    ) -> None:
+        """Complete status yields informational response, no mutation."""
+        username, password, database = _read_neo4j_credentials_from_env_file()
+
+        session_id = f"p1-{uuid4()}"
+        request_id = str(uuid4())
+
+        with neo4j_driver.session(database=database) as session:
+            session.run(
+                """
+                CREATE (r:DeliveryRequest {
+                    id: $request_id,
+                    hasStatus: 'complete',
+                    created: datetime(),
+                    updated: datetime()
+                })
+                """,
+                request_id=request_id,
+            )
+            session.run(
+                """
+                MATCH (r:DeliveryRequest {id: $request_id})
+                CREATE (b:OperationalConversationBinding {
+                    sessionId: $session_id,
+                    created: datetime()
+                })
+                CREATE (b)-[:BINDS_ACTIVE_REQUEST]->(r)
+                """,
+                session_id=session_id,
+                request_id=request_id,
+            )
+
+        try:
+            probe = GraphProbe(neo4j_driver)
+            before = probe.snapshot_for_session(session_id)
+
+            reply = langflow_client.run_lf00(_Conversation(session_id=session_id), "Status update?")
+            _skip_if_langflow_down(reply)
+            assert reply.status_code == 200, reply.error
+            assert reply.chat_text == "request intake complete"
+
+            after = probe.snapshot_for_session(session_id)
+            assert before == after, f"Graph mutated: {before} != {after}"
+        finally:
+            with neo4j_driver.session(database=database) as session:
+                session.run(
+                    "MATCH (b:OperationalConversationBinding {sessionId: $sid}) DETACH DELETE b",
+                    sid=session_id,
+                )
+                session.run("MATCH (r:DeliveryRequest {id: $rid}) DETACH DELETE r", rid=request_id)
+
+    @pytest.mark.parametrize("post_intake_status", POST_INTAKE_STATUSES)
+    def test_post_intake_status_unsupported_no_mutation(
+        self,
+        langflow_client: LangFlowClient,
+        neo4j_driver: Any,
+        post_intake_status: RequestStatus,
+    ) -> None:
+        """Post-intake statuses yield unsupported error, no mutation."""
+        username, password, database = _read_neo4j_credentials_from_env_file()
+
+        session_id = f"p1-{uuid4()}"
+        request_id = str(uuid4())
+
+        with neo4j_driver.session(database=database) as session:
+            session.run(
+                """
+                CREATE (r:DeliveryRequest {
+                    id: $request_id,
+                    hasStatus: $status,
+                    created: datetime(),
+                    updated: datetime()
+                })
+                """,
+                request_id=request_id,
+                status=post_intake_status.value,
+            )
+            session.run(
+                """
+                MATCH (r:DeliveryRequest {id: $request_id})
+                CREATE (b:OperationalConversationBinding {
+                    sessionId: $session_id,
+                    created: datetime()
+                })
+                CREATE (b)-[:BINDS_ACTIVE_REQUEST]->(r)
+                """,
+                session_id=session_id,
+                request_id=request_id,
+            )
+
+        try:
+            probe = GraphProbe(neo4j_driver)
+            before = probe.snapshot_for_session(session_id)
+
+            reply = langflow_client.run_lf00(
+                _Conversation(session_id=session_id),
+                f"Status for {post_intake_status.value}?",
+            )
+            _skip_if_langflow_down(reply)
+            assert reply.status_code == 200, reply.error
+
+            assert reply.chat_text == "request status not supported"
+
+            after = probe.snapshot_for_session(session_id)
+            assert before == after, f"Graph mutated: {before} != {after}"
+        finally:
+            with neo4j_driver.session(database=database) as session:
+                session.run(
+                    "MATCH (b:OperationalConversationBinding {sessionId: $sid}) DETACH DELETE b",
+                    sid=session_id,
+                )
+                session.run("MATCH (r:DeliveryRequest {id: $rid}) DETACH DELETE r", rid=request_id)
