@@ -2031,7 +2031,8 @@
                 "tool_mode": false,
                 "trace_as_metadata": true,
                 "track_in_telemetry": true,
-                "type": "str"
+                "type": "str",
+                "value": "lf-10-request-intake"
               },
               "session_id": {
                 "_input_type": "MessageTextInput",

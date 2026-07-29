@@ -1303,7 +1303,8 @@
                 "tool_mode": false,
                 "trace_as_metadata": true,
                 "track_in_telemetry": true,
-                "type": "str"
+                "type": "str",
+                "value": "lf-70-data-access"
               },
               "is_refresh": false,
               "session_id": {
