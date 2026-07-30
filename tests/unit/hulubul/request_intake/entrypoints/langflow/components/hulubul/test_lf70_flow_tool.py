@@ -1,6 +1,7 @@
 """Tests for the deterministic LF-70 flow tool bridge."""
 
 import json
+from uuid import UUID
 
 import pytest
 from lfx.schema.message import Message
@@ -9,6 +10,8 @@ from hulubul.core.models.operational.enums import DataOperation, DataOperationOu
 from hulubul.request_intake.entrypoints.langflow.components.hulubul.lf70_flow_tool import (
     HulubulLf70FlowTool,
 )
+
+LF70_RUN_SESSION_ID = UUID("cccccccc-cccc-4ccc-8ccc-cccccccccccc")
 
 
 def _lf70_run_response(text: str) -> dict:
@@ -106,3 +109,26 @@ def test_call_lf70_uses_validated_response(monkeypatch: pytest.MonkeyPatch) -> N
     result = component.call_lf70()
 
     assert json.loads(result.text)["request_id"] == "req-from-post"
+
+
+def test_call_lf70_isolates_langflow_run_session(monkeypatch: pytest.MonkeyPatch) -> None:
+    """LF-70 must not inherit LF-10's conversation session as its run session."""
+    component = HulubulLf70FlowTool()
+    component.input_value = '{"operation":"createDeliveryRequest"}'
+    component.session_id = "p1-outer-conversation-session"
+    component.target_flow_id = "flow-1"
+    component.base_url = "http://langflow.local"
+
+    def fake_post(base_url: str, flow_id: str, access_token: str, payload: dict) -> dict:
+        assert payload["session_id"] == str(LF70_RUN_SESSION_ID)
+        return _lf70_run_response(_confirmed_result("req-isolated-session"))
+
+    monkeypatch.setattr(
+        "hulubul.request_intake.entrypoints.langflow.components.hulubul.lf70_flow_tool.uuid4",
+        lambda: LF70_RUN_SESSION_ID,
+    )
+    monkeypatch.setattr(component, "_post_lf70", fake_post)
+
+    result = component.call_lf70()
+
+    assert json.loads(result.text)["request_id"] == "req-isolated-session"

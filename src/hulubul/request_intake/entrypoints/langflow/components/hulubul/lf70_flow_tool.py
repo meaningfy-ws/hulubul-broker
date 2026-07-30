@@ -91,7 +91,7 @@ class HulubulLf70FlowTool(Component):
         flow_id = self.target_flow_id or DEFAULT_LF70_FLOW_ID
         base_url = self.base_url or DEFAULT_LANGFLOW_BASE_URL
         access_token = os.environ.get(LANGFLOW_API_KEY_ENV, "")
-        session_id = self.session_id or f"lf70-{uuid4()}"
+        session_id = str(uuid4())
 
         try:
             payload = self._build_run_payload(input_text, session_id)
