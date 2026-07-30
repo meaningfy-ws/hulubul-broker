@@ -95,7 +95,7 @@ def test_call_lf70_uses_validated_response(monkeypatch: pytest.MonkeyPatch) -> N
     component.target_flow_id = "flow-1"
     component.base_url = "http://langflow.local"
 
-    def fake_post(base_url: str, flow_id: str, auth_value: str, payload: dict) -> dict:
+    def fake_post(base_url: str, flow_id: str, access_token: str, payload: dict) -> dict:
         assert base_url == "http://langflow.local"
         assert flow_id == "flow-1"
         assert payload["input_value"] == component.input_value

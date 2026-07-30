@@ -23,8 +23,7 @@ __all__ = ["HulubulLf70FlowTool"]
 
 DEFAULT_LF70_FLOW_ID = "a6ac335f-3b94-4906-9bdc-eb5c30cc010d"
 DEFAULT_LANGFLOW_BASE_URL = "http://localhost:7860"
-LANGFLOW_AUTH_ENV = "LANGFLOW_" + "API_" + "KEY"
-LANGFLOW_AUTH_HEADER = "x-" + "api-" + "key"
+LANGFLOW_API_KEY_ENV = "LANGFLOW_API_KEY"
 
 
 class HulubulLf70FlowTool(Component):
@@ -91,12 +90,12 @@ class HulubulLf70FlowTool(Component):
 
         flow_id = self.target_flow_id or DEFAULT_LF70_FLOW_ID
         base_url = self.base_url or DEFAULT_LANGFLOW_BASE_URL
-        auth_value = os.environ.get(LANGFLOW_AUTH_ENV, "")
+        access_token = os.environ.get(LANGFLOW_API_KEY_ENV, "")
         session_id = self.session_id or f"lf70-{uuid4()}"
 
         try:
             payload = self._build_run_payload(input_text, session_id)
-            response = self._post_lf70(base_url, flow_id, auth_value, payload)
+            response = self._post_lf70(base_url, flow_id, access_token, payload)
         except Exception:
             return self._error_message(ErrorCode.MCP_OPERATION_FAILURE)
 
@@ -108,7 +107,7 @@ class HulubulLf70FlowTool(Component):
 
     @staticmethod
     def _post_lf70(
-        base_url: str, flow_id: str, auth_value: str, payload: dict[str, str]
+        base_url: str, flow_id: str, access_token: str, payload: dict[str, str]
     ) -> dict[str, Any]:
         query = parse.urlencode(
             {
@@ -119,8 +118,8 @@ class HulubulLf70FlowTool(Component):
         )
         url = f"{base_url.rstrip('/')}/api/v1/run/{flow_id}?{query}"
         headers = {"Content-Type": "application/json"}
-        if auth_value:
-            headers[LANGFLOW_AUTH_HEADER] = auth_value
+        if access_token:
+            headers["x-api-key"] = access_token
         req = request.Request(
             url,
             data=json.dumps(payload).encode(),
