@@ -62,22 +62,35 @@ class ContractInputBoundaryComponent(Component):
             name="envelope",
             display_name="Envelope",
             info=(
-                "Fixed MainFlowInput envelope (advanced, not model-editable). "
-                "Required if using fixed-edge path."
+                "Fixed MainFlowInput envelope (not model-editable -- excluded "
+                "from the model-callable tool schema via fixed-edge wiring, "
+                "not via `advanced`). Required if using fixed-edge path.\n\n"
+                "Deliberately NOT `advanced=True`: LangFlow's frontend treats "
+                "an incoming edge into an `advanced` field as invalid and "
+                "silently strips it while loading/saving the graph -- "
+                "`advanced` is UI-only metadata (which section a field shows "
+                "under) and has no effect on trust, read-only-ness, or "
+                "model-editability; using it for a field that participates "
+                "in the normal data path caused this exact edge to be "
+                "dropped for real when a canvas was saved while that warning "
+                "showed. See DEV/reports/advanced-field-in-langflow.md."
             ),
             input_types=["Data", "JSON"],
-            advanced=True,
+            advanced=False,
             required=False,
         ),
         HandleInput(  # type: ignore[call-arg]
             name="routing_context",
             display_name="Routing Context",
             info=(
-                "Fixed RoutingContext (advanced, not model-editable). "
-                "Required if using fixed-edge path."
+                "Fixed RoutingContext (not model-editable -- excluded from "
+                "the model-callable tool schema via fixed-edge wiring, not "
+                "via `advanced`). Required if using fixed-edge path.\n\n"
+                "Deliberately NOT `advanced=True`: see the `envelope` "
+                "field's docstring above for why."
             ),
             input_types=["Data", "JSON"],
-            advanced=True,
+            advanced=False,
             required=False,
         ),
         MessageTextInput(  # type: ignore[call-arg]
