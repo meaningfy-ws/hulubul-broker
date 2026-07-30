@@ -101,7 +101,7 @@ class ExecutionEnvelopeComponent(Component):
         raw_session = self.message.session_id
         if isinstance(raw_session, UUID):
             raw_session = str(raw_session)
-        session_id = self._normalize_and_validate_session(raw_session)
+        session_id = self._normalize_and_validate_session(raw_session, source)
 
         # Generate unique message_id and correlation_id
         message_id = uuid4()
@@ -239,12 +239,15 @@ class ExecutionEnvelopeComponent(Component):
         # message-vs-graph mismatch check in _normalize_and_validate_session.
         return None
 
-    def _normalize_and_validate_session(self, session_id: str | None) -> str:
+    def _normalize_and_validate_session(
+        self, session_id: str | None, source: InvocationSource
+    ) -> str:
         """Normalize and validate session ID.
 
         Accepts:
         - Bare UUID: "12345678-1234-4000-8000-000000000000"
         - Canonical: "p1-12345678-1234-4000-8000-000000000000"
+        - Playground-only UI labels such as "New Session 0"
 
         Both normalize to: "p1-<lowercase-uuid>"
 
@@ -272,12 +275,7 @@ class ExecutionEnvelopeComponent(Component):
         # Remove p1- prefix if present
         uuid_part = normalized[3:] if normalized.startswith("p1-") else normalized
 
-        # Validate UUID format
-        try:
-            UUID(uuid_part)
-        except ValueError as err:
-            msg = f"INVALID_INPUT: session_id must be a valid UUID, got '{session_id}'"
-            raise ValueError(msg) from err
+        uuid_part = self._session_uuid_part(uuid_part, session_id, source)
 
         # Return in canonical form
         canonical_session = f"p1-{uuid_part}"
@@ -287,10 +285,21 @@ class ExecutionEnvelopeComponent(Component):
         if graph_session:
             # Normalize graph session for comparison
             graph_normalized = graph_session.lower().strip()
-            if graph_normalized.startswith("p1-"):
-                graph_uuid = graph_normalized[3:]
-            else:
-                graph_uuid = graph_normalized
+            graph_candidate = (
+                graph_normalized[3:] if graph_normalized.startswith("p1-") else graph_normalized
+            )
+            try:
+                UUID(graph_candidate)
+                graph_uuid = graph_candidate
+            except ValueError as err:
+                if source is InvocationSource.PLAYGROUND and graph_normalized == normalized:
+                    graph_uuid = uuid_part
+                else:
+                    msg = (
+                        f"INVALID_INPUT: graph session_id must be a valid UUID, "
+                        f"got '{graph_session}'"
+                    )
+                    raise ValueError(msg) from err
 
             # Ensure they match after normalization
             if graph_uuid != uuid_part:
@@ -300,3 +309,16 @@ class ExecutionEnvelopeComponent(Component):
                 )
 
         return canonical_session
+
+    @staticmethod
+    def _session_uuid_part(
+        uuid_part: str, original_session_id: str, source: InvocationSource
+    ) -> str:
+        try:
+            UUID(uuid_part)
+            return uuid_part
+        except ValueError as err:
+            if source is InvocationSource.PLAYGROUND:
+                return str(uuid4())
+            msg = f"INVALID_INPUT: session_id must be a valid UUID, got '{original_session_id}'"
+            raise ValueError(msg) from err

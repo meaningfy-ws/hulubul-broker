@@ -21,6 +21,8 @@ SESSION = "p1-12345678-1234-4000-8000-000000000000"
 BARE_UUID = "12345678-1234-4000-8000-000000000000"
 TRUSTED_ACTOR_ID = "urn:uuid:87654321-4321-4000-8000-000000000000"
 TRUSTED_DISPLAY_NAME = "Test Sender"
+PLAYGROUND_SESSION_UUID_1 = UUID("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa")
+PLAYGROUND_SESSION_UUID_2 = UUID("bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb")
 
 
 @pytest.fixture
@@ -274,6 +276,56 @@ class TestSessionNormalization:
             ):
                 envelope = MainFlowInput.model_validate(component.build_envelope().data)
                 assert envelope.session_id == f"p1-{BARE_UUID.lower()}"
+
+    def test_playground_label_session_generates_random_uuid(
+        self, component: ExecutionEnvelopeComponent
+    ) -> None:
+        """Playground labels like `New Session 0` are normalized for local UX."""
+        component.message = Message(text="Hello", session_id="New Session 0")
+
+        with patch.object(component, "_get_playground_actor_id", return_value=TRUSTED_ACTOR_ID):
+            with patch.object(
+                component, "_get_invocation_source", return_value=InvocationSource.PLAYGROUND
+            ):
+                with patch(
+                    "hulubul.request_intake.entrypoints.langflow.components.hulubul.execution_envelope.uuid4",
+                    side_effect=[
+                        PLAYGROUND_SESSION_UUID_1,
+                        UUID("11111111-1111-4111-8111-111111111111"),
+                        UUID("22222222-2222-4222-8222-222222222222"),
+                        PLAYGROUND_SESSION_UUID_2,
+                        UUID("33333333-3333-4333-8333-333333333333"),
+                        UUID("44444444-4444-4444-8444-444444444444"),
+                    ],
+                ):
+                    first = MainFlowInput.model_validate(component.build_envelope().data)
+                    second = MainFlowInput.model_validate(component.build_envelope().data)
+
+        assert first.session_id == f"p1-{PLAYGROUND_SESSION_UUID_1}"
+        assert second.session_id == f"p1-{PLAYGROUND_SESSION_UUID_2}"
+
+    def test_playground_label_matching_graph_label_is_accepted(
+        self, component: ExecutionEnvelopeComponent
+    ) -> None:
+        """Matching Playground labels do not fail the message-vs-graph check."""
+        component.message = Message(text="Hello", session_id="New Session 0")
+
+        with patch.object(component, "_get_playground_actor_id", return_value=TRUSTED_ACTOR_ID):
+            with patch.object(
+                component, "_get_invocation_source", return_value=InvocationSource.PLAYGROUND
+            ):
+                with patch.object(component, "_get_graph_session_id", return_value="New Session 0"):
+                    with patch(
+                        "hulubul.request_intake.entrypoints.langflow.components.hulubul.execution_envelope.uuid4",
+                        side_effect=[
+                            PLAYGROUND_SESSION_UUID_1,
+                            UUID("11111111-1111-4111-8111-111111111111"),
+                            UUID("22222222-2222-4222-8222-222222222222"),
+                        ],
+                    ):
+                        envelope = MainFlowInput.model_validate(component.build_envelope().data)
+
+        assert envelope.session_id == f"p1-{PLAYGROUND_SESSION_UUID_1}"
 
 
 class TestSessionValidation:
