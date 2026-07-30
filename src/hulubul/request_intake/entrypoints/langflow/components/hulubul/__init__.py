@@ -1,6 +1,6 @@
 """Hulubul LFX custom components for Phase 1 request intake and data access.
 
-Eleven thin adapters bridging LangFlow's Message/Data boundary to pure operational contracts
+Twelve thin adapters bridging LangFlow's Message/Data boundary to pure operational contracts
 and policies (Cosmic Python DEC-007 proportional architecture):
 
 1. ExecutionEnvelopeComponent (Task 16): Trusted actor context + message envelope
@@ -23,6 +23,8 @@ and policies (Cosmic Python DEC-007 proportional architecture):
 11. RoutingContextAdapterComponent (Task 33): Deterministic
     RoutingLookupRecord -> RoutingContext classification for
     getRequestRoutingContext, replacing LLM-improvised business logic
+12. HulubulLf70FlowTool: Deterministic LF-10 tool bridge to canonical LF-70
+    when Langflow's stock RunFlow tool exposure returns an empty toolset
 
 One component per file: LangFlow's directory-based custom component loader
 registers exactly one component per file, named after the file -- a second
@@ -46,6 +48,7 @@ from .data_operation_result_boundary import DataOperationResultBoundaryComponent
 from .deterministic_renderer import DeterministicRendererComponent
 from .execution_envelope import ExecutionEnvelopeComponent
 from .graph_identifiers_generator import HulubulGraphIdentifiersGenerator
+from .lf70_flow_tool import HulubulLf70FlowTool
 from .intake_input_boundary import IntakeInputBoundaryComponent
 from .retry_decision import RetryDecisionComponent
 from .router_input_boundary import RouterInputBoundaryComponent
@@ -59,6 +62,7 @@ __all__ = [
     "ExecutionEnvelopeComponent",
     "HulubulDataAccessAgentComponent",
     "HulubulGraphIdentifiersGenerator",
+    "HulubulLf70FlowTool",
     "IntakeInputBoundaryComponent",
     "RetryDecisionComponent",
     "RouterInputBoundaryComponent",
