@@ -3,7 +3,7 @@ name = "hulubul-broker"
 version = "0.1.0"
 description = "Hulubul V1 conceptual model and deterministic generators (LinkML)."
 authors = ["Meaningfy <eugen@meaningfy.ws>"]
-license = "CC-BY-4.0"
+license = "Apache-2.0"
 # hulubul is the installable application package; the generator scripts stay
 # packaged alongside it. The LinkML schemas live under model/linkml.
 packages = [
