@@ -123,6 +123,7 @@ def scan_tracked_files(repo: Path) -> tuple[SecretFinding, ...]:
         "tests/integration/langflow/test_lf70_update_request.py",  # Local dev defaults only
         "tests/integration/langflow/test_lf70_status_transition.py",  # Local dev defaults only
         "tests/integration/langflow/test_lf00_main_router.py",  # Local dev defaults only
+        "tests/integration/langflow/test_lf00_traces.py",  # Local dev defaults only
         "infra/.env.example",  # Template with placeholders only
     )
 
