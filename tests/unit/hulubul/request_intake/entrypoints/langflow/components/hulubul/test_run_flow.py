@@ -1,17 +1,20 @@
-"""Tests for the Hulubul Run Flow component's two overrides.
+"""Tests for the Hulubul Run Flow component's overrides.
 
 The point of these tests is that they run against the *real* ``lfx`` machinery
 the overrides exist to protect: the schema builder that crashes on a raw
-connection-field label, and the payload builder that omits the input category.
+connection-field label, the payload builder that omits the input category, and
+the per-tool-call component copy that used to lose the agent's arguments.
 """
 
 import asyncio
+from copy import deepcopy
 from typing import Any
 
 import pytest
 from lfx.components.flow_controls.run_flow import RunFlowComponent
 from lfx.io.schema import create_input_schema_from_dict
 from lfx.schema.dotdict import dotdict
+from lfx.template.field.base import Output
 
 from hulubul.request_intake.entrypoints.langflow.components.hulubul.run_flow import (
     HulubulRunFlowComponent,
@@ -20,6 +23,7 @@ from hulubul.request_intake.entrypoints.langflow.components.hulubul.run_flow imp
 CONNECTION_FIELD_TYPE = "other"
 FLOW_TWEAK_PARAM_KEY = "flow_tweak_data"
 BOUNDARY_VERTEX_ID = "HulubulDataOperationRequestBoundary-hlb-lf-70-request-v1"
+RESULT_VERTEX_ID = "HulubulDataOperationResultBoundary-hlb-lf-70-result-v1"
 
 
 def _field(name: str, field_type: str) -> dotdict:
@@ -142,6 +146,102 @@ class TestGetRequiredData:
         monkeypatch.setattr(RunFlowComponent, "get_required_data", no_flow_selected)
 
         assert asyncio.run(_component().get_required_data()) is None
+
+
+class TestToolArgumentDelivery:
+    """Run time: whether an agent's tool arguments reach the run that uses them.
+
+    ``ComponentToolkit`` copies the component per tool call, applies the
+    agent's arguments to the copy, then re-resolves the output method on the
+    copy by ``output_method.__name__``. Stock RunFlow breaks that twice over,
+    so the sub-flow ran against the original component and saw no arguments
+    at all. These tests reproduce that exact sequence.
+    """
+
+    @staticmethod
+    def _with_flow_output(
+        vertex_id: str = RESULT_VERTEX_ID,
+    ) -> tuple[HulubulRunFlowComponent, str]:
+        """A component carrying one dynamic flow output, as a live node does."""
+        component = HulubulRunFlowComponent(_id="test-run-flow")  # type: ignore[no-untyped-call]
+        method_name = component._register_flow_output_method(
+            vertex_id=vertex_id, output_name="response"
+        )
+        output = Output(
+            name=f"{vertex_id}~response",
+            display_name="Result",
+            method=method_name,
+            types=["JSON"],
+        )
+        component._outputs_map[output.name] = output
+        component.outputs = [output]
+        return component, method_name
+
+    def test_resolver_name_matches_the_attribute_it_is_published_under(self) -> None:
+        component, method_name = self._with_flow_output()
+
+        assert getattr(component, method_name).__name__ == method_name
+
+    def test_registration_still_reports_the_upstream_method_name(self) -> None:
+        _, method_name = self._with_flow_output()
+
+        assert method_name == (
+            "_resolve_flow_output__HulubulDataOperationResultBoundary_hlb_lf_70_result_v1__response"
+        )
+
+    def test_each_registration_owns_its_own_closure(self) -> None:
+        """Renaming one resolver must not rename another."""
+        component = HulubulRunFlowComponent(_id="test-run-flow")  # type: ignore[no-untyped-call]
+
+        first = component._register_flow_output_method(vertex_id="alpha", output_name="response")
+        second = component._register_flow_output_method(vertex_id="beta", output_name="response")
+
+        assert first != second
+        assert getattr(component, first).__name__ == first
+        assert getattr(component, second).__name__ == second
+
+    def test_copy_carries_the_resolver(self) -> None:
+        """Component.__deepcopy__ rebuilds the instance and drops dynamic attrs."""
+        component, method_name = self._with_flow_output()
+
+        duplicate = deepcopy(component)
+
+        assert hasattr(duplicate, method_name)
+
+    def test_toolkit_lookup_lands_on_the_copy_not_the_original(self) -> None:
+        """The exact lookup ComponentToolkit._build_output_*_function performs."""
+        component, method_name = self._with_flow_output()
+        assert component.outputs[0].method == method_name
+        output_method = getattr(component, method_name)
+
+        duplicate = deepcopy(component)
+        resolved = getattr(duplicate, output_method.__name__, output_method)
+
+        assert resolved.__self__ is duplicate
+
+    def test_arguments_applied_to_the_copy_reach_the_sub_flow_run(self) -> None:
+        """End to end over the real toolkit sequence: copy, set, resolve, build."""
+        component, method_name = self._with_flow_output()
+        assert component.outputs[0].method == method_name
+        output_method = getattr(component, method_name)
+
+        duplicate = deepcopy(component)
+        duplicate.set(  # type: ignore[no-untyped-call]
+            flow_tweak_data={
+                f"{BOUNDARY_VERTEX_ID}~input_value": '{"operation":"readDeliveryRequest"}'
+            }
+        )
+        executing = getattr(duplicate, output_method.__name__, output_method).__self__
+
+        inputs = executing._build_inputs(executing._build_flow_tweak_data())
+
+        assert inputs == [
+            {
+                "components": [BOUNDARY_VERTEX_ID],
+                "input_value": '{"operation":"readDeliveryRequest"}',
+                "type": "any",
+            }
+        ]
 
 
 class TestBuildInputsFromIoputs:
