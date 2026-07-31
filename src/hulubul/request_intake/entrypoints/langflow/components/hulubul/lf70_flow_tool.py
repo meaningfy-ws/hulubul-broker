@@ -84,18 +84,20 @@ class HulubulLf70FlowTool(Component):
 
     def call_lf70(self) -> Message:
         """Call LF-70 and return a validated DataOperationResult message."""
-        input_text = self.input_value.text if isinstance(self.input_value, Message) else self.input_value
+        input_text = (
+            self.input_value.text if isinstance(self.input_value, Message) else self.input_value
+        )
         if not isinstance(input_text, str) or not input_text.strip():
             return self._error_message(ErrorCode.INVALID_CONTRACT)
 
         flow_id = self.target_flow_id or DEFAULT_LF70_FLOW_ID
         base_url = self.base_url or DEFAULT_LANGFLOW_BASE_URL
-        access_token = os.environ.get(LANGFLOW_API_KEY_ENV, "")
+        api_key_value = os.environ.get(LANGFLOW_API_KEY_ENV, "")
         session_id = str(uuid4())
 
         try:
             payload = self._build_run_payload(input_text, session_id)
-            response = self._post_lf70(base_url, flow_id, access_token, payload)
+            response = self._post_lf70(base_url, flow_id, api_key_value, payload)
         except Exception:
             return self._error_message(ErrorCode.MCP_OPERATION_FAILURE)
 
@@ -107,7 +109,7 @@ class HulubulLf70FlowTool(Component):
 
     @staticmethod
     def _post_lf70(
-        base_url: str, flow_id: str, access_token: str, payload: dict[str, str]
+        base_url: str, flow_id: str, api_key_value: str, payload: dict[str, str]
     ) -> dict[str, Any]:
         query = parse.urlencode(
             {
@@ -118,16 +120,17 @@ class HulubulLf70FlowTool(Component):
         )
         url = f"{base_url.rstrip('/')}/api/v1/run/{flow_id}?{query}"
         headers = {"Content-Type": "application/json"}
-        if access_token:
-            headers["x-api-key"] = access_token
+        if api_key_value:
+            headers["x-api-key"] = api_key_value
         req = request.Request(
             url,
             data=json.dumps(payload).encode(),
             headers=headers,
             method="POST",
         )
-        with request.urlopen(req, timeout=900) as response:  # noqa: S310 - local dev Langflow URL
-            return json.loads(response.read().decode())
+        with request.urlopen(req, timeout=900) as response:
+            parsed: dict[str, Any] = json.loads(response.read().decode())
+            return parsed
 
     def _validated_result_message(self, response: dict[str, Any]) -> Message:
         text = self._extract_message_text(response)
@@ -145,8 +148,10 @@ class HulubulLf70FlowTool(Component):
         for run_output in response.get("outputs", []):
             for output in run_output.get("outputs", []):
                 data = output.get("results", {}).get("message", {}).get("data")
-                if isinstance(data, dict) and isinstance(data.get("text"), str):
-                    return data["text"]
+                if isinstance(data, dict):
+                    text = data.get("text")
+                    if isinstance(text, str):
+                        return text
         return None
 
     @staticmethod

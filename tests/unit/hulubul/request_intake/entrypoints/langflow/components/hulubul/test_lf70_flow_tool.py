@@ -1,6 +1,7 @@
 """Tests for the deterministic LF-70 flow tool bridge."""
 
 import json
+from typing import Any
 from uuid import UUID
 
 import pytest
@@ -14,7 +15,7 @@ from hulubul.request_intake.entrypoints.langflow.components.hulubul.lf70_flow_to
 LF70_RUN_SESSION_ID = UUID("cccccccc-cccc-4ccc-8ccc-cccccccccccc")
 
 
-def _lf70_run_response(text: str) -> dict:
+def _lf70_run_response(text: str) -> dict[str, Any]:
     return {
         "outputs": [
             {
@@ -59,6 +60,7 @@ def test_extracts_and_validates_data_operation_result() -> None:
     result = component._validated_result_message(_lf70_run_response(_confirmed_result()))
 
     assert isinstance(result, Message)
+    assert isinstance(result.text, str)
     parsed = json.loads(result.text)
     assert parsed["operation"] == DataOperation.CREATE_DELIVERY_REQUEST.value
     assert parsed["outcome"] == DataOperationOutcome.CONFIRMED.value
@@ -78,6 +80,7 @@ def test_rejects_non_result_echo() -> None:
 
     result = component._validated_result_message(_lf70_run_response(echo))
 
+    assert isinstance(result.text, str)
     assert json.loads(result.text)["code"] == "MALFORMED_AGENT_RESULT"
 
 
@@ -98,7 +101,9 @@ def test_call_lf70_uses_validated_response(monkeypatch: pytest.MonkeyPatch) -> N
     component.target_flow_id = "flow-1"
     component.base_url = "http://langflow.local"
 
-    def fake_post(base_url: str, flow_id: str, access_token: str, payload: dict) -> dict:
+    def fake_post(
+        base_url: str, flow_id: str, api_key_value: str, payload: dict[str, str]
+    ) -> dict[str, Any]:
         assert base_url == "http://langflow.local"
         assert flow_id == "flow-1"
         assert payload["input_value"] == component.input_value
@@ -108,6 +113,7 @@ def test_call_lf70_uses_validated_response(monkeypatch: pytest.MonkeyPatch) -> N
 
     result = component.call_lf70()
 
+    assert isinstance(result.text, str)
     assert json.loads(result.text)["request_id"] == "req-from-post"
 
 
@@ -119,7 +125,9 @@ def test_call_lf70_isolates_langflow_run_session(monkeypatch: pytest.MonkeyPatch
     component.target_flow_id = "flow-1"
     component.base_url = "http://langflow.local"
 
-    def fake_post(base_url: str, flow_id: str, access_token: str, payload: dict) -> dict:
+    def fake_post(
+        base_url: str, flow_id: str, api_key_value: str, payload: dict[str, str]
+    ) -> dict[str, Any]:
         assert payload["session_id"] == str(LF70_RUN_SESSION_ID)
         return _lf70_run_response(_confirmed_result("req-isolated-session"))
 
@@ -131,4 +139,5 @@ def test_call_lf70_isolates_langflow_run_session(monkeypatch: pytest.MonkeyPatch
 
     result = component.call_lf70()
 
+    assert isinstance(result.text, str)
     assert json.loads(result.text)["request_id"] == "req-isolated-session"
