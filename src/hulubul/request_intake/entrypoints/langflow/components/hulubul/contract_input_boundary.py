@@ -65,18 +65,29 @@ class ContractInputBoundaryComponent(Component):
                 "Fixed MainFlowInput envelope (not model-editable -- excluded "
                 "from the model-callable tool schema via fixed-edge wiring, "
                 "not via `advanced`). Required if using fixed-edge path.\n\n"
-                "Deliberately NOT `advanced=True`: LangFlow's frontend treats "
-                "an incoming edge into an `advanced` field as invalid and "
-                "silently strips it while loading/saving the graph -- "
-                "`advanced` is UI-only metadata (which section a field shows "
-                "under) and has no effect on trust, read-only-ness, or "
-                "model-editability; using it for a field that participates "
-                "in the normal data path caused this exact edge to be "
-                "dropped for real when a canvas was saved while that warning "
-                "showed. See DEV/reports/advanced-field-in-langflow.md."
+                "`advanced=True` here is a deliberate, temporary regression, "
+                "not an oversight: LangFlow's frontend treats an incoming "
+                "edge into an `advanced` field as invalid and silently strips "
+                "it while loading/saving the graph (see "
+                "DEV/reports/advanced-field-in-langflow.md), so `advanced=False` "
+                "is the architecturally correct value and restores the real "
+                "edge into this field. But flipping it also makes this field "
+                "tool-mode-eligible whenever this component sits at a flow's "
+                "input boundary and that flow is invoked via `RunFlow` (e.g. "
+                "LF-00's Router Agent calling LF-10) -- `lfx`'s "
+                "`create_input_schema_from_dict()` "
+                "(`lfx/io/schema.py`) then crashes building a Pydantic schema "
+                'for this field\'s raw `type: "other"` label with '
+                "`name 'other' is not defined`, breaking every call to the "
+                "calling flow. Confirmed live, 100% reproducible. See "
+                "`DEV/knowledge/checkpoint9-lf10-runflow-injection-runbook.md` "
+                "for the full trace. Restore `advanced=False` once that `lfx` "
+                "bug has a real fix (patch the schema builder, or find a way "
+                "to keep the field non-advanced without RunFlow exposing it "
+                "as a tool argument)."
             ),
             input_types=["Data", "JSON"],
-            advanced=False,
+            advanced=True,
             required=False,
         ),
         HandleInput(  # type: ignore[call-arg]
@@ -86,11 +97,11 @@ class ContractInputBoundaryComponent(Component):
                 "Fixed RoutingContext (not model-editable -- excluded from "
                 "the model-callable tool schema via fixed-edge wiring, not "
                 "via `advanced`). Required if using fixed-edge path.\n\n"
-                "Deliberately NOT `advanced=True`: see the `envelope` "
-                "field's docstring above for why."
+                "`advanced=True` here is a deliberate, temporary regression: "
+                "see the `envelope` field's docstring above for why."
             ),
             input_types=["Data", "JSON"],
-            advanced=False,
+            advanced=True,
             required=False,
         ),
         MessageTextInput(  # type: ignore[call-arg]
