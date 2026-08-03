@@ -8,6 +8,7 @@ randomness, and no leakage of raw MCP output, prompts, or credentials.
 
 from __future__ import annotations
 
+import json
 from uuid import uuid4
 
 import pytest
@@ -27,8 +28,10 @@ from hulubul.core.models.operational.intake import IntakeFacts, IntakeResult
 from hulubul.core.models.operational.routing import RouterResult
 from hulubul.request_intake.services.rendering import (
     CLARIFICATION_QUESTIONS,
+    GENERIC_CLARIFICATION_QUESTION,
     STATUS_UPDATE_MESSAGES,
     render_clarification_message,
+    render_clarification_question,
     render_complete_message,
     render_intake_result,
     render_operational_error,
@@ -294,3 +297,43 @@ class TestRenderStatusUpdate:
         for text in STATUS_UPDATE_MESSAGES.values():
             assert text.endswith(".")
             assert text[0].isupper()
+
+
+class TestClarificationVocabularyGap:
+    """LF-10 and the renderer do not share a field vocabulary.
+
+    `IntakeResult.clarification_field` is a plain `str`, so the contract admits
+    names `IntakeField` does not define. Coercing raised `ValueError`, which the
+    deterministic renderer catches while trying each contract in turn -- so a
+    valid IntakeResult was reported as matching no contract and 500'd the flow.
+    """
+
+    def test_known_field_renders_its_canonical_question(self) -> None:
+        assert (
+            render_clarification_question("pickup_location")
+            == "Where should the parcel be picked up?"
+        )
+
+    def test_unknown_field_falls_back_instead_of_raising(self) -> None:
+        """`receiver_name` is what LF-10 actually emits; the enum has `receiver_identity`."""
+        assert render_clarification_question("receiver_name") == GENERIC_CLARIFICATION_QUESTION
+
+    def test_fallback_never_echoes_the_unrecognized_name(self) -> None:
+        assert "receiver_name" not in render_clarification_question("receiver_name")
+
+    def test_intake_result_with_unknown_field_still_renders(self) -> None:
+        result = IntakeResult.model_validate_json(
+            json.dumps(
+                {
+                    "outcome": "clarificationRequired",
+                    "request_id": None,
+                    "status": None,
+                    "facts": None,
+                    "missing_fields": ["receiver_name"],
+                    "clarification_field": "receiver_name",
+                    "safe_user_message": None,
+                    "error": None,
+                }
+            )
+        )
+        assert render_intake_result(result) == GENERIC_CLARIFICATION_QUESTION
