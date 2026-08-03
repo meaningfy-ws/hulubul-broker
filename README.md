@@ -272,12 +272,8 @@ check, mypy, import-linter, operational-schema drift, unit tests and static
 tests. Nothing is done until it exits 0. CI runs exactly this target on every
 push and pull request against `main` and `develop`.
 
-Two checks sit outside it:
+One check sit outside it:
 
-- `make check-secrets` — scans tracked files for committed secrets. It is
-  intentionally excluded from `ci-static` because of a known false-positive
-  pattern; run it separately, or install the pre-commit hook once with
-  `make install-git-hooks` and let it run automatically.
 - `make test-integration` — integration tests against real adapters. Requires
   Docker (testcontainers) and, for the LangFlow tests, a running stack.
 

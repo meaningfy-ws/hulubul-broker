@@ -210,7 +210,7 @@
             "id": "HulubulDataOperationResultBoundary-hlb-lf-70-result-v1",
             "name": "response",
             "output_types": [
-              "Message"
+              "JSON"
             ]
           },
           "targetHandle": {
@@ -226,10 +226,10 @@
             "type": "other"
           }
         },
-        "id": "xy-edge__HulubulDataOperationResultBoundary-hlb-lf-70-result-v1{œdataTypeœ:œHulubulDataOperationResultBoundaryœ,œidœ:œHulubulDataOperationResultBoundary-hlb-lf-70-result-v1œ,œnameœ:œresponseœ,œoutput_typesœ:[œMessageœ]}-ChatOutput-hlb-lf-70-data-access-test-out-v1{œfieldNameœ:œinput_valueœ,œidœ:œChatOutput-hlb-lf-70-data-access-test-out-v1œ,œinputTypesœ:[œDataœ,œJSONœ,œDataFrameœ,œTableœ,œMessageœ],œtypeœ:œotherœ}",
+        "id": "xy-edge__HulubulDataOperationResultBoundary-hlb-lf-70-result-v1{œdataTypeœ:œHulubulDataOperationResultBoundaryœ,œidœ:œHulubulDataOperationResultBoundary-hlb-lf-70-result-v1œ,œnameœ:œresponseœ,œoutput_typesœ:[œJSONœ]}-ChatOutput-hlb-lf-70-data-access-test-out-v1{œfieldNameœ:œinput_valueœ,œidœ:œChatOutput-hlb-lf-70-data-access-test-out-v1œ,œinputTypesœ:[œDataœ,œJSONœ,œDataFrameœ,œTableœ,œMessageœ],œtypeœ:œotherœ}",
         "selected": false,
         "source": "HulubulDataOperationResultBoundary-hlb-lf-70-result-v1",
-        "sourceHandle": "{œdataTypeœ:œHulubulDataOperationResultBoundaryœ,œidœ:œHulubulDataOperationResultBoundary-hlb-lf-70-result-v1œ,œnameœ:œresponseœ,œoutput_typesœ:[œMessageœ]}",
+        "sourceHandle": "{œdataTypeœ:œHulubulDataOperationResultBoundaryœ,œidœ:œHulubulDataOperationResultBoundary-hlb-lf-70-result-v1œ,œnameœ:œresponseœ,œoutput_typesœ:[œJSONœ]}",
         "target": "ChatOutput-hlb-lf-70-data-access-test-out-v1",
         "targetHandle": "{œfieldNameœ:œinput_valueœ,œidœ:œChatOutput-hlb-lf-70-data-access-test-out-v1œ,œinputTypesœ:[œDataœ,œJSONœ,œDataFrameœ,œTableœ,œMessageœ],œtypeœ:œotherœ}"
       }

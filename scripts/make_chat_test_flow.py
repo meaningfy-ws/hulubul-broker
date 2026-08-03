@@ -41,8 +41,6 @@ PUBLIC_INPUT_FIELD_NAME = "input_value"
 RESULT_OUTPUT_NAME = "response"
 FLOW_ID_TEMPLATE_FIELD = "_frontend_node_flow_id"
 
-CHAT_OUTPUT_INPUT_TYPES = ["Data", "JSON", "DataFrame", "Table", "Message"]
-
 REFERENCE_FLOW = Path("langflow/flows/30-lf-00-main-router.json")
 REFERENCE_CHAT_INPUT_ID = "ChatInput-hlb-lf-00-message-v1"
 REFERENCE_CHAT_OUTPUT_ID = "ChatOutput-hlb-lf-00-chat-v1"
@@ -97,6 +95,39 @@ def _find(nodes: list[dict[str, Any]], node_id: str) -> dict[str, Any]:
     raise SystemExit(f"component {node_id} not found in source flow")
 
 
+def _source_handle(node: dict[str, Any], output_name: str) -> dict[str, Any]:
+    """Build a source handle from the node's real output definition.
+
+    The frontend derives a handle's identity from the output's declared
+    ``types``. Guessing them produces a handle that matches nothing on the
+    node, and the canvas silently drops the edge as invalid on load -- while
+    the backend, which resolves edges by node id, still runs it. So the flow
+    works over the API and looks broken in the Playground.
+    """
+    for output in node["data"]["node"].get("outputs", []):
+        if output.get("name") == output_name:
+            return {
+                "dataType": node["data"]["type"],
+                "id": node["id"],
+                "name": output_name,
+                "output_types": list(output.get("types") or []),
+            }
+    raise SystemExit(f"{node['id']} has no output named {output_name!r}")
+
+
+def _target_handle(node: dict[str, Any], field_name: str) -> dict[str, Any]:
+    """Build a target handle from the node's real template field."""
+    field = node["data"]["node"]["template"].get(field_name)
+    if not isinstance(field, dict):
+        raise SystemExit(f"{node['id']} has no template field {field_name!r}")
+    return {
+        "fieldName": field_name,
+        "id": node["id"],
+        "inputTypes": list(field.get("input_types") or []),
+        "type": field.get("type"),
+    }
+
+
 def build(
     source_path: Path,
     input_component_id: str,
@@ -120,51 +151,28 @@ def build(
     public_result["data"]["node"]["is_output"] = False
 
     anchor = public_input["position"]
-    nodes.insert(
-        0,
-        _rehome(
-            _reference_node(REFERENCE_CHAT_INPUT_ID),
-            chat_input_id,
-            {"x": anchor["x"] - 420, "y": anchor["y"]},
-        ),
+    chat_input = _rehome(
+        _reference_node(REFERENCE_CHAT_INPUT_ID),
+        chat_input_id,
+        {"x": anchor["x"] - 420, "y": anchor["y"]},
     )
-    nodes.append(
-        _rehome(
-            _reference_node(REFERENCE_CHAT_OUTPUT_ID),
-            chat_output_id,
-            {"x": public_result["position"]["x"] + 420, "y": public_result["position"]["y"]},
-        )
+    chat_output = _rehome(
+        _reference_node(REFERENCE_CHAT_OUTPUT_ID),
+        chat_output_id,
+        {"x": public_result["position"]["x"] + 420, "y": public_result["position"]["y"]},
     )
+    nodes.insert(0, chat_input)
+    nodes.append(chat_output)
 
     flow["data"]["edges"].extend(
         [
             _edge(
-                {
-                    "dataType": CHAT_INPUT_TYPE,
-                    "id": chat_input_id,
-                    "name": CHAT_INPUT_OUTPUT_NAME,
-                    "output_types": ["Message"],
-                },
-                {
-                    "fieldName": PUBLIC_INPUT_FIELD_NAME,
-                    "id": input_component_id,
-                    "inputTypes": ["Message"],
-                    "type": "str",
-                },
+                _source_handle(chat_input, CHAT_INPUT_OUTPUT_NAME),
+                _target_handle(public_input, PUBLIC_INPUT_FIELD_NAME),
             ),
             _edge(
-                {
-                    "dataType": public_result["data"]["type"],
-                    "id": result_component_id,
-                    "name": RESULT_OUTPUT_NAME,
-                    "output_types": ["Message"],
-                },
-                {
-                    "fieldName": CHAT_OUTPUT_FIELD_NAME,
-                    "id": chat_output_id,
-                    "inputTypes": CHAT_OUTPUT_INPUT_TYPES,
-                    "type": "other",
-                },
+                _source_handle(public_result, RESULT_OUTPUT_NAME),
+                _target_handle(chat_output, CHAT_OUTPUT_FIELD_NAME),
             ),
         ]
     )
