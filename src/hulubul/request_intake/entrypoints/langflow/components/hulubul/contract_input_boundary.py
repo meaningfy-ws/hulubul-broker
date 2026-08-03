@@ -62,46 +62,42 @@ class ContractInputBoundaryComponent(Component):
             name="envelope",
             display_name="Envelope",
             info=(
-                "Fixed MainFlowInput envelope (not model-editable -- excluded "
-                "from the model-callable tool schema via fixed-edge wiring, "
-                "not via `advanced`). Required if using fixed-edge path.\n\n"
-                "`advanced=True` here is a deliberate, temporary regression, "
-                "not an oversight: LangFlow's frontend treats an incoming "
-                "edge into an `advanced` field as invalid and silently strips "
-                "it while loading/saving the graph (see "
-                "DEV/reports/advanced-field-in-langflow.md), so `advanced=False` "
-                "is the architecturally correct value and restores the real "
-                "edge into this field. But flipping it also makes this field "
-                "tool-mode-eligible whenever this component sits at a flow's "
-                "input boundary and that flow is invoked via `RunFlow` (e.g. "
-                "LF-00's Router Agent calling LF-10) -- `lfx`'s "
-                "`create_input_schema_from_dict()` "
-                "(`lfx/io/schema.py`) then crashes building a Pydantic schema "
-                'for this field\'s raw `type: "other"` label with '
-                "`name 'other' is not defined`, breaking every call to the "
-                "calling flow. Confirmed live, 100% reproducible. See "
-                "`DEV/knowledge/checkpoint9-lf10-runflow-injection-runbook.md` "
-                "for the full trace. Restore `advanced=False` once that `lfx` "
-                "bug has a real fix (patch the schema builder, or find a way "
-                "to keep the field non-advanced without RunFlow exposing it "
-                "as a tool argument)."
+                "Fixed MainFlowInput envelope: trusted context supplied by an "
+                "upstream edge, never authored by a model. Required if using "
+                "the fixed-edge path.\n\n"
+                "`advanced=False` is deliberate and load-bearing. LangFlow's "
+                "frontend treats an incoming edge into an `advanced` field as "
+                "invalid and silently strips it while loading/saving the graph "
+                "(see `DEV/reports/advanced-field-in-langflow.md`), so this "
+                "field must stay non-advanced for its edge to survive at all. "
+                "Keeping it out of the model-callable tool schema is a "
+                "separate concern, handled where it belongs: "
+                "`HulubulRunFlowComponent.get_required_data()` withholds "
+                "connection-only fields from the schema it hands the agent. "
+                "Any flow that invokes this component's flow via `RunFlow` "
+                "must therefore use `HulubulRunFlow`, not the stock node -- "
+                "stock `RunFlow` exposes this field to `lfx`'s "
+                "`create_input_schema_from_dict()`, which crashes on its raw "
+                "`type: \"other\"` label with `name 'other' is not defined` "
+                "and breaks every call to the *calling* flow. See "
+                "`DEV/knowledge/checkpoint9-lf10-runflow-injection-runbook.md`."
             ),
             input_types=["Data", "JSON"],
-            advanced=True,
+            advanced=False,
             required=False,
         ),
         HandleInput(  # type: ignore[call-arg]
             name="routing_context",
             display_name="Routing Context",
             info=(
-                "Fixed RoutingContext (not model-editable -- excluded from "
-                "the model-callable tool schema via fixed-edge wiring, not "
-                "via `advanced`). Required if using fixed-edge path.\n\n"
-                "`advanced=True` here is a deliberate, temporary regression: "
-                "see the `envelope` field's docstring above for why."
+                "Fixed RoutingContext: trusted context supplied by an upstream "
+                "edge, never authored by a model. Required if using the "
+                "fixed-edge path.\n\n"
+                "`advanced=False` for the same reason as `envelope` above, "
+                "and with the same requirement on callers."
             ),
             input_types=["Data", "JSON"],
-            advanced=True,
+            advanced=False,
             required=False,
         ),
         MessageTextInput(  # type: ignore[call-arg]

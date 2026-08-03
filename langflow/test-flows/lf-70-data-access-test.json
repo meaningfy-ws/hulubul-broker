@@ -733,7 +733,7 @@
             "pinned": false,
             "template": {
               "_frontend_node_flow_id": {
-                "value": "94f6774d-ebc7-5bf1-8486-886f91886a5f"
+                "value": "c6d63e07-a3e6-5c5b-b700-47b3e9702654"
               },
               "_frontend_node_folder_id": {
                 "value": "a6f9eb0d-e26e-4d3d-9232-fe1704342cd4"
@@ -1149,7 +1149,7 @@
             "template": {
               "_frontend_node_flow_id": {
                 "input_types": [],
-                "value": "94f6774d-ebc7-5bf1-8486-886f91886a5f"
+                "value": "c6d63e07-a3e6-5c5b-b700-47b3e9702654"
               },
               "_frontend_node_folder_id": {
                 "input_types": [],

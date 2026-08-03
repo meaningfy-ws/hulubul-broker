@@ -39,6 +39,7 @@ CHAT_INPUT_OUTPUT_NAME = "message"
 CHAT_OUTPUT_FIELD_NAME = "input_value"
 PUBLIC_INPUT_FIELD_NAME = "input_value"
 RESULT_OUTPUT_NAME = "response"
+FLOW_ID_TEMPLATE_FIELD = "_frontend_node_flow_id"
 
 CHAT_OUTPUT_INPUT_TYPES = ["Data", "JSON", "DataFrame", "Table", "Message"]
 
@@ -170,6 +171,14 @@ def build(
 
     flow["id"] = str(uuid.uuid5(FLOW_ID_NAMESPACE, FLOW_ID_PREFIX + flow_name))
     flow["name"] = flow_name
+
+    # Nodes carry the id of the flow they belong to. Left pointing at the
+    # source, LangFlow rewrites it on load and the committed copy immediately
+    # reads as drifted against the server.
+    for node in nodes:
+        owner = node["data"]["node"]["template"].get(FLOW_ID_TEMPLATE_FIELD)
+        if isinstance(owner, dict):
+            owner["value"] = flow["id"]
     flow["description"] = (
         f"Chat-driven test copy of {source_path.stem}. Same graph, wrapped in "
         "ChatInput/ChatOutput so runs are observable in the Playground."
