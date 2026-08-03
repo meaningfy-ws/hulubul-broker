@@ -12,7 +12,8 @@ from typing import Any
 from uuid import uuid4
 
 from lfx.custom.custom_component.component import Component
-from lfx.inputs.inputs import HandleInput
+from lfx.inputs.inputs import HandleInput, StrInput
+from lfx.log.logger import logger
 from lfx.schema.data import JSON
 from lfx.schema.message import Message
 from lfx.template.field.base import Output
@@ -35,6 +36,11 @@ from hulubul.core.models.operational import (
 from hulubul.core.models.operational.data_operations import DATA_OPERATION_ADAPTER
 from hulubul.core.models.operational.errors import ERROR_POLICY
 from hulubul.core.models.operational.json_extraction import extract_json_object_text
+from hulubul.request_intake.services.contract_result_policy import (
+    is_terminal_contract,
+    parse_terminal_kinds,
+    terminal_rejection_reason,
+)
 
 __all__ = ["CONTRACT_TYPES", "ContractResultBoundaryComponent"]
 
@@ -82,6 +88,25 @@ class ContractResultBoundaryComponent(Component):
             info="The contract value to validate (Message/Data/JSON).",
             input_types=["Message", "Data", "JSON"],
             required=True,
+        ),
+        StrInput(  # type: ignore[call-arg]
+            name="terminal_kinds",
+            display_name="Terminal Contract Kinds",
+            info=(
+                "ContractKind values that may legitimately end this flow, e.g. "
+                "intake-result, router-result, operational-error. Leave empty to "
+                "accept any of the 11 registered kinds -- the historical "
+                "behaviour, which answers 'is this a known contract?' but never "
+                "'is this the right contract for this turn?'. Declaring the set "
+                "makes a well-formed but out-of-place payload (a "
+                "data-operation-result surfacing to a sender, a router-result "
+                "that delegated to a specialist and never got a result back) a "
+                "visible INVALID_CONTRACT instead of a plausible-looking reply."
+            ),
+            is_list=True,
+            value=[],
+            required=False,
+            advanced=False,
         ),
     ]
 
@@ -164,6 +189,7 @@ class ContractResultBoundaryComponent(Component):
         # this tolerate native-instance dicts (e.g. a `UUID` object), same
         # rationale as `ContractInputBoundaryComponent._coerce_model`.
         value_json = json.dumps(value, default=str)
+        allowed = parse_terminal_kinds(self.terminal_kinds)
 
         # Try to validate against each registered contract type
         for _contract_kind, model_type in CONTRACT_TYPES.items():
@@ -171,17 +197,20 @@ class ContractResultBoundaryComponent(Component):
                 # Handle TypeAdapter (for DATA_OPERATION_REQUEST)
                 if isinstance(model_type, TypeAdapter):
                     instance = model_type.validate_json(value_json)
-                    # Success: return as JSON
                     if hasattr(instance, "model_dump"):
                         data = instance.model_dump(mode="json")
                     else:
                         data = dict(instance)
+                    if not is_terminal_contract(_contract_kind, data, allowed):
+                        return self._refuse_non_terminal(_contract_kind, data, allowed)
                     return JSON(data=data)
                 # Handle BaseModel classes
                 elif isinstance(model_type, type) and issubclass(model_type, BaseModel):
                     instance = model_type.model_validate_json(value_json)
-                    # Success: return as JSON
-                    return JSON(data=instance.model_dump(mode="json"))
+                    data = instance.model_dump(mode="json")
+                    if not is_terminal_contract(_contract_kind, data, allowed):
+                        return self._refuse_non_terminal(_contract_kind, data, allowed)
+                    return JSON(data=data)
                 else:
                     # Unknown type, skip
                     continue
@@ -194,6 +223,25 @@ class ContractResultBoundaryComponent(Component):
 
         # None of the registered types matched
         # Return canonical INVALID_CONTRACT error (never expose raw values)
+        return self._make_error_response(ErrorCode.INVALID_CONTRACT)
+
+    def _refuse_non_terminal(
+        self,
+        kind: ContractKind,
+        payload: dict[str, Any],
+        allowed: frozenset[ContractKind],
+    ) -> JSON:
+        """Reject a valid contract that has no business ending this flow.
+
+        The sender only ever sees the canonical safe message, so the real cause
+        has to be logged or it is lost -- and this refusal in particular (a
+        router that delegated to a specialist and never got a result back) is
+        otherwise indistinguishable from an ordinary routing reply.
+        """
+        logger.warning(
+            f"{self.name}: refused a non-terminal contract -- "
+            f"{terminal_rejection_reason(kind, payload, allowed)}"
+        )
         return self._make_error_response(ErrorCode.INVALID_CONTRACT)
 
     def _make_error_response(

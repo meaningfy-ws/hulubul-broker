@@ -143,6 +143,24 @@ class TestGeneratedMetadataUniqueness:
         assert first.correlation_id != second.correlation_id
 
 
+# LF-00 delegates intake to LF-10 rather than stopping at the routing decision,
+# so an intake turn now ends on LF-10's IntakeResult -- a clarification question
+# or a confirmation -- never on the router's hand-off text. Seeing a hand-off
+# string here means the router decided to delegate and then didn't, which is the
+# one failure that would otherwise look exactly like success.
+ROUTER_HANDOFF_TEXTS = frozenset({"routing to intake", "request intake in progress"})
+
+
+def assert_intake_reply(reply) -> None:  # type: ignore[no-untyped-def]
+    """Assert the turn reached LF-10 and came back with a real intake reply."""
+    assert reply.status_code == 200, reply.error
+    assert reply.chat_text, "expected an intake reply, got nothing"
+    assert reply.chat_text not in ROUTER_HANDOFF_TEXTS, (
+        f"LF-00 stopped at the routing hand-off ({reply.chat_text!r}) instead of "
+        "running intake -- the router delegated but no IntakeResult came back"
+    )
+
+
 class TestAbsentBindingRoute:
     """The no-prior-binding route: the one scenario needing no Neo4j fixture."""
 
@@ -155,7 +173,7 @@ class TestAbsentBindingRoute:
         )
         _skip_if_langflow_down(reply)
         assert reply.status_code == 200, reply.error
-        assert reply.chat_text == "routing to intake"
+        assert_intake_reply(reply)
 
     def test_chat_text_matches_deterministic_render_for_absent_binding(
         self, langflow_client: LangFlowClient
@@ -203,7 +221,7 @@ class TestSessionIdNormalization:
         )
         _skip_if_langflow_down(reply)
         assert reply.status_code == 200, reply.error
-        assert reply.chat_text == "routing to intake"
+        assert_intake_reply(reply)
 
     def test_canonical_p1_prefixed_session_id_succeeds(
         self, langflow_client: LangFlowClient
@@ -215,7 +233,7 @@ class TestSessionIdNormalization:
         )
         _skip_if_langflow_down(reply)
         assert reply.status_code == 200, reply.error
-        assert reply.chat_text == "routing to intake"
+        assert_intake_reply(reply)
 
     def test_bare_and_canonical_forms_of_same_uuid_reach_same_binding_state(
         self, langflow_client: LangFlowClient
@@ -240,7 +258,8 @@ class TestSessionIdNormalization:
 
         # Both still see an absent binding (no write ever happened on this
         # session), so both must render identically.
-        assert bare.chat_text == canonical.chat_text == "routing to intake"
+        assert_intake_reply(bare)
+        assert_intake_reply(canonical)
 
 
 class TestIntakeRoutes:
@@ -289,7 +308,7 @@ class TestIntakeRoutes:
             reply = langflow_client.run_lf00(_Conversation(session_id=session_id), "Tell me more")
             _skip_if_langflow_down(reply)
             assert reply.status_code == 200, reply.error
-            assert reply.chat_text == "request intake in progress"
+            assert_intake_reply(reply)
         finally:
             with neo4j_driver.session(database=database) as session:
                 session.run(
@@ -339,7 +358,7 @@ class TestIntakeRoutes:
             )
             _skip_if_langflow_down(reply)
             assert reply.status_code == 200, reply.error
-            assert reply.chat_text == "request intake in progress"
+            assert_intake_reply(reply)
         finally:
             with neo4j_driver.session(database=database) as session:
                 session.run(
@@ -394,7 +413,7 @@ class TestIntakeRoutes:
             reply = langflow_client.run_lf00(_Conversation(session_id=session_id), "Any update?")
             _skip_if_langflow_down(reply)
             assert reply.status_code == 200, reply.error
-            assert reply.chat_text == "request intake in progress"
+            assert_intake_reply(reply)
         finally:
             with neo4j_driver.session(database=database) as session:
                 session.run(
