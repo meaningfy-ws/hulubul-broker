@@ -39,7 +39,6 @@ from hulubul.core.models.operational.enums import (
     POST_INTAKE_STATUSES,
     RequestStatus,
 )
-from hulubul.request_intake.services.rendering import render_router_result
 from tests.support.graph_probe import GraphProbe
 from tests.support.langflow_client import LangFlowClient
 
@@ -186,13 +185,10 @@ class TestAbsentBindingRoute:
         API cannot expose the intermediate structured result directly (see
         module docstring).
         """
-        from uuid import uuid4
-
-        from hulubul.core.models.operational import (
-            RouterOutcome,
-            RouterResult,
-            RouterTarget,
-            RoutingReason,
+        from hulubul.request_intake.services.rendering import (
+            CLARIFICATION_QUESTIONS,
+            GENERIC_CLARIFICATION_QUESTION,
+            render_complete_message,
         )
 
         reply = langflow_client.run_lf00(
@@ -200,15 +196,22 @@ class TestAbsentBindingRoute:
         )
         _skip_if_langflow_down(reply)
         assert reply.status_code == 200, reply.error
+        assert reply.chat_text
 
-        expected_structured = RouterResult(
-            correlation_id=uuid4(),
-            outcome=RouterOutcome.ROUTED,
-            target=RouterTarget.INTAKE,
-            reason=RoutingReason.NO_BINDING,
-            safe_message="routing to intake",
-        )
-        assert reply.chat_text == render_router_result(expected_structured)
+        # An intake turn now ends on LF-10's IntakeResult, so the deterministic
+        # render is one of the renderer's intake strings rather than the
+        # router's hand-off. Which one depends on what the model extracted, so
+        # pin the closed set instead of a single string -- the property under
+        # test is that the text came from the renderer at all, never from agent
+        # free text.
+        deterministic_intake_texts = {
+            *CLARIFICATION_QUESTIONS.values(),
+            GENERIC_CLARIFICATION_QUESTION,
+        }
+        complete_prefix = render_complete_message("").rsplit(" ", 1)[0]
+        assert reply.chat_text in deterministic_intake_texts or reply.chat_text.startswith(
+            complete_prefix
+        ), f"chat text {reply.chat_text!r} is not a deterministic render"
 
 
 class TestSessionIdNormalization:
