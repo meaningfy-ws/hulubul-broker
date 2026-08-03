@@ -1586,7 +1586,7 @@
                 "trace_as_metadata": true,
                 "track_in_telemetry": true,
                 "type": "int",
-                "value": 100
+                "value": 0
               },
               "output_schema": {
                 "_input_type": "TableInput",

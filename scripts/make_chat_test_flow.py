@@ -40,6 +40,7 @@ CHAT_OUTPUT_FIELD_NAME = "input_value"
 PUBLIC_INPUT_FIELD_NAME = "input_value"
 RESULT_OUTPUT_NAME = "response"
 FLOW_ID_TEMPLATE_FIELD = "_frontend_node_flow_id"
+HISTORY_LIMIT_FIELD = "n_messages"
 
 REFERENCE_FLOW = Path("langflow/flows/30-lf-00-main-router.json")
 REFERENCE_CHAT_INPUT_ID = "ChatInput-hlb-lf-00-message-v1"
@@ -149,6 +150,19 @@ def build(
     # the API injects into both ends and two vertices claim the same role.
     public_input["data"]["node"]["is_input"] = False
     public_result["data"]["node"]["is_output"] = False
+
+    # Cut every agent's chat-history window to zero. ChatInput stores the raw
+    # message it was sent, and an agent with a history window reads it back --
+    # which routes the caller's payload around the input boundary entirely. A
+    # payload the boundary rejected as INVALID_CONTRACT still reached the agent
+    # and produced a real Neo4j write, because the agent answered from history
+    # instead of from its own input. The wrapped flows have no ChatInput, so
+    # their agents never had a history to read; the copy must match, or it
+    # tests a flow that fails open where the original fails closed.
+    for node in nodes:
+        window = node["data"]["node"]["template"].get(HISTORY_LIMIT_FIELD)
+        if isinstance(window, dict):
+            window["value"] = 0
 
     anchor = public_input["position"]
     chat_input = _rehome(
