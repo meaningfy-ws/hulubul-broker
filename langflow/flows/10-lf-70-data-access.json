@@ -1208,7 +1208,7 @@
                       "search": false,
                       "tool_calling": true
                     },
-                    "name": "global/nearai/deepseek-v4-flash",
+                    "name": "global/nearai/glm-5.2",
                     "provider": "OpenAI"
                   }
                 ]
