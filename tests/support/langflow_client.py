@@ -371,6 +371,159 @@ class LangFlowClient:
         # Unreachable: the loop above always returns on its final iteration.
         raise AssertionError("run_flow_with_actor: retry loop exited without returning")
 
+    # Pinned per langflow/flow-manifest.yaml.
+    LF10_FLOW_ID = "6843ae79-147f-55d4-a25b-01d6143a12cc"
+
+    def run_lf10(
+        self,
+        *,
+        message: str,
+        session_id: str | None = None,
+        actor_id: str = "urn:uuid:6fff189f-aed3-47dd-b1b9-945d8dbefb47",
+        display_name: str = "Dev User",
+        routing_context: dict[str, Any] | None = None,
+    ) -> FlowReply:
+        """Call LF-10 directly, bypassing LF-00, with a hand-built IntakeInput.
+
+        LF-10 has no ChatInput entry point -- its only entry is
+        ContractInputBoundary's `input_value` field. Posting a top-level
+        `input_value` (the plain Run API pattern that works for LF-00, whose
+        ChatInput IS the graph's recognized input vertex) does NOT reach it --
+        confirmed live: the field arrives empty every time. The mechanism that
+        does work is LangFlow's `tweaks` parameter, targeting the node by ID
+        directly, exactly as `HulubulRunFlowComponent` does internally when
+        LF-00 invokes LF-10 as a tool.
+
+        Args:
+            message: The sender's message text.
+            session_id: Bare UUID string (no "p1-" prefix); a fresh one is
+                generated if omitted.
+            actor_id: Sender actor_id (default: the shared trusted dev actor).
+            display_name: Sender display name.
+            routing_context: Full RoutingContext dict. Defaults to an
+                absent-binding, routing_stage="intake" context (a fresh,
+                unbound sender) if omitted -- pass an explicit one to test a
+                bound/needsClarification continuation turn.
+
+        Returns:
+            FlowReply with status, flow_id, result (the parsed IntakeResult
+            dict), or error.
+        """
+        sid = session_id or str(uuid.uuid4())
+        correlation_id = str(uuid.uuid4())
+        canonical_session_id = f"p1-{sid}"
+
+        if routing_context is None:
+            routing_context = {
+                "schema_version": "1.0.0",
+                "correlation_id": correlation_id,
+                "session_id": canonical_session_id,
+                "binding_state": "absent",
+                "binding_count": 0,
+                "active_relationship_count": 0,
+                "active_target_count": 0,
+                "request_id": None,
+                "request_status": None,
+                "closed_at": None,
+                "routing_stage": "intake",
+                "error": None,
+            }
+
+        intake_input = {
+            "schema_version": "1.0.0",
+            "correlation_id": correlation_id,
+            "envelope": {
+                "schema_version": "1.0.0",
+                "correlation_id": correlation_id,
+                "message_id": str(uuid.uuid4()),
+                "session_id": canonical_session_id,
+                "actor": {
+                    "actor_id": actor_id,
+                    "display_name": display_name,
+                    "actor_role": "sender",
+                    "identity_assurance": "simulated",
+                },
+                "source": "playground",
+                "message": message,
+            },
+            "routing_context": routing_context,
+        }
+
+        url = f"{self.base_url}/api/v1/run/{self.LF10_FLOW_ID}"
+        headers = self._get_headers(actor_id, display_name)
+        body = {
+            "input_value": "",
+            "session_id": sid,
+            "tweaks": {
+                "HulubulContractInputBoundary-hlb-lf-10-input-v1": {
+                    "input_value": json.dumps(intake_input),
+                }
+            },
+        }
+
+        if httpx is None:
+            return FlowReply(
+                status_code=500,
+                error="httpx not installed; run: poetry install --with integration",
+            )
+
+        try:
+            with httpx.Client() as client:
+                response = client.post(
+                    url,
+                    json=body,
+                    headers=headers,
+                    params={"output_type": "any", "input_type": "any"},
+                    timeout=300.0,
+                )
+
+                if response.status_code == 403:
+                    return FlowReply(
+                        status_code=403,
+                        error="Unauthorized (missing or invalid API key)",
+                    )
+
+                if response.status_code == 200:
+                    raw = self._extract_lf10_raw_text(response.json())
+                    if raw is None:
+                        return FlowReply(
+                            status_code=200,
+                            flow_id=self.LF10_FLOW_ID,
+                            error="Could not extract IntakeResult text from response",
+                        )
+                    try:
+                        result = json.loads(raw)
+                    except json.JSONDecodeError:
+                        return FlowReply(
+                            status_code=200,
+                            flow_id=self.LF10_FLOW_ID,
+                            error=f"IntakeResult text was not valid JSON: {raw[:200]}",
+                        )
+                    return FlowReply(status_code=200, flow_id=self.LF10_FLOW_ID, result=result)
+
+                return FlowReply(
+                    status_code=response.status_code,
+                    error=f"LangFlow error: {response.text[:200]}",
+                )
+        except Exception as e:
+            return FlowReply(status_code=500, error=f"Connection error: {str(e)[:200]}")
+
+    @staticmethod
+    def _extract_lf10_raw_text(response: dict[str, Any]) -> str | None:
+        """Pull the terminal component's raw IntakeResult JSON text out of the
+        Run API's nested response envelope
+        (`outputs[0].outputs[0].artifacts.response.raw`).
+        """
+        try:
+            outputs = response["outputs"][0]["outputs"]
+        except (KeyError, IndexError, TypeError):
+            return None
+        for output in outputs:
+            raw = output.get("artifacts", {}).get("response", {}).get("raw")
+            if isinstance(raw, str):
+                return raw
+        return None
+
     @staticmethod
     def _extract_result_message(response: dict[str, Any]) -> dict[str, Any] | None:
         """Pull the terminal component's `DataOperationResult`/error dict out of
