@@ -272,10 +272,16 @@ check, mypy, import-linter, operational-schema drift, unit tests and static
 tests. Nothing is done until it exits 0. CI runs exactly this target on every
 push and pull request against `main` and `develop`.
 
-One check sit outside it:
+Two things sit outside it:
 
 - `make test-integration` — integration tests against real adapters. Requires
   Docker (testcontainers) and, for the LangFlow tests, a running stack.
+- `tests/manual/` — human-driven scenarios for the three flows. Not collected by
+  pytest: they need the full local stack and call a real model, so no two runs
+  are identical. They cover what the automated suites cannot — whether a flow
+  behaves sensibly for a person talking to it. Run them after changing a flow's
+  prompt, its wiring, or a boundary contract. Index and prerequisites in
+  `tests/manual/README.md`.
 
 ### Merging
 
@@ -332,7 +338,7 @@ Tox mirrors part of this for multi-environment runs: `tox` runs the `py310`,
 ├── schemas/operational/       # Operational contracts published as JSON Schema — generated
 ├── scripts/                   # Custom LinkML generators and flow tooling
 ├── src/hulubul/               # Python package: custom components and domain logic
-├── tests/                     # unit, static, integration, features, fixtures, support
+├── tests/                     # unit, static, integration, manual, features, fixtures, support
 ├── .github/workflows/ci.yaml  # CI: make install && make ci-static
 ├── AGENTS.md (→ CLAUDE.md)    # Instructions for AI coding agents
 ├── Makefile                   # Every workflow entry point
@@ -373,6 +379,7 @@ nodes), so those are excluded from the drift check.
 | `infra/README.md` | Stack internals, service topology, security posture |
 | `langflow/README.md` | Flow-as-code toolchain, manifest rules, edit cycle |
 | `model/README.md` | The domain model and its provenance |
+| `tests/manual/README.md` | Manual test scenarios for the three flows, and how to run them |
 | `AGENTS.md` | Conventions for AI coding agents working in this repository |
 
 ## Licence
