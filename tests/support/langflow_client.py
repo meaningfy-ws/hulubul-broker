@@ -117,7 +117,7 @@ class LangFlowClient:
     # not this UUID) 404s: LangFlow's Run API resolves by exact flow name or
     # UUID, and this flow's registered name is "lf-00-main-router", not
     # "lf-00". Confirmed live.
-    LF00_FLOW_ID = "38b7ee64-26c8-5d4d-97e4-6e62a0fcb557"
+    LF00_FLOW_ID = "29c624c0-7940-48c3-8164-123620c53562"
 
     def run_lf00(self, conversation: ConversationLike, message: str) -> FlowReply:
         """Run LF-00 (main router) flow with actor context.

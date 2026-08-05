@@ -21,7 +21,7 @@ def lf00_flow() -> dict[str, Any]:
 
 def test_lf00_stable_id(lf00_flow: dict[str, Any]) -> None:
     """LF-00 has the correct stable UUID from the manifest."""
-    expected_id = "38b7ee64-26c8-5d4d-97e4-6e62a0fcb557"
+    expected_id = "29c624c0-7940-48c3-8164-123620c53562"
     assert lf00_flow.get("id") == expected_id
 
 

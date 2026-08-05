@@ -56,7 +56,7 @@ class TestManifestValidation:
         expected_ids = {
             "lf-70-data-access": "94f6774d-ebc7-5bf1-8486-886f91886a5f",
             "lf-10-request-intake": "6843ae79-147f-55d4-a25b-01d6143a12cc",
-            "lf-00-main-router": "38b7ee64-26c8-5d4d-97e4-6e62a0fcb557",
+            "lf-00-main-router": "29c624c0-7940-48c3-8164-123620c53562",
         }
 
         for flow_name, expected_id in expected_ids.items():

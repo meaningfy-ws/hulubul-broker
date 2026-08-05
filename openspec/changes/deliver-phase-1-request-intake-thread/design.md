@@ -608,7 +608,7 @@ outside Change 1.
 
 | Flow | UUID | Responsibility |
 | --- | --- | --- |
-| LF-00 Main Router | `38b7ee64-26c8-5d4d-97e4-6e62a0fcb557` | Input envelope, mandatory LF-70 context read, route to LF-10 or no-op result, validate/render output |
+| LF-00 Main Router | `29c624c0-7940-48c3-8164-123620c53562` | Input envelope, mandatory LF-70 context read, route to LF-10 or no-op result, validate/render output |
 | LF-10 Request Intake | `6843ae79-147f-55d4-a25b-01d6143a12cc` | Extract facts, create/read/update same request, select one clarification, reach complete |
 | LF-70 Data Access | `94f6774d-ebc7-5bf1-8486-886f91886a5f` | Validate logical operation, invoke Neo4j MCP, validate structured result |
 

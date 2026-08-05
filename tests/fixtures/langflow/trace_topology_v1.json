@@ -4,7 +4,7 @@
   "description": "Frozen, safe-projected span topology for the deterministic complete status no-mutation route (a DeliveryRequest bound to the session with hasStatus=complete, message \"Status update?\"). Chosen over the absent-binding/routes-to-intake scenario because that one lets the Router Agent choose whether to invoke the LF-10 tool, which is a genuine, confirmed LLM behavioral non-determinism (observed directly: identical calls sometimes produced 15 spans/1 LLM call, sometimes 26 spans/multiple LLM calls) -- not something a frozen fixture can honestly represent. This scenario has no plausible reason for the Router to call any tool, and was verified deterministic across repeated live runs (identical normalized tuples every time).",
   "flows": {
     "lf_00": {
-      "flow_id": "38b7ee64-26c8-5d4d-97e4-6e62a0fcb557",
+      "flow_id": "29c624c0-7940-48c3-8164-123620c53562",
       "spans": [
         [
           "Run Flow",

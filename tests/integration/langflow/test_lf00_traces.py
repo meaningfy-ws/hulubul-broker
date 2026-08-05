@@ -41,7 +41,7 @@ from tests.support.trace_metadata_probe import TraceMetadataProbe, normalize_top
 if TYPE_CHECKING:
     from tests.support.trace_metadata_probe import NativeSpanMetadata
 
-LF_00_FLOW_ID = uuid.UUID("38b7ee64-26c8-5d4d-97e4-6e62a0fcb557")
+LF_00_FLOW_ID = uuid.UUID("29c624c0-7940-48c3-8164-123620c53562")
 LF_70_FLOW_ID = uuid.UUID("94f6774d-ebc7-5bf1-8486-886f91886a5f")
 TRUSTED_ACTOR_ID = "urn:uuid:6fff189f-aed3-47dd-b1b9-945d8dbefb47"
 

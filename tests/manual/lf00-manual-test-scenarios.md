@@ -9,7 +9,7 @@ only once, or varied between runs, it says so. Sibling docs:
 ## 1. What to run against
 
 LF-00 (`langflow/flows/30-lf-00-main-router.json`, flow id
-`38b7ee64-26c8-5d4d-97e4-6e62a0fcb557`) has a real `ChatInput`/`ChatOutput`
+`29c624c0-7940-48c3-8164-123620c53562`) has a real `ChatInput`/`ChatOutput`
 pair of its own, so there is no `-test` copy and nothing to wire. Runs appear
 in the Playground's chat history directly.
 
@@ -65,7 +65,7 @@ print(reply.chat_text)
 **API:**
 
 ```bash
-curl -s -X POST "http://localhost:7860/api/v1/run/38b7ee64-26c8-5d4d-97e4-6e62a0fcb557?input_type=chat&output_type=chat" \
+curl -s -X POST "http://localhost:7860/api/v1/run/29c624c0-7940-48c3-8164-123620c53562?input_type=chat&output_type=chat" \
   -H "x-api-key: $LANGFLOW_API_KEY" -H "Content-Type: application/json" \
   -d '{"input_value": "I need to send a parcel",
        "session_id": "p1-3f6e2b1a-0000-4000-8000-000000000001"}'

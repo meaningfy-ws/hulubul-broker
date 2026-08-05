@@ -350,7 +350,7 @@ flows:
     run_flow_references:
       - {component_id: RunFlow-hlb-lf-10-data-access-v1, target_flow_id: 94f6774d-ebc7-5bf1-8486-886f91886a5f}
   lf-00-main-router:
-    id: 38b7ee64-26c8-5d4d-97e4-6e62a0fcb557
+    id: 29c624c0-7940-48c3-8164-123620c53562
     file: flows/30-lf-00-main-router.json
     public_input_component_id: ChatInput-hlb-lf-00-message-v1
     public_result_component_id: HulubulContractResultBoundary-hlb-lf-00-result-v1
