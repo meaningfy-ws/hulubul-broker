@@ -1,7 +1,7 @@
 """Trusted execution envelope component: user prose isolation and session normalization."""
 
 import os
-from uuid import UUID, uuid4
+from uuid import UUID, uuid4, uuid5
 
 from lfx.custom.custom_component.component import Component
 from lfx.inputs.inputs import MessageInput
@@ -18,6 +18,13 @@ from hulubul.core.models.operational import (
 )
 
 __all__ = ["ExecutionEnvelopeComponent"]
+
+# Namespace for deriving a deterministic session UUID from a non-UUID
+# Playground label (e.g. "New Session 0"). Arbitrary but must never change:
+# every session UUID ever derived from a given label depends on it staying
+# fixed, or the same label would silently start mapping to a different
+# session on the next deploy.
+_PLAYGROUND_SESSION_NAMESPACE = UUID("f47ee1a0-99d1-4bda-9d0e-13a4f47c8f01")
 
 
 class ExecutionEnvelopeComponent(Component):
@@ -314,11 +321,24 @@ class ExecutionEnvelopeComponent(Component):
     def _session_uuid_part(
         uuid_part: str, original_session_id: str, source: InvocationSource
     ) -> str:
+        """Resolve a session's UUID part, deterministically for Playground labels.
+
+        A non-UUID Playground label (e.g. "New Session 0") must map to the
+        *same* UUID on every call within the same conversation -- confirmed
+        live: with a random uuid4() here (the previous behaviour), each
+        message in a Playground chat landed on a different, disconnected
+        session, so LF-10's multi-turn intake accumulation saw an empty
+        state every turn and re-asked for facts the sender had already
+        given, cycling between the same two or three questions instead of
+        progressing. uuid5 against a fixed namespace is deterministic for
+        the same input, so the same label always resolves to the same
+        session while still producing a schema-valid UUID.
+        """
         try:
             UUID(uuid_part)
             return uuid_part
         except ValueError as err:
             if source is InvocationSource.PLAYGROUND:
-                return str(uuid4())
+                return str(uuid5(_PLAYGROUND_SESSION_NAMESPACE, uuid_part))
             msg = f"INVALID_INPUT: session_id must be a valid UUID, got '{original_session_id}'"
             raise ValueError(msg) from err

@@ -21,8 +21,6 @@ SESSION = "p1-12345678-1234-4000-8000-000000000000"
 BARE_UUID = "12345678-1234-4000-8000-000000000000"
 TRUSTED_ACTOR_ID = "urn:uuid:87654321-4321-4000-8000-000000000000"
 TRUSTED_DISPLAY_NAME = "Test Sender"
-PLAYGROUND_SESSION_UUID_1 = UUID("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa")
-PLAYGROUND_SESSION_UUID_2 = UUID("bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb")
 
 
 @pytest.fixture
@@ -277,32 +275,57 @@ class TestSessionNormalization:
                 envelope = MainFlowInput.model_validate(component.build_envelope().data)
                 assert envelope.session_id == f"p1-{BARE_UUID.lower()}"
 
-    def test_playground_label_session_generates_random_uuid(
+    def test_playground_label_session_is_deterministic_across_calls(
         self, component: ExecutionEnvelopeComponent
     ) -> None:
-        """Playground labels like `New Session 0` are normalized for local UX."""
+        """Same Playground label -> same session on every call.
+
+        Confirmed live: a random UUID per call (the previous behaviour) meant
+        every message in one Playground chat landed on a disconnected
+        session, so LF-10's multi-turn intake accumulation saw an empty
+        state each turn and re-asked for facts the sender had already given.
+        """
         component.message = Message(text="Hello", session_id="New Session 0")
 
         with patch.object(component, "_get_playground_actor_id", return_value=TRUSTED_ACTOR_ID):
             with patch.object(
                 component, "_get_invocation_source", return_value=InvocationSource.PLAYGROUND
             ):
-                with patch(
-                    "hulubul.request_intake.entrypoints.langflow.components.hulubul.execution_envelope.uuid4",
-                    side_effect=[
-                        PLAYGROUND_SESSION_UUID_1,
-                        UUID("11111111-1111-4111-8111-111111111111"),
-                        UUID("22222222-2222-4222-8222-222222222222"),
-                        PLAYGROUND_SESSION_UUID_2,
-                        UUID("33333333-3333-4333-8333-333333333333"),
-                        UUID("44444444-4444-4444-8444-444444444444"),
-                    ],
-                ):
-                    first = MainFlowInput.model_validate(component.build_envelope().data)
-                    second = MainFlowInput.model_validate(component.build_envelope().data)
+                first = MainFlowInput.model_validate(component.build_envelope().data)
+                second = MainFlowInput.model_validate(component.build_envelope().data)
 
-        assert first.session_id == f"p1-{PLAYGROUND_SESSION_UUID_1}"
-        assert second.session_id == f"p1-{PLAYGROUND_SESSION_UUID_2}"
+        assert first.session_id == second.session_id
+
+    def test_different_playground_labels_map_to_different_sessions(
+        self, component: ExecutionEnvelopeComponent
+    ) -> None:
+        """Distinct labels must not collapse onto the same session."""
+        with patch.object(component, "_get_playground_actor_id", return_value=TRUSTED_ACTOR_ID):
+            with patch.object(
+                component, "_get_invocation_source", return_value=InvocationSource.PLAYGROUND
+            ):
+                component.message = Message(text="Hello", session_id="New Session 0")
+                first = MainFlowInput.model_validate(component.build_envelope().data)
+
+                component.message = Message(text="Hello", session_id="New Session 1")
+                second = MainFlowInput.model_validate(component.build_envelope().data)
+
+        assert first.session_id != second.session_id
+
+    def test_playground_label_session_is_a_valid_uuid(
+        self, component: ExecutionEnvelopeComponent
+    ) -> None:
+        """The deterministic session still satisfies the p1-<uuid> contract."""
+        component.message = Message(text="Hello", session_id="New Session 0")
+
+        with patch.object(component, "_get_playground_actor_id", return_value=TRUSTED_ACTOR_ID):
+            with patch.object(
+                component, "_get_invocation_source", return_value=InvocationSource.PLAYGROUND
+            ):
+                envelope = MainFlowInput.model_validate(component.build_envelope().data)
+
+        assert envelope.session_id.startswith("p1-")
+        UUID(envelope.session_id.removeprefix("p1-"))  # must not raise
 
     def test_playground_label_matching_graph_label_is_accepted(
         self, component: ExecutionEnvelopeComponent
@@ -315,17 +338,47 @@ class TestSessionNormalization:
                 component, "_get_invocation_source", return_value=InvocationSource.PLAYGROUND
             ):
                 with patch.object(component, "_get_graph_session_id", return_value="New Session 0"):
-                    with patch(
-                        "hulubul.request_intake.entrypoints.langflow.components.hulubul.execution_envelope.uuid4",
-                        side_effect=[
-                            PLAYGROUND_SESSION_UUID_1,
-                            UUID("11111111-1111-4111-8111-111111111111"),
-                            UUID("22222222-2222-4222-8222-222222222222"),
-                        ],
-                    ):
-                        envelope = MainFlowInput.model_validate(component.build_envelope().data)
+                    envelope = MainFlowInput.model_validate(component.build_envelope().data)
 
-        assert envelope.session_id == f"p1-{PLAYGROUND_SESSION_UUID_1}"
+        assert envelope.session_id.startswith("p1-")
+
+
+class TestSessionUuidPart:
+    """`_session_uuid_part` in isolation: no component mocking needed."""
+
+    def test_already_valid_uuid_is_returned_unchanged(self) -> None:
+        result = ExecutionEnvelopeComponent._session_uuid_part(
+            BARE_UUID, BARE_UUID, InvocationSource.API
+        )
+
+        assert result == BARE_UUID
+
+    def test_non_uuid_playground_label_is_deterministic(self) -> None:
+        first = ExecutionEnvelopeComponent._session_uuid_part(
+            "new session 0", "New Session 0", InvocationSource.PLAYGROUND
+        )
+        second = ExecutionEnvelopeComponent._session_uuid_part(
+            "new session 0", "New Session 0", InvocationSource.PLAYGROUND
+        )
+
+        assert first == second
+        UUID(first)  # must not raise
+
+    def test_non_uuid_playground_label_differs_by_label(self) -> None:
+        first = ExecutionEnvelopeComponent._session_uuid_part(
+            "new session 0", "New Session 0", InvocationSource.PLAYGROUND
+        )
+        second = ExecutionEnvelopeComponent._session_uuid_part(
+            "new session 1", "New Session 1", InvocationSource.PLAYGROUND
+        )
+
+        assert first != second
+
+    def test_non_uuid_api_label_is_rejected(self) -> None:
+        with pytest.raises(ValueError, match="INVALID_INPUT"):
+            ExecutionEnvelopeComponent._session_uuid_part(
+                "new session 0", "New Session 0", InvocationSource.API
+            )
 
 
 class TestSessionValidation:
