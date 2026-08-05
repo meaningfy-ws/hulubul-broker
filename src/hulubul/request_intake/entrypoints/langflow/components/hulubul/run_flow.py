@@ -1,17 +1,19 @@
 """Run Flow variant that fixes stock ``RunFlow``'s cross-flow defects.
 
-Drop-in replacement for LangFlow's built-in **Run Flow** node. It fixes three
+Drop-in replacement for LangFlow's built-in **Run Flow** node. It fixes four
 ``lfx==1.10.2`` defects and inherits everything else, so flow selection, output
 mapping, graph caching and tool exposure keep working as they do upstream:
 
 1. which target-flow fields become model-callable tool arguments
    (``get_required_data``),
 2. which input category runtime payloads carry
-   (``_build_inputs_from_ioputs``), and
+   (``_build_inputs_from_ioputs``),
 3. whether an agent's tool arguments reach the run that consumes them
-   (``_register_flow_output_method`` and ``__deepcopy__`` together).
+   (``_register_flow_output_method`` and ``__deepcopy__`` together), and
+4. whether a tool call survives a per-call copy when a cached tool-mode
+   output carries a live, unpicklable object (``__deepcopy__``).
 
-The first two decisions live in
+The pure decisions (1, 2 and 4) live in
 :mod:`hulubul.request_intake.entrypoints.langflow.run_flow_policy`, which
 documents the defects being worked around and is unit-tested without a
 LangFlow installation. Nothing here monkey-patches ``lfx``.
@@ -32,6 +34,7 @@ from lfx.log.logger import logger
 from lfx.schema.dotdict import dotdict
 
 from hulubul.request_intake.entrypoints.langflow.run_flow_policy import (
+    deepcopy_outputs_with_fallback,
     excluded_field_names,
     select_model_callable_fields,
     with_unrestricted_input_type,
@@ -124,7 +127,33 @@ class HulubulRunFlowComponent(RunFlowComponent):
         The copy's ``_outputs_map`` is restored by the time we get here, so
         re-registering from it rebinds one resolver per dynamic flow output to
         the copy.
+
+        A third, unrelated defect lives in the same base method:
+        ``Component.__deepcopy__`` deep-copies ``self._outputs_map`` with no
+        protection, unlike the try/except-and-shallow-copy fallback it already
+        applies to ``self._inputs`` two lines earlier. A tool-mode output's
+        cached value can carry a live ``asyncio.Task`` from LangFlow's own
+        tracing service (confirmed live, only on flow builds started through
+        the streaming endpoint the Playground UI uses -- see
+        :func:`~hulubul.request_intake.entrypoints.langflow.run_flow_policy.deepcopy_outputs_with_fallback`
+        for the full explanation), which cannot be deep-copied, so the tool
+        call fails after LangChain's own retries are exhausted. Detach
+        ``_outputs_map`` before the base copy runs so it has nothing risky to
+        choke on, then reattach a defensively-copied version.
         """
-        duplicate = cast("HulubulRunFlowComponent", super().__deepcopy__(memo))
+        outputs_map = self._outputs_map
+        self._outputs_map = {}
+        try:
+            duplicate = cast("HulubulRunFlowComponent", super().__deepcopy__(memo))
+        finally:
+            self._outputs_map = outputs_map
+
+        safe_outputs_map, fell_back = deepcopy_outputs_with_fallback(outputs_map, memo)
+        if fell_back:
+            logger.warning(
+                f"{self.name}: deepcopy failed for outputs {fell_back} -- "
+                "falling back to a shared reference"
+            )
+        duplicate._outputs_map = safe_outputs_map
         duplicate._ensure_flow_output_methods()
         return duplicate

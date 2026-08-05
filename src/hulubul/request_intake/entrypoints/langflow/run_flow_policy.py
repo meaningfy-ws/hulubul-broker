@@ -1,8 +1,9 @@
 """Policy for LangFlow's cross-flow ``RunFlow`` boundary.
 
-Stock ``RunFlow`` (``lfx==1.10.2``) has two defects on the path a caller flow
-uses to invoke a target flow. Both are fixed by ``HulubulRunFlowComponent``,
-which delegates the decisions to the pure functions in this module.
+Stock ``RunFlow`` (``lfx==1.10.2``) has three defects on the path a caller
+flow uses to invoke a target flow. All three are fixed by
+``HulubulRunFlowComponent``, which delegates the decisions to the pure
+functions in this module.
 
 Build time -- ``lfx/io/schema.py::create_input_schema_from_dict()`` passes each
 target-flow field's *serialized* type label straight to Pydantic as a type
@@ -19,6 +20,21 @@ vertex whose component type is not ``ChatInput``. A payload aimed at a custom
 boundary component therefore never lands and the boundary rejects an empty
 ``input_value``. See :func:`with_unrestricted_input_type`.
 
+Per-tool-call copy -- ``ComponentToolkit`` (``lfx/base/tools/component_tool.py``)
+deep-copies the whole component on every tool invocation, to isolate
+concurrent calls. ``Component.__deepcopy__`` protects ``self._inputs`` from a
+deepcopy failure with a try/except-and-shallow-copy fallback, but deep-copies
+``self._outputs_map`` two lines later with no protection at all. A tool-mode
+output's cached value (``Output.cache=True``) can carry a live
+``asyncio.Task`` from LangFlow's own tracing service -- confirmed live: a
+flow build triggered through the streaming endpoint (``/api/v1/build``, what
+the Playground UI uses) wires a ``NativeTracer`` whose background flush task
+ends up nested inside the cached ``component_as_tool`` value; a plain
+synchronous run (``/api/v1/run``) never does. ``asyncio.Task`` cannot be
+deep-copied or pickled, so the tool call fails with ``TypeError: cannot
+pickle '_asyncio.Task' object`` after LangChain's own retries are exhausted.
+See :func:`deepcopy_outputs_with_fallback`.
+
 This module is deliberately free of ``lfx``/``langflow`` imports so the policy
 stays unit-testable without a LangFlow server installation; it speaks plain
 mappings, and the component re-wraps the results in ``dotdict``.
@@ -27,6 +43,7 @@ mappings, and the component re-wraps the results in ``dotdict``.
 from __future__ import annotations
 
 from collections.abc import Iterable, Mapping
+from copy import deepcopy
 from typing import Any, Final
 
 __all__ = [
@@ -36,6 +53,7 @@ __all__ = [
     "INPUT_TYPE_KEY",
     "SCHEMA_SAFE_FIELD_TYPES",
     "UNRESTRICTED_INPUT_TYPE",
+    "deepcopy_outputs_with_fallback",
     "excluded_field_names",
     "select_model_callable_fields",
     "with_unrestricted_input_type",
@@ -142,3 +160,30 @@ def with_unrestricted_input_type(
     custom boundary component.
     """
     return [{**payload, INPUT_TYPE_KEY: UNRESTRICTED_INPUT_TYPE} for payload in payloads]
+
+
+def deepcopy_outputs_with_fallback(
+    outputs_map: Mapping[str, Any], memo: dict[int, Any]
+) -> tuple[dict[str, Any], list[str]]:
+    """Deep-copy each output's cached value, falling back to a shared reference.
+
+    A cached tool-mode output (``component_as_tool``) is a static "how to
+    call this component" wrapper, not per-call execution state -- the real
+    per-call isolation happens one level deeper, inside the tool invocation
+    itself. So it is safe to share the reference for whichever entry fails to
+    deep-copy, the same trade-off ``Component.__deepcopy__`` already makes
+    for ``_inputs``.
+
+    Returns the copied mapping and the names of entries that fell back to a
+    shared reference, so the caller can log the fallback without this module
+    importing a logger.
+    """
+    copied: dict[str, Any] = {}
+    fell_back: list[str] = []
+    for key, value in outputs_map.items():
+        try:
+            copied[key] = deepcopy(value, memo)
+        except Exception:
+            copied[key] = value
+            fell_back.append(key)
+    return copied, fell_back

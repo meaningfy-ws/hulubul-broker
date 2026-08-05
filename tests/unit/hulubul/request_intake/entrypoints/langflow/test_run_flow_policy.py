@@ -1,11 +1,13 @@
 """Tests for the cross-flow RunFlow tool-boundary policy."""
 
+import copy
 from typing import Any
 
 import pytest
 
 from hulubul.request_intake.entrypoints.langflow.run_flow_policy import (
     UNRESTRICTED_INPUT_TYPE,
+    deepcopy_outputs_with_fallback,
     excluded_field_names,
     select_model_callable_fields,
     with_unrestricted_input_type,
@@ -171,3 +173,76 @@ class TestWithUnrestrictedInputType:
 
     def test_no_payloads_yields_no_result(self) -> None:
         assert with_unrestricted_input_type([]) == []
+
+
+class _Unpicklable:
+    """Stand-in for a live object `copy.deepcopy` cannot handle (e.g. an
+    `asyncio.Task`), without depending on asyncio internals in the test."""
+
+    def __deepcopy__(self, memo: dict[int, Any]) -> "_Unpicklable":
+        msg = "cannot pickle '_Unpicklable' object"
+        raise TypeError(msg)
+
+
+class TestDeepcopyOutputsWithFallback:
+    """Per-tool-call copy of a component's cached outputs."""
+
+    def test_deepcopyable_values_are_deep_copied(self) -> None:
+        outputs_map = {"response": {"nested": ["value"]}}
+
+        copied, fell_back = deepcopy_outputs_with_fallback(outputs_map, {})
+
+        assert copied == outputs_map
+        assert copied["response"] is not outputs_map["response"]
+        assert fell_back == []
+
+    def test_unpicklable_value_falls_back_to_shared_reference(self) -> None:
+        """A cached `component_as_tool` wrapper carrying a live asyncio.Task."""
+        unpicklable = _Unpicklable()
+        outputs_map = {"component_as_tool": unpicklable}
+
+        copied, fell_back = deepcopy_outputs_with_fallback(outputs_map, {})
+
+        assert copied["component_as_tool"] is unpicklable
+        assert fell_back == ["component_as_tool"]
+
+    def test_mixed_map_only_reports_the_entries_that_failed(self) -> None:
+        unpicklable = _Unpicklable()
+        outputs_map = {
+            "HulubulContractResultBoundary-hlb-lf-10-result-v1~response": {"value": 1},
+            "component_as_tool": unpicklable,
+        }
+
+        copied, fell_back = deepcopy_outputs_with_fallback(outputs_map, {})
+
+        assert copied["HulubulContractResultBoundary-hlb-lf-10-result-v1~response"] == {"value": 1}
+        assert (
+            copied["HulubulContractResultBoundary-hlb-lf-10-result-v1~response"]
+            is not outputs_map["HulubulContractResultBoundary-hlb-lf-10-result-v1~response"]
+        )
+        assert copied["component_as_tool"] is unpicklable
+        assert fell_back == ["component_as_tool"]
+
+    def test_empty_map_yields_no_result_and_no_fallback(self) -> None:
+        assert deepcopy_outputs_with_fallback({}, {}) == ({}, [])
+
+    def test_memo_is_shared_with_the_caller_deepcopy(self) -> None:
+        """A shared `memo` resolves reference cycles consistently across calls."""
+        shared_value = {"marker": "shared"}
+        outputs_map = {"first": shared_value, "second": shared_value}
+        memo: dict[int, Any] = {}
+
+        copied, fell_back = deepcopy_outputs_with_fallback(outputs_map, memo)
+
+        assert fell_back == []
+        assert copied["first"] is copied["second"]
+        assert copied["first"] is not shared_value
+
+    def test_source_map_is_not_mutated(self) -> None:
+        unpicklable = _Unpicklable()
+        outputs_map = {"component_as_tool": unpicklable, "response": {"value": 1}}
+        original = copy.copy(outputs_map)
+
+        deepcopy_outputs_with_fallback(outputs_map, {})
+
+        assert outputs_map == original

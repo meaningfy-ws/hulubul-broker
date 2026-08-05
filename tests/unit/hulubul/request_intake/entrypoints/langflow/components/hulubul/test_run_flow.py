@@ -8,6 +8,7 @@ the per-tool-call component copy that used to lose the agent's arguments.
 
 import asyncio
 from copy import deepcopy
+from types import SimpleNamespace
 from typing import Any
 
 import pytest
@@ -278,3 +279,113 @@ class TestBuildInputsFromIoputs:
 
     def test_no_ioputs_yields_no_payloads(self) -> None:
         assert _component()._build_inputs_from_ioputs({}) == []
+
+
+class TestDeepcopySurvivesAnUnpicklableCachedOutput:
+    """The live failure: a cached `component_as_tool` output's `.value`
+    carrying a live `asyncio.Task`, nested inside it exactly as captured from
+    the running system (`Output.value[0].callbacks[0].tracer._flush_task`) --
+    LangFlow's own tracing service. Confirmed live only on a flow build
+    started through the streaming endpoint the Playground UI uses -- never on
+    a plain synchronous run, and never reproducible via a direct API call
+    regardless of session ID format.
+    """
+
+    @staticmethod
+    def _finished_task() -> "asyncio.Task[None]":
+        async def _noop() -> None:
+            return None
+
+        async def _make() -> "asyncio.Task[None]":
+            task = asyncio.ensure_future(_noop())
+            await task
+            return task
+
+        return asyncio.run(_make())
+
+    @classmethod
+    def _component_as_tool_output(cls) -> Output:
+        """A `component_as_tool` output shaped like the one captured live:
+        `Output.value[0].callbacks[0].tracer._flush_task` holds the task."""
+        tracer = SimpleNamespace(_flush_task=cls._finished_task())
+        callback = SimpleNamespace(tracer=tracer)
+        tool_wrapper = SimpleNamespace(callbacks=[callback])
+        return Output(
+            name="component_as_tool",
+            display_name="Toolset",
+            method="to_toolkit",
+            types=["Tool"],
+            value=[tool_wrapper],
+        )
+
+    @staticmethod
+    def _component_with_flow_output() -> tuple[HulubulRunFlowComponent, str]:
+        component = HulubulRunFlowComponent(_id="test-run-flow")  # type: ignore[no-untyped-call]
+        method_name = component._register_flow_output_method(
+            vertex_id=RESULT_VERTEX_ID, output_name="response"
+        )
+        output = Output(
+            name=f"{RESULT_VERTEX_ID}~response",
+            display_name="Result",
+            method=method_name,
+            types=["JSON"],
+        )
+        component._outputs_map[output.name] = output
+        component.outputs = [output]
+        return component, method_name
+
+    def test_deepcopy_does_not_raise_when_a_cached_output_holds_a_task(self) -> None:
+        component, _ = self._component_with_flow_output()
+        tool_output = self._component_as_tool_output()
+        component._outputs_map["component_as_tool"] = tool_output
+
+        duplicate = deepcopy(component)  # must not raise TypeError
+
+        assert duplicate._outputs_map["component_as_tool"] is tool_output
+
+    def test_other_cached_outputs_are_still_deep_copied_independently(self) -> None:
+        """The fallback must stay scoped to the one entry that fails, not
+        silently degrade the whole `_outputs_map` to a shallow copy."""
+        component, _ = self._component_with_flow_output()
+        component._outputs_map["component_as_tool"] = self._component_as_tool_output()
+
+        duplicate = deepcopy(component)
+
+        vertex_output_name = f"{RESULT_VERTEX_ID}~response"
+        assert (
+            duplicate._outputs_map[vertex_output_name]
+            is not (component._outputs_map[vertex_output_name])
+        )
+
+    def test_dynamic_resolver_still_works_alongside_the_unpicklable_output(self) -> None:
+        """The pre-existing tool-argument-delivery fix must not regress."""
+        component, method_name = self._component_with_flow_output()
+        component._outputs_map["component_as_tool"] = self._component_as_tool_output()
+
+        duplicate = deepcopy(component)
+
+        assert hasattr(duplicate, method_name)
+        assert getattr(duplicate, method_name).__self__ is duplicate
+
+    def test_original_component_is_left_usable_after_the_copy(self) -> None:
+        """Detaching `_outputs_map` for the base copy must restore it on self."""
+        component, _ = self._component_with_flow_output()
+        tool_output = self._component_as_tool_output()
+        component._outputs_map["component_as_tool"] = tool_output
+
+        deepcopy(component)
+
+        assert component._outputs_map["component_as_tool"] is tool_output
+
+    def test_without_an_unpicklable_output_deepcopy_is_unaffected(self) -> None:
+        """No behavior change on the ordinary path most tool calls take."""
+        component, method_name = self._component_with_flow_output()
+
+        duplicate = deepcopy(component)
+
+        assert hasattr(duplicate, method_name)
+        vertex_output_name = f"{RESULT_VERTEX_ID}~response"
+        assert (
+            duplicate._outputs_map[vertex_output_name]
+            is not (component._outputs_map[vertex_output_name])
+        )
