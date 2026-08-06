@@ -25,6 +25,13 @@ domain logic behind them, laid out in `core/` (shared) plus feature sub-modules,
 each following the `models` / `services` / `entrypoints` layering enforced by
 import-linter.
 
+| File | Flow | What it does |
+|------|------|---------------|
+| `10-lf-70-data-access.json` | LF-70 Data Access | Validates a typed `DataOperationRequest`, executes it via the Data Access Agent against Neo4j MCP, returns a validated `DataOperationResult`. |
+| `20-lf-10-request-intake.json` | LF-10 Request Intake | Validates a typed `IntakeInput`, extracts intake facts via the Request Intake Agent using LF-70 as a tool, returns a validated `IntakeResult`. |
+| `30-lf-00-main-router.json` | LF-00 Main Router | Validates trusted chat input, prefetches routing context from LF-70, routes to LF-10 for intake-eligible states, renders a deterministic `RouterResult` to Chat Output. This is the deployed entry point. |
+| `lf-10-70-merged-demo-1.json` | — | Demo/debug artifact, not in the manifest and not deployed by `make langflow-deploy`. Kept for reference only. |
+
 **Flows exchange versioned contracts** (`src/hulubul/core/models/operational/`,
 `schemas/`). The payloads flows pass to one another are defined as Pydantic
 models, which are what actually validate a payload at runtime. Those models are
