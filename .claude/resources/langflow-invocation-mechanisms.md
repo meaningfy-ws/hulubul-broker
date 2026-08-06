@@ -56,3 +56,22 @@ Run turns **sequentially** (wait for one turn's events stream to finish
 before sending the next) — firing multiple `/build` calls back-to-back
 without waiting does not reproduce a real conversation and can interleave
 state incorrectly.
+
+## Disconnecting from `/events` cancels the job server-side
+
+Confirmed live: if the client reading `GET /api/v1/build/{job_id}/events`
+disconnects or times out before the stream ends, LangFlow **cancels the job**
+(`docker logs` shows `"Build cancelled"` / `"Job ... was cancelled by
+system"` immediately after). This is different from the plain `/run/`
+endpoint, where a client-side timeout does not necessarily stop server-side
+processing.
+
+Practical consequence when reproducing or verifying a slow multi-turn flow:
+a turn that legitimately takes several minutes (this system has observed
+single turns take 15-20+ minutes under upstream-model-timeout/retry
+conditions) will never complete if your `/events` read times out first — you
+won't get a slow result, you'll get no result, and the job is gone for good.
+Set the `/events` request's timeout generously (minutes, not the ~60-280s
+that's fine for a single-shot request), or run it in the background with a
+long timeout, rather than assuming a stalled-looking request is still
+progressing server-side the way it would on `/run/`.
