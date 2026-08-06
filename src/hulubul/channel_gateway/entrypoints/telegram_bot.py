@@ -30,6 +30,7 @@ class GatewayConfig:
     langflow_flow_id: str
     mode: GatewayMode
     webhook_secret: str | None = None
+    langflow_api_key: str | None = None
 
 
 def load_config() -> GatewayConfig:
@@ -55,6 +56,7 @@ def load_config() -> GatewayConfig:
         langflow_flow_id=os.environ["LANGFLOW_FLOW_ID"],
         mode=mode,
         webhook_secret=webhook_secret,
+        langflow_api_key=os.environ.get("LANGFLOW_API_KEY") or None,
     )
 
 
@@ -134,6 +136,7 @@ async def main() -> None:
             base_url=config.langflow_api_url,
             flow_id=config.langflow_flow_id,
             client=http_client,
+            api_key=config.langflow_api_key,
         )
 
         @dispatcher.message(F.text)
