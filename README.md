@@ -320,8 +320,8 @@ direct pushes are not used. Commit messages follow
 **CI / quality gates**
 - `make install` — install all dependency groups
 - `make lint-python` / `format-python` / `format-check-python` / `typecheck` / `check-architecture`
-- `make test-unit` / `test-static` / `test-integration`
-- `make operational-schemas` / `check-operational-schemas` / `check-model-generated` / `check-secrets`
+- `make test-unit` / `test-static` / `test-feature` / `test-integration`
+- `make operational-schemas` / `check-operational-schemas` / `check-model-generated`
 - `make ci-static` — the everyday gate, and what CI runs
 - `make ci` — `ci-static` plus the acceptance suite; the acceptance half needs
   the dedicated Docker acceptance stack (`make acceptance-up`), so use

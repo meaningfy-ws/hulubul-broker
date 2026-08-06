@@ -64,6 +64,38 @@ services:
 
     restart: unless-stopped
 
+  channel-gateway:
+    build:
+      context: ../
+      dockerfile: infra/channel-gateway/Dockerfile
+
+    depends_on:
+      langflow:
+        condition: service_started
+
+    environment:
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
+      LANGFLOW_API_URL: http://langflow:7860
+      LANGFLOW_FLOW_ID: ${LANGFLOW_FLOW_ID}
+      LANGFLOW_API_KEY: ${LANGFLOW_API_KEY:-}
+      GATEWAY_MODE: ${GATEWAY_MODE:-polling}
+      TELEGRAM_WEBHOOK_SECRET: ${TELEGRAM_WEBHOOK_SECRET:-}
+      NGROK_API_URL: http://ngrok:4040
+
+    expose: ["8080"]
+
+  # ngrok tunnel — only started in webhook mode (`--profile webhook`), exposing
+  # channel-gateway's aiohttp webhook server to the public internet for local
+  # Telegram webhook testing.
+  ngrok:
+    image: ngrok/ngrok:3
+    command: ["http", "channel-gateway:8080"]
+    environment:
+      NGROK_AUTHTOKEN: ${NGROK_AUTHTOKEN}
+    ports:
+      - "4040:4040"
+    profiles: ["webhook"]
+
   postgres:
     image: postgres:16-trixie@sha256:33f923b05f64ca54ac4401c01126a6b92afe839a0aa0a52bc5aeb5cc958e5f20
 
@@ -120,8 +152,9 @@ services:
 
     restart: unless-stopped
 
-  # Neo4j schema setup job (one-shot) — runs after neo4j is healthy,
-  # ensures schema is initialized before MCP can use the graph.
+  # Neo4j schema setup job (one-shot) — placeholder that starts after neo4j is
+  # healthy but does not yet apply the schema (command is a no-op); real
+  # schema application is a later task (see `make neo4j-schema`).
   neo4j-schema:
     image: neo4j:5.26-community@sha256:362542416de6c09a971484d1893878016cc3b5cdec166e54b1c824a220ecd6b9
 

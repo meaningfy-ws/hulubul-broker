@@ -62,11 +62,13 @@ Handy targets: `make lint` (validate only), `make clean` (wipe `generated/`),
 
 ## Generated artifacts (`make <target>`)
 
-All land under a single `generated/` tree. Run `make all` for the lot.
+All land under a single `generated/` tree, except `pydantic` — see ADR-019
+(`architecture/decisions/README.md`) — which lands inside the installed `hulubul`
+package so it's importable. Run `make all` for the lot.
 
 | Target | Output | Purpose |
 |--------|--------|---------|
-| `pydantic` | `generated/pydantic/hulubul_models.py` | Pydantic models |
+| `pydantic` | `src/hulubul/core/models/domain/hulubul_models.py` (outside `generated/`, per ADR-019) | Pydantic models |
 | `owl` | `generated/owl/hulubul.owl.ttl` | OWL ontology |
 | `shacl` | `generated/shacl/hulubul.shacl.ttl` | SHACL shapes (validation) |
 | `jsonschema` | `generated/jsonschema/hulubul.schema.json` | JSON Schema |

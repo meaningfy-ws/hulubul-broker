@@ -27,8 +27,17 @@ below.
 | [diagrams/workflows.md](diagrams/workflows.md) | Status state machine, happy-path sequence, cascade | Jul 8 | ⚠ stale — see conflicts |
 | [raci.md](raci.md) | Responsibility matrix across the flow | Jul 8 | ✅ |
 | [task-2-frameworks-exploration.md](task-2-frameworks-exploration.md) | Framework/tech exploration (non-decisional) | Jul 8 | ✅ |
+| [channel-gateway-blueprint.md](channel-gateway-blueprint.md) | Telegram/WhatsApp channel gateway design: `ChannelPort` interface, session/identity handling, module layout, deployment topology | Jul 25 | ✅ current — Phase 3 scope, pulled forward |
+| [channel-gateway-runbook.md](channel-gateway-runbook.md) | Channel gateway operational how-to: Telegram bot setup, local Compose bring-up, running tests | Jul 25 | ✅ current — Phase 3 scope, pulled forward |
 | [reports/](reports/) | Research report: Deterministic Control Patterns for LLM Agent Systems | Jul 10 | ✅ non-binding |
 | [specs/](specs/) | LinkML domain schema placeholder | Jul 8 | ⛔ deferred (schema now under `../model/linkml/`) |
+
+**Note on the two channel-gateway docs above:** they document Phase 3 (Field Pilot) scope per
+[incremental-system-development-strategy.md §6](incremental-system-development-strategy.md#6-phase-3---field-pilot),
+built and documented ahead of Phase 1 completing, to de-risk the later Phase 3 channel cutover.
+The active OpenSpec change at the time this was written (`deliver-phase-1-request-intake-thread`)
+is Phase 1 scope; the channel gateway work does not redirect it. See the blueprint's
+[Context section](channel-gateway-blueprint.md#context) for the full reasoning.
 
 ## Task status
 

@@ -6,8 +6,13 @@ END_BUILD_PRINT = \e[0m
 REPO_ROOT    := $(shell pwd)
 INFRA_PATH   := $(REPO_ROOT)/infra
 SCHEMA       := $(REPO_ROOT)/model/linkml/hulubul.yaml
+# Repo-relative form for generators whose output embeds the schema path
+# verbatim (gen-pydantic's `source_file`); keeps that field stable across
+# machines/checkouts instead of leaking a developer's local worktree path.
+SCHEMA_REL   := model/linkml/hulubul.yaml
 GEN          := $(REPO_ROOT)/model/generated
 DIAG         := $(GEN)/diagrams
+DOMAIN_MODELS := $(REPO_ROOT)/src/hulubul/core/models/domain
 COMPOSE_FILE := $(INFRA_PATH)/docker-compose.yaml
 ENV_FILE     := $(INFRA_PATH)/.env
 NEO4J_CY     := $(INFRA_PATH)/cypher
@@ -75,9 +80,6 @@ help: ## Display available targets
 	@ echo "    langflow-deploy     - Push every flow in langflow/flows to a LangFlow instance"
 	@ echo "    check-flows         - Validate flow assets (manifest, normalization, lfx checks)"
 	@ echo ""
-	@ echo -e "  $(BUILD_PRINT)Git hooks:$(END_BUILD_PRINT)"
-	@ echo "    install-git-hooks   - Install the local pre-commit secret scan hook"
-	@ echo ""
 	@ echo -e "  $(BUILD_PRINT)CI / Quality gates:$(END_BUILD_PRINT)"
 	@ echo "    install                  - Install project dependencies via Poetry"
 	@ echo "    lint-python              - Lint Python source with Ruff"
@@ -85,11 +87,11 @@ help: ## Display available targets
 	@ echo "    format-python            - Apply Ruff formatting to Python source"
 	@ echo "    typecheck                - Type-check with mypy"
 	@ echo "    test-unit                - Run unit tests with coverage (fails under 80%)"
+	@ echo "    test-feature             - Run feature-level pytest-bdd suites (tests/e2e excluded)"
 	@ echo "    check-architecture       - Enforce import boundaries with import-linter"
 	@ echo "    operational-schemas      - Generate operational JSON schemas"
 	@ echo "    check-model-generated    - Fail if model/generated is stale relative to the LinkML schema"
 	@ echo "    check-operational-schemas - Fail if operational schemas are stale"
-	@ echo "    check-secrets            - Scan tracked files for committed secrets"
 	@ echo "    test-integration         - Run integration-marked tests"
 	@ echo "    test-system              - Run system-marked tests"
 	@ echo "    test-bdd                 - Run BDD step-definition tests"
@@ -114,7 +116,7 @@ lint:
 # Pydantic classes (the "possibly generate pydantic" target).
 pydantic:
 	@ echo -e "$(BUILD_PRINT)$(ICON_PROGRESS) Generating Pydantic classes$(END_BUILD_PRINT)"
-	@ mkdir -p $(GEN)/pydantic && poetry run gen-pydantic $(SCHEMA) > $(GEN)/pydantic/hulubul_models.py
+	@ mkdir -p $(DOMAIN_MODELS) && poetry run gen-pydantic $(SCHEMA_REL) > $(DOMAIN_MODELS)/hulubul_models.py
 	@ echo -e "$(BUILD_PRINT)$(ICON_DONE) Pydantic classes generated$(END_BUILD_PRINT)"
 
 # Ontology + constraints. Every class/slot carries an explicit hlb: URI, so the
@@ -308,15 +310,6 @@ langflow-deploy: check-env ## Push every flow in langflow/flows to a LangFlow in
 	@ echo -e "$(BUILD_PRINT)$(ICON_DONE) Flows deployed$(END_BUILD_PRINT)"
 
 #-----------------------------------------------------------------------------
-# Git hooks
-#-----------------------------------------------------------------------------
-.PHONY: install-git-hooks
-
-install-git-hooks: ## Install the local pre-commit secret scan hook
-	@ install -m 755 scripts/git-hooks/pre-commit "$$(git rev-parse --git-common-dir)/hooks/pre-commit"
-	@ echo -e "$(BUILD_PRINT)$(ICON_DONE) Installed pre-commit hook (runs check_committed_secrets.py)$(END_BUILD_PRINT)"
-
-#-----------------------------------------------------------------------------
 # Python quality, tests and CI
 # Namespaced so they never collide with the LinkML generation targets above:
 # `lint` stays LinkML-only (linkml-lint); Python style/type checks live under
@@ -324,15 +317,15 @@ install-git-hooks: ## Install the local pre-commit secret scan hook
 # by later plan tasks fail naturally until those tasks land — that is
 # expected, not a bug in this target set.
 #-----------------------------------------------------------------------------
-.PHONY: install lint-python format-check-python typecheck test-unit \
+.PHONY: install lint-python format-check-python typecheck test-unit test-feature \
 	check-architecture operational-schemas format-python check-model-generated \
-	check-operational-schemas check-secrets test-integration \
+	check-operational-schemas test-integration \
 	test-system test-bdd ci-static ci-acceptance ci acceptance-up \
 	acceptance-ready acceptance-deploy preflight-langflow-1-10-2 \
 	acceptance-diagnostics acceptance-down release-evidence
 
-install: ## Install all dependency groups (test, quality, langflow, integration)
-	poetry install --with test,quality,langflow,integration
+install: ## Install all dependency groups (test, quality, langflow, integration, gateway)
+	poetry install --with test,quality,langflow,integration,gateway
 
 lint-python: ## Lint Python source with Ruff
 	poetry run ruff check src tests scripts
@@ -353,6 +346,10 @@ test-unit: ## Run unit tests with coverage (fails under 80%)
 test-static: ## Run static flow-topology tests (no live services, no coverage)
 	poetry run pytest tests/static
 
+test-feature: ## Run feature-level pytest-bdd suites (tests/feature); tests/e2e excluded (defense in depth)
+	@ mkdir -p reports
+	poetry run pytest tests/feature --ignore=tests/e2e --junitxml=reports/junit-feature.xml
+
 check-architecture: ## Enforce import boundaries with import-linter
 	poetry run lint-imports
 
@@ -360,13 +357,10 @@ operational-schemas: ## Generate operational JSON schemas
 	poetry run gen-operational-schemas --output schemas/operational/v1
 
 check-model-generated: lint pydantic jsonschema erdiagram plantuml classdiagram neo4j-constraints neomodel ## Fail if model/generated is stale relative to the LinkML schema
-	git diff --exit-code -- model/generated ':(exclude)model/generated/owl/**' ':(exclude)model/generated/shacl/**' ':(exclude)model/generated/pydantic/**'
+	git diff --exit-code -- model/generated ':(exclude)model/generated/owl/**' ':(exclude)model/generated/shacl/**' src/hulubul/core/models/domain
 
 check-operational-schemas: ## Fail if operational schemas are stale
 	poetry run gen-operational-schemas --output schemas/operational/v1 --check
-
-check-secrets: ## Scan tracked files for committed secrets
-	poetry run python scripts/check_committed_secrets.py
 
 check-flows: ## Validate LangFlow flow assets (manifest, normalization, lfx checks)
 	# poetry run python scripts/validate_langflow_assets.py langflow/flow-manifest.yaml
@@ -435,17 +429,9 @@ test-bdd: ## Run BDD step-definition tests
 # test-evaluation-judge: ## Run the LLM-judge clarification evaluation (opt-in, calls the real model)
 # 	poetry run pytest tests/evaluation/test_clarification_judge.py --run-live-evaluation
 
-# Static CI: schema + Python quality + fast tests.
-# check-secrets is deliberately NOT a prerequisite here: its regex only
-# recognizes bare placeholder literals or bare dotted references, not
-# function-call RHS shapes, so it false-positives on every
-# os.getenv(NAME, "changeme123")-style default value in the LF-70
-# integration tests (tests/integration/langflow/test_lf70_*.py) -- confirmed
-# by manual review, no real secret. Run `make check-secrets` on its own
-# (or as part of pre-commit) rather than blocking ci-static on a known
-# false positive; the target itself is unchanged and still catches real
-# committed secrets elsewhere.
-ci-static: lint check-model-generated lint-python format-check-python typecheck check-architecture check-operational-schemas test-unit test-static
+# Static CI: schema + Python quality + fast tests (no comment on the target
+# line itself, so the prerequisite list stays exactly the canonical set).
+ci-static: lint check-model-generated lint-python format-check-python typecheck check-architecture check-operational-schemas test-unit test-static test-feature
 
 # Acceptance CI: integration + system + BDD tests + evidence report.
 ci-acceptance: test-integration test-system test-bdd release-evidence

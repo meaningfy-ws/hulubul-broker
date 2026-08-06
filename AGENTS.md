@@ -85,6 +85,8 @@ Details, API shapes, and a minimal repro:
 - **LinkML is the single source of truth.** Files under `model/generated/` are
   produced by `make` and must never be hand-edited; the next `make` overwrites
   them. Commit generated artifacts in the same commit as the schema edit.
+  `src/hulubul/core/models/domain/` is likewise `make`-generated (`make pydantic`)
+  and must never be hand-edited.
 - **Secrets never live in VCS.** `infra/.env` is gitignored; copy from
   `infra/.env.example` and edit passwords (Neo4j password ≥ 8 characters).
 - **Never hardcode a developer's local filesystem path into committed code.**
@@ -196,3 +198,76 @@ When all 5 hold → proactively suggest "ready to `/opsx:propose`?" — wait for
   each commit unless they explicitly delegate it for the current task.
 
 Full detail: [superpowers-bridge README §Entry & exit gates](https://github.com/JiangWay/openspec-schemas/blob/main/superpowers-bridge/README.md#entry--exit-gates).
+
+### Meaningfy skill routing
+
+`meaningfy-skillery` (22 skills: core/building/consulting/architecture) isn't otherwise
+routed here — this table is that routing.
+
+| When | Skill |
+|---|---|
+| Apply-readiness gate, before `/opsx:apply` (not optional) | `meaningfy-building:clarity-gate` — score ≥9/10 |
+| System design, ADRs, C4 | `meaningfy-architecture:architecture` |
+| Editing the LinkML schema or its generation pipeline | `meaningfy-architecture:linkml-engineering` + `meaningfy-architecture:modelling-conventions` |
+| Generated-domain vs. hand-written model boundary | `meaningfy-architecture:conceptual-modelling` |
+| Code layering/SOLID under `src/hulubul/` | `meaningfy-building:cosmic-python` |
+| Gherkin feature files | `meaningfy-building:bdd-gherkin` |
+| Architecture docs, READMEs, docstrings | `meaningfy-core:technical-writing` |
+| Broad-audience explainer prose | `meaningfy-core:explanatory-writing` |
+| Chat input reaching an LLM agent | `meaningfy-core:guardrails` |
+| Commits, branches, PRs | `meaningfy-core:meaningfy-git-workflow` |
+| Post-implementation review (separate dispatch, never self-review) | `meaningfy-building:meaningfy-code-review` |
+| `/opsx:archive` | `meaningfy-building:spec-stewardship` |
+| New-repo or repo-wide scaffolding | `meaningfy-building:project-setup` |
+| Deploy/CD setup (real deployment, not local Compose) | `meaningfy-building:ci-cd-delivery` |
+| Release/versioning/publish | `meaningfy-building:meaningfy-release` |
+
+`meaningfy-consulting:*` (coach/decision-package/proposal-writing/estimation/
+executive-communication) is **not applicable** to this repo — it's for running a consulting
+engagement, not building this product. `/opsx:propose` and `proposal-writing` are unrelated
+despite the name overlap.
+
+<!-- gitnexus:start -->
+# GitNexus — Code Intelligence
+
+This project is indexed by GitNexus as **hulubul-broker** (2103 symbols, 2688 relationships, 11 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
+
+> Index stale? Run `node .gitnexus/run.cjs analyze` from the project root — it auto-selects an available runner. No `.gitnexus/run.cjs` yet? `npx gitnexus analyze` (npm 11 crash → `npm i -g gitnexus`; #1939).
+
+## Always Do
+
+- **MUST run impact analysis before editing any symbol.** Before modifying a function, class, or method, run `impact({target: "symbolName", direction: "upstream"})` and report the blast radius (direct callers, affected processes, risk level) to the user.
+- **MUST run `detect_changes()` before committing** to verify your changes only affect expected symbols and execution flows. For regression review, compare against the default branch: `detect_changes({scope: "compare", base_ref: "main"})`.
+- **MUST warn the user** if impact analysis returns HIGH or CRITICAL risk before proceeding with edits.
+- When exploring unfamiliar code, use `query({search_query: "concept"})` to find execution flows instead of grepping. It returns process-grouped results ranked by relevance.
+- When you need full context on a specific symbol — callers, callees, which execution flows it participates in — use `context({name: "symbolName"})`.
+- For security review, `explain({target: "fileOrSymbol"})` lists taint findings (source→sink flows; needs `analyze --pdg`).
+
+## Never Do
+
+- NEVER edit a function, class, or method without first running `impact` on it.
+- NEVER ignore HIGH or CRITICAL risk warnings from impact analysis.
+- NEVER rename symbols with find-and-replace — use `rename` which understands the call graph.
+- NEVER commit changes without running `detect_changes()` to check affected scope.
+
+## Resources
+
+| Resource | Use for |
+|----------|---------|
+| `gitnexus://repo/hulubul-broker/context` | Codebase overview, check index freshness |
+| `gitnexus://repo/hulubul-broker/clusters` | All functional areas |
+| `gitnexus://repo/hulubul-broker/processes` | All execution flows |
+| `gitnexus://repo/hulubul-broker/process/{name}` | Step-by-step execution trace |
+
+## CLI
+
+| Task | Read this skill file |
+|------|---------------------|
+| Understand architecture / "How does X work?" | `.claude/skills/gitnexus/gitnexus-exploring/SKILL.md` |
+| Blast radius / "What breaks if I change X?" | `.claude/skills/gitnexus/gitnexus-impact-analysis/SKILL.md` |
+| Trace bugs / "Why is X failing?" | `.claude/skills/gitnexus/gitnexus-debugging/SKILL.md` |
+| Rename / extract / split / refactor | `.claude/skills/gitnexus/gitnexus-refactoring/SKILL.md` |
+| Tools, resources, schema reference | `.claude/skills/gitnexus/gitnexus-guide/SKILL.md` |
+| Index, status, clean, wiki CLI commands | `.claude/skills/gitnexus/gitnexus-cli/SKILL.md` |
+
+<!-- gitnexus:end -->
