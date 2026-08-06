@@ -52,9 +52,7 @@ async def test_run_sends_x_api_key_header_when_api_key_is_configured() -> None:
         captured_headers.update(request.headers)
         return httpx.Response(
             200,
-            json={
-                "outputs": [{"outputs": [{"results": {"message": {"data": {"text": "ok"}}}}]}]
-            },
+            json={"outputs": [{"outputs": [{"results": {"message": {"data": {"text": "ok"}}}}]}]},
         )
 
     transport = httpx.MockTransport(handler)
@@ -78,9 +76,7 @@ async def test_run_omits_x_api_key_header_when_no_api_key_is_configured() -> Non
         captured_headers.update(request.headers)
         return httpx.Response(
             200,
-            json={
-                "outputs": [{"outputs": [{"results": {"message": {"data": {"text": "ok"}}}}]}]
-            },
+            json={"outputs": [{"outputs": [{"results": {"message": {"data": {"text": "ok"}}}}]}]},
         )
 
     transport = httpx.MockTransport(handler)
