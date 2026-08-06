@@ -1,0 +1,2670 @@
+{
+  "access_type": "PRIVATE",
+  "action_description": null,
+  "action_name": null,
+  "data": {
+    "edges": [
+      {
+        "animated": false,
+        "className": "",
+        "data": {
+          "sourceHandle": {
+            "dataType": "ChatInput",
+            "id": "ChatInput-hlb-lf-00-message-v1",
+            "name": "message",
+            "output_types": [
+              "Message"
+            ]
+          },
+          "targetHandle": {
+            "fieldName": "message",
+            "id": "HulubulExecutionEnvelope-hlb-lf-00-envelope-v1",
+            "inputTypes": [
+              "Message"
+            ],
+            "type": "str"
+          }
+        },
+        "id": "xy-edge__ChatInput-hlb-lf-00-message-v1{\u0153dataType\u0153:\u0153ChatInput\u0153,\u0153id\u0153:\u0153ChatInput-hlb-lf-00-message-v1\u0153,\u0153name\u0153:\u0153message\u0153,\u0153output_types\u0153:[\u0153Message\u0153]}-HulubulExecutionEnvelope-hlb-lf-00-envelope-v1{\u0153fieldName\u0153:\u0153message\u0153,\u0153id\u0153:\u0153HulubulExecutionEnvelope-hlb-lf-00-envelope-v1\u0153,\u0153inputTypes\u0153:[\u0153Message\u0153],\u0153type\u0153:\u0153str\u0153}",
+        "selected": false,
+        "source": "ChatInput-hlb-lf-00-message-v1",
+        "sourceHandle": "{\u0153dataType\u0153:\u0153ChatInput\u0153,\u0153id\u0153:\u0153ChatInput-hlb-lf-00-message-v1\u0153,\u0153name\u0153:\u0153message\u0153,\u0153output_types\u0153:[\u0153Message\u0153]}",
+        "target": "HulubulExecutionEnvelope-hlb-lf-00-envelope-v1",
+        "targetHandle": "{\u0153fieldName\u0153:\u0153message\u0153,\u0153id\u0153:\u0153HulubulExecutionEnvelope-hlb-lf-00-envelope-v1\u0153,\u0153inputTypes\u0153:[\u0153Message\u0153],\u0153type\u0153:\u0153str\u0153}"
+      },
+      {
+        "animated": false,
+        "className": "",
+        "data": {
+          "sourceHandle": {
+            "dataType": "HulubulExecutionEnvelope",
+            "id": "HulubulExecutionEnvelope-hlb-lf-00-envelope-v1",
+            "name": "response",
+            "output_types": [
+              "JSON"
+            ]
+          },
+          "targetHandle": {
+            "fieldName": "envelope",
+            "id": "HulubulDataOperationRequestBuilder-hlb-lf-00-routing-request-v1",
+            "inputTypes": [
+              "Data",
+              "JSON"
+            ],
+            "type": "other"
+          }
+        },
+        "id": "xy-edge__HulubulExecutionEnvelope-hlb-lf-00-envelope-v1{\u0153dataType\u0153:\u0153HulubulExecutionEnvelope\u0153,\u0153id\u0153:\u0153HulubulExecutionEnvelope-hlb-lf-00-envelope-v1\u0153,\u0153name\u0153:\u0153response\u0153,\u0153output_types\u0153:[\u0153JSON\u0153]}-HulubulDataOperationRequestBuilder-hlb-lf-00-routing-request-v1{\u0153fieldName\u0153:\u0153envelope\u0153,\u0153id\u0153:\u0153HulubulDataOperationRequestBuilder-hlb-lf-00-routing-request-v1\u0153,\u0153inputTypes\u0153:[\u0153Data\u0153,\u0153JSON\u0153],\u0153type\u0153:\u0153other\u0153}",
+        "selected": false,
+        "source": "HulubulExecutionEnvelope-hlb-lf-00-envelope-v1",
+        "sourceHandle": "{\u0153dataType\u0153:\u0153HulubulExecutionEnvelope\u0153,\u0153id\u0153:\u0153HulubulExecutionEnvelope-hlb-lf-00-envelope-v1\u0153,\u0153name\u0153:\u0153response\u0153,\u0153output_types\u0153:[\u0153JSON\u0153]}",
+        "target": "HulubulDataOperationRequestBuilder-hlb-lf-00-routing-request-v1",
+        "targetHandle": "{\u0153fieldName\u0153:\u0153envelope\u0153,\u0153id\u0153:\u0153HulubulDataOperationRequestBuilder-hlb-lf-00-routing-request-v1\u0153,\u0153inputTypes\u0153:[\u0153Data\u0153,\u0153JSON\u0153],\u0153type\u0153:\u0153other\u0153}"
+      },
+      {
+        "animated": false,
+        "className": "",
+        "data": {
+          "sourceHandle": {
+            "dataType": "HulubulExecutionEnvelope",
+            "id": "HulubulExecutionEnvelope-hlb-lf-00-envelope-v1",
+            "name": "response",
+            "output_types": [
+              "JSON"
+            ]
+          },
+          "targetHandle": {
+            "fieldName": "envelope",
+            "id": "HulubulContractInputBoundary-hlb-lf-00-router-input-v1",
+            "inputTypes": [
+              "Data",
+              "JSON"
+            ],
+            "type": "other"
+          }
+        },
+        "id": "xy-edge__HulubulExecutionEnvelope-hlb-lf-00-envelope-v1{\u0153dataType\u0153:\u0153HulubulExecutionEnvelope\u0153,\u0153id\u0153:\u0153HulubulExecutionEnvelope-hlb-lf-00-envelope-v1\u0153,\u0153name\u0153:\u0153response\u0153,\u0153output_types\u0153:[\u0153JSON\u0153]}-HulubulContractInputBoundary-hlb-lf-00-router-input-v1{\u0153fieldName\u0153:\u0153envelope\u0153,\u0153id\u0153:\u0153HulubulContractInputBoundary-hlb-lf-00-router-input-v1\u0153,\u0153inputTypes\u0153:[\u0153Data\u0153,\u0153JSON\u0153],\u0153type\u0153:\u0153other\u0153}",
+        "selected": false,
+        "source": "HulubulExecutionEnvelope-hlb-lf-00-envelope-v1",
+        "sourceHandle": "{\u0153dataType\u0153:\u0153HulubulExecutionEnvelope\u0153,\u0153id\u0153:\u0153HulubulExecutionEnvelope-hlb-lf-00-envelope-v1\u0153,\u0153name\u0153:\u0153response\u0153,\u0153output_types\u0153:[\u0153JSON\u0153]}",
+        "target": "HulubulContractInputBoundary-hlb-lf-00-router-input-v1",
+        "targetHandle": "{\u0153fieldName\u0153:\u0153envelope\u0153,\u0153id\u0153:\u0153HulubulContractInputBoundary-hlb-lf-00-router-input-v1\u0153,\u0153inputTypes\u0153:[\u0153Data\u0153,\u0153JSON\u0153],\u0153type\u0153:\u0153other\u0153}"
+      },
+      {
+        "animated": false,
+        "className": "",
+        "data": {
+          "sourceHandle": {
+            "dataType": "HulubulDataOperationRequestBuilder",
+            "id": "HulubulDataOperationRequestBuilder-hlb-lf-00-routing-request-v1",
+            "name": "request",
+            "output_types": [
+              "Message"
+            ]
+          },
+          "targetHandle": {
+            "fieldName": "HulubulDataOperationRequestBoundary-hlb-lf-70-request-v1~input_value",
+            "id": "RunFlow-hlb-lf-00-routing-context-v1",
+            "inputTypes": [
+              "Message"
+            ],
+            "type": "str"
+          }
+        },
+        "id": "xy-edge__HulubulDataOperationRequestBuilder-hlb-lf-00-routing-request-v1{\u0153dataType\u0153:\u0153HulubulDataOperationRequestBuilder\u0153,\u0153id\u0153:\u0153HulubulDataOperationRequestBuilder-hlb-lf-00-routing-request-v1\u0153,\u0153name\u0153:\u0153request\u0153,\u0153output_types\u0153:[\u0153Message\u0153]}-RunFlow-hlb-lf-00-routing-context-v1{\u0153fieldName\u0153:\u0153HulubulDataOperationRequestBoundary-hlb-lf-70-request-v1~input_value\u0153,\u0153id\u0153:\u0153RunFlow-hlb-lf-00-routing-context-v1\u0153,\u0153inputTypes\u0153:[\u0153Message\u0153],\u0153type\u0153:\u0153str\u0153}",
+        "selected": false,
+        "source": "HulubulDataOperationRequestBuilder-hlb-lf-00-routing-request-v1",
+        "sourceHandle": "{\u0153dataType\u0153:\u0153HulubulDataOperationRequestBuilder\u0153,\u0153id\u0153:\u0153HulubulDataOperationRequestBuilder-hlb-lf-00-routing-request-v1\u0153,\u0153name\u0153:\u0153request\u0153,\u0153output_types\u0153:[\u0153Message\u0153]}",
+        "target": "RunFlow-hlb-lf-00-routing-context-v1",
+        "targetHandle": "{\u0153fieldName\u0153:\u0153HulubulDataOperationRequestBoundary-hlb-lf-70-request-v1~input_value\u0153,\u0153id\u0153:\u0153RunFlow-hlb-lf-00-routing-context-v1\u0153,\u0153inputTypes\u0153:[\u0153Message\u0153],\u0153type\u0153:\u0153str\u0153}"
+      },
+      {
+        "animated": false,
+        "className": "",
+        "data": {
+          "sourceHandle": {
+            "dataType": "HulubulContractInputBoundary",
+            "id": "HulubulContractInputBoundary-hlb-lf-00-router-input-v1",
+            "name": "response",
+            "output_types": [
+              "Message"
+            ]
+          },
+          "targetHandle": {
+            "fieldName": "input_value",
+            "id": "Agent-hlb-lf-00-router-v1",
+            "inputTypes": [
+              "Message"
+            ],
+            "type": "str"
+          }
+        },
+        "id": "xy-edge__HulubulContractInputBoundary-hlb-lf-00-router-input-v1{\u0153dataType\u0153:\u0153HulubulContractInputBoundary\u0153,\u0153id\u0153:\u0153HulubulContractInputBoundary-hlb-lf-00-router-input-v1\u0153,\u0153name\u0153:\u0153response\u0153,\u0153output_types\u0153:[\u0153Message\u0153]}-Agent-hlb-lf-00-router-v1{\u0153fieldName\u0153:\u0153input_value\u0153,\u0153id\u0153:\u0153Agent-hlb-lf-00-router-v1\u0153,\u0153inputTypes\u0153:[\u0153Message\u0153],\u0153type\u0153:\u0153str\u0153}",
+        "selected": false,
+        "source": "HulubulContractInputBoundary-hlb-lf-00-router-input-v1",
+        "sourceHandle": "{\u0153dataType\u0153:\u0153HulubulContractInputBoundary\u0153,\u0153id\u0153:\u0153HulubulContractInputBoundary-hlb-lf-00-router-input-v1\u0153,\u0153name\u0153:\u0153response\u0153,\u0153output_types\u0153:[\u0153Message\u0153]}",
+        "target": "Agent-hlb-lf-00-router-v1",
+        "targetHandle": "{\u0153fieldName\u0153:\u0153input_value\u0153,\u0153id\u0153:\u0153Agent-hlb-lf-00-router-v1\u0153,\u0153inputTypes\u0153:[\u0153Message\u0153],\u0153type\u0153:\u0153str\u0153}"
+      },
+      {
+        "animated": false,
+        "className": "",
+        "data": {
+          "sourceHandle": {
+            "dataType": "HulubulRunFlow",
+            "id": "RunFlow-hlb-lf-00-request-intake-v1",
+            "name": "component_as_tool",
+            "output_types": [
+              "Tool"
+            ]
+          },
+          "targetHandle": {
+            "fieldName": "tools",
+            "id": "Agent-hlb-lf-00-router-v1",
+            "inputTypes": [
+              "Tool"
+            ],
+            "type": "other"
+          }
+        },
+        "id": "xy-edge__RunFlow-hlb-lf-00-request-intake-v1{\u0153dataType\u0153:\u0153HulubulRunFlow\u0153,\u0153id\u0153:\u0153RunFlow-hlb-lf-00-request-intake-v1\u0153,\u0153name\u0153:\u0153component_as_tool\u0153,\u0153output_types\u0153:[\u0153Tool\u0153]}-Agent-hlb-lf-00-router-v1{\u0153fieldName\u0153:\u0153tools\u0153,\u0153id\u0153:\u0153Agent-hlb-lf-00-router-v1\u0153,\u0153inputTypes\u0153:[\u0153Tool\u0153],\u0153type\u0153:\u0153other\u0153}",
+        "selected": false,
+        "source": "RunFlow-hlb-lf-00-request-intake-v1",
+        "sourceHandle": "{\u0153dataType\u0153:\u0153HulubulRunFlow\u0153,\u0153id\u0153:\u0153RunFlow-hlb-lf-00-request-intake-v1\u0153,\u0153name\u0153:\u0153component_as_tool\u0153,\u0153output_types\u0153:[\u0153Tool\u0153]}",
+        "target": "Agent-hlb-lf-00-router-v1",
+        "targetHandle": "{\u0153fieldName\u0153:\u0153tools\u0153,\u0153id\u0153:\u0153Agent-hlb-lf-00-router-v1\u0153,\u0153inputTypes\u0153:[\u0153Tool\u0153],\u0153type\u0153:\u0153other\u0153}"
+      },
+      {
+        "animated": false,
+        "className": "",
+        "data": {
+          "sourceHandle": {
+            "dataType": "HulubulRouterAgent",
+            "id": "Agent-hlb-lf-00-router-v1",
+            "name": "response",
+            "output_types": [
+              "Message"
+            ]
+          },
+          "targetHandle": {
+            "fieldName": "value",
+            "id": "HulubulContractResultBoundary-hlb-lf-00-result-v1",
+            "inputTypes": [
+              "Message",
+              "Data",
+              "JSON"
+            ],
+            "type": "other"
+          }
+        },
+        "id": "xy-edge__Agent-hlb-lf-00-router-v1{\u0153dataType\u0153:\u0153HulubulRouterAgent\u0153,\u0153id\u0153:\u0153Agent-hlb-lf-00-router-v1\u0153,\u0153name\u0153:\u0153response\u0153,\u0153output_types\u0153:[\u0153Message\u0153]}-HulubulContractResultBoundary-hlb-lf-00-result-v1{\u0153fieldName\u0153:\u0153value\u0153,\u0153id\u0153:\u0153HulubulContractResultBoundary-hlb-lf-00-result-v1\u0153,\u0153inputTypes\u0153:[\u0153Message\u0153,\u0153Data\u0153,\u0153JSON\u0153],\u0153type\u0153:\u0153other\u0153}",
+        "selected": false,
+        "source": "Agent-hlb-lf-00-router-v1",
+        "sourceHandle": "{\u0153dataType\u0153:\u0153HulubulRouterAgent\u0153,\u0153id\u0153:\u0153Agent-hlb-lf-00-router-v1\u0153,\u0153name\u0153:\u0153response\u0153,\u0153output_types\u0153:[\u0153Message\u0153]}",
+        "target": "HulubulContractResultBoundary-hlb-lf-00-result-v1",
+        "targetHandle": "{\u0153fieldName\u0153:\u0153value\u0153,\u0153id\u0153:\u0153HulubulContractResultBoundary-hlb-lf-00-result-v1\u0153,\u0153inputTypes\u0153:[\u0153Message\u0153,\u0153Data\u0153,\u0153JSON\u0153],\u0153type\u0153:\u0153other\u0153}"
+      },
+      {
+        "animated": false,
+        "className": "",
+        "data": {
+          "sourceHandle": {
+            "dataType": "HulubulContractResultBoundary",
+            "id": "HulubulContractResultBoundary-hlb-lf-00-result-v1",
+            "name": "response",
+            "output_types": [
+              "Message"
+            ]
+          },
+          "targetHandle": {
+            "fieldName": "result",
+            "id": "HulubulDeterministicRenderer-hlb-lf-00-renderer-v1",
+            "inputTypes": [
+              "Message",
+              "Data",
+              "JSON"
+            ],
+            "type": "other"
+          }
+        },
+        "id": "xy-edge__HulubulContractResultBoundary-hlb-lf-00-result-v1{\u0153dataType\u0153:\u0153HulubulContractResultBoundary\u0153,\u0153id\u0153:\u0153HulubulContractResultBoundary-hlb-lf-00-result-v1\u0153,\u0153name\u0153:\u0153response\u0153,\u0153output_types\u0153:[\u0153Message\u0153]}-HulubulDeterministicRenderer-hlb-lf-00-renderer-v1{\u0153fieldName\u0153:\u0153result\u0153,\u0153id\u0153:\u0153HulubulDeterministicRenderer-hlb-lf-00-renderer-v1\u0153,\u0153inputTypes\u0153:[\u0153Message\u0153,\u0153Data\u0153,\u0153JSON\u0153],\u0153type\u0153:\u0153other\u0153}",
+        "selected": false,
+        "source": "HulubulContractResultBoundary-hlb-lf-00-result-v1",
+        "sourceHandle": "{\u0153dataType\u0153:\u0153HulubulContractResultBoundary\u0153,\u0153id\u0153:\u0153HulubulContractResultBoundary-hlb-lf-00-result-v1\u0153,\u0153name\u0153:\u0153response\u0153,\u0153output_types\u0153:[\u0153Message\u0153]}",
+        "target": "HulubulDeterministicRenderer-hlb-lf-00-renderer-v1",
+        "targetHandle": "{\u0153fieldName\u0153:\u0153result\u0153,\u0153id\u0153:\u0153HulubulDeterministicRenderer-hlb-lf-00-renderer-v1\u0153,\u0153inputTypes\u0153:[\u0153Message\u0153,\u0153Data\u0153,\u0153JSON\u0153],\u0153type\u0153:\u0153other\u0153}"
+      },
+      {
+        "animated": false,
+        "className": "",
+        "data": {
+          "sourceHandle": {
+            "dataType": "HulubulDeterministicRenderer",
+            "id": "HulubulDeterministicRenderer-hlb-lf-00-renderer-v1",
+            "name": "response",
+            "output_types": [
+              "Message"
+            ]
+          },
+          "targetHandle": {
+            "fieldName": "input_value",
+            "id": "ChatOutput-hlb-lf-00-chat-v1",
+            "inputTypes": [
+              "Data",
+              "JSON",
+              "DataFrame",
+              "Table",
+              "Message"
+            ],
+            "type": "other"
+          }
+        },
+        "id": "xy-edge__HulubulDeterministicRenderer-hlb-lf-00-renderer-v1{\u0153dataType\u0153:\u0153HulubulDeterministicRenderer\u0153,\u0153id\u0153:\u0153HulubulDeterministicRenderer-hlb-lf-00-renderer-v1\u0153,\u0153name\u0153:\u0153response\u0153,\u0153output_types\u0153:[\u0153Message\u0153]}-ChatOutput-hlb-lf-00-chat-v1{\u0153fieldName\u0153:\u0153input_value\u0153,\u0153id\u0153:\u0153ChatOutput-hlb-lf-00-chat-v1\u0153,\u0153inputTypes\u0153:[\u0153Data\u0153,\u0153JSON\u0153,\u0153DataFrame\u0153,\u0153Table\u0153,\u0153Message\u0153],\u0153type\u0153:\u0153other\u0153}",
+        "selected": false,
+        "source": "HulubulDeterministicRenderer-hlb-lf-00-renderer-v1",
+        "sourceHandle": "{\u0153dataType\u0153:\u0153HulubulDeterministicRenderer\u0153,\u0153id\u0153:\u0153HulubulDeterministicRenderer-hlb-lf-00-renderer-v1\u0153,\u0153name\u0153:\u0153response\u0153,\u0153output_types\u0153:[\u0153Message\u0153]}",
+        "target": "ChatOutput-hlb-lf-00-chat-v1",
+        "targetHandle": "{\u0153fieldName\u0153:\u0153input_value\u0153,\u0153id\u0153:\u0153ChatOutput-hlb-lf-00-chat-v1\u0153,\u0153inputTypes\u0153:[\u0153Data\u0153,\u0153JSON\u0153,\u0153DataFrame\u0153,\u0153Table\u0153,\u0153Message\u0153],\u0153type\u0153:\u0153other\u0153}"
+      },
+      {
+        "animated": false,
+        "className": "",
+        "data": {
+          "sourceHandle": {
+            "dataType": "RunFlow",
+            "id": "RunFlow-hlb-lf-00-routing-context-v1",
+            "name": "HulubulDataOperationResultBoundary-hlb-lf-70-result-v1~response",
+            "output_types": [
+              "JSON"
+            ]
+          },
+          "targetHandle": {
+            "fieldName": "routing_context",
+            "id": "HulubulContractInputBoundary-hlb-lf-00-router-input-v1",
+            "inputTypes": [
+              "Data",
+              "JSON"
+            ],
+            "type": "other"
+          }
+        },
+        "id": "xy-edge__RunFlow-hlb-lf-00-routing-context-v1{\u0153dataType\u0153:\u0153RunFlow\u0153,\u0153id\u0153:\u0153RunFlow-hlb-lf-00-routing-context-v1\u0153,\u0153name\u0153:\u0153HulubulDataOperationResultBoundary-hlb-lf-70-result-v1~response\u0153,\u0153output_types\u0153:[\u0153JSON\u0153]}-HulubulContractInputBoundary-hlb-lf-00-router-input-v1{\u0153fieldName\u0153:\u0153routing_context\u0153,\u0153id\u0153:\u0153HulubulContractInputBoundary-hlb-lf-00-router-input-v1\u0153,\u0153inputTypes\u0153:[\u0153Data\u0153,\u0153JSON\u0153],\u0153type\u0153:\u0153other\u0153}",
+        "selected": false,
+        "source": "RunFlow-hlb-lf-00-routing-context-v1",
+        "sourceHandle": "{\u0153dataType\u0153:\u0153RunFlow\u0153,\u0153id\u0153:\u0153RunFlow-hlb-lf-00-routing-context-v1\u0153,\u0153name\u0153:\u0153HulubulDataOperationResultBoundary-hlb-lf-70-result-v1~response\u0153,\u0153output_types\u0153:[\u0153JSON\u0153]}",
+        "target": "HulubulContractInputBoundary-hlb-lf-00-router-input-v1",
+        "targetHandle": "{\u0153fieldName\u0153:\u0153routing_context\u0153,\u0153id\u0153:\u0153HulubulContractInputBoundary-hlb-lf-00-router-input-v1\u0153,\u0153inputTypes\u0153:[\u0153Data\u0153,\u0153JSON\u0153],\u0153type\u0153:\u0153other\u0153}"
+      }
+    ],
+    "nodes": [
+      {
+        "data": {
+          "id": "ChatInput-hlb-lf-00-message-v1",
+          "node": {
+            "base_classes": [
+              "Message"
+            ],
+            "beta": false,
+            "conditional_paths": [],
+            "custom_fields": {},
+            "description": "Get chat inputs from the Playground.",
+            "display_name": "Chat Input",
+            "documentation": "https://docs.langflow.org/chat-input-and-output",
+            "edited": false,
+            "field_order": [
+              "input_value",
+              "should_store_message",
+              "sender",
+              "sender_name",
+              "session_id",
+              "context_id",
+              "files"
+            ],
+            "frozen": false,
+            "icon": "MessagesSquare",
+            "id": "ChatInput-hlb-lf-00-message-v1",
+            "is_input": true,
+            "legacy": false,
+            "metadata": {
+              "code_hash": "7a26c54d89ed",
+              "dependencies": {
+                "dependencies": [
+                  {
+                    "name": "lfx",
+                    "version": null
+                  }
+                ],
+                "total_dependencies": 1
+              },
+              "module": "lfx.components.input_output.chat.ChatInput"
+            },
+            "minimized": true,
+            "output_types": [],
+            "outputs": [
+              {
+                "allows_loop": false,
+                "cache": true,
+                "display_name": "Chat Message",
+                "group_outputs": false,
+                "method": "message_response",
+                "name": "message",
+                "selected": "Message",
+                "tool_mode": true,
+                "types": [
+                  "Message"
+                ],
+                "value": "__UNDEFINED__"
+              }
+            ],
+            "pinned": false,
+            "template": {
+              "_type": "Component",
+              "code": {
+                "advanced": true,
+                "dynamic": true,
+                "fileTypes": [],
+                "file_path": "",
+                "info": "",
+                "list": false,
+                "load_from_db": false,
+                "multiline": true,
+                "name": "code",
+                "password": false,
+                "placeholder": "",
+                "required": true,
+                "show": true,
+                "title_case": false,
+                "type": "code",
+                "value": "from lfx.base.data.utils import IMG_FILE_TYPES, TEXT_FILE_TYPES\nfrom lfx.base.io.chat import ChatComponent\nfrom lfx.inputs.inputs import BoolInput\nfrom lfx.io import (\n    DropdownInput,\n    FileInput,\n    MessageTextInput,\n    MultilineInput,\n    Output,\n)\nfrom lfx.schema.message import Message\nfrom lfx.utils.constants import (\n    MESSAGE_SENDER_AI,\n    MESSAGE_SENDER_NAME_USER,\n    MESSAGE_SENDER_USER,\n)\n\n\nclass ChatInput(ChatComponent):\n    display_name = \"Chat Input\"\n    description = \"Get chat inputs from the Playground.\"\n    documentation: str = \"https://docs.langflow.org/chat-input-and-output\"\n    icon = \"MessagesSquare\"\n    name = \"ChatInput\"\n    minimized = True\n\n    inputs = [\n        MultilineInput(\n            name=\"input_value\",\n            display_name=\"Input Text\",\n            value=\"\",\n            info=\"Message to be passed as input.\",\n            input_types=[],\n        ),\n        BoolInput(\n            name=\"should_store_message\",\n            display_name=\"Store Messages\",\n            info=\"Store the message in the history.\",\n            value=True,\n            advanced=True,\n        ),\n        DropdownInput(\n            name=\"sender\",\n            display_name=\"Sender Type\",\n            options=[MESSAGE_SENDER_AI, MESSAGE_SENDER_USER],\n            value=MESSAGE_SENDER_USER,\n            info=\"Type of sender.\",\n            advanced=True,\n        ),\n        MessageTextInput(\n            name=\"sender_name\",\n            display_name=\"Sender Name\",\n            info=\"Name of the sender.\",\n            value=MESSAGE_SENDER_NAME_USER,\n            advanced=True,\n        ),\n        MessageTextInput(\n            name=\"session_id\",\n            display_name=\"Session ID\",\n            info=\"The session ID of the chat. If empty, the current session ID parameter will be used.\",\n            advanced=True,\n        ),\n        MessageTextInput(\n            name=\"context_id\",\n            display_name=\"Context ID\",\n            info=\"The context ID of the chat. Adds an extra layer to the local memory.\",\n            value=\"\",\n            advanced=True,\n        ),\n        FileInput(\n            name=\"files\",\n            display_name=\"Files\",\n            file_types=TEXT_FILE_TYPES + IMG_FILE_TYPES,\n            info=\"Files to be sent with the message.\",\n            advanced=True,\n            is_list=True,\n            temp_file=True,\n        ),\n    ]\n    outputs = [\n        Output(display_name=\"Chat Message\", name=\"message\", method=\"message_response\"),\n    ]\n\n    async def message_response(self) -> Message:\n        # Ensure files is a list and filter out empty/None values\n        files = self.files if self.files else []\n        if files and not isinstance(files, list):\n            files = [files]\n        # Filter out None/empty values\n        files = [f for f in files if f is not None and f != \"\"]\n\n        session_id = self.session_id or self.graph.session_id or \"\"\n        message = await Message.create(\n            text=self.input_value,\n            sender=self.sender,\n            sender_name=self.sender_name,\n            session_id=session_id,\n            context_id=self.context_id,\n            files=files,\n        )\n        if session_id and isinstance(message, Message) and self.should_store_message:\n            stored_message = await self.send_message(\n                message,\n            )\n            self.message.value = stored_message\n            message = stored_message\n\n        self.status = message\n        return message\n"
+              },
+              "context_id": {
+                "_input_type": "MessageTextInput",
+                "advanced": true,
+                "display_name": "Context ID",
+                "dynamic": false,
+                "info": "The context ID of the chat. Adds an extra layer to the local memory.",
+                "input_types": [
+                  "Message"
+                ],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "name": "context_id",
+                "override_skip": false,
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "track_in_telemetry": false,
+                "type": "str",
+                "value": ""
+              },
+              "files": {
+                "_input_type": "FileInput",
+                "advanced": true,
+                "display_name": "Files",
+                "dynamic": false,
+                "fileTypes": [
+                  "csv",
+                  "json",
+                  "pdf",
+                  "txt",
+                  "md",
+                  "mdx",
+                  "yaml",
+                  "yml",
+                  "xml",
+                  "html",
+                  "htm",
+                  "docx",
+                  "py",
+                  "sh",
+                  "sql",
+                  "js",
+                  "ts",
+                  "tsx",
+                  "jpg",
+                  "jpeg",
+                  "png",
+                  "bmp",
+                  "image"
+                ],
+                "file_path": "",
+                "info": "Files to be sent with the message.",
+                "list": true,
+                "list_add_label": "Add More",
+                "name": "files",
+                "override_skip": false,
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "temp_file": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_metadata": true,
+                "track_in_telemetry": false,
+                "type": "file",
+                "value": ""
+              },
+              "input_value": {
+                "_input_type": "MultilineInput",
+                "advanced": false,
+                "ai_enabled": false,
+                "copy_field": false,
+                "display_name": "Input Text",
+                "dynamic": false,
+                "info": "Message to be passed as input.",
+                "input_types": [],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "multiline": true,
+                "name": "input_value",
+                "override_skip": false,
+                "password": false,
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "track_in_telemetry": false,
+                "type": "str",
+                "value": ""
+              },
+              "sender": {
+                "_input_type": "DropdownInput",
+                "advanced": true,
+                "combobox": false,
+                "dialog_inputs": {},
+                "display_name": "Sender Type",
+                "dynamic": false,
+                "external_options": {},
+                "info": "Type of sender.",
+                "name": "sender",
+                "options": [
+                  "Machine",
+                  "User"
+                ],
+                "options_metadata": [],
+                "override_skip": false,
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "toggle": false,
+                "tool_mode": false,
+                "trace_as_metadata": true,
+                "track_in_telemetry": true,
+                "type": "str",
+                "value": "User"
+              },
+              "sender_name": {
+                "_input_type": "MessageTextInput",
+                "advanced": true,
+                "display_name": "Sender Name",
+                "dynamic": false,
+                "info": "Name of the sender.",
+                "input_types": [
+                  "Message"
+                ],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "name": "sender_name",
+                "override_skip": false,
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "track_in_telemetry": false,
+                "type": "str",
+                "value": "User"
+              },
+              "session_id": {
+                "_input_type": "MessageTextInput",
+                "advanced": true,
+                "display_name": "Session ID",
+                "dynamic": false,
+                "info": "The session ID of the chat. If empty, the current session ID parameter will be used.",
+                "input_types": [
+                  "Message"
+                ],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "name": "session_id",
+                "override_skip": false,
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "track_in_telemetry": false,
+                "type": "str",
+                "value": ""
+              },
+              "should_store_message": {
+                "_input_type": "BoolInput",
+                "advanced": true,
+                "display_name": "Store Messages",
+                "dynamic": false,
+                "info": "Store the message in the history.",
+                "list": false,
+                "list_add_label": "Add More",
+                "name": "should_store_message",
+                "override_skip": false,
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_metadata": true,
+                "track_in_telemetry": true,
+                "type": "bool",
+                "value": true
+              }
+            },
+            "tool_mode": false
+          },
+          "type": "ChatInput"
+        },
+        "dragging": false,
+        "id": "ChatInput-hlb-lf-00-message-v1",
+        "measured": {
+          "height": 200,
+          "width": 320
+        },
+        "position": {
+          "x": 0,
+          "y": 0
+        },
+        "selected": false,
+        "type": "genericNode"
+      },
+      {
+        "data": {
+          "id": "HulubulExecutionEnvelope-hlb-lf-00-envelope-v1",
+          "node": {
+            "base_classes": [
+              "JSON"
+            ],
+            "beta": false,
+            "conditional_paths": [],
+            "custom_fields": {},
+            "description": "Trust boundary: builds MainFlowInput from a Message plus trusted metadata.",
+            "display_name": "Execution Envelope",
+            "documentation": "",
+            "edited": false,
+            "field_order": [
+              "message",
+              "actor_id_var",
+              "actor_display_name_var"
+            ],
+            "frozen": false,
+            "icon": "shield-check",
+            "id": "HulubulExecutionEnvelope-hlb-lf-00-envelope-v1",
+            "legacy": false,
+            "metadata": {
+              "code_hash": "6d48a9b42482",
+              "dependencies": {
+                "dependencies": [
+                  {
+                    "name": "lfx",
+                    "version": "1.10.2"
+                  },
+                  {
+                    "name": "hulubul",
+                    "version": null
+                  }
+                ],
+                "total_dependencies": 2
+              },
+              "module": "custom_components.execution_envelope"
+            },
+            "minimized": false,
+            "output_types": [],
+            "outputs": [
+              {
+                "allows_loop": false,
+                "cache": true,
+                "display_name": "Envelope",
+                "group_outputs": false,
+                "method": "build_envelope",
+                "name": "response",
+                "selected": "JSON",
+                "tool_mode": true,
+                "types": [
+                  "JSON"
+                ],
+                "value": "__UNDEFINED__"
+              }
+            ],
+            "pinned": false,
+            "template": {
+              "_type": "Component",
+              "code": {
+                "advanced": true,
+                "dynamic": true,
+                "fileTypes": [],
+                "file_path": "",
+                "info": "",
+                "list": false,
+                "load_from_db": false,
+                "multiline": true,
+                "name": "code",
+                "password": false,
+                "placeholder": "",
+                "required": true,
+                "show": true,
+                "title_case": false,
+                "type": "code",
+                "value": "\"\"\"Trusted execution envelope component: user prose isolation and session normalization.\"\"\"\n\nimport os\nfrom uuid import UUID, uuid4, uuid5\n\nfrom lfx.custom.custom_component.component import Component\nfrom lfx.inputs.inputs import MessageInput\nfrom lfx.schema.data import Data\nfrom lfx.schema.message import Message\nfrom lfx.template.field.base import Output\n\nfrom hulubul.core.models.operational import (\n    ActorContext,\n    ActorRole,\n    IdentityAssurance,\n    InvocationSource,\n    MainFlowInput,\n)\n\n__all__ = [\"ExecutionEnvelopeComponent\"]\n\n# Namespace for deriving a deterministic session UUID from a non-UUID\n# Playground label (e.g. \"New Session 0\"). Arbitrary but must never change:\n# every session UUID ever derived from a given label depends on it staying\n# fixed, or the same label would silently start mapping to a different\n# session on the next deploy.\n_PLAYGROUND_SESSION_NAMESPACE = UUID(\"f47ee1a0-99d1-4bda-9d0e-13a4f47c8f01\")\n\n\nclass ExecutionEnvelopeComponent(Component):\n    \"\"\"Message-only execution envelope with trusted metadata.\n\n    This component is the trust boundary between untrusted user prose (Message.text)\n    and the trusted operational envelope (MainFlowInput). It:\n    - Accepts exactly one Message (never a free string)\n    - Normalizes session_id (bare UUID or p1-<uuid> \u2192 lowercase p1-<uuid>)\n    - Requires Message.session_id == active graph session\n    - Derives source (api or playground) from trusted path\n    - Hard-codes role=sender, assurance=simulated\n    - Rejects: empty/malformed/mismatched sessions, flow-ID fallback, prose identity override\n    - Generates unique message_id, correlation_id per call\n\n    Deliberately has no `__init__` override: pre-assigning a declared input\n    field (e.g. `self.message = None`) in `__init__` collides with LangFlow's\n    `Component.set_attributes()` the moment a differing value arrives via a\n    real graph edge -- confirmed live (\"ExecutionEnvelopeComponent defines\n    an input parameter named 'message' that is a reserved word and cannot\n    be used\"), the same reserved-word class of bug already fixed in every\n    other boundary component in this module. Let the framework's own\n    declarative default populate `self.message` instead.\n    \"\"\"\n\n    display_name = \"Execution Envelope\"\n    description = \"Trust boundary: builds MainFlowInput from a Message plus trusted metadata.\"\n    icon = \"shield-check\"\n    name = \"HulubulExecutionEnvelope\"\n\n    inputs = [  # noqa: RUF012\n        MessageInput(  # type: ignore[call-arg]\n            name=\"message\",\n            display_name=\"Message\",\n            info=\"The inbound chat Message (never a free string).\",\n            required=True,\n        ),\n    ]\n\n    outputs = [  # noqa: RUF012\n        Output(  # type: ignore[call-arg]\n            display_name=\"Envelope\", name=\"response\", type_=Data, method=\"build_envelope\"\n        ),\n    ]\n\n    def build_envelope(self) -> Data:\n        \"\"\"Build MainFlowInput from Message and trusted metadata.\n\n        Returns:\n            Data: An LFX Data object with MainFlowInput serialized as JSON\n\n        Raises:\n            ValueError: If validation fails (empty/malformed/mismatched session,\n                      missing required actor ID, etc.)\n        \"\"\"\n        if self.message is None:\n            raise ValueError(\"INVALID_INPUT: message is required\")\n\n        if not isinstance(self.message, Message):\n            raise ValueError(\"INVALID_INPUT: message must be a Message object, not a string\")\n\n        # Determine invocation source (api or playground)\n        source = self._get_invocation_source()\n\n        # Read trusted actor metadata based on source\n        if source == InvocationSource.API:\n            actor_id = self._get_api_actor_id()\n            display_name = self._get_api_display_name()\n        else:  # InvocationSource.PLAYGROUND\n            actor_id = self._get_playground_actor_id()\n            display_name = self._get_playground_display_name()\n\n        if not actor_id:\n            raise ValueError(f\"INVALID_INPUT: actor_id is required for {source.value} invocation\")\n\n        # Provide default display name if not specified\n        if not display_name:\n            display_name = \"User\"\n\n        # Validate and normalize session_id\n        raw_session = self.message.session_id\n        if isinstance(raw_session, UUID):\n            raw_session = str(raw_session)\n        session_id = self._normalize_and_validate_session(raw_session, source)\n\n        # Generate unique message_id and correlation_id\n        message_id = uuid4()\n        correlation_id = uuid4()\n\n        # Build the trusted actor context\n        actor = ActorContext(\n            actor_id=actor_id,\n            display_name=display_name,\n            actor_role=ActorRole.SENDER,\n            identity_assurance=IdentityAssurance.SIMULATED,\n        )\n\n        # Build the main flow input\n        message_text = self.message.text\n        if not isinstance(message_text, str):\n            raise ValueError(\"INVALID_INPUT: message.text must be a string\")\n        envelope = MainFlowInput(\n            message_id=message_id,\n            session_id=session_id,\n            actor=actor,\n            source=source,\n            message=message_text,\n            correlation_id=correlation_id,\n        )\n\n        # Return as Data object\n        return Data(data=envelope.model_dump())\n\n    def _get_invocation_source(self) -> InvocationSource:\n        \"\"\"Determine if this is an API or Playground invocation.\n\n        API invocations have actor ID in headers (via LangFlow global variables).\n        Playground invocations have actor ID in environment variables.\n\n        Returns:\n            InvocationSource.API or InvocationSource.PLAYGROUND\n        \"\"\"\n        playground_actor_id = os.environ.get(\"HULUBUL_PHASE1_PLAYGROUND_ACTOR_ID\")\n        if playground_actor_id:\n            return InvocationSource.PLAYGROUND\n        return InvocationSource.API\n\n    def _get_request_variable(self, name: str) -> str | None:\n        \"\"\"Read a single `X-LANGFLOW-GLOBAL-VAR-<name>` header value.\n\n        LangFlow does not expose these as flat top-level keys on\n        `Component.ctx` -- confirmed live (a debug print showed\n        `self.ctx.keys() == ['request_variables']`, never the variable name\n        itself). They live one level down, under\n        `self.ctx[\"request_variables\"][name]`. A previous version of this\n        method checked `name in self.ctx` directly, which was always False,\n        so every API-path actor/display-name read silently fell through to\n        the (unset) environment-variable fallback -- this broke every LF-00\n        API invocation until caught live.\n\n        `ctx` is a property that proxies to `self.graph.context` and\n        actively *raises* `ValueError` (not just returns empty/None) when\n        `self.graph` isn't set yet -- confirmed by reading\n        `lfx.custom.custom_component.component.Component.ctx`'s own\n        source, not assumed. Catch `(AttributeError, ValueError)`, not just\n        `AttributeError`.\n        \"\"\"\n        try:\n            request_variables = self.ctx.get(\"request_variables\", {})\n        except (AttributeError, ValueError):\n            return None\n        value = request_variables.get(name) if isinstance(request_variables, dict) else None\n        return value if isinstance(value, str) else None\n\n    def _get_api_actor_id(self) -> str | None:\n        \"\"\"Read actor ID from API header (X-LANGFLOW-GLOBAL-VAR-HULUBUL_PHASE1_ACTOR_ID).\n\n        Returns:\n            Actor ID string or None if not provided\n        \"\"\"\n        value = self._get_request_variable(\"HULUBUL_PHASE1_ACTOR_ID\")\n        if value:\n            return value\n        # Fallback for testing or if LangFlow doesn't inject headers.\n        return os.environ.get(\"HULUBUL_PHASE1_ACTOR_ID\")\n\n    def _get_api_display_name(self) -> str | None:\n        \"\"\"Read display name from API header (X-LANGFLOW-GLOBAL-VAR-\n        HULUBUL_PHASE1_ACTOR_DISPLAY_NAME).\n\n        Returns:\n            Display name string or None if not provided (optional field)\n        \"\"\"\n        value = self._get_request_variable(\"HULUBUL_PHASE1_ACTOR_DISPLAY_NAME\")\n        if value:\n            return value\n        return os.environ.get(\"HULUBUL_PHASE1_ACTOR_DISPLAY_NAME\")\n\n    def _get_playground_actor_id(self) -> str | None:\n        \"\"\"Read actor ID from Playground environment variable (HULUBUL_PHASE1_PLAYGROUND_ACTOR_ID).\n\n        Returns:\n            Actor ID string or None if not provided\n        \"\"\"\n        return os.environ.get(\"HULUBUL_PHASE1_PLAYGROUND_ACTOR_ID\")\n\n    def _get_playground_display_name(self) -> str | None:\n        \"\"\"Read display name from Playground environment variable\n        (HULUBUL_PHASE1_PLAYGROUND_ACTOR_DISPLAY_NAME).\n\n        Returns:\n            Display name string or None if not provided (optional field)\n        \"\"\"\n        return os.environ.get(\"HULUBUL_PHASE1_PLAYGROUND_ACTOR_DISPLAY_NAME\")\n\n    def _get_graph_session_id(self) -> str | None:\n        \"\"\"Read the active LangFlow graph session ID.\n\n        In LangFlow, the graph context may have a session ID. We compare this\n        with the Message.session_id to ensure they match.\n\n        Returns:\n            Session ID from graph context or None\n        \"\"\"\n        # `self.ctx` never carries a \"session_id\" key (confirmed live -- see\n        # `_get_request_variable`'s docstring for how that was diagnosed);\n        # the graph's own run session lives on `self.graph.session_id`\n        # (falling back to `self._session_id`), matching `lfx`'s own\n        # internal usage (`Component.set_class_code`/`_get_result`).\n        graph = getattr(self, \"graph\", None)\n        session_id = getattr(graph, \"session_id\", None)\n        if session_id is None:\n            session_id = getattr(self, \"_session_id\", None)\n        if isinstance(session_id, str):\n            return session_id\n\n        # No fallback to Message.session_id here: that would compare the\n        # message's session against itself, silently defeating the\n        # message-vs-graph mismatch check in _normalize_and_validate_session.\n        return None\n\n    def _normalize_and_validate_session(\n        self, session_id: str | None, source: InvocationSource\n    ) -> str:\n        \"\"\"Normalize and validate session ID.\n\n        Accepts:\n        - Bare UUID: \"12345678-1234-4000-8000-000000000000\"\n        - Canonical: \"p1-12345678-1234-4000-8000-000000000000\"\n        - Playground-only UI labels such as \"New Session 0\"\n\n        Both normalize to: \"p1-<lowercase-uuid>\"\n\n        Rejects:\n        - Empty values\n        - Malformed UUIDs\n        - Mismatched message/graph sessions\n        - Flow-ID fallback (when session is omitted)\n\n        Args:\n            session_id: The session ID to normalize\n\n        Returns:\n            Normalized session ID in form \"p1-<lowercase-uuid>\"\n\n        Raises:\n            ValueError: If validation fails\n        \"\"\"\n        if not session_id:\n            raise ValueError(\"INVALID_INPUT: session_id is required and cannot be empty\")\n\n        # Try to parse as UUID to validate format\n        normalized = session_id.lower().strip()\n\n        # Remove p1- prefix if present\n        uuid_part = normalized[3:] if normalized.startswith(\"p1-\") else normalized\n\n        uuid_part = self._session_uuid_part(uuid_part, session_id, source)\n\n        # Return in canonical form\n        canonical_session = f\"p1-{uuid_part}\"\n\n        # Check if graph session matches message session (if both are available)\n        graph_session = self._get_graph_session_id()\n        if graph_session:\n            # Normalize graph session for comparison\n            graph_normalized = graph_session.lower().strip()\n            graph_candidate = (\n                graph_normalized[3:] if graph_normalized.startswith(\"p1-\") else graph_normalized\n            )\n            try:\n                UUID(graph_candidate)\n                graph_uuid = graph_candidate\n            except ValueError as err:\n                if source is InvocationSource.PLAYGROUND and graph_normalized == normalized:\n                    graph_uuid = uuid_part\n                else:\n                    msg = (\n                        f\"INVALID_INPUT: graph session_id must be a valid UUID, \"\n                        f\"got '{graph_session}'\"\n                    )\n                    raise ValueError(msg) from err\n\n            # Ensure they match after normalization\n            if graph_uuid != uuid_part:\n                raise ValueError(\n                    f\"INVALID_INPUT: message session_id does not match graph session: \"\n                    f\"'{session_id}' vs graph '{graph_session}'\"\n                )\n\n        return canonical_session\n\n    @staticmethod\n    def _session_uuid_part(\n        uuid_part: str, original_session_id: str, source: InvocationSource\n    ) -> str:\n        \"\"\"Resolve a session's UUID part, deterministically for Playground labels.\n\n        A non-UUID Playground label (e.g. \"New Session 0\") must map to the\n        *same* UUID on every call within the same conversation -- confirmed\n        live: with a random uuid4() here (the previous behaviour), each\n        message in a Playground chat landed on a different, disconnected\n        session, so LF-10's multi-turn intake accumulation saw an empty\n        state every turn and re-asked for facts the sender had already\n        given, cycling between the same two or three questions instead of\n        progressing. uuid5 against a fixed namespace is deterministic for\n        the same input, so the same label always resolves to the same\n        session while still producing a schema-valid UUID.\n        \"\"\"\n        try:\n            UUID(uuid_part)\n            return uuid_part\n        except ValueError as err:\n            if source is InvocationSource.PLAYGROUND:\n                return str(uuid5(_PLAYGROUND_SESSION_NAMESPACE, uuid_part))\n            msg = f\"INVALID_INPUT: session_id must be a valid UUID, got '{original_session_id}'\"\n            raise ValueError(msg) from err\n"
+              },
+              "message": {
+                "_input_type": "MessageInput",
+                "advanced": false,
+                "display_name": "Message",
+                "dynamic": false,
+                "info": "The inbound chat Message (never a free string).",
+                "input_types": [
+                  "Message"
+                ],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "name": "message",
+                "override_skip": false,
+                "placeholder": "",
+                "required": true,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "track_in_telemetry": false,
+                "type": "str",
+                "value": ""
+              }
+            },
+            "tool_mode": false
+          },
+          "type": "HulubulExecutionEnvelope"
+        },
+        "dragging": false,
+        "id": "HulubulExecutionEnvelope-hlb-lf-00-envelope-v1",
+        "measured": {
+          "height": 200,
+          "width": 320
+        },
+        "position": {
+          "x": 300,
+          "y": 0
+        },
+        "selected": false,
+        "type": "genericNode"
+      },
+      {
+        "data": {
+          "id": "HulubulDataOperationRequestBuilder-hlb-lf-00-routing-request-v1",
+          "node": {
+            "base_classes": [
+              "Message"
+            ],
+            "beta": false,
+            "conditional_paths": [],
+            "custom_fields": {},
+            "description": "Build GetRequestRoutingContextRequest for routing context prefetch. Pure deterministic assembly from envelope metadata.",
+            "display_name": "Data Operation Request Builder (Routing Context)",
+            "documentation": "",
+            "edited": false,
+            "field_order": [
+              "envelope"
+            ],
+            "frozen": false,
+            "icon": "package",
+            "id": "HulubulDataOperationRequestBuilder-hlb-lf-00-routing-request-v1",
+            "legacy": false,
+            "metadata": {
+              "code_hash": "994723146dcc",
+              "dependencies": {
+                "dependencies": [
+                  {
+                    "name": "lfx",
+                    "version": "1.10.2"
+                  },
+                  {
+                    "name": "hulubul",
+                    "version": null
+                  }
+                ],
+                "total_dependencies": 2
+              },
+              "module": "custom_components.data_operation_request_builder_routing_context"
+            },
+            "minimized": false,
+            "output_types": [],
+            "outputs": [
+              {
+                "allows_loop": false,
+                "cache": true,
+                "display_name": "Data Operation Request",
+                "group_outputs": false,
+                "method": "build_output",
+                "name": "request",
+                "selected": "Message",
+                "tool_mode": true,
+                "types": [
+                  "Message"
+                ],
+                "value": "__UNDEFINED__"
+              }
+            ],
+            "pinned": false,
+            "template": {
+              "_type": "Component",
+              "code": {
+                "advanced": true,
+                "dynamic": true,
+                "fileTypes": [],
+                "file_path": "",
+                "info": "",
+                "list": false,
+                "load_from_db": false,
+                "multiline": true,
+                "name": "code",
+                "password": false,
+                "placeholder": "",
+                "required": true,
+                "show": true,
+                "title_case": false,
+                "type": "code",
+                "value": "\"\"\"Data operation request builder component for LF-00 routing context prefetch.\n\nConstructs deterministic GetRequestRoutingContextRequest for the mandatory routing context prefetch.\nPure deterministic component (no I/O, no LLM) \u2014 wires between execution envelope and LF-70 Run Flow.\n\"\"\"\n\nimport json\nfrom typing import Any\nfrom uuid import uuid4\n\nfrom lfx.custom.custom_component.component import Component\nfrom lfx.inputs.inputs import HandleInput\nfrom lfx.schema.message import Message\nfrom lfx.template.field.base import Output\n\nfrom hulubul.core.models.operational import MainFlowInput\nfrom hulubul.core.models.operational.data_operations import GetRequestRoutingContextRequest\nfrom hulubul.core.models.operational.enums import DataOperation\n\n__all__ = [\"HulubulDataOperationRequestBuilder\"]\n\n\nclass HulubulDataOperationRequestBuilder(Component):\n    \"\"\"Build deterministic GetRequestRoutingContextRequest.\n\n    Takes the validated MainFlowInput envelope from execution boundary and\n    constructs the operation request for LF-70's mandatory routing-context\n    prefetch.\n\n    Inputs:\n    - envelope: MainFlowInput from ExecutionEnvelopeComponent\n\n    Outputs:\n    - request: Message containing JSON string (GetRequestRoutingContextRequest) for LF-70\n    \"\"\"\n\n    display_name = \"Data Operation Request Builder (Routing Context)\"\n    description = (\n        \"Build GetRequestRoutingContextRequest for routing context prefetch. \"\n        \"Pure deterministic assembly from envelope metadata.\"\n    )\n    icon = \"package\"\n    name = \"HulubulDataOperationRequestBuilder\"\n\n    inputs = [  # noqa: RUF012\n        HandleInput(  # type: ignore[call-arg]\n            name=\"envelope\",\n            display_name=\"Execution Envelope\",\n            info=\"MainFlowInput from ExecutionEnvelopeComponent\",\n            input_types=[\"Data\", \"JSON\"],\n            required=True,\n        ),\n    ]\n\n    outputs = [  # noqa: RUF012\n        Output(  # type: ignore[call-arg]\n            display_name=\"Data Operation Request\",\n            name=\"request\",\n            type_=Message,\n            method=\"build_output\",\n        ),\n    ]\n\n    @staticmethod\n    def _coerce_envelope(value: Any) -> MainFlowInput:\n        \"\"\"Coerce the incoming envelope edge value into a real MainFlowInput.\n\n        `ExecutionEnvelopeComponent.build_envelope()` returns\n        `Data(data=envelope.model_dump())` -- a dict, not a hydrated\n        `MainFlowInput` instance, and its `.actor` is itself a plain nested\n        dict (`.actor.actor_id` fails with `'dict' object has no attribute\n        'actor_id'`), discovered only when actually building a live LF-00\n        flow, not by any prior unit test (existing tests passed a real\n        `MainFlowInput` instance directly). Route through\n        `model_validate_json` so strict-model UUID/enum coercion applies\n        regardless of whether the dict holds native objects or JSON\n        primitives (`default=str` handles both).\n\n        `isinstance(value, Message)` must be checked before the generic\n        `hasattr(value, \"data\")` branch: `Message` also exposes a `.data`\n        attribute (its own field dict -- `sender`, `session_id`, `duration`,\n        etc.), which is not the envelope payload at all; the actual JSON\n        lives in `.text`.\n        \"\"\"\n        if isinstance(value, MainFlowInput):\n            return value\n        if isinstance(value, Message):\n            if not isinstance(value.text, str):\n                msg = \"INVALID_CONFIGURATION: envelope Message has no text content\"\n                raise ValueError(msg)\n            return MainFlowInput.model_validate_json(value.text)\n        candidate = value.data if hasattr(value, \"data\") else value\n        if isinstance(candidate, str):\n            return MainFlowInput.model_validate_json(candidate)\n        if isinstance(candidate, dict):\n            # LFX's own JSON/Data wrapper classes can leak their OWN fields\n            # (e.g. `default_value`) into `.data` at some points in the\n            # pipeline -- confirmed live: a real edge value arrived as\n            # `JSON(text_key='text', data={...real envelope fields...,\n            # 'default_value': ''}, default_value='')`. MainFlowInput is a\n            # strict model (extra_forbidden), so pass through only the keys\n            # it actually declares rather than patching around one specific\n            # framework-injected key.\n            filtered = {k: v for k, v in candidate.items() if k in MainFlowInput.model_fields}\n            return MainFlowInput.model_validate_json(json.dumps(filtered, default=str))\n        msg = f\"INVALID_CONFIGURATION: envelope has unexpected type {type(value)!r}\"\n        raise ValueError(msg)\n\n    def build_output(self) -> Message:\n        \"\"\"Construct GetRequestRoutingContextRequest.\n\n        Returns Message containing JSON string (GetRequestRoutingContextRequest) for LF-70.\n        \"\"\"\n        envelope = self._coerce_envelope(self.envelope)\n\n        # Construct the operation request deterministically\n        request = GetRequestRoutingContextRequest(\n            operation=DataOperation.GET_REQUEST_ROUTING_CONTEXT,\n            operation_id=str(uuid4()),\n            caller=\"LF-00\",\n            session_id=str(envelope.session_id),\n            actor_id=str(envelope.actor.actor_id),\n            schema_version=envelope.schema_version,\n            correlation_id=str(envelope.correlation_id),\n        )\n\n        # Return as Message with JSON text\n        return Message(text=request.model_dump_json())\n"
+              },
+              "envelope": {
+                "_input_type": "HandleInput",
+                "advanced": false,
+                "display_name": "Execution Envelope",
+                "dynamic": false,
+                "info": "MainFlowInput from ExecutionEnvelopeComponent",
+                "input_types": [
+                  "Data",
+                  "JSON"
+                ],
+                "list": false,
+                "list_add_label": "Add More",
+                "name": "envelope",
+                "override_skip": false,
+                "placeholder": "",
+                "required": true,
+                "show": true,
+                "title_case": false,
+                "trace_as_metadata": true,
+                "track_in_telemetry": false,
+                "type": "other",
+                "value": ""
+              }
+            },
+            "tool_mode": false
+          },
+          "type": "HulubulDataOperationRequestBuilder"
+        },
+        "dragging": false,
+        "id": "HulubulDataOperationRequestBuilder-hlb-lf-00-routing-request-v1",
+        "measured": {
+          "height": 200,
+          "width": 320
+        },
+        "position": {
+          "x": 600,
+          "y": 200
+        },
+        "selected": false,
+        "type": "genericNode"
+      },
+      {
+        "data": {
+          "id": "RunFlow-hlb-lf-00-routing-context-v1",
+          "node": {
+            "base_classes": [],
+            "beta": true,
+            "conditional_paths": [],
+            "custom_fields": {},
+            "description": "Executes another flow from within the same project. Can also be used as a tool for agents. \n **Select a Flow to use the tool mode**",
+            "display_name": "Run Flow",
+            "documentation": "https://docs.langflow.org/run-flow",
+            "edited": false,
+            "field_order": [
+              "flow_name_selected",
+              "flow_id_selected",
+              "session_id",
+              "cache_flow",
+              "HulubulDataOperationRequestBoundary-hlb-lf-70-request-v1~input_value"
+            ],
+            "frozen": false,
+            "icon": "Workflow",
+            "id": "RunFlow-hlb-lf-00-routing-context-v1",
+            "legacy": false,
+            "metadata": {
+              "code_hash": "ea901208037d",
+              "dependencies": {
+                "dependencies": [
+                  {
+                    "name": "lfx",
+                    "version": null
+                  }
+                ],
+                "total_dependencies": 1
+              },
+              "module": "lfx.components.flow_controls.run_flow.RunFlowComponent"
+            },
+            "minimized": false,
+            "output_types": [],
+            "outputs": [
+              {
+                "allows_loop": false,
+                "cache": true,
+                "display_name": "Result (LF-70 Data Access)",
+                "group_outputs": false,
+                "hidden": null,
+                "loop_types": null,
+                "method": "_resolve_flow_output__HulubulDataOperationResultBoundary_hlb_lf_70_result_v1__response",
+                "name": "HulubulDataOperationResultBoundary-hlb-lf-70-result-v1~response",
+                "options": null,
+                "required_inputs": null,
+                "selected": "JSON",
+                "tool_mode": true,
+                "types": [
+                  "JSON"
+                ],
+                "value": "__UNDEFINED__"
+              }
+            ],
+            "pinned": false,
+            "template": {
+              "HulubulDataOperationRequestBoundary-hlb-lf-70-request-v1~input_value": {
+                "_input_type": "MessageTextInput",
+                "advanced": false,
+                "display_name": "Data Operation Request (LF-70 Data Access)",
+                "dynamic": false,
+                "info": "Typed DataOperationRequest (JSON text) to validate and authorize.",
+                "input_types": [
+                  "Message"
+                ],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "name": "HulubulDataOperationRequestBoundary-hlb-lf-70-request-v1~input_value",
+                "override_skip": false,
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": true,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "track_in_telemetry": false,
+                "type": "str",
+                "value": ""
+              },
+              "_type": "Component",
+              "cache_flow": {
+                "_input_type": "BoolInput",
+                "advanced": true,
+                "display_name": "Cache Flow",
+                "dynamic": false,
+                "info": "Whether to cache the selected flow.",
+                "list": false,
+                "list_add_label": "Add More",
+                "name": "cache_flow",
+                "override_skip": false,
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_metadata": true,
+                "track_in_telemetry": true,
+                "type": "bool",
+                "value": false
+              },
+              "code": {
+                "advanced": true,
+                "dynamic": true,
+                "fileTypes": [],
+                "file_path": "",
+                "info": "",
+                "list": false,
+                "load_from_db": false,
+                "multiline": true,
+                "name": "code",
+                "password": false,
+                "placeholder": "",
+                "required": true,
+                "show": true,
+                "title_case": false,
+                "type": "code",
+                "value": "from copy import deepcopy\nfrom datetime import datetime\nfrom typing import Any\n\nfrom lfx.base.tools.run_flow import RunFlowBaseComponent\nfrom lfx.log.logger import logger\nfrom lfx.schema.data import Data\nfrom lfx.schema.dotdict import dotdict\n\n\nclass RunFlowComponent(RunFlowBaseComponent):\n    display_name = \"Run Flow\"\n    description = (\n        \"Executes another flow from within the same project. Can also be used as a tool for agents.\"\n        \" \\n **Select a Flow to use the tool mode**\"\n    )\n    documentation: str = \"https://docs.langflow.org/run-flow\"\n    beta = True\n    name = \"RunFlow\"\n    icon = \"Workflow\"\n\n    # Keep the concrete class templates detached from the base-class templates;\n    # Component.__init__ still makes the per-instance copies used at runtime.\n    inputs = deepcopy(RunFlowBaseComponent.get_base_inputs())\n    outputs = deepcopy(RunFlowBaseComponent.get_base_outputs())\n\n    async def update_build_config(\n        self,\n        build_config: dotdict,\n        field_value: Any,\n        field_name: str | None = None,\n    ):\n        missing_keys = [key for key in self.default_keys if key not in build_config]\n        for key in missing_keys:  # TODO: create a defaults dict to avoid hardcoding the defaults here\n            if key == \"flow_name_selected\":\n                build_config[key] = {\"options\": [], \"options_metadata\": [], \"value\": None}\n            elif key == \"flow_id_selected\":\n                build_config[key] = {\"value\": None}\n            elif key == \"cache_flow\":\n                build_config[key] = {\"value\": False}\n            else:\n                build_config[key] = {}\n        if field_name == \"flow_name_selected\" and (build_config.get(\"is_refresh\", False) or field_value is None):\n            # refresh button was clicked or componented was initialized, so list the flows\n            options: list[str] = await self.alist_flows_by_flow_folder()\n            build_config[\"flow_name_selected\"][\"options\"] = [flow.data[\"name\"] for flow in options]\n            build_config[\"flow_name_selected\"][\"options_metadata\"] = []\n            for flow in options:\n                # populate options_metadata\n                build_config[\"flow_name_selected\"][\"options_metadata\"].append(\n                    {\"id\": flow.data[\"id\"], \"updated_at\": flow.data[\"updated_at\"]}\n                )\n                # update selected flow if it is stale\n                if str(flow.data[\"id\"]) == self.flow_id_selected:\n                    await self.check_and_update_stale_flow(flow, build_config)\n        elif field_name in {\"flow_name_selected\", \"flow_id_selected\"} and field_value is not None:\n            # flow was selected by name or id, so get the flow and update the bcfg\n            try:\n                # derive flow id if the field_name is flow_name_selected\n                build_config[\"flow_id_selected\"][\"value\"] = (\n                    self.get_selected_flow_meta(build_config, \"id\") or build_config[\"flow_id_selected\"][\"value\"]\n                )\n                updated_at = self.get_selected_flow_meta(build_config, \"updated_at\")\n                await self.load_graph_and_update_cfg(\n                    build_config, build_config[\"flow_id_selected\"][\"value\"], updated_at\n                )\n            except Exception as e:\n                msg = f\"Error building graph for flow {field_value}\"\n                await logger.aexception(msg)\n                raise RuntimeError(msg) from e\n\n        return build_config\n\n    def get_selected_flow_meta(self, build_config: dotdict, field: str) -> dict:\n        \"\"\"Get the selected flow's metadata from the build config.\"\"\"\n        return build_config.get(\"flow_name_selected\", {}).get(\"selected_metadata\", {}).get(field)\n\n    async def load_graph_and_update_cfg(\n        self,\n        build_config: dotdict,\n        flow_id: str,\n        updated_at: str | datetime,\n    ) -> None:\n        \"\"\"Load a flow's graph and update the build config.\"\"\"\n        graph = await self.get_graph(\n            flow_id_selected=flow_id,\n            updated_at=self.get_str_isots(updated_at),\n        )\n        self.update_build_config_from_graph(build_config, graph)\n\n    def should_update_stale_flow(self, flow: Data, build_config: dotdict) -> bool:\n        \"\"\"Check if the flow should be updated.\"\"\"\n        return (\n            (updated_at := self.get_str_isots(flow.data[\"updated_at\"]))  # true updated_at date just fetched from db\n            and (stale_at := self.get_selected_flow_meta(build_config, \"updated_at\"))  # outdated date in bcfg\n            and self._parse_timestamp(updated_at) > self._parse_timestamp(stale_at)  # stale flow condition\n        )\n\n    async def check_and_update_stale_flow(self, flow: Data, build_config: dotdict) -> None:\n        \"\"\"Check if the flow should be updated and update it if necessary.\"\"\"\n        # TODO: improve contract/return value\n        if self.should_update_stale_flow(flow, build_config):\n            await self.load_graph_and_update_cfg(\n                build_config,\n                flow.data[\"id\"],\n                flow.data[\"updated_at\"],\n            )\n\n    def get_str_isots(self, date: datetime | str) -> str:\n        \"\"\"Get a string timestamp from a datetime or string.\"\"\"\n        return date.isoformat() if hasattr(date, \"isoformat\") else date\n"
+              },
+              "flow_id_selected": {
+                "_input_type": "StrInput",
+                "advanced": false,
+                "display_name": "Flow ID",
+                "dynamic": false,
+                "info": "The ID of the flow to run.",
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "name": "flow_id_selected",
+                "override_skip": true,
+                "placeholder": "",
+                "required": false,
+                "show": false,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_metadata": true,
+                "track_in_telemetry": false,
+                "type": "str",
+                "value": "94f6774d-ebc7-5bf1-8486-886f91886a5f"
+              },
+              "flow_name_selected": {
+                "_input_type": "DropdownInput",
+                "advanced": false,
+                "combobox": false,
+                "dialog_inputs": {},
+                "display_name": "Flow Name",
+                "dynamic": false,
+                "external_options": {},
+                "info": "The name of the flow to run.",
+                "name": "flow_name_selected",
+                "options": [],
+                "options_metadata": [],
+                "override_skip": false,
+                "placeholder": "",
+                "real_time_refresh": true,
+                "refresh_button": true,
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "toggle": false,
+                "tool_mode": false,
+                "trace_as_metadata": true,
+                "track_in_telemetry": true,
+                "type": "str"
+              },
+              "session_id": {
+                "_input_type": "MessageTextInput",
+                "advanced": true,
+                "display_name": "Session ID",
+                "dynamic": false,
+                "info": "The session ID to run the flow in.",
+                "input_types": [
+                  "Message"
+                ],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "name": "session_id",
+                "override_skip": false,
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "track_in_telemetry": false,
+                "type": "str",
+                "value": ""
+              }
+            },
+            "tool_mode": false
+          },
+          "type": "RunFlow"
+        },
+        "dragging": false,
+        "id": "RunFlow-hlb-lf-00-routing-context-v1",
+        "measured": {
+          "height": 200,
+          "width": 320
+        },
+        "position": {
+          "x": 900,
+          "y": 200
+        },
+        "selected": false,
+        "type": "genericNode"
+      },
+      {
+        "data": {
+          "id": "HulubulContractInputBoundary-hlb-lf-00-router-input-v1",
+          "node": {
+            "base_classes": [
+              "Message"
+            ],
+            "beta": false,
+            "conditional_paths": [],
+            "custom_fields": {},
+            "description": "Public entry point for intake and router inputs via fixed edges or direct JSON.",
+            "display_name": "Contract Input Boundary",
+            "documentation": "",
+            "edited": false,
+            "field_order": [
+              "envelope",
+              "routing_context",
+              "input_value",
+              "contract_kind"
+            ],
+            "frozen": false,
+            "icon": "shield-check",
+            "id": "HulubulContractInputBoundary-hlb-lf-00-router-input-v1",
+            "legacy": false,
+            "metadata": {
+              "code_hash": "bd2e37da2b9b",
+              "dependencies": {
+                "dependencies": [
+                  {
+                    "name": "lfx",
+                    "version": "1.10.2"
+                  },
+                  {
+                    "name": "pydantic",
+                    "version": "2.13.4"
+                  },
+                  {
+                    "name": "hulubul",
+                    "version": null
+                  }
+                ],
+                "total_dependencies": 3
+              },
+              "module": "custom_components.contract_input_boundary"
+            },
+            "minimized": false,
+            "output_types": [],
+            "outputs": [
+              {
+                "allows_loop": false,
+                "cache": true,
+                "display_name": "Message",
+                "group_outputs": false,
+                "method": "build_output",
+                "name": "response",
+                "selected": "Message",
+                "tool_mode": true,
+                "types": [
+                  "Message"
+                ],
+                "value": "__UNDEFINED__"
+              }
+            ],
+            "pinned": false,
+            "template": {
+              "_type": "Component",
+              "code": {
+                "advanced": true,
+                "dynamic": true,
+                "fileTypes": [],
+                "file_path": "",
+                "info": "",
+                "list": false,
+                "load_from_db": false,
+                "multiline": true,
+                "name": "code",
+                "password": false,
+                "placeholder": "",
+                "required": true,
+                "show": true,
+                "title_case": false,
+                "type": "code",
+                "value": "\"\"\"Contract input boundary component: unified entry point for intake and router inputs.\n\nConsolidates IntakeInputBoundaryComponent and RouterInputBoundaryComponent into\na single, generic component that handles both:\n1. Structured integration path: fixed `envelope` and `routing_context` edges\n   (for LF-00/LF-10 upstream integration)\n2. Direct API invocation path: `input_value` MessageTextInput with JSON text\n   (for Run API testing)\n\nThe `contract_kind` dropdown selects which wrapper type to build (intake or\nrouter). If fixed edges are provided, they take precedence. If only\n`input_value` is provided, it is parsed and validated as the selected contract\nkind.\n\nSplit from the former contract_boundary.py (which held three components)\nbecause LangFlow's directory-based custom component loader registers exactly\none component per file, named after the file -- extra classes in the same\nfile are silently dropped from the sidebar palette.\n\"\"\"\n\nimport json\nfrom typing import Any\nfrom uuid import uuid4\n\nfrom lfx.custom.custom_component.component import Component\nfrom lfx.inputs.inputs import DropdownInput, HandleInput, MessageTextInput\nfrom lfx.schema.message import Message\nfrom lfx.template.field.base import Output\nfrom pydantic import BaseModel, ValidationError\n\nfrom hulubul.core.models.operational import (\n    IntakeInput,\n    MainFlowInput,\n    OperationalError,\n    RouterInput,\n    RoutingContext,\n)\nfrom hulubul.core.models.operational.enums import ErrorCode\nfrom hulubul.core.models.operational.errors import ERROR_POLICY\n\n__all__ = [\"ContractInputBoundaryComponent\"]\n\n\nclass ContractInputBoundaryComponent(Component):\n    \"\"\"Unified public entry point for intake and router inputs.\n\n    Supports two integration paths:\n    1. Structured edges: fixed `envelope` and `routing_context` (for LF-00/LF-10 upstream flows)\n    2. Direct API: literal JSON text via `input_value` (for Run API invocation)\n\n    The `contract_kind` selector determines which wrapper type to assemble (intake or router).\n    Fixed edges take precedence when supplied; otherwise, `input_value` is used.\n    \"\"\"\n\n    display_name = \"Contract Input Boundary\"\n    description = \"Public entry point for intake and router inputs via fixed edges or direct JSON.\"\n    icon = \"shield-check\"\n    name = \"HulubulContractInputBoundary\"\n\n    inputs = [  # noqa: RUF012\n        HandleInput(  # type: ignore[call-arg]\n            name=\"envelope\",\n            display_name=\"Envelope\",\n            info=(\n                \"Fixed MainFlowInput envelope: trusted context supplied by an \"\n                \"upstream edge, never authored by a model. Required if using \"\n                \"the fixed-edge path.\\n\\n\"\n                \"`advanced=False` is deliberate and load-bearing. LangFlow's \"\n                \"frontend treats an incoming edge into an `advanced` field as \"\n                \"invalid and silently strips it while loading/saving the graph \"\n                \"(see `DEV/reports/advanced-field-in-langflow.md`), so this \"\n                \"field must stay non-advanced for its edge to survive at all. \"\n                \"Keeping it out of the model-callable tool schema is a \"\n                \"separate concern, handled where it belongs: \"\n                \"`HulubulRunFlowComponent.get_required_data()` withholds \"\n                \"connection-only fields from the schema it hands the agent. \"\n                \"Any flow that invokes this component's flow via `RunFlow` \"\n                \"must therefore use `HulubulRunFlow`, not the stock node -- \"\n                \"stock `RunFlow` exposes this field to `lfx`'s \"\n                \"`create_input_schema_from_dict()`, which crashes on its raw \"\n                \"`type: \\\"other\\\"` label with `name 'other' is not defined` \"\n                \"and breaks every call to the *calling* flow. See \"\n                \"`DEV/knowledge/checkpoint9-lf10-runflow-injection-runbook.md`.\"\n            ),\n            input_types=[\"Data\", \"JSON\"],\n            advanced=False,\n            required=False,\n        ),\n        HandleInput(  # type: ignore[call-arg]\n            name=\"routing_context\",\n            display_name=\"Routing Context\",\n            info=(\n                \"Fixed RoutingContext: trusted context supplied by an upstream \"\n                \"edge, never authored by a model. Required if using the \"\n                \"fixed-edge path.\\n\\n\"\n                \"`advanced=False` for the same reason as `envelope` above, \"\n                \"and with the same requirement on callers.\"\n            ),\n            input_types=[\"Data\", \"JSON\"],\n            advanced=False,\n            required=False,\n        ),\n        MessageTextInput(  # type: ignore[call-arg]\n            name=\"input_value\",\n            display_name=\"Direct Input\",\n            info=(\n                \"Typed contract input (JSON text) for direct API invocation or \"\n                \"edge-supplied data. MessageTextInput rather than HandleInput: \"\n                \"HandleInput fields are edge-only in LangFlow (they never read \"\n                \"their own literal value), which made direct invocation unreachable \"\n                \"via the plain Run API. MessageTextInput accepts both literal \"\n                \"values and real edges.\"\n            ),\n            required=False,\n        ),\n        DropdownInput(  # type: ignore[call-arg]\n            name=\"contract_kind\",\n            display_name=\"Contract Kind\",\n            info=(\"Type of input to build: 'intake' for IntakeInput, 'router' for RouterInput.\"),\n            options=[\"intake\", \"router\"],\n            value=\"intake\",\n            required=True,\n        ),\n    ]\n\n    outputs = [  # noqa: RUF012\n        Output(  # type: ignore[call-arg]\n            display_name=\"Message\", name=\"response\", type_=Message, method=\"build_output\"\n        ),\n    ]\n\n    def __init__(self, **kwargs: Any) -> None:\n        \"\"\"Initialize the ContractInputBoundaryComponent.\n\n        Deliberately does NOT pre-assign any declared input field here.\n        LangFlow's `Component.set_attributes()` treats a name that is already\n        in `self.__dict__` but not in `self._attributes` as a reserved-word\n        collision the moment a differing runtime value is injected via a real\n        edge -- confirmed for `input_value` (loud crash: \"defines an input\n        parameter named 'input_value' that is a reserved word\") and, it turns\n        out, for `envelope`/`routing_context` too, just silently: the edge\n        into the field gets dropped instead of raising, discovered only when\n        an actual LF-00 flow round-tripped through the API with fewer edges\n        than were sent. Let the framework's own declarative default (each\n        input's own `value=`) populate every field instead.\n        \"\"\"\n        super().__init__(**kwargs)\n\n    def build_output(self) -> Message:\n        \"\"\"Build intake or router input from fixed edges or direct JSON.\n\n        Priority:\n        1. If both envelope and routing_context are supplied, assemble from fixed edges\n        2. Otherwise, parse and validate input_value as JSON\n\n        Returns:\n            Message: JSON-serialized IntakeInput or RouterInput\n\n        Raises:\n            ValueError: If neither path is available or if required fields are missing\n        \"\"\"\n        # Path 1: Fixed edges (structured integration from LF-00/LF-10 upstream).\n        # Truthy, not `is not None`: an unwired HandleInput field's framework\n        # default is `\"\"` (empty string), not `None`, once these fields are no\n        # longer explicitly pre-assigned in `__init__` (see its docstring).\n        if self.envelope and self.routing_context:\n            return self._build_from_fixed_edges()\n\n        # Path 2: Direct JSON input (Run API invocation)\n        if self.input_value:\n            return self._build_from_input_value()\n\n        # Neither path available\n        return self._make_error_response(ErrorCode.INVALID_CONTRACT)\n\n    @staticmethod\n    def _coerce_model(value: Any, model_cls: type[BaseModel]) -> Any:\n        \"\"\"Coerce a Data/Message/dict/already-hydrated-model edge value into `model_cls`.\n\n        A real edge value from another component can arrive as either a\n        JSON-primitive dict (string UUIDs, string enum values -- e.g.\n        `.model_dump(mode=\"json\")` output) or a dict of already-native\n        instances (e.g. `ExecutionEnvelopeComponent.build_envelope()` returns\n        `Data(data=envelope.model_dump())` -- note: no `mode=\"json\"`, so its\n        `actor_id`/`message_id`/`correlation_id` are real `UUID` objects, not\n        strings). This project's contracts are strict-typed and reject the\n        first shape via ordinary python-mode construction (a UUID/enum field\n        must already be a native instance) -- only `model_validate_json`\n        applies the standard JSON coercion rules; `default=str` in the\n        dump makes that same call handle the second shape too. Values\n        already an instance of `model_cls` (e.g. a real object passed\n        directly in a unit test) pass through unchanged; anything\n        unparseable is returned as-is and left for the caller's own\n        validation/error path to reject.\n\n        `isinstance(value, Message)` is checked before the generic\n        `hasattr(value, \"data\")` branch: `Message` also exposes a `.data`\n        attribute (its own field dict -- `sender`, `session_id`, `duration`,\n        etc.), which is not the wrapped payload at all; the actual JSON\n        lives in `.text`.\n        \"\"\"\n        if isinstance(value, model_cls):\n            return value\n        if isinstance(value, Message):\n            if not isinstance(value.text, str):\n                return value\n            try:\n                return model_cls.model_validate_json(value.text)\n            except (ValidationError, TypeError):\n                return value\n        candidate = value.data if hasattr(value, \"data\") else value\n        try:\n            if isinstance(candidate, str):\n                return model_cls.model_validate_json(candidate)\n            if isinstance(candidate, dict):\n                # LFX's own JSON/Data wrapper classes can leak their OWN\n                # fields (e.g. `default_value`) into `.data` at some points\n                # in the pipeline -- confirmed live against a real LF-00\n                # edge value. `model_cls` is strict (extra_forbidden), so\n                # pass through only the keys it actually declares.\n                filtered = {k: v for k, v in candidate.items() if k in model_cls.model_fields}\n                return model_cls.model_validate_json(json.dumps(filtered, default=str))\n        except (ValidationError, TypeError):\n            return value\n        return value\n\n    @staticmethod\n    def _unwrap_routing_context(value: Any) -> Any:\n        \"\"\"Unwrap a DataOperationResult-shaped routing_context edge value.\n\n        LF-00's mandatory context-prefetch feeds this boundary the raw\n        `DataOperationResult` returned by LF-70's `getRequestRoutingContext`\n        operation (RoutingContext lives at `.result`, already fully adapted\n        by LF-70's own RoutingContextAdapterComponent) -- not a bare\n        RoutingContext directly. LF-10 has no such predecessor and always\n        supplies a bare RoutingContext. Detect the DataOperationResult shape\n        (its `outcome`/`result` keys are not RoutingContext fields) and\n        unwrap it; pass anything else through unchanged so a bare\n        RoutingContext (dict or model instance) still works as before.\n\n        `isinstance(value, Message)` must be checked before the generic\n        `hasattr(value, \"data\")` branch (same ordering bug already fixed in\n        `_coerce_model`): confirmed live -- the real `RunFlow` context-\n        prefetch output arrives as a `Message` wrapping the full\n        `DataOperationResult` JSON text, not a `Data`/`JSON` object. Without\n        this check the unwrap silently no-ops (a `Message`'s own `.data` is\n        its OWN field dict, not the payload), and `_coerce_model` then tries\n        to validate the entire `DataOperationResult` as a bare\n        `RoutingContext` and fails with `INVALID_CONTRACT` -- with no\n        exception ever logged, since the failure is \"successfully\" caught by\n        `_build_from_fixed_edges`'s own error handling. This was silently\n        breaking every LF-00 request regardless of RoutingContext content.\n\n        A second, independent wrapping layer was found live on top of that:\n        `RunFlow` in non-tool mode surfaces a sub-flow component's output by\n        forwarding LangFlow's own internal per-output artifact record --\n        `{\"repr\": <str>, \"raw\": <actual payload>, \"type\": <str>}` -- as the\n        `Data`/`Message` content, rather than the bare payload. `_unwrap_one_layer`\n        peels exactly that shape off (recognised by having `raw`/`type` keys\n        without `outcome`/`result` of its own) before the `outcome`/`result`\n        check runs, so a payload that never went through `RunFlow` (e.g. LF-10\n        feeding a bare `RoutingContext`, or a direct `DataOperationResult`\n        with no `RunFlow` hop) is unaffected.\n        \"\"\"\n\n        def _unwrap_one_layer(candidate: Any) -> Any:\n            if (\n                isinstance(candidate, dict)\n                and \"raw\" in candidate\n                and \"type\" in candidate\n                and \"outcome\" not in candidate\n            ):\n                return candidate[\"raw\"]\n            return candidate\n\n        if isinstance(value, Message) and isinstance(value.text, str):\n            try:\n                parsed = json.loads(value.text)\n            except json.JSONDecodeError:\n                return value\n            parsed = _unwrap_one_layer(parsed)\n            if isinstance(parsed, dict) and \"outcome\" in parsed and \"result\" in parsed:\n                return parsed[\"result\"]\n            return value\n        candidate = value.data if hasattr(value, \"data\") else value\n        candidate = _unwrap_one_layer(candidate)\n        if isinstance(candidate, dict) and \"outcome\" in candidate and \"result\" in candidate:\n            return candidate[\"result\"]\n        return value\n\n    def _build_from_fixed_edges(self) -> Message:\n        \"\"\"Assemble input from fixed envelope/routing_context edges.\n\n        Returns:\n            Message: Serialized IntakeInput or RouterInput, as selected by contract_kind\n\n        Raises:\n            ValueError: If envelope or routing_context is None\n        \"\"\"\n        if self.envelope is None:\n            raise ValueError(\"INVALID_CONFIGURATION: envelope is required\")\n        if self.routing_context is None:\n            raise ValueError(\"INVALID_CONFIGURATION: routing_context is required\")\n\n        envelope = self._coerce_model(self.envelope, MainFlowInput)\n        routing_context = self._coerce_model(\n            self._unwrap_routing_context(self.routing_context), RoutingContext\n        )\n\n        try:\n            wrapper: IntakeInput | RouterInput\n            if self.contract_kind == \"router\":\n                wrapper = RouterInput(\n                    schema_version=envelope.schema_version,\n                    correlation_id=envelope.correlation_id,\n                    envelope=envelope,\n                    routing_context=routing_context,\n                )\n            else:  # default to \"intake\"\n                wrapper = IntakeInput(\n                    schema_version=envelope.schema_version,\n                    correlation_id=envelope.correlation_id,\n                    envelope=envelope,\n                    routing_context=routing_context,\n                )\n\n            return Message(text=wrapper.model_dump_json())\n\n        except (ValidationError, TypeError, AttributeError):\n            return self._make_error_response(ErrorCode.INVALID_CONTRACT)\n\n    def _build_from_input_value(self) -> Message:\n        \"\"\"Parse and validate input_value as JSON, then assemble the selected contract type.\n\n        Returns:\n            Message: Serialized IntakeInput or RouterInput, as selected by contract_kind\n        \"\"\"\n        raw_value = self.input_value\n        if isinstance(raw_value, Message):\n            raw_value = raw_value.text\n\n        if not raw_value or (isinstance(raw_value, str) and not raw_value.strip()):\n            return self._make_error_response(ErrorCode.INVALID_CONTRACT)\n\n        try:\n            # Parse JSON and validate as selected type\n            parsed_input: IntakeInput | RouterInput\n            if self.contract_kind == \"router\":\n                if isinstance(raw_value, str):\n                    parsed_input = RouterInput.model_validate_json(raw_value)\n                else:\n                    # JSON-mode validation for non-string dicts: a dict from\n                    # an edge or variable binding is shaped as JSON primitives\n                    # (string UUIDs in correlation_id, string source enums, etc.),\n                    # not native instances. Though currently unreachable (input_value\n                    # is always a string or Message in live flows), this is the\n                    # correct pattern if the else branch is ever exercised.\n                    # Same rationale as DataOperationResultBoundary and\n                    # DataAccessAgentComponent.\n                    value_json = json.dumps(raw_value, default=str)\n                    parsed_input = RouterInput.model_validate_json(value_json)\n            else:  # default to \"intake\"\n                if isinstance(raw_value, str):\n                    parsed_input = IntakeInput.model_validate_json(raw_value)\n                else:\n                    # JSON-mode validation for non-string dicts: same rationale\n                    # as RouterInput case above.\n                    value_json = json.dumps(raw_value, default=str)\n                    parsed_input = IntakeInput.model_validate_json(value_json)\n\n            return Message(text=parsed_input.model_dump_json())\n\n        except (ValidationError, json.JSONDecodeError, TypeError):\n            return self._make_error_response(ErrorCode.INVALID_CONTRACT)\n\n    def _make_error_response(self, code: ErrorCode) -> Message:\n        \"\"\"Create a canonical error response without exposing user values.\n\n        Args:\n            code: The ErrorCode\n\n        Returns:\n            Message: Serialized OperationalError\n        \"\"\"\n        policy = ERROR_POLICY[code]\n        error = OperationalError(\n            schema_version=\"1.0.0\",\n            code=code,\n            correlation_id=uuid4(),\n            category=policy.category,\n            message=policy.safe_message,\n            retryable=policy.retryable,\n        )\n\n        return Message(text=error.model_dump_json())\n"
+              },
+              "contract_kind": {
+                "_input_type": "DropdownInput",
+                "advanced": false,
+                "combobox": false,
+                "dialog_inputs": {},
+                "display_name": "Contract Kind",
+                "dynamic": false,
+                "external_options": {},
+                "info": "Type of input to build: 'intake' for IntakeInput, 'router' for RouterInput.",
+                "name": "contract_kind",
+                "options": [
+                  "intake",
+                  "router"
+                ],
+                "options_metadata": [],
+                "override_skip": false,
+                "placeholder": "",
+                "required": true,
+                "show": true,
+                "title_case": false,
+                "toggle": false,
+                "tool_mode": false,
+                "trace_as_metadata": true,
+                "track_in_telemetry": true,
+                "type": "str",
+                "value": "router"
+              },
+              "envelope": {
+                "_input_type": "HandleInput",
+                "advanced": false,
+                "display_name": "Envelope",
+                "dynamic": false,
+                "info": "Fixed MainFlowInput envelope (advanced, not model-editable). Required if using fixed-edge path.",
+                "input_types": [
+                  "Data",
+                  "JSON"
+                ],
+                "list": false,
+                "list_add_label": "Add More",
+                "name": "envelope",
+                "override_skip": false,
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "trace_as_metadata": true,
+                "track_in_telemetry": false,
+                "type": "other",
+                "value": ""
+              },
+              "input_value": {
+                "_input_type": "MessageTextInput",
+                "advanced": false,
+                "display_name": "Direct Input",
+                "dynamic": false,
+                "info": "Typed contract input (JSON text) for direct API invocation or edge-supplied data. MessageTextInput rather than HandleInput: HandleInput fields are edge-only in LangFlow (they never read their own literal value), which made direct invocation unreachable via the plain Run API. MessageTextInput accepts both literal values and real edges.",
+                "input_types": [
+                  "Message"
+                ],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "name": "input_value",
+                "override_skip": false,
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "track_in_telemetry": false,
+                "type": "str",
+                "value": ""
+              },
+              "routing_context": {
+                "_input_type": "HandleInput",
+                "advanced": false,
+                "display_name": "Routing Context",
+                "dynamic": false,
+                "info": "Fixed RoutingContext (advanced, not model-editable). Required if using fixed-edge path.",
+                "input_types": [
+                  "Data",
+                  "JSON"
+                ],
+                "list": false,
+                "list_add_label": "Add More",
+                "name": "routing_context",
+                "override_skip": false,
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "trace_as_metadata": true,
+                "track_in_telemetry": false,
+                "type": "other",
+                "value": ""
+              }
+            },
+            "tool_mode": false
+          },
+          "type": "HulubulContractInputBoundary"
+        },
+        "dragging": false,
+        "id": "HulubulContractInputBoundary-hlb-lf-00-router-input-v1",
+        "measured": {
+          "height": 200,
+          "width": 320
+        },
+        "position": {
+          "x": 1200,
+          "y": 0
+        },
+        "selected": false,
+        "type": "genericNode"
+      },
+      {
+        "data": {
+          "id": "Agent-hlb-lf-00-router-v1",
+          "node": {
+            "base_classes": [
+              "Data",
+              "JSON",
+              "Message"
+            ],
+            "beta": false,
+            "conditional_paths": [],
+            "custom_fields": {},
+            "description": "LF-00's router: decides intake vs. informational vs. fail-closed based on RoutingContext. Calls LF-10 as a tool for intake routes, otherwise returns structured result for complete/closed/unsupported/unknown contexts.",
+            "display_name": "Router Agent",
+            "documentation": "https://docs.langflow.org/agents",
+            "edited": false,
+            "field_order": [
+              "model",
+              "api_key",
+              "base_url_ibm_watsonx",
+              "project_id",
+              "system_prompt",
+              "context_id",
+              "n_messages",
+              "max_tokens",
+              "format_instructions",
+              "output_schema",
+              "tools",
+              "input_value",
+              "handle_parsing_errors",
+              "max_iterations",
+              "stream",
+              "add_current_date_tool",
+              "add_calculator_tool"
+            ],
+            "frozen": false,
+            "icon": "bot",
+            "id": "Agent-hlb-lf-00-router-v1",
+            "legacy": false,
+            "metadata": {
+              "code_hash": "a976fe7ab8fe",
+              "dependencies": {
+                "dependencies": [
+                  {
+                    "name": "lfx",
+                    "version": "1.10.2"
+                  }
+                ],
+                "total_dependencies": 1
+              },
+              "module": "custom_components.router_agent"
+            },
+            "minimized": false,
+            "output_types": [],
+            "outputs": [
+              {
+                "allows_loop": false,
+                "cache": true,
+                "display_name": "Response",
+                "group_outputs": false,
+                "method": "message_response",
+                "name": "response",
+                "selected": "Message",
+                "tool_mode": true,
+                "types": [
+                  "Message"
+                ],
+                "value": "__UNDEFINED__"
+              },
+              {
+                "allows_loop": false,
+                "cache": true,
+                "display_name": "Structured Response",
+                "group_outputs": false,
+                "method": "json_response",
+                "name": "structured_response",
+                "selected": "Data",
+                "tool_mode": true,
+                "types": [
+                  "Data",
+                  "JSON"
+                ],
+                "value": "__UNDEFINED__"
+              }
+            ],
+            "pinned": false,
+            "template": {
+              "_type": "Component",
+              "add_calculator_tool": {
+                "_input_type": "BoolInput",
+                "advanced": true,
+                "display_name": "Calculator",
+                "dynamic": false,
+                "info": "If true, adds a zero-config arithmetic calculator tool to the agent (safe: only +, -, *, /, ** operators via AST).",
+                "list": false,
+                "list_add_label": "Add More",
+                "name": "add_calculator_tool",
+                "override_skip": false,
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_metadata": true,
+                "track_in_telemetry": true,
+                "type": "bool",
+                "value": false
+              },
+              "add_current_date_tool": {
+                "_input_type": "BoolInput",
+                "advanced": true,
+                "display_name": "Current Date",
+                "dynamic": false,
+                "info": "If true, will add a tool to the agent that returns the current date.",
+                "list": false,
+                "list_add_label": "Add More",
+                "name": "add_current_date_tool",
+                "override_skip": false,
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_metadata": true,
+                "track_in_telemetry": true,
+                "type": "bool",
+                "value": false
+              },
+              "api_key": {
+                "_input_type": "SecretStrInput",
+                "advanced": true,
+                "display_name": "API Key",
+                "dynamic": false,
+                "info": "Overrides global provider settings. Leave blank to use your pre-configured API Key.",
+                "input_types": [],
+                "load_from_db": true,
+                "name": "api_key",
+                "override_skip": false,
+                "password": true,
+                "placeholder": "",
+                "real_time_refresh": true,
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "track_in_telemetry": false,
+                "type": "str",
+                "value": ""
+              },
+              "base_url_ibm_watsonx": {
+                "_input_type": "DropdownInput",
+                "advanced": false,
+                "combobox": true,
+                "dialog_inputs": {},
+                "display_name": "watsonx API Endpoint",
+                "dynamic": false,
+                "external_options": {},
+                "info": "The base URL of the API (IBM watsonx.ai only)",
+                "name": "base_url_ibm_watsonx",
+                "options": [
+                  "https://us-south.ml.cloud.ibm.com",
+                  "https://eu-de.ml.cloud.ibm.com",
+                  "https://eu-gb.ml.cloud.ibm.com",
+                  "https://au-syd.ml.cloud.ibm.com",
+                  "https://jp-tok.ml.cloud.ibm.com",
+                  "https://ca-tor.ml.cloud.ibm.com"
+                ],
+                "options_metadata": [],
+                "override_skip": false,
+                "placeholder": "",
+                "real_time_refresh": true,
+                "required": false,
+                "show": false,
+                "title_case": false,
+                "toggle": false,
+                "tool_mode": false,
+                "trace_as_metadata": true,
+                "track_in_telemetry": true,
+                "type": "str",
+                "value": "https://us-south.ml.cloud.ibm.com"
+              },
+              "code": {
+                "advanced": true,
+                "dynamic": true,
+                "fileTypes": [],
+                "file_path": "",
+                "info": "",
+                "list": false,
+                "load_from_db": false,
+                "multiline": true,
+                "name": "code",
+                "password": false,
+                "placeholder": "",
+                "required": true,
+                "show": true,
+                "title_case": false,
+                "type": "code",
+                "value": "\"\"\"LF-00 Router Agent: scoped Agent for intake routing.\n\nPer the spec (plan.md task 44), the Router Agent:\n1. Takes deterministic RouterInput from the contract boundary (never model-substitutable)\n2. Has LF-10 as its only tool (Tool Mode, single RunFlow component exposed as a tool)\n3. Never retries writes (LF-10 handle retries/idempotency there)\n4. Emits RouterResult with exact discriminator\n\nDEC-019: \"Give LF-00 or LF-10 raw MCP tools\" is explicitly forbidden.\nThe Router calls LF-10 through a typed RunFlow tool only, never MCP directly.\n\"\"\"\n\nfrom lfx.components.models_and_agents.agent import AgentComponent\nfrom lfx.schema.message import Message\n\n__all__ = [\"HulubulRouterAgent\"]\n\n\nclass HulubulRouterAgent(AgentComponent):\n    \"\"\"LF-00 Router Agent: routes intake requests and reports non-intake outcomes.\"\"\"\n\n    display_name = \"Router Agent\"\n    description = (\n        \"LF-00's router: decides intake vs. informational vs. fail-closed based on \"\n        \"RoutingContext. Calls LF-10 as a tool for intake routes, otherwise returns \"\n        \"structured result for complete/closed/unsupported/unknown contexts.\"\n    )\n    icon = \"bot\"\n    name = \"HulubulRouterAgent\"\n\n    # LF-00's Router does not need custom middleware behavior:\n    # - It calls LF-10 (another flow) as a tool, not MCP directly\n    # - LF-10 handles its own retries\n    # - No local writes to protect from replay\n    # Stock AgentComponent middleware is sufficient.\n\n    async def message_response(self) -> Message:\n        \"\"\"Return the Agent's response message.\"\"\"\n        return await super().message_response()\n"
+              },
+              "context_id": {
+                "_input_type": "MessageTextInput",
+                "advanced": true,
+                "display_name": "Context ID",
+                "dynamic": false,
+                "info": "The context ID of the chat. Adds an extra layer to the local memory.",
+                "input_types": [
+                  "Message"
+                ],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "name": "context_id",
+                "override_skip": false,
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "track_in_telemetry": false,
+                "type": "str",
+                "value": ""
+              },
+              "format_instructions": {
+                "_input_type": "MultilineInput",
+                "advanced": true,
+                "ai_enabled": false,
+                "copy_field": false,
+                "display_name": "Output Format Instructions",
+                "dynamic": false,
+                "info": "Generic Template for structured output formatting. Valid only with Structured response.",
+                "input_types": [
+                  "Message"
+                ],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "multiline": true,
+                "name": "format_instructions",
+                "override_skip": false,
+                "password": false,
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "track_in_telemetry": false,
+                "type": "str",
+                "value": "You are an AI that extracts structured JSON objects from unstructured text. Use a predefined schema with expected types (str, int, float, bool, dict). Extract ALL relevant instances that match the schema - if multiple patterns exist, capture them all. Fill missing or ambiguous values with defaults: null for missing values. Remove exact duplicates but keep variations that have different field values. Always return valid JSON in the expected format, never throw errors. If multiple objects can be extracted, return them all in the structured format."
+              },
+              "handle_parsing_errors": {
+                "_input_type": "BoolInput",
+                "advanced": true,
+                "display_name": "Handle Parse Errors",
+                "dynamic": false,
+                "info": "Adds tool-execution retry as a safety net. `create_agent` already feeds tool-call validation errors back to the LLM automatically; this flag layers `ToolRetryMiddleware` on top so transient tool runtime failures are retried (max 2 retries).",
+                "list": false,
+                "list_add_label": "Add More",
+                "name": "handle_parsing_errors",
+                "override_skip": false,
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_metadata": true,
+                "track_in_telemetry": true,
+                "type": "bool",
+                "value": true
+              },
+              "input_value": {
+                "_input_type": "MessageInput",
+                "advanced": false,
+                "display_name": "Input",
+                "dynamic": false,
+                "info": "The input provided by the user for the agent to process.",
+                "input_types": [
+                  "Message"
+                ],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "name": "input_value",
+                "override_skip": false,
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": true,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "track_in_telemetry": false,
+                "type": "str",
+                "value": ""
+              },
+              "max_iterations": {
+                "_input_type": "IntInput",
+                "advanced": true,
+                "display_name": "Max Iterations",
+                "dynamic": false,
+                "info": "Maximum number of model calls the agent can make before stopping (maps to `ModelCallLimitMiddleware.run_limit` on the create_agent path). Must be at least 1 \u2014 it is a safety cap, never 'unlimited'.",
+                "list": false,
+                "list_add_label": "Add More",
+                "name": "max_iterations",
+                "override_skip": false,
+                "placeholder": "",
+                "range_spec": {
+                  "max": 128000.0,
+                  "min": 1.0,
+                  "step": 1.0,
+                  "step_type": "int"
+                },
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_metadata": true,
+                "track_in_telemetry": true,
+                "type": "int",
+                "value": 15
+              },
+              "max_tokens": {
+                "_input_type": "IntInput",
+                "advanced": true,
+                "display_name": "Max Tokens",
+                "dynamic": false,
+                "info": "Maximum number of tokens to generate. Field name varies by provider.",
+                "list": false,
+                "list_add_label": "Add More",
+                "name": "max_tokens",
+                "override_skip": false,
+                "placeholder": "",
+                "range_spec": {
+                  "max": 128000.0,
+                  "min": 1.0,
+                  "step": 1.0,
+                  "step_type": "int"
+                },
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_metadata": true,
+                "track_in_telemetry": true,
+                "type": "int",
+                "value": 4096
+              },
+              "model": {
+                "_input_type": "ModelInput",
+                "advanced": false,
+                "display_name": "Language Model",
+                "dynamic": false,
+                "external_options": {
+                  "fields": {
+                    "data": {
+                      "node": {
+                        "display_name": "Connect other models",
+                        "icon": "CornerDownLeft",
+                        "name": "connect_other_models"
+                      }
+                    }
+                  }
+                },
+                "filters": {
+                  "tool_calling": true
+                },
+                "info": "Select your model provider",
+                "input_types": [
+                  "LanguageModel"
+                ],
+                "list": false,
+                "list_add_label": "Add More",
+                "model_type": "language",
+                "name": "model",
+                "override_skip": false,
+                "placeholder": "Setup Provider",
+                "real_time_refresh": true,
+                "refresh_button": true,
+                "required": true,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "track_in_telemetry": false,
+                "type": "model",
+                "value": [
+                  {
+                    "icon": "OpenAI",
+                    "metadata": {
+                      "created": 0,
+                      "default": false,
+                      "deprecated": false,
+                      "icon": "OpenAI",
+                      "model_type": "llm",
+                      "not_supported": false,
+                      "preview": false,
+                      "reasoning": false,
+                      "search": false,
+                      "tool_calling": true
+                    },
+                    "name": "global/nearai/glm-5.2",
+                    "provider": "OpenAI"
+                  }
+                ]
+              },
+              "n_messages": {
+                "_input_type": "IntInput",
+                "advanced": true,
+                "display_name": "Number of Chat History Messages",
+                "dynamic": false,
+                "info": "Number of chat history messages to retrieve.",
+                "list": false,
+                "list_add_label": "Add More",
+                "name": "n_messages",
+                "override_skip": false,
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_metadata": true,
+                "track_in_telemetry": true,
+                "type": "int",
+                "value": 0
+              },
+              "output_schema": {
+                "_input_type": "TableInput",
+                "advanced": true,
+                "display_name": "Output Schema",
+                "dynamic": false,
+                "info": "Schema Validation: Define the structure and data types for structured output. No validation if no output schema.",
+                "input_types": [
+                  "DataFrame",
+                  "Table"
+                ],
+                "is_list": true,
+                "list_add_label": "Add More",
+                "name": "output_schema",
+                "override_skip": false,
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "table_icon": "Table",
+                "table_schema": [
+                  {
+                    "default": "field",
+                    "description": "Specify the name of the output field.",
+                    "display_name": "Name",
+                    "edit_mode": "inline",
+                    "name": "name",
+                    "type": "str"
+                  },
+                  {
+                    "default": "description of field",
+                    "description": "Describe the purpose of the output field.",
+                    "display_name": "Description",
+                    "edit_mode": "popover",
+                    "name": "description",
+                    "type": "str"
+                  },
+                  {
+                    "default": "str",
+                    "description": "Indicate the data type of the output field (e.g., str, int, float, bool, dict).",
+                    "display_name": "Type",
+                    "edit_mode": "inline",
+                    "name": "type",
+                    "options": [
+                      "str",
+                      "int",
+                      "float",
+                      "bool",
+                      "dict"
+                    ],
+                    "type": "str"
+                  },
+                  {
+                    "default": "False",
+                    "description": "Set to True if this output field should be a list of the specified type.",
+                    "display_name": "As List",
+                    "edit_mode": "inline",
+                    "name": "multiple",
+                    "type": "boolean"
+                  }
+                ],
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_metadata": true,
+                "track_in_telemetry": false,
+                "trigger_icon": "Table",
+                "trigger_text": "Open table",
+                "type": "table",
+                "value": []
+              },
+              "project_id": {
+                "_input_type": "StrInput",
+                "advanced": false,
+                "display_name": "watsonx Project ID",
+                "dynamic": false,
+                "info": "The project ID associated with the foundation model (IBM watsonx.ai only)",
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "name": "project_id",
+                "override_skip": false,
+                "placeholder": "",
+                "required": false,
+                "show": false,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_metadata": true,
+                "track_in_telemetry": false,
+                "type": "str",
+                "value": ""
+              },
+              "stream": {
+                "_input_type": "BoolInput",
+                "advanced": true,
+                "display_name": "Stream",
+                "dynamic": false,
+                "info": "Stream the response from the model. Streaming works only in Chat.",
+                "list": false,
+                "list_add_label": "Add More",
+                "name": "stream",
+                "override_skip": false,
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_metadata": true,
+                "track_in_telemetry": true,
+                "type": "bool",
+                "value": true
+              },
+              "system_prompt": {
+                "_input_type": "MultilineInput",
+                "advanced": false,
+                "ai_enabled": false,
+                "copy_field": false,
+                "display_name": "Agent Instructions",
+                "dynamic": false,
+                "info": "System Prompt: Initial instructions and context provided to guide the agent's behavior. Supports dynamic placeholders: {current_date}, {model_name}, {optional_user_context}.",
+                "input_types": [
+                  "Message"
+                ],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "multiline": true,
+                "name": "system_prompt",
+                "override_skip": false,
+                "password": false,
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "track_in_telemetry": false,
+                "type": "str",
+                "value": "DO NOT produce any text other than valid JSON. No markdown code blocks, no explanation, no text before or after.\n\nYou are the LF-00 Router Agent. You receive a RouterInput (envelope + routing_context) and must emit a RouterResult as a single JSON object:\n\n{\"correlation_id\":\"<value>\",\"outcome\":\"<value>\",\"target\":\"<value>\",\"reason\":\"<value>\",\"safe_message\":\"<value>\",\"request_id\":<value_or_null>}\n\nField constraints:\n- correlation_id: copy exactly from the input envelope's correlation_id.\n- outcome: one of \"routed\", \"informational\", \"failure\".\n- target: one of \"intake\", \"none\".\n- reason: one of \"noBinding\", \"intakeInProgress\", \"intakeComplete\", \"requestClosed\", \"unsupportedStatus\", \"invalidContext\", \"lookupFailed\".\n- safe_message: a short user-facing string. No JSON, no newlines.\n- request_id: null if the input's routing_context.request_id is null, otherwise copy it EXACTLY as given (never invent, never modify).\n\n## routing_context fields you receive (use ONLY these, never a field named \"status\"):\n- binding_state: \"absent\" | \"bound\" | \"inconsistent\"\n- request_status: null, or one of \"new\", \"needsClarification\", \"complete\", \"optionsProposed\", \"waitingResponse\", \"accepted\", \"rejected\", \"pickUpPlanned\", \"pickedUp\", \"delivered\", \"cancelled\"\n- routing_stage: \"intake\" | \"complete\" | \"closed\" | \"unsupported\" | \"failure\"\n- closed_at: null or a timestamp\n- error: null or a populated error object\n\n## Decision logic \u2014 evaluate routing_stage FIRST, it is authoritative and already encodes closed-over-status precedence:\n\n1. If routing_stage == \"closed\":\n   \u2192 outcome=\"informational\", target=\"none\", reason=\"requestClosed\", safe_message=\"request closed\"\n\n2. Else if routing_stage == \"intake\":\n   This covers BOTH binding_state==\"absent\" (no request yet) AND binding_state==\"bound\" with request_status in {\"new\", \"needsClarification\"} (an intake already in progress).\n   - If binding_state == \"absent\": reason=\"noBinding\", safe_message=\"routing to intake\"\n   - If binding_state == \"bound\" (request_status is \"new\" or \"needsClarification\"): reason=\"intakeInProgress\", safe_message=\"request intake in progress\"\n   \u2192 outcome=\"routed\", target=\"intake\" in both cases.\n\n3. Else if routing_stage == \"complete\":\n   \u2192 outcome=\"informational\", target=\"none\", reason=\"intakeComplete\", safe_message=\"request intake complete\"\n\n4. Else if routing_stage == \"unsupported\" (request_status is one of the eight post-intake statuses: optionsProposed, waitingResponse, accepted, rejected, pickUpPlanned, pickedUp, delivered, cancelled):\n   \u2192 outcome=\"failure\", target=\"none\", reason=\"unsupportedStatus\", safe_message=\"request status not supported\"\n\n5. Else if routing_stage == \"failure\", or binding_state == \"inconsistent\", or routing_context.error is populated, or any required field is missing/unrecognized:\n   \u2192 outcome=\"failure\", target=\"none\", reason=\"invalidContext\", safe_message=\"routing context invalid\"\n\nCRITICAL: reason=\"noBinding\" applies ONLY when binding_state==\"absent\". Never use reason=\"noBinding\" when binding_state==\"bound\", regardless of request_status. This is the single most common mistake \u2014 double-check binding_state before choosing between \"noBinding\" and \"intakeInProgress\".\n\nCRITICAL: reason=\"invalidContext\" (rule 5) MUST always pair with outcome=\"failure\" and target=\"none\". NEVER emit reason=\"invalidContext\" together with outcome=\"routed\" or target=\"intake\" -- that combination is always wrong and will be rejected downstream. If you are unsure whether the context is valid, re-check rule 5's conditions before deciding; do not default to routing to intake.\n\nrequest_id: set to routing_context.request_id verbatim (null if the context has no bound request; the exact persisted string otherwise). Never generate or guess a request_id.\n\n\n## Delegating to LF-10 (this is the ONLY case where you call a tool)\n\nWhen, and only when, your decision is target=\"intake\" (rules 2 above), you MUST call the\ntool named \"lf-10-request-intake_tool\" before answering. Its argument is a JSON object\ncalled \"flow_tweak_data\" with EXACTLY ONE key:\n\n{\n  \"HulubulContractInputBoundary-hlb-lf-10-input-v1~input_value\": \"<the RouterInput you received, verbatim, serialized as a JSON string>\"\n}\n\nCopy the RouterInput you were given, unchanged, into that string. Do not rebuild it, do\nnot drop fields, do not renumber correlation_id or session_id -- LF-10 revalidates the\nwhole object and rejects anything that disagrees with itself. Do not add any other key to\n\"flow_tweak_data\" -- the tool call has EXACTLY the one key above, nothing else, every time\nyou call it, including on any retry.\n\nIf the tool's result is not a usable IntakeResult (e.g. an error object), call the tool\nexactly once more with that SAME single key and the SAME verbatim RouterInput string --\nnever with a different or smaller set of keys, and never by guessing at what might fix it.\nIf the second attempt also fails, return the tool's own error output as your answer\nverbatim rather than inventing a different shape.\n\nThe tool returns an IntakeResult. Return that IntakeResult as your entire answer,\nverbatim, as a single JSON object. Do not wrap it, do not summarise it, do not convert it\nback into a RouterResult, and do not invent one if the tool call failed -- return exactly\nwhat the tool gave you.\n\nFor every other decision (rules 1, 3, 4, 5) do NOT call any tool: answer with the\nRouterResult JSON described above, as before.\n\nA RouterResult with target=\"intake\" is never a valid final answer. If you decided intake,\nyour answer is the IntakeResult from the tool.\n\nRESPOND WITH ONLY THE JSON OBJECT. NOTHING ELSE."
+              },
+              "tools": {
+                "_input_type": "HandleInput",
+                "advanced": false,
+                "display_name": "Tools",
+                "dynamic": false,
+                "info": "These are the tools that the agent can use to help with tasks.",
+                "input_types": [
+                  "Tool"
+                ],
+                "list": true,
+                "list_add_label": "Add More",
+                "name": "tools",
+                "override_skip": false,
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "trace_as_metadata": true,
+                "track_in_telemetry": false,
+                "type": "other",
+                "value": ""
+              },
+              "temperature": {
+                "tool_mode": false,
+                "min_label": "",
+                "max_label": "",
+                "min_label_icon": "",
+                "max_label_icon": "",
+                "slider_buttons": false,
+                "slider_buttons_options": [],
+                "slider_input": false,
+                "range_spec": {
+                  "step_type": "float",
+                  "min": 0.0,
+                  "max": 1.0,
+                  "step": 0.01
+                },
+                "override_skip": false,
+                "required": false,
+                "placeholder": "",
+                "show": true,
+                "name": "temperature",
+                "value": 0.0,
+                "display_name": "Temperature",
+                "advanced": true,
+                "dynamic": false,
+                "info": "",
+                "title_case": false,
+                "track_in_telemetry": false,
+                "type": "slider",
+                "_input_type": "SliderInput"
+              }
+            },
+            "tool_mode": false
+          },
+          "type": "HulubulRouterAgent"
+        },
+        "dragging": false,
+        "id": "Agent-hlb-lf-00-router-v1",
+        "measured": {
+          "height": 200,
+          "width": 320
+        },
+        "position": {
+          "x": 1500,
+          "y": 0
+        },
+        "selected": false,
+        "type": "genericNode"
+      },
+      {
+        "data": {
+          "id": "RunFlow-hlb-lf-00-request-intake-v1",
+          "node": {
+            "base_classes": [],
+            "beta": true,
+            "conditional_paths": [],
+            "custom_fields": {},
+            "description": "Executes another flow from within the same project, with Hulubul's cross-flow tool-schema and input-injection fixes. Can also be used as a tool for agents.\n **Select a Flow to use the tool mode**",
+            "display_name": "Hulubul Run Flow",
+            "documentation": "https://docs.langflow.org/run-flow",
+            "edited": false,
+            "field_order": [
+              "flow_name_selected",
+              "flow_id_selected",
+              "session_id",
+              "cache_flow"
+            ],
+            "frozen": false,
+            "icon": "Workflow",
+            "id": "RunFlow-hlb-lf-00-request-intake-v1",
+            "legacy": false,
+            "metadata": {
+              "code_hash": "a5a2338c3fe9",
+              "dependencies": {
+                "dependencies": [
+                  {
+                    "name": "lfx",
+                    "version": "1.10.2"
+                  },
+                  {
+                    "name": "hulubul",
+                    "version": null
+                  }
+                ],
+                "total_dependencies": 2
+              },
+              "module": "custom_components.run_flow"
+            },
+            "minimized": false,
+            "output_types": [],
+            "outputs": [
+              {
+                "allows_loop": false,
+                "cache": false,
+                "display_name": "Toolset",
+                "group_outputs": false,
+                "hidden": null,
+                "loop_types": null,
+                "method": "to_toolkit",
+                "name": "component_as_tool",
+                "options": null,
+                "required_inputs": null,
+                "selected": "Tool",
+                "tool_mode": true,
+                "types": [
+                  "Tool"
+                ],
+                "value": "__UNDEFINED__"
+              }
+            ],
+            "pinned": false,
+            "template": {
+              "_type": "Component",
+              "cache_flow": {
+                "_input_type": "BoolInput",
+                "advanced": true,
+                "display_name": "Cache Flow",
+                "dynamic": false,
+                "info": "Whether to cache the selected flow.",
+                "list": false,
+                "list_add_label": "Add More",
+                "name": "cache_flow",
+                "override_skip": false,
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_metadata": true,
+                "track_in_telemetry": true,
+                "type": "bool",
+                "value": false
+              },
+              "code": {
+                "advanced": true,
+                "dynamic": true,
+                "fileTypes": [],
+                "file_path": "",
+                "info": "",
+                "list": false,
+                "load_from_db": false,
+                "multiline": true,
+                "name": "code",
+                "password": false,
+                "placeholder": "",
+                "required": true,
+                "show": true,
+                "title_case": false,
+                "type": "code",
+                "value": "\"\"\"Run Flow variant that fixes stock ``RunFlow``'s cross-flow defects.\n\nDrop-in replacement for LangFlow's built-in **Run Flow** node. It fixes four\n``lfx==1.10.2`` defects and inherits everything else, so flow selection, output\nmapping, graph caching and tool exposure keep working as they do upstream:\n\n1. which target-flow fields become model-callable tool arguments\n   (``get_required_data``),\n2. which input category runtime payloads carry\n   (``_build_inputs_from_ioputs``),\n3. whether an agent's tool arguments reach the run that consumes them\n   (``_register_flow_output_method`` and ``__deepcopy__`` together), and\n4. whether a tool call survives a per-call copy when a cached tool-mode\n   output carries a live, unpicklable object (``__deepcopy__``).\n\nThe pure decisions (1, 2 and 4) live in\n:mod:`hulubul.request_intake.entrypoints.langflow.run_flow_policy`, which\ndocuments the defects being worked around and is unit-tested without a\nLangFlow installation. Nothing here monkey-patches ``lfx``.\n\nEvery override touches private ``lfx`` internals, so re-run the unit tests\nafter every ``lfx`` upgrade -- upstream may fix any of these, at which point\nthe corresponding override should be deleted rather than left as dead\ncompatibility code.\n\"\"\"\n\nfrom __future__ import annotations\n\nfrom copy import deepcopy\nfrom typing import Any, cast\n\nfrom lfx.components.flow_controls.run_flow import RunFlowComponent\nfrom lfx.log.logger import logger\nfrom lfx.schema.dotdict import dotdict\n\nfrom hulubul.request_intake.entrypoints.langflow.run_flow_policy import (\n    deepcopy_outputs_with_fallback,\n    excluded_field_names,\n    select_model_callable_fields,\n    with_unrestricted_input_type,\n)\n\n__all__ = [\"HulubulRunFlowComponent\"]\n\n\nclass HulubulRunFlowComponent(RunFlowComponent):\n    \"\"\"Execute another flow, with the cross-flow schema and injection fixes.\"\"\"\n\n    display_name = \"Hulubul Run Flow\"\n    description = (\n        \"Executes another flow from within the same project, with Hulubul's \"\n        \"cross-flow tool-schema and input-injection fixes. Can also be used as \"\n        \"a tool for agents.\\n **Select a Flow to use the tool mode**\"\n    )\n    documentation: str = \"https://docs.langflow.org/run-flow\"\n    name = \"HulubulRunFlow\"\n    icon = \"Workflow\"\n\n    # Detach the templates from the built-in component's class attributes, for\n    # the same reason the built-in detaches from its own base: the per-instance\n    # copies Component.__init__ makes must not alias a shared list.\n    inputs = deepcopy(RunFlowComponent.inputs)\n    outputs = deepcopy(RunFlowComponent.outputs)\n\n    async def get_required_data(self) -> tuple[str, list[dotdict]] | None:\n        \"\"\"Expose only the target-flow fields that are safe as tool arguments.\n\n        Withholding a field here keeps it off the model-callable tool schema\n        only; the node's own build config still carries it, so a fixed edge\n        into that field survives and keeps feeding the target flow.\n        \"\"\"\n        required_data = await super().get_required_data()\n        if required_data is None:\n            return None\n\n        flow_description, fields = required_data\n        if withheld := excluded_field_names(fields):\n            logger.debug(\n                f\"{self.name}: withheld {withheld} from the tool schema of \"\n                f\"flow {self.flow_name_selected!r} (connection-only or \"\n                f\"unmappable field types)\"\n            )\n        return flow_description, [dotdict(field) for field in select_model_callable_fields(fields)]\n\n    def _build_inputs_from_ioputs(\n        self,\n        ioputs: dict[str, dict[str, Any]],\n    ) -> list[dict[str, Any]]:\n        \"\"\"Stop the target flow's non-ChatInput boundary from being skipped.\"\"\"\n        return with_unrestricted_input_type(super()._build_inputs_from_ioputs(ioputs))\n\n    def _register_flow_output_method(self, *, vertex_id: str, output_name: str) -> str:\n        \"\"\"Name the dynamic resolver after the attribute it is published under.\n\n        Half of the tool-argument fix. Upstream stores the resolver as an\n        instance attribute named ``_resolve_flow_output__<vertex>__<output>``\n        while the closure behind it is still called ``_dynamic_resolver``.\n        ``ComponentToolkit`` re-resolves the method on the per-call copy it\n        makes, by ``getattr(copy, output_method.__name__)`` -- so it looks for\n        ``_dynamic_resolver``, misses, and silently falls back to the method\n        bound to the *original* component. See :meth:`__deepcopy__` for what\n        that costs and for the other half.\n\n        Each registration builds its own closure, so this renames nothing\n        shared.\n        \"\"\"\n        method_name = super()._register_flow_output_method(\n            vertex_id=vertex_id, output_name=output_name\n        )\n        getattr(self, method_name).__func__.__name__ = method_name\n        return method_name\n\n    def __deepcopy__(self, memo: dict[Any, Any]) -> HulubulRunFlowComponent:\n        \"\"\"Carry the dynamic flow-output resolvers onto the per-call copy.\n\n        The other half of the tool-argument fix. ``ComponentToolkit`` copies the\n        component per tool call, applies the agent's arguments to the copy, and\n        then calls the resolver. But ``Component.__deepcopy__`` rebuilds the\n        instance from its config and inputs and re-attaches a fixed set of\n        fields, so dynamically registered resolvers do not come across -- the\n        lookup on the copy fails and execution lands on the original, which\n        never received ``flow_tweak_data``. The target flow then runs with an\n        empty ``input_value`` and its boundary rejects the call as\n        ``INVALID_CONTRACT``, with nothing in the agent's own trace to explain\n        it: the tool call it logged was well-formed.\n\n        The copy's ``_outputs_map`` is restored by the time we get here, so\n        re-registering from it rebinds one resolver per dynamic flow output to\n        the copy.\n\n        A third, unrelated defect lives in the same base method:\n        ``Component.__deepcopy__`` deep-copies ``self._outputs_map`` with no\n        protection, unlike the try/except-and-shallow-copy fallback it already\n        applies to ``self._inputs`` two lines earlier. A tool-mode output's\n        cached value can carry a live ``asyncio.Task`` from LangFlow's own\n        tracing service (confirmed live, only on flow builds started through\n        the streaming endpoint the Playground UI uses -- see\n        :func:`~hulubul.request_intake.entrypoints.langflow.run_flow_policy.deepcopy_outputs_with_fallback`\n        for the full explanation), which cannot be deep-copied, so the tool\n        call fails after LangChain's own retries are exhausted. Detach\n        ``_outputs_map`` before the base copy runs so it has nothing risky to\n        choke on, then reattach a defensively-copied version.\n        \"\"\"\n        outputs_map = self._outputs_map\n        self._outputs_map = {}\n        try:\n            duplicate = cast(\"HulubulRunFlowComponent\", super().__deepcopy__(memo))\n        finally:\n            self._outputs_map = outputs_map\n\n        safe_outputs_map, fell_back = deepcopy_outputs_with_fallback(outputs_map, memo)\n        if fell_back:\n            logger.warning(\n                f\"{self.name}: deepcopy failed for outputs {fell_back} -- \"\n                \"falling back to a shared reference\"\n            )\n        duplicate._outputs_map = safe_outputs_map\n        duplicate._ensure_flow_output_methods()\n        return duplicate\n"
+              },
+              "flow_id_selected": {
+                "_input_type": "StrInput",
+                "advanced": false,
+                "display_name": "Flow ID",
+                "dynamic": false,
+                "info": "The ID of the flow to run.",
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "name": "flow_id_selected",
+                "override_skip": true,
+                "placeholder": "",
+                "required": false,
+                "show": false,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_metadata": true,
+                "track_in_telemetry": false,
+                "type": "str",
+                "value": "6843ae79-147f-55d4-a25b-01d6143a12cc"
+              },
+              "flow_name_selected": {
+                "_input_type": "DropdownInput",
+                "advanced": false,
+                "combobox": false,
+                "dialog_inputs": {},
+                "display_name": "Flow Name",
+                "dynamic": false,
+                "external_options": {},
+                "info": "The name of the flow to run.",
+                "name": "flow_name_selected",
+                "options": [],
+                "options_metadata": [],
+                "override_skip": false,
+                "placeholder": "",
+                "real_time_refresh": true,
+                "refresh_button": true,
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "toggle": false,
+                "tool_mode": false,
+                "trace_as_metadata": true,
+                "track_in_telemetry": true,
+                "type": "str",
+                "value": "lf-10-request-intake"
+              },
+              "session_id": {
+                "_input_type": "MessageTextInput",
+                "advanced": true,
+                "display_name": "Session ID",
+                "dynamic": false,
+                "info": "The session ID to run the flow in.",
+                "input_types": [
+                  "Message"
+                ],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "name": "session_id",
+                "override_skip": false,
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "track_in_telemetry": false,
+                "type": "str",
+                "value": ""
+              }
+            },
+            "tool_mode": true
+          },
+          "type": "HulubulRunFlow"
+        },
+        "dragging": false,
+        "id": "RunFlow-hlb-lf-00-request-intake-v1",
+        "measured": {
+          "height": 200,
+          "width": 320
+        },
+        "position": {
+          "x": 1500,
+          "y": 300
+        },
+        "selected": false,
+        "type": "genericNode"
+      },
+      {
+        "data": {
+          "id": "HulubulContractResultBoundary-hlb-lf-00-result-v1",
+          "node": {
+            "base_classes": [
+              "Message"
+            ],
+            "beta": false,
+            "conditional_paths": [],
+            "custom_fields": {},
+            "description": "Validates and serializes a contract result against all 11 ContractKind types.",
+            "display_name": "Contract Result Boundary",
+            "documentation": "",
+            "edited": false,
+            "field_order": [
+              "value",
+              "terminal_kinds"
+            ],
+            "frozen": false,
+            "icon": "shield-check",
+            "id": "HulubulContractResultBoundary-hlb-lf-00-result-v1",
+            "is_output": true,
+            "legacy": false,
+            "metadata": {
+              "code_hash": "e06c7472c5fc",
+              "dependencies": {
+                "dependencies": [
+                  {
+                    "name": "lfx",
+                    "version": "1.10.2"
+                  },
+                  {
+                    "name": "pydantic",
+                    "version": "2.13.4"
+                  },
+                  {
+                    "name": "hulubul",
+                    "version": null
+                  }
+                ],
+                "total_dependencies": 3
+              },
+              "module": "custom_components.contract_result_boundary"
+            },
+            "minimized": false,
+            "output_types": [],
+            "outputs": [
+              {
+                "allows_loop": false,
+                "cache": true,
+                "display_name": "Message",
+                "group_outputs": false,
+                "method": "build_output",
+                "name": "response",
+                "selected": "Message",
+                "tool_mode": true,
+                "types": [
+                  "Message"
+                ],
+                "value": "__UNDEFINED__"
+              }
+            ],
+            "pinned": false,
+            "template": {
+              "_type": "Component",
+              "code": {
+                "advanced": true,
+                "dynamic": true,
+                "fileTypes": [],
+                "file_path": "",
+                "info": "",
+                "list": false,
+                "load_from_db": false,
+                "multiline": true,
+                "name": "code",
+                "password": false,
+                "placeholder": "",
+                "required": true,
+                "show": true,
+                "title_case": false,
+                "type": "code",
+                "value": "\"\"\"Contract result boundary component: validates and serializes contract results.\n\nSplit from the former contract_boundary.py (which held three components)\nbecause LangFlow's directory-based custom component loader registers exactly\none component per file, named after the file -- extra classes in the same\nfile are silently dropped from the sidebar palette. See\nrouter_input_boundary.py and intake_input_boundary.py for the other two.\n\"\"\"\n\nimport json\nfrom typing import Any\nfrom uuid import uuid4\n\nfrom lfx.custom.custom_component.component import Component\nfrom lfx.inputs.inputs import HandleInput, StrInput\nfrom lfx.log.logger import logger\nfrom lfx.schema.data import JSON\nfrom lfx.schema.message import Message\nfrom lfx.template.field.base import Output\nfrom pydantic import BaseModel, TypeAdapter, ValidationError\n\nfrom hulubul.core.models.operational import (\n    ContractKind,\n    DataOperationResult,\n    DeliveryRequestSnapshot,\n    ErrorCode,\n    IntakeFacts,\n    IntakeInput,\n    IntakeResult,\n    MainFlowInput,\n    OperationalError,\n    RouterInput,\n    RouterResult,\n    RoutingContext,\n)\nfrom hulubul.core.models.operational.data_operations import DATA_OPERATION_ADAPTER\nfrom hulubul.core.models.operational.errors import ERROR_POLICY\nfrom hulubul.core.models.operational.json_extraction import extract_json_object_text\nfrom hulubul.request_intake.services.contract_result_policy import (\n    is_terminal_contract,\n    parse_terminal_kinds,\n    terminal_rejection_reason,\n)\n\n__all__ = [\"CONTRACT_TYPES\", \"ContractResultBoundaryComponent\"]\n\n# ============================================================================\n# Registry: All 11 ContractKind values \u2192 Model types\n# ============================================================================\n\nCONTRACT_TYPES = {\n    ContractKind.MAIN_FLOW_INPUT: MainFlowInput,\n    ContractKind.ROUTER_INPUT: RouterInput,\n    ContractKind.INTAKE_INPUT: IntakeInput,\n    ContractKind.ROUTING_CONTEXT: RoutingContext,\n    ContractKind.ROUTER_RESULT: RouterResult,\n    ContractKind.INTAKE_FACTS: IntakeFacts,\n    ContractKind.INTAKE_RESULT: IntakeResult,\n    ContractKind.DATA_OPERATION_REQUEST: DATA_OPERATION_ADAPTER,\n    ContractKind.DATA_OPERATION_RESULT: DataOperationResult,\n    ContractKind.DELIVERY_REQUEST_SNAPSHOT: DeliveryRequestSnapshot,\n    ContractKind.OPERATIONAL_ERROR: OperationalError,\n}\n\n# Verify registry contains all 11 ContractKind values\nassert set(CONTRACT_TYPES.keys()) == set(ContractKind), (\n    \"Registry missing or has extra ContractKind values\"\n)\n\n\nclass ContractResultBoundaryComponent(Component):\n    \"\"\"Validates and serializes contract results (OperationalError, RouterResult, IntakeResult).\n\n    Uses registry-driven conversion for all 11 ContractKind values. Validates/type-translates\n    only declared LFX Data/JSON values. Catches validation/type failures \u2192 INVALID_CONTRACT.\n    Unexpected programming errors remain exceptions.\n    \"\"\"\n\n    display_name = \"Contract Result Boundary\"\n    description = \"Validates and serializes a contract result against all 11 ContractKind types.\"\n    icon = \"shield-check\"\n    name = \"HulubulContractResultBoundary\"\n\n    inputs = [  # noqa: RUF012\n        HandleInput(  # type: ignore[call-arg]\n            name=\"value\",\n            display_name=\"Contract Value\",\n            info=\"The contract value to validate (Message/Data/JSON).\",\n            input_types=[\"Message\", \"Data\", \"JSON\"],\n            required=True,\n        ),\n        StrInput(  # type: ignore[call-arg]\n            name=\"terminal_kinds\",\n            display_name=\"Terminal Contract Kinds\",\n            info=(\n                \"ContractKind values that may legitimately end this flow, e.g. \"\n                \"intake-result, router-result, operational-error. Leave empty to \"\n                \"accept any of the 11 registered kinds -- the historical \"\n                \"behaviour, which answers 'is this a known contract?' but never \"\n                \"'is this the right contract for this turn?'. Declaring the set \"\n                \"makes a well-formed but out-of-place payload (a \"\n                \"data-operation-result surfacing to a sender, a router-result \"\n                \"that delegated to a specialist and never got a result back) a \"\n                \"visible INVALID_CONTRACT instead of a plausible-looking reply.\"\n            ),\n            is_list=True,\n            value=[],\n            required=False,\n            advanced=False,\n        ),\n    ]\n\n    outputs = [  # noqa: RUF012\n        Output(  # type: ignore[call-arg]\n            display_name=\"Message\", name=\"response\", type_=Message, method=\"build_output\"\n        ),\n    ]\n\n    def __init__(self, **kwargs: Any) -> None:\n        \"\"\"Initialize the ContractResultBoundaryComponent.\"\"\"\n        super().__init__(**kwargs)\n\n    @classmethod\n    def _as_dict(cls, value: Any) -> dict[str, Any]:\n        \"\"\"Coerce an incoming Message/Data/JSON edge value into a plain dict.\n\n        An Agent's final text is LLM-generated and not guaranteed to be valid\n        JSON, or may wrap the real answer in prose/markdown/a draft block.\n        Treat undecodable text as an empty dict rather than raising, so it is\n        validated normally and rejected as INVALID_CONTRACT downstream\n        instead of crashing the component build.\n        \"\"\"\n        if isinstance(value, Message):\n            text = value.text\n            if not isinstance(text, str):\n                return {}\n            try:\n                decoded = json.loads(extract_json_object_text(text))\n            except json.JSONDecodeError:\n                return {}\n            return decoded if isinstance(decoded, dict) else {}\n        if hasattr(value, \"data\"):\n            return dict(value.data)\n        return dict(value) if value else {}\n\n    def build_output(self) -> Message:\n        \"\"\"LFX-facing output: validate self.value.\n\n        Always returns Message (even for errors, wrapping the JSON error as\n        message text) so LFX registers a single declared output type. A\n        `Message | JSON` return annotation here makes LFX register\n        `output_types=[\"JSON\", \"Message\"]`, which the frontend's connection\n        check treats as a strict subset requirement against a Message-only\n        target -- silently rejecting every edge into this output.\n        \"\"\"\n        value = self._as_dict(self.value)\n        result = self.validate_contract_value(value)\n        if isinstance(result, Message):\n            return result\n        return Message(text=json.dumps(result.data))\n\n    def validate_contract_value(self, value: dict[str, Any] | Any) -> Message | JSON:\n        \"\"\"Validate and convert a contract value to typed model.\n\n        Attempts to validate the input value against all registered contract types.\n        On validation failure, returns canonical INVALID_CONTRACT OperationalError.\n\n        Args:\n            value: The contract value to validate (dict or other type)\n\n        Returns:\n            Message or JSON: Typed, validated contract or error\n\n        Raises:\n            ValueError: Only for unexpected programming errors, not validation failures\n        \"\"\"\n        if value is None:\n            return self._make_error_response(ErrorCode.INVALID_CONTRACT)\n\n        if not isinstance(value, dict):\n            return self._make_error_response(ErrorCode.INVALID_CONTRACT)\n\n        # JSON-mode validation, not python-mode: a real edge value (e.g. an\n        # Agent's JSON-decoded text output) is a dict of JSON primitives\n        # (string UUIDs, string enum values), which these strict-typed\n        # contracts reject via plain `model_validate`/`validate_python`\n        # (`Input should be an instance of UUID`/enum) -- confirmed live\n        # against the real router Agent output. `default=str` also makes\n        # this tolerate native-instance dicts (e.g. a `UUID` object), same\n        # rationale as `ContractInputBoundaryComponent._coerce_model`.\n        value_json = json.dumps(value, default=str)\n        allowed = parse_terminal_kinds(self.terminal_kinds)\n\n        # Try to validate against each registered contract type\n        for _contract_kind, model_type in CONTRACT_TYPES.items():\n            try:\n                # Handle TypeAdapter (for DATA_OPERATION_REQUEST)\n                if isinstance(model_type, TypeAdapter):\n                    instance = model_type.validate_json(value_json)\n                    if hasattr(instance, \"model_dump\"):\n                        data = instance.model_dump(mode=\"json\")\n                    else:\n                        data = dict(instance)\n                    if not is_terminal_contract(_contract_kind, data, allowed):\n                        return self._refuse_non_terminal(_contract_kind, data, allowed)\n                    return JSON(data=data)\n                # Handle BaseModel classes\n                elif isinstance(model_type, type) and issubclass(model_type, BaseModel):\n                    instance = model_type.model_validate_json(value_json)\n                    data = instance.model_dump(mode=\"json\")\n                    if not is_terminal_contract(_contract_kind, data, allowed):\n                        return self._refuse_non_terminal(_contract_kind, data, allowed)\n                    return JSON(data=data)\n                else:\n                    # Unknown type, skip\n                    continue\n            except ValidationError:\n                # Validation failure, continue to next type\n                continue\n            except (TypeError, ValueError, AttributeError):\n                # Other validation issues, continue\n                continue\n\n        # None of the registered types matched\n        # Return canonical INVALID_CONTRACT error (never expose raw values)\n        return self._make_error_response(ErrorCode.INVALID_CONTRACT)\n\n    def _refuse_non_terminal(\n        self,\n        kind: ContractKind,\n        payload: dict[str, Any],\n        allowed: frozenset[ContractKind],\n    ) -> JSON:\n        \"\"\"Reject a valid contract that has no business ending this flow.\n\n        The sender only ever sees the canonical safe message, so the real cause\n        has to be logged or it is lost -- and this refusal in particular (a\n        router that delegated to a specialist and never got a result back) is\n        otherwise indistinguishable from an ordinary routing reply.\n        \"\"\"\n        logger.warning(\n            f\"{self.name}: refused a non-terminal contract -- \"\n            f\"{terminal_rejection_reason(kind, payload, allowed)}\"\n        )\n        return self._make_error_response(ErrorCode.INVALID_CONTRACT)\n\n    def _make_error_response(\n        self,\n        code: ErrorCode,\n    ) -> JSON:\n        \"\"\"Create a canonical error response without exposing user values.\n\n        Args:\n            code: The ErrorCode\n\n        Returns:\n            JSON: Serialized OperationalError\n        \"\"\"\n        policy = ERROR_POLICY[code]\n        error = OperationalError(\n            schema_version=\"1.0.0\",\n            code=code,\n            correlation_id=uuid4(),\n            category=policy.category,\n            message=policy.safe_message,\n            retryable=policy.retryable,\n        )\n\n        return JSON(data=error.model_dump(mode=\"json\"))\n"
+              },
+              "terminal_kinds": {
+                "_input_type": "StrInput",
+                "advanced": false,
+                "display_name": "Terminal Contract Kinds",
+                "dynamic": false,
+                "info": "ContractKind values that may legitimately end this flow. Leave empty to accept any of the 11 registered kinds.",
+                "is_list": true,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "name": "terminal_kinds",
+                "override_skip": false,
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_metadata": true,
+                "track_in_telemetry": true,
+                "type": "str",
+                "value": [
+                  "intake-result",
+                  "router-result",
+                  "operational-error"
+                ]
+              },
+              "value": {
+                "_input_type": "HandleInput",
+                "advanced": false,
+                "display_name": "Contract Value",
+                "dynamic": false,
+                "info": "The contract value to validate (Message/Data/JSON).",
+                "input_types": [
+                  "Message",
+                  "Data",
+                  "JSON"
+                ],
+                "list": false,
+                "list_add_label": "Add More",
+                "name": "value",
+                "override_skip": false,
+                "placeholder": "",
+                "required": true,
+                "show": true,
+                "title_case": false,
+                "trace_as_metadata": true,
+                "track_in_telemetry": false,
+                "type": "other",
+                "value": ""
+              }
+            },
+            "tool_mode": false
+          },
+          "type": "HulubulContractResultBoundary"
+        },
+        "dragging": false,
+        "id": "HulubulContractResultBoundary-hlb-lf-00-result-v1",
+        "measured": {
+          "height": 200,
+          "width": 320
+        },
+        "position": {
+          "x": 1800,
+          "y": 0
+        },
+        "selected": false,
+        "type": "genericNode"
+      },
+      {
+        "data": {
+          "id": "HulubulDeterministicRenderer-hlb-lf-00-renderer-v1",
+          "node": {
+            "base_classes": [
+              "Message"
+            ],
+            "beta": false,
+            "conditional_paths": [],
+            "custom_fields": {},
+            "description": "Renders a validated IntakeResult/RouterResult/OperationalError to safe text.",
+            "display_name": "Deterministic Renderer",
+            "documentation": "",
+            "edited": false,
+            "field_order": [
+              "result"
+            ],
+            "frozen": false,
+            "icon": "shield-check",
+            "id": "HulubulDeterministicRenderer-hlb-lf-00-renderer-v1",
+            "legacy": false,
+            "metadata": {
+              "code_hash": "c7ba1b50dae7",
+              "dependencies": {
+                "dependencies": [
+                  {
+                    "name": "lfx",
+                    "version": "1.10.2"
+                  },
+                  {
+                    "name": "pydantic",
+                    "version": "2.13.4"
+                  },
+                  {
+                    "name": "hulubul",
+                    "version": null
+                  }
+                ],
+                "total_dependencies": 3
+              },
+              "module": "custom_components.deterministic_renderer"
+            },
+            "minimized": false,
+            "output_types": [],
+            "outputs": [
+              {
+                "allows_loop": false,
+                "cache": true,
+                "display_name": "Message",
+                "group_outputs": false,
+                "method": "build_message",
+                "name": "response",
+                "selected": "Message",
+                "tool_mode": true,
+                "types": [
+                  "Message"
+                ],
+                "value": "__UNDEFINED__"
+              }
+            ],
+            "pinned": false,
+            "template": {
+              "_type": "Component",
+              "code": {
+                "advanced": true,
+                "dynamic": true,
+                "fileTypes": [],
+                "file_path": "",
+                "info": "",
+                "list": false,
+                "load_from_db": false,
+                "multiline": true,
+                "name": "code",
+                "password": false,
+                "placeholder": "",
+                "required": true,
+                "show": true,
+                "title_case": false,
+                "type": "code",
+                "value": "\"\"\"Deterministic renderer component: thin adapter delegating to pure rendering policy.\n\nThis LFX component encapsulates safe, deterministic result rendering:\n- Accepts validated IntakeResult, RouterResult, or OperationalError (never free text)\n- Validates the contract structure and outcome discriminator\n- Dispatches to the matching pure renderer function\n- Returns typed Message with canonical, safe user-facing text\n\nThe component performs no orchestration, no model calls, no I/O,\nand makes no decisions. It is a thin, deterministic adapter that ensures\nstructured and chat output can never diverge (per DEC-014).\n\"\"\"\n\nimport json\nfrom typing import Any\n\nfrom lfx.custom.custom_component.component import Component\nfrom lfx.inputs.inputs import HandleInput\nfrom lfx.schema.message import Message\nfrom lfx.template.field.base import Output\nfrom pydantic import ValidationError\n\nfrom hulubul.core.models.operational.enums import IntakeOutcome, RouterOutcome\nfrom hulubul.core.models.operational.errors import OperationalError\nfrom hulubul.core.models.operational.intake import IntakeResult\nfrom hulubul.core.models.operational.routing import RouterResult\nfrom hulubul.request_intake.services.rendering import (\n    render_intake_result,\n    render_operational_error,\n    render_router_result,\n)\n\n__all__ = [\"DeterministicRendererComponent\"]\n\n\nclass DeterministicRendererComponent(Component):\n    \"\"\"Thin adapter delegating to pure rendering policy.\n\n    Validates typed contract input and returns a Message with canonical,\n    safe, deterministic user-facing text. Never accepts Agent free text\n    or unvalidated prose.\n    \"\"\"\n\n    display_name = \"Deterministic Renderer\"\n    description = \"Renders a validated IntakeResult/RouterResult/OperationalError to safe text.\"\n    icon = \"shield-check\"\n    name = \"HulubulDeterministicRenderer\"\n\n    inputs = [  # noqa: RUF012\n        HandleInput(  # type: ignore[call-arg]\n            name=\"result\",\n            display_name=\"Result\",\n            info=\"Validated IntakeResult, RouterResult, or OperationalError (never free text).\",\n            input_types=[\"Message\", \"Data\", \"JSON\"],\n            required=True,\n        ),\n    ]\n\n    outputs = [  # noqa: RUF012\n        Output(  # type: ignore[call-arg]\n            display_name=\"Message\", name=\"response\", type_=Message, method=\"build_message\"\n        ),\n    ]\n\n    @staticmethod\n    def _as_dict(value: Any) -> dict[str, Any]:\n        \"\"\"Coerce a Message/Data/JSON edge value into a plain dict.\n\n        `ContractResultBoundaryComponent` (the predecessor in every wiring\n        that reaches this component) emits its validated contract as a\n        `Message` wrapping JSON text, not a `Data`/`JSON` object -- discovered\n        only when actually building a live LF-00 flow (Result Boundary ->\n        Renderer edge), not by any prior unit test. Undecodable text becomes\n        an empty dict, matching this codebase's established\n        never-crash-on-malformed-JSON convention, so it is rejected as\n        INVALID_INPUT below rather than raising here.\n        \"\"\"\n        if isinstance(value, Message):\n            text = value.text\n            if not isinstance(text, str):\n                return {}\n            try:\n                decoded = json.loads(text)\n            except json.JSONDecodeError:\n                return {}\n            return decoded if isinstance(decoded, dict) else {}\n        if hasattr(value, \"data\"):\n            return dict(value.data)\n        return dict(value) if value else {}\n\n    def build_message(self) -> Message:\n        \"\"\"Build rendered message from validated result contract.\n\n        - Accept validated IntakeResult, RouterResult, or OperationalError\n        - Validate contract structure and discriminator\n        - Dispatch to matching pure renderer\n        - Return Message with canonical text\n\n        Returns:\n            Message: LFX Message with canonical rendered text\n\n        Raises:\n            ValueError: If result is invalid, missing, or not a typed contract\n            KeyError: If discriminator is missing or invalid\n        \"\"\"\n        if self.result is None:\n            raise ValueError(\"INVALID_INPUT: result is required\")\n\n        result_dict = self._as_dict(self.result)\n        if not result_dict:\n            raise ValueError(\n                \"INVALID_INPUT: result must be a non-empty dict (validated contract), \"\n                \"not raw text or prose\"\n            )\n\n        # Attempt to detect and validate contract type\n        rendered_text = self._render_result(result_dict)\n\n        return Message(text=rendered_text)\n\n    def _render_result(self, result_dict: dict[str, Any]) -> str:\n        \"\"\"Dispatch to the matching pure renderer based on contract type.\n\n        Tries to validate against each contract type and dispatch to the\n        matching renderer. Raises ValueError if contract is invalid.\n\n        Args:\n            result_dict: The result contract as a dict\n\n        Returns:\n            str: Rendered canonical safe message\n\n        Raises:\n            ValueError: If result_dict does not match any valid contract\n            KeyError: If required discriminator fields are missing\n        \"\"\"\n        # Strategy: Try to match based on discriminators, then validate.\n        # `model_validate_json` (not `.model_validate(dict)`) on purpose: this\n        # project's contracts are strict-typed and reject a plain python dict\n        # containing JSON-primitive values (string UUIDs, string enum values --\n        # exactly what a real Message-wrapped edge value decodes to) via\n        # ordinary python-mode construction; only JSON-mode coercion applies\n        # the standard UUID/enum/datetime parsing rules. `default=str` handles\n        # the other calling shape too (a dict of already-native UUID/enum\n        # instances, from `.model_dump()` rather than a decoded wire payload).\n        result_json = json.dumps(result_dict, default=str)\n        outcome_value = result_dict.get(\"outcome\")\n\n        # Try IntakeResult if outcome is IntakeOutcome value\n        if isinstance(outcome_value, str) and outcome_value in {e.value for e in IntakeOutcome}:\n            try:\n                intake_result = IntakeResult.model_validate_json(result_json)\n                return render_intake_result(intake_result)\n            except (ValidationError, ValueError):\n                pass\n\n        # Try RouterResult if outcome is RouterOutcome value\n        if isinstance(outcome_value, str) and outcome_value in {e.value for e in RouterOutcome}:\n            try:\n                router_result = RouterResult.model_validate_json(result_json)\n                return render_router_result(router_result)\n            except (ValidationError, ValueError):\n                pass\n\n        # Try OperationalError (has code discriminator)\n        if \"code\" in result_dict:\n            try:\n                error = OperationalError.model_validate_json(result_json)\n                return render_operational_error(error)\n            except (ValidationError, ValueError):\n                pass\n\n        # No valid contract type matched\n        raise ValueError(\n            \"INVALID_CONTRACT: result does not match IntakeResult, RouterResult, \"\n            \"or OperationalError structure. Never accept Agent free text.\"\n        )\n"
+              },
+              "result": {
+                "_input_type": "HandleInput",
+                "advanced": false,
+                "display_name": "Result",
+                "dynamic": false,
+                "info": "Validated IntakeResult, RouterResult, or OperationalError (never free text).",
+                "input_types": [
+                  "Message",
+                  "Data",
+                  "JSON"
+                ],
+                "list": false,
+                "list_add_label": "Add More",
+                "name": "result",
+                "override_skip": false,
+                "placeholder": "",
+                "required": true,
+                "show": true,
+                "title_case": false,
+                "trace_as_metadata": true,
+                "track_in_telemetry": false,
+                "type": "other",
+                "value": ""
+              }
+            },
+            "tool_mode": false
+          },
+          "type": "HulubulDeterministicRenderer"
+        },
+        "dragging": false,
+        "id": "HulubulDeterministicRenderer-hlb-lf-00-renderer-v1",
+        "measured": {
+          "height": 200,
+          "width": 320
+        },
+        "position": {
+          "x": 2100,
+          "y": 0
+        },
+        "selected": false,
+        "type": "genericNode"
+      },
+      {
+        "data": {
+          "id": "ChatOutput-hlb-lf-00-chat-v1",
+          "node": {
+            "base_classes": [
+              "Message"
+            ],
+            "beta": false,
+            "conditional_paths": [],
+            "custom_fields": {},
+            "description": "Display a chat message in the Playground.",
+            "display_name": "Chat Output",
+            "documentation": "https://docs.langflow.org/chat-input-and-output",
+            "edited": false,
+            "field_order": [
+              "input_value",
+              "should_store_message",
+              "sender",
+              "sender_name",
+              "session_id",
+              "context_id",
+              "data_template",
+              "clean_data"
+            ],
+            "frozen": false,
+            "icon": "MessagesSquare",
+            "id": "ChatOutput-hlb-lf-00-chat-v1",
+            "legacy": false,
+            "metadata": {
+              "code_hash": "84009527d08c",
+              "dependencies": {
+                "dependencies": [
+                  {
+                    "name": "orjson",
+                    "version": "3.11.9"
+                  },
+                  {
+                    "name": "fastapi",
+                    "version": "0.139.0"
+                  },
+                  {
+                    "name": "lfx",
+                    "version": null
+                  }
+                ],
+                "total_dependencies": 3
+              },
+              "module": "lfx.components.input_output.chat_output.ChatOutput"
+            },
+            "minimized": true,
+            "output_types": [],
+            "outputs": [
+              {
+                "allows_loop": false,
+                "cache": true,
+                "display_name": "Output Message",
+                "group_outputs": false,
+                "method": "message_response",
+                "name": "message",
+                "selected": "Message",
+                "tool_mode": true,
+                "types": [
+                  "Message"
+                ],
+                "value": "__UNDEFINED__"
+              }
+            ],
+            "pinned": false,
+            "template": {
+              "_type": "Component",
+              "clean_data": {
+                "_input_type": "BoolInput",
+                "advanced": true,
+                "display_name": "Basic Clean Data",
+                "dynamic": false,
+                "info": "Whether to clean data before converting to string.",
+                "list": false,
+                "list_add_label": "Add More",
+                "name": "clean_data",
+                "override_skip": false,
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_metadata": true,
+                "track_in_telemetry": true,
+                "type": "bool",
+                "value": true
+              },
+              "code": {
+                "advanced": true,
+                "dynamic": true,
+                "fileTypes": [],
+                "file_path": "",
+                "info": "",
+                "list": false,
+                "load_from_db": false,
+                "multiline": true,
+                "name": "code",
+                "password": false,
+                "placeholder": "",
+                "required": true,
+                "show": true,
+                "title_case": false,
+                "type": "code",
+                "value": "from collections.abc import Generator\nfrom typing import Any\n\nimport orjson\nfrom fastapi.encoders import jsonable_encoder\n\nfrom lfx.base.io.chat import ChatComponent\nfrom lfx.helpers.data import safe_convert\nfrom lfx.inputs.inputs import BoolInput, DropdownInput, HandleInput, MessageTextInput\nfrom lfx.schema.data import Data\nfrom lfx.schema.dataframe import DataFrame\nfrom lfx.schema.message import Message\nfrom lfx.schema.properties import Source\nfrom lfx.template.field.base import Output\nfrom lfx.utils.constants import (\n    MESSAGE_SENDER_AI,\n    MESSAGE_SENDER_NAME_AI,\n    MESSAGE_SENDER_USER,\n)\n\n\nclass ChatOutput(ChatComponent):\n    display_name = \"Chat Output\"\n    description = \"Display a chat message in the Playground.\"\n    documentation: str = \"https://docs.langflow.org/chat-input-and-output\"\n    icon = \"MessagesSquare\"\n    name = \"ChatOutput\"\n    minimized = True\n\n    inputs = [\n        HandleInput(\n            name=\"input_value\",\n            display_name=\"Inputs\",\n            info=\"Message to be passed as output.\",\n            input_types=[\"Data\", \"JSON\", \"DataFrame\", \"Table\", \"Message\"],\n            required=True,\n        ),\n        BoolInput(\n            name=\"should_store_message\",\n            display_name=\"Store Messages\",\n            info=\"Store the message in the history.\",\n            value=True,\n            advanced=True,\n        ),\n        DropdownInput(\n            name=\"sender\",\n            display_name=\"Sender Type\",\n            options=[MESSAGE_SENDER_AI, MESSAGE_SENDER_USER],\n            value=MESSAGE_SENDER_AI,\n            advanced=True,\n            info=\"Type of sender.\",\n        ),\n        MessageTextInput(\n            name=\"sender_name\",\n            display_name=\"Sender Name\",\n            info=\"Name of the sender.\",\n            value=MESSAGE_SENDER_NAME_AI,\n            advanced=True,\n        ),\n        MessageTextInput(\n            name=\"session_id\",\n            display_name=\"Session ID\",\n            info=\"The session ID of the chat. If empty, the current session ID parameter will be used.\",\n            advanced=True,\n        ),\n        MessageTextInput(\n            name=\"context_id\",\n            display_name=\"Context ID\",\n            info=\"The context ID of the chat. Adds an extra layer to the local memory.\",\n            value=\"\",\n            advanced=True,\n        ),\n        MessageTextInput(\n            name=\"data_template\",\n            display_name=\"Data Template\",\n            value=\"{text}\",\n            advanced=True,\n            info=\"Template to convert Data to Text. If left empty, it will be dynamically set to the Data's text key.\",\n        ),\n        BoolInput(\n            name=\"clean_data\",\n            display_name=\"Basic Clean Data\",\n            value=True,\n            advanced=True,\n            info=\"Whether to clean data before converting to string.\",\n        ),\n    ]\n    outputs = [\n        Output(\n            display_name=\"Output Message\",\n            name=\"message\",\n            method=\"message_response\",\n        ),\n    ]\n\n    def _build_source(self, id_: str | None, display_name: str | None, source: str | None) -> Source:\n        source_dict = {}\n        if id_:\n            source_dict[\"id\"] = id_\n        if display_name:\n            source_dict[\"display_name\"] = display_name\n        if source:\n            # Handle case where source is a ChatOpenAI object\n            if hasattr(source, \"model_name\"):\n                source_dict[\"source\"] = source.model_name\n            elif hasattr(source, \"model\"):\n                source_dict[\"source\"] = str(source.model)\n            else:\n                source_dict[\"source\"] = str(source)\n        return Source(**source_dict)\n\n    async def message_response(self) -> Message:\n        # First convert the input to string if needed\n        text = self.convert_to_string()\n\n        # Get source properties\n        source, _, display_name, source_id = self.get_properties_from_source_component()\n\n        # Create or use existing Message object\n        if isinstance(self.input_value, Message) and not self.is_connected_to_chat_input():\n            message = self.input_value\n            # Update message properties\n            message.text = text\n            # Preserve existing session_id from the incoming message if it exists\n            existing_session_id = message.session_id\n        else:\n            message = Message(text=text)\n            existing_session_id = None\n\n        # Set message properties\n        message.sender = self.sender\n        message.sender_name = self.sender_name\n        # Preserve session_id from incoming message, or use component/graph session_id\n        message.session_id = (\n            self.session_id or existing_session_id or (self.graph.session_id if hasattr(self, \"graph\") else None) or \"\"\n        )\n        message.context_id = self.context_id\n        message.flow_id = self.graph.flow_id if hasattr(self, \"graph\") else None\n        message.properties.source = self._build_source(source_id, display_name, source)\n\n        # Store message if needed\n        if message.session_id and self.should_store_message:\n            stored_message = await self.send_message(message)\n            self.message.value = stored_message\n            message = stored_message\n\n        # Set accumulated token usage from all upstream LLM vertices.\n        # This must happen AFTER send_message() because streaming captures\n        # usage from chunks and would overwrite accumulated totals.\n        if hasattr(self, \"_vertex\") and self._vertex is not None:\n            accumulated_usage = self._vertex._accumulate_upstream_token_usage()  # noqa: SLF001\n            if accumulated_usage:\n                message.properties.usage = accumulated_usage\n                if self.should_store_message and message.get_id():\n                    message = await self._update_stored_message(message)\n                    await self._send_message_event(message, id_=message.get_id())\n\n        self.status = message\n        return message\n\n    def _serialize_data(self, data: Data) -> str:\n        \"\"\"Serialize Data object to JSON string.\"\"\"\n        # Convert data.data to JSON-serializable format\n        serializable_data = jsonable_encoder(data.data)\n        # Serialize with orjson, enabling pretty printing with indentation\n        json_bytes = orjson.dumps(serializable_data, option=orjson.OPT_INDENT_2)\n        # Convert bytes to string and wrap in Markdown code blocks\n        return \"```json\\n\" + json_bytes.decode(\"utf-8\") + \"\\n```\"\n\n    def _validate_input(self) -> None:\n        \"\"\"Validate the input data and raise ValueError if invalid.\"\"\"\n        if self.input_value is None:\n            msg = \"Input data cannot be None\"\n            raise ValueError(msg)\n        if isinstance(self.input_value, list) and not all(\n            isinstance(item, Message | Data | DataFrame | str) for item in self.input_value\n        ):\n            invalid_types = [\n                type(item).__name__\n                for item in self.input_value\n                if not isinstance(item, Message | Data | DataFrame | str)\n            ]\n            msg = f\"Expected Data or DataFrame or Message or str, got {invalid_types}\"\n            raise TypeError(msg)\n        if not isinstance(\n            self.input_value,\n            Message | Data | DataFrame | str | list | Generator | type(None),\n        ):\n            type_name = type(self.input_value).__name__\n            msg = f\"Expected Data or DataFrame or Message or str, Generator or None, got {type_name}\"\n            raise TypeError(msg)\n\n    def convert_to_string(self) -> str | Generator[Any, None, None]:\n        \"\"\"Convert input data to string with proper error handling.\"\"\"\n        self._validate_input()\n        if isinstance(self.input_value, list):\n            clean_data: bool = getattr(self, \"clean_data\", False)\n            return \"\\n\".join([safe_convert(item, clean_data=clean_data) for item in self.input_value])\n        if isinstance(self.input_value, Generator):\n            return self.input_value\n        return safe_convert(self.input_value)\n"
+              },
+              "context_id": {
+                "_input_type": "MessageTextInput",
+                "advanced": true,
+                "display_name": "Context ID",
+                "dynamic": false,
+                "info": "The context ID of the chat. Adds an extra layer to the local memory.",
+                "input_types": [
+                  "Message"
+                ],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "name": "context_id",
+                "override_skip": false,
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "track_in_telemetry": false,
+                "type": "str",
+                "value": ""
+              },
+              "data_template": {
+                "_input_type": "MessageTextInput",
+                "advanced": true,
+                "display_name": "Data Template",
+                "dynamic": false,
+                "info": "Template to convert Data to Text. If left empty, it will be dynamically set to the Data's text key.",
+                "input_types": [
+                  "Message"
+                ],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "name": "data_template",
+                "override_skip": false,
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "track_in_telemetry": false,
+                "type": "str",
+                "value": "{text}"
+              },
+              "input_value": {
+                "_input_type": "HandleInput",
+                "advanced": false,
+                "display_name": "Inputs",
+                "dynamic": false,
+                "info": "Message to be passed as output.",
+                "input_types": [
+                  "Data",
+                  "JSON",
+                  "DataFrame",
+                  "Table",
+                  "Message"
+                ],
+                "list": false,
+                "list_add_label": "Add More",
+                "name": "input_value",
+                "override_skip": false,
+                "placeholder": "",
+                "required": true,
+                "show": true,
+                "title_case": false,
+                "trace_as_metadata": true,
+                "track_in_telemetry": false,
+                "type": "other",
+                "value": ""
+              },
+              "sender": {
+                "_input_type": "DropdownInput",
+                "advanced": true,
+                "combobox": false,
+                "dialog_inputs": {},
+                "display_name": "Sender Type",
+                "dynamic": false,
+                "external_options": {},
+                "info": "Type of sender.",
+                "name": "sender",
+                "options": [
+                  "Machine",
+                  "User"
+                ],
+                "options_metadata": [],
+                "override_skip": false,
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "toggle": false,
+                "tool_mode": false,
+                "trace_as_metadata": true,
+                "track_in_telemetry": true,
+                "type": "str",
+                "value": "Machine"
+              },
+              "sender_name": {
+                "_input_type": "MessageTextInput",
+                "advanced": true,
+                "display_name": "Sender Name",
+                "dynamic": false,
+                "info": "Name of the sender.",
+                "input_types": [
+                  "Message"
+                ],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "name": "sender_name",
+                "override_skip": false,
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "track_in_telemetry": false,
+                "type": "str",
+                "value": "AI"
+              },
+              "session_id": {
+                "_input_type": "MessageTextInput",
+                "advanced": true,
+                "display_name": "Session ID",
+                "dynamic": false,
+                "info": "The session ID of the chat. If empty, the current session ID parameter will be used.",
+                "input_types": [
+                  "Message"
+                ],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "name": "session_id",
+                "override_skip": false,
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "track_in_telemetry": false,
+                "type": "str",
+                "value": ""
+              },
+              "should_store_message": {
+                "_input_type": "BoolInput",
+                "advanced": true,
+                "display_name": "Store Messages",
+                "dynamic": false,
+                "info": "Store the message in the history.",
+                "list": false,
+                "list_add_label": "Add More",
+                "name": "should_store_message",
+                "override_skip": false,
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_metadata": true,
+                "track_in_telemetry": true,
+                "type": "bool",
+                "value": true
+              }
+            },
+            "tool_mode": false
+          },
+          "type": "ChatOutput"
+        },
+        "dragging": false,
+        "id": "ChatOutput-hlb-lf-00-chat-v1",
+        "measured": {
+          "height": 200,
+          "width": 320
+        },
+        "position": {
+          "x": 2400,
+          "y": 0
+        },
+        "selected": false,
+        "type": "genericNode"
+      }
+    ],
+    "viewport": {
+      "x": 0,
+      "y": 0,
+      "zoom": 1
+    }
+  },
+  "description": "LF-00 Main Router: validates trusted chat input, mandatorily prefetches routing context from LF-70, routes to LF-10 (Tool Mode) for intake-eligible states, and renders a deterministic, validated RouterResult to Chat Output.",
+  "endpoint_name": null,
+  "folder_id": "a6f9eb0d-e26e-4d3d-9232-fe1704342cd4",
+  "gradient": null,
+  "icon": null,
+  "icon_bg_color": null,
+  "id": "29c624c0-7940-48c3-8164-123620c53562",
+  "is_component": false,
+  "locked": false,
+  "mcp_enabled": false,
+  "name": "lf-00-main-router",
+  "name_key": null,
+  "tags": null,
+  "updated_at": "2026-08-05T08:34:43+00:00",
+  "user_id": "4686a792-e21e-497a-9d27-c5b4d17296b5",
+  "webhook": false,
+  "workspace_id": null
+}

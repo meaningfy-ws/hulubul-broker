@@ -1,6 +1,6 @@
 """Tests for ExecutionEnvelopeComponent: trust boundary isolation and session normalization."""
 
-from unittest.mock import patch
+from unittest.mock import PropertyMock, patch
 from uuid import UUID
 
 import pytest
@@ -27,6 +27,91 @@ TRUSTED_DISPLAY_NAME = "Test Sender"
 def component() -> ExecutionEnvelopeComponent:
     """Create an ExecutionEnvelopeComponent instance."""
     return ExecutionEnvelopeComponent()
+
+
+class TestRequestVariableExtraction:
+    """Test the real `self.ctx` extraction logic (not mocked).
+
+    Regression tests: confirmed live -- `self.ctx` never carries the
+    request-variable names as flat top-level keys (a debug print showed
+    `self.ctx.keys() == ['request_variables']` for a real LF-00 API
+    invocation with both actor headers set). The previous implementation
+    checked `"HULUBUL_PHASE1_ACTOR_ID" in self.ctx` directly, which was
+    always False, so `_get_api_actor_id`/`_get_api_display_name` always
+    silently fell through to the (unset) environment-variable fallback --
+    breaking every LF-00 API invocation regardless of headers sent. Every
+    other test in this file mocks `_get_api_actor_id` directly via
+    `patch.object`, so none of them exercised this real extraction path;
+    that's why this went undetected until a live debug trace caught it.
+    """
+
+    def test_get_request_variable_reads_nested_dict(
+        self, component: ExecutionEnvelopeComponent
+    ) -> None:
+        """Reads the real `self.ctx["request_variables"][name]` shape.
+
+        `Component.ctx` is a read-only property that proxies to
+        `self.graph.context` (see `lfx.custom.custom_component.component
+        .Component.ctx`'s own source) -- mock the property at the class
+        level via `PropertyMock`, the only way to override a property
+        without a setter; a plain `component.ctx = ...` raises
+        `AttributeError: can't set attribute 'ctx'` at runtime.
+        """
+        with patch.object(
+            ExecutionEnvelopeComponent,
+            "ctx",
+            new_callable=PropertyMock,
+            return_value={
+                "request_variables": {
+                    "HULUBUL_PHASE1_ACTOR_ID": TRUSTED_ACTOR_ID,
+                    "HULUBUL_PHASE1_ACTOR_DISPLAY_NAME": TRUSTED_DISPLAY_NAME,
+                }
+            },
+        ):
+            assert component._get_api_actor_id() == TRUSTED_ACTOR_ID
+            assert component._get_api_display_name() == TRUSTED_DISPLAY_NAME
+
+    def test_get_request_variable_missing_key_returns_none(
+        self, component: ExecutionEnvelopeComponent
+    ) -> None:
+        """A `request_variables` dict without the named variable yields None."""
+        with patch.object(
+            ExecutionEnvelopeComponent,
+            "ctx",
+            new_callable=PropertyMock,
+            return_value={"request_variables": {}},
+        ):
+            assert component._get_api_actor_id() is None
+            assert component._get_api_display_name() is None
+
+    def test_get_request_variable_ctx_raises_returns_none(
+        self, component: ExecutionEnvelopeComponent
+    ) -> None:
+        """`ctx` raising ValueError (the real behavior before a graph is
+        attached -- confirmed by reading `Component.ctx`'s source: "Graph
+        not found. Please build the graph first.") never crashes; it's
+        treated as "no request variables available" instead."""
+        with patch.object(
+            ExecutionEnvelopeComponent,
+            "ctx",
+            new_callable=PropertyMock,
+            side_effect=ValueError("Graph not found. Please build the graph first."),
+        ):
+            assert component._get_api_actor_id() is None
+
+    def test_get_graph_session_id_falls_back_to_session_id_attribute(
+        self, component: ExecutionEnvelopeComponent
+    ) -> None:
+        """Falls back to `self._session_id` when there is no `.graph`."""
+        component._session_id = SESSION
+
+        assert component._get_graph_session_id() == SESSION
+
+    def test_get_graph_session_id_returns_none_when_unavailable(
+        self, component: ExecutionEnvelopeComponent
+    ) -> None:
+        """No graph and no `_session_id` -> None, not a crash."""
+        assert component._get_graph_session_id() is None
 
 
 class TestActorIdResolution:
@@ -189,6 +274,111 @@ class TestSessionNormalization:
             ):
                 envelope = MainFlowInput.model_validate(component.build_envelope().data)
                 assert envelope.session_id == f"p1-{BARE_UUID.lower()}"
+
+    def test_playground_label_session_is_deterministic_across_calls(
+        self, component: ExecutionEnvelopeComponent
+    ) -> None:
+        """Same Playground label -> same session on every call.
+
+        Confirmed live: a random UUID per call (the previous behaviour) meant
+        every message in one Playground chat landed on a disconnected
+        session, so LF-10's multi-turn intake accumulation saw an empty
+        state each turn and re-asked for facts the sender had already given.
+        """
+        component.message = Message(text="Hello", session_id="New Session 0")
+
+        with patch.object(component, "_get_playground_actor_id", return_value=TRUSTED_ACTOR_ID):
+            with patch.object(
+                component, "_get_invocation_source", return_value=InvocationSource.PLAYGROUND
+            ):
+                first = MainFlowInput.model_validate(component.build_envelope().data)
+                second = MainFlowInput.model_validate(component.build_envelope().data)
+
+        assert first.session_id == second.session_id
+
+    def test_different_playground_labels_map_to_different_sessions(
+        self, component: ExecutionEnvelopeComponent
+    ) -> None:
+        """Distinct labels must not collapse onto the same session."""
+        with patch.object(component, "_get_playground_actor_id", return_value=TRUSTED_ACTOR_ID):
+            with patch.object(
+                component, "_get_invocation_source", return_value=InvocationSource.PLAYGROUND
+            ):
+                component.message = Message(text="Hello", session_id="New Session 0")
+                first = MainFlowInput.model_validate(component.build_envelope().data)
+
+                component.message = Message(text="Hello", session_id="New Session 1")
+                second = MainFlowInput.model_validate(component.build_envelope().data)
+
+        assert first.session_id != second.session_id
+
+    def test_playground_label_session_is_a_valid_uuid(
+        self, component: ExecutionEnvelopeComponent
+    ) -> None:
+        """The deterministic session still satisfies the p1-<uuid> contract."""
+        component.message = Message(text="Hello", session_id="New Session 0")
+
+        with patch.object(component, "_get_playground_actor_id", return_value=TRUSTED_ACTOR_ID):
+            with patch.object(
+                component, "_get_invocation_source", return_value=InvocationSource.PLAYGROUND
+            ):
+                envelope = MainFlowInput.model_validate(component.build_envelope().data)
+
+        assert envelope.session_id.startswith("p1-")
+        UUID(envelope.session_id.removeprefix("p1-"))  # must not raise
+
+    def test_playground_label_matching_graph_label_is_accepted(
+        self, component: ExecutionEnvelopeComponent
+    ) -> None:
+        """Matching Playground labels do not fail the message-vs-graph check."""
+        component.message = Message(text="Hello", session_id="New Session 0")
+
+        with patch.object(component, "_get_playground_actor_id", return_value=TRUSTED_ACTOR_ID):
+            with patch.object(
+                component, "_get_invocation_source", return_value=InvocationSource.PLAYGROUND
+            ):
+                with patch.object(component, "_get_graph_session_id", return_value="New Session 0"):
+                    envelope = MainFlowInput.model_validate(component.build_envelope().data)
+
+        assert envelope.session_id.startswith("p1-")
+
+
+class TestSessionUuidPart:
+    """`_session_uuid_part` in isolation: no component mocking needed."""
+
+    def test_already_valid_uuid_is_returned_unchanged(self) -> None:
+        result = ExecutionEnvelopeComponent._session_uuid_part(
+            BARE_UUID, BARE_UUID, InvocationSource.API
+        )
+
+        assert result == BARE_UUID
+
+    def test_non_uuid_playground_label_is_deterministic(self) -> None:
+        first = ExecutionEnvelopeComponent._session_uuid_part(
+            "new session 0", "New Session 0", InvocationSource.PLAYGROUND
+        )
+        second = ExecutionEnvelopeComponent._session_uuid_part(
+            "new session 0", "New Session 0", InvocationSource.PLAYGROUND
+        )
+
+        assert first == second
+        UUID(first)  # must not raise
+
+    def test_non_uuid_playground_label_differs_by_label(self) -> None:
+        first = ExecutionEnvelopeComponent._session_uuid_part(
+            "new session 0", "New Session 0", InvocationSource.PLAYGROUND
+        )
+        second = ExecutionEnvelopeComponent._session_uuid_part(
+            "new session 1", "New Session 1", InvocationSource.PLAYGROUND
+        )
+
+        assert first != second
+
+    def test_non_uuid_api_label_is_rejected(self) -> None:
+        with pytest.raises(ValueError, match="INVALID_INPUT"):
+            ExecutionEnvelopeComponent._session_uuid_part(
+                "new session 0", "New Session 0", InvocationSource.API
+            )
 
 
 class TestSessionValidation:
@@ -435,7 +625,7 @@ class TestMessageAcceptance:
     def test_rejects_string_input(self, component: ExecutionEnvelopeComponent) -> None:
         """Component rejects plain string input (no free prose as input)."""
         # The component should have message as Message type, not str
-        component.message = "Not a Message object"  # type: ignore[assignment]
+        component.message = "Not a Message object"
 
         with patch.object(component, "_get_api_actor_id", return_value=TRUSTED_ACTOR_ID):
             with patch.object(

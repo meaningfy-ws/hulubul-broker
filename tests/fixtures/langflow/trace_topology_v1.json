@@ -1,0 +1,210 @@
+{
+  "schema_version": "1.0.0",
+  "scenario": "complete_status_informational",
+  "description": "Frozen, safe-projected span topology for the deterministic complete status no-mutation route (a DeliveryRequest bound to the session with hasStatus=complete, message \"Status update?\"). Chosen over the absent-binding/routes-to-intake scenario because that one lets the Router Agent choose whether to invoke the LF-10 tool, which is a genuine, confirmed LLM behavioral non-determinism (observed directly: identical calls sometimes produced 15 spans/1 LLM call, sometimes 26 spans/multiple LLM calls) -- not something a frozen fixture can honestly represent. This scenario has no plausible reason for the Router to call any tool, and was verified deterministic across repeated live runs (identical normalized tuples every time).",
+  "flows": {
+    "lf_00": {
+      "flow_id": "29c624c0-7940-48c3-8164-123620c53562",
+      "spans": [
+        [
+          "Run Flow",
+          "chain",
+          true,
+          null
+        ],
+        [
+          "Chat Input",
+          "chain",
+          true,
+          null
+        ],
+        [
+          "Execution Envelope",
+          "chain",
+          true,
+          null
+        ],
+        [
+          "Data Operation Request Builder (Routing Context)",
+          "chain",
+          true,
+          null
+        ],
+        [
+          "Run Flow",
+          "chain",
+          true,
+          null
+        ],
+        [
+          "Contract Input Boundary",
+          "chain",
+          true,
+          null
+        ],
+        [
+          "Router Agent",
+          "agent",
+          true,
+          null
+        ],
+        [
+          "Chain",
+          "chain",
+          true,
+          6
+        ],
+        [
+          "Chain",
+          "chain",
+          true,
+          7
+        ],
+        [
+          "Chain",
+          "chain",
+          true,
+          7
+        ],
+        [
+          "ChatOpenAI global/nearai/deepseek-v4-flash",
+          "llm",
+          true,
+          9
+        ],
+        [
+          "Chain",
+          "chain",
+          true,
+          7
+        ],
+        [
+          "Contract Result Boundary",
+          "chain",
+          true,
+          null
+        ],
+        [
+          "Deterministic Renderer",
+          "chain",
+          true,
+          null
+        ],
+        [
+          "Chat Output",
+          "chain",
+          true,
+          null
+        ]
+      ]
+    },
+    "lf_70": {
+      "flow_id": "94f6774d-ebc7-5bf1-8486-886f91886a5f",
+      "spans": [
+        [
+          "Data Operation Request Boundary",
+          "chain",
+          true,
+          null
+        ],
+        [
+          "MCP Tools",
+          "chain",
+          true,
+          null
+        ],
+        [
+          "Data Access Agent",
+          "agent",
+          true,
+          null
+        ],
+        [
+          "Chain",
+          "chain",
+          true,
+          2
+        ],
+        [
+          "Chain",
+          "chain",
+          true,
+          3
+        ],
+        [
+          "Chain",
+          "chain",
+          true,
+          3
+        ],
+        [
+          "ChatOpenAI global/nearai/deepseek-v4-flash",
+          "llm",
+          true,
+          5
+        ],
+        [
+          "Chain",
+          "chain",
+          true,
+          3
+        ],
+        [
+          "Chain",
+          "chain",
+          true,
+          3
+        ],
+        [
+          "read_neo4j_cypher",
+          "tool",
+          true,
+          8
+        ],
+        [
+          "Chain",
+          "chain",
+          true,
+          3
+        ],
+        [
+          "Chain",
+          "chain",
+          true,
+          3
+        ],
+        [
+          "ChatOpenAI global/nearai/deepseek-v4-flash",
+          "llm",
+          true,
+          11
+        ],
+        [
+          "Chain",
+          "chain",
+          true,
+          3
+        ],
+        [
+          "Routing Context Adapter",
+          "chain",
+          true,
+          null
+        ],
+        [
+          "Data Operation Result Boundary",
+          "chain",
+          true,
+          null
+        ]
+      ]
+    }
+  },
+  "span_tuple_format": [
+    "name",
+    "type",
+    "status_ok",
+    "parent_index"
+  ],
+  "notes": "Each span list is produced by trace_metadata_probe.normalize_topology: a preorder-flattened, safe-projected span tree with random ids/timestamps replaced by preorder index/parent_index (null for a root). LF-10 is not invoked in this scenario and has no entry here -- it is not recorded as its own top-level trace unless the Router Agent actually calls it as a tool. Refresh this fixture (regenerate, reverify determinism across 2+ live runs) if the router prompt, component wiring, or configured model changes; the ChatOpenAI span names embed the configured model identifier and change with it."
+}

@@ -205,6 +205,7 @@ def test_ci_static_lists_expected_prerequisites_in_order(makefile_text: str) -> 
         "check-architecture",
         "check-operational-schemas",
         "test-unit",
+        "test-static",
         "test-feature",
     ]
 

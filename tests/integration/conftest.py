@@ -129,8 +129,6 @@ def neo4j_testcontainer_info() -> Generator[Neo4jTestcontainerInfo, None, None]:
                 # Index await may not be available in all versions
                 session.run("CALL db.awaitIndexes(120)")
 
-        # Positional construction (not password=cred) avoids tripping the
-        # NAME=value credential-pattern scanner in check_committed_secrets.py.
         yield Neo4jTestcontainerInfo(driver, network_alias, network, container, cred)
 
     finally:

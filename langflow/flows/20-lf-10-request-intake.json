@@ -1,0 +1,1796 @@
+{
+  "access_type": "PRIVATE",
+  "action_description": null,
+  "action_name": null,
+  "data": {
+    "edges": [
+      {
+        "animated": false,
+        "className": "",
+        "data": {
+          "sourceHandle": {
+            "dataType": "HulubulContractInputBoundary",
+            "id": "HulubulContractInputBoundary-hlb-lf-10-input-v1",
+            "name": "response",
+            "output_types": [
+              "Message"
+            ]
+          },
+          "targetHandle": {
+            "fieldName": "input_value",
+            "id": "Agent-hlb-lf-10-request-intake-v1",
+            "inputTypes": [
+              "Message"
+            ],
+            "type": "str"
+          }
+        },
+        "id": "xy-edge__HulubulContractInputBoundary-hlb-lf-10-input-v1{\u0153dataType\u0153:\u0153HulubulContractInputBoundary\u0153,\u0153id\u0153:\u0153HulubulContractInputBoundary-hlb-lf-10-input-v1\u0153,\u0153name\u0153:\u0153response\u0153,\u0153output_types\u0153:[\u0153Message\u0153]}-Agent-hlb-lf-10-request-intake-v1{\u0153fieldName\u0153:\u0153input_value\u0153,\u0153id\u0153:\u0153Agent-hlb-lf-10-request-intake-v1\u0153,\u0153inputTypes\u0153:[\u0153Message\u0153],\u0153type\u0153:\u0153str\u0153}",
+        "selected": false,
+        "source": "HulubulContractInputBoundary-hlb-lf-10-input-v1",
+        "sourceHandle": "{\u0153dataType\u0153:\u0153HulubulContractInputBoundary\u0153,\u0153id\u0153:\u0153HulubulContractInputBoundary-hlb-lf-10-input-v1\u0153,\u0153name\u0153:\u0153response\u0153,\u0153output_types\u0153:[\u0153Message\u0153]}",
+        "target": "Agent-hlb-lf-10-request-intake-v1",
+        "targetHandle": "{\u0153fieldName\u0153:\u0153input_value\u0153,\u0153id\u0153:\u0153Agent-hlb-lf-10-request-intake-v1\u0153,\u0153inputTypes\u0153:[\u0153Message\u0153],\u0153type\u0153:\u0153str\u0153}"
+      },
+      {
+        "animated": false,
+        "className": "",
+        "data": {
+          "sourceHandle": {
+            "dataType": "HulubulRunFlow",
+            "id": "RunFlow-hlb-lf-10-data-access-v1",
+            "name": "component_as_tool",
+            "output_types": [
+              "Tool"
+            ]
+          },
+          "targetHandle": {
+            "fieldName": "tools",
+            "id": "Agent-hlb-lf-10-request-intake-v1",
+            "inputTypes": [
+              "Tool"
+            ],
+            "type": "other"
+          }
+        },
+        "id": "xy-edge__RunFlow-hlb-lf-10-data-access-v1{\u0153dataType\u0153:\u0153HulubulRunFlow\u0153,\u0153id\u0153:\u0153RunFlow-hlb-lf-10-data-access-v1\u0153,\u0153name\u0153:\u0153component_as_tool\u0153,\u0153output_types\u0153:[\u0153Tool\u0153]}-Agent-hlb-lf-10-request-intake-v1{\u0153fieldName\u0153:\u0153tools\u0153,\u0153id\u0153:\u0153Agent-hlb-lf-10-request-intake-v1\u0153,\u0153inputTypes\u0153:[\u0153Tool\u0153],\u0153type\u0153:\u0153other\u0153}",
+        "selected": false,
+        "source": "RunFlow-hlb-lf-10-data-access-v1",
+        "sourceHandle": "{\u0153dataType\u0153:\u0153HulubulRunFlow\u0153,\u0153id\u0153:\u0153RunFlow-hlb-lf-10-data-access-v1\u0153,\u0153name\u0153:\u0153component_as_tool\u0153,\u0153output_types\u0153:[\u0153Tool\u0153]}",
+        "target": "Agent-hlb-lf-10-request-intake-v1",
+        "targetHandle": "{\u0153fieldName\u0153:\u0153tools\u0153,\u0153id\u0153:\u0153Agent-hlb-lf-10-request-intake-v1\u0153,\u0153inputTypes\u0153:[\u0153Tool\u0153],\u0153type\u0153:\u0153other\u0153}"
+      },
+      {
+        "animated": false,
+        "className": "",
+        "data": {
+          "sourceHandle": {
+            "dataType": "Agent",
+            "id": "Agent-hlb-lf-10-request-intake-v1",
+            "name": "response",
+            "output_types": [
+              "Message"
+            ]
+          },
+          "targetHandle": {
+            "fieldName": "value",
+            "id": "HulubulContractResultBoundary-hlb-lf-10-result-v1",
+            "inputTypes": [
+              "Message",
+              "Data",
+              "JSON"
+            ],
+            "type": "other"
+          }
+        },
+        "id": "xy-edge__Agent-hlb-lf-10-request-intake-v1{\u0153dataType\u0153:\u0153Agent\u0153,\u0153id\u0153:\u0153Agent-hlb-lf-10-request-intake-v1\u0153,\u0153name\u0153:\u0153response\u0153,\u0153output_types\u0153:[\u0153Message\u0153]}-HulubulContractResultBoundary-hlb-lf-10-result-v1{\u0153fieldName\u0153:\u0153value\u0153,\u0153id\u0153:\u0153HulubulContractResultBoundary-hlb-lf-10-result-v1\u0153,\u0153inputTypes\u0153:[\u0153Message\u0153,\u0153Data\u0153,\u0153JSON\u0153],\u0153type\u0153:\u0153other\u0153}",
+        "selected": false,
+        "source": "Agent-hlb-lf-10-request-intake-v1",
+        "sourceHandle": "{\u0153dataType\u0153:\u0153Agent\u0153,\u0153id\u0153:\u0153Agent-hlb-lf-10-request-intake-v1\u0153,\u0153name\u0153:\u0153response\u0153,\u0153output_types\u0153:[\u0153Message\u0153]}",
+        "target": "HulubulContractResultBoundary-hlb-lf-10-result-v1",
+        "targetHandle": "{\u0153fieldName\u0153:\u0153value\u0153,\u0153id\u0153:\u0153HulubulContractResultBoundary-hlb-lf-10-result-v1\u0153,\u0153inputTypes\u0153:[\u0153Message\u0153,\u0153Data\u0153,\u0153JSON\u0153],\u0153type\u0153:\u0153other\u0153}"
+      },
+      {
+        "animated": false,
+        "className": "",
+        "data": {
+          "sourceHandle": {
+            "dataType": "HulubulGraphIdentifiersGenerator",
+            "id": "HulubulGraphIdentifiersGenerator-hlb-lf-10-gen-identifiers-v1",
+            "name": "component_as_tool",
+            "output_types": [
+              "Tool"
+            ]
+          },
+          "targetHandle": {
+            "fieldName": "tools",
+            "id": "Agent-hlb-lf-10-request-intake-v1",
+            "inputTypes": [
+              "Tool"
+            ],
+            "type": "other"
+          }
+        },
+        "id": "xy-edge__HulubulGraphIdentifiersGenerator-hlb-lf-10-gen-identifiers-v1{\u0153dataType\u0153:\u0153HulubulGraphIdentifiersGenerator\u0153,\u0153id\u0153:\u0153HulubulGraphIdentifiersGenerator-hlb-lf-10-gen-identifiers-v1\u0153,\u0153name\u0153:\u0153component_as_tool\u0153,\u0153output_types\u0153:[\u0153Tool\u0153]}-Agent-hlb-lf-10-request-intake-v1{\u0153fieldName\u0153:\u0153tools\u0153,\u0153id\u0153:\u0153Agent-hlb-lf-10-request-intake-v1\u0153,\u0153inputTypes\u0153:[\u0153Tool\u0153],\u0153type\u0153:\u0153other\u0153}",
+        "selected": false,
+        "source": "HulubulGraphIdentifiersGenerator-hlb-lf-10-gen-identifiers-v1",
+        "sourceHandle": "{\u0153dataType\u0153:\u0153HulubulGraphIdentifiersGenerator\u0153,\u0153id\u0153:\u0153HulubulGraphIdentifiersGenerator-hlb-lf-10-gen-identifiers-v1\u0153,\u0153name\u0153:\u0153component_as_tool\u0153,\u0153output_types\u0153:[\u0153Tool\u0153]}",
+        "target": "Agent-hlb-lf-10-request-intake-v1",
+        "targetHandle": "{\u0153fieldName\u0153:\u0153tools\u0153,\u0153id\u0153:\u0153Agent-hlb-lf-10-request-intake-v1\u0153,\u0153inputTypes\u0153:[\u0153Tool\u0153],\u0153type\u0153:\u0153other\u0153}"
+      }
+    ],
+    "nodes": [
+      {
+        "data": {
+          "id": "HulubulContractInputBoundary-hlb-lf-10-input-v1",
+          "node": {
+            "base_classes": [
+              "Message"
+            ],
+            "beta": false,
+            "conditional_paths": [],
+            "custom_fields": {},
+            "description": "Public entry point for intake and router inputs via fixed edges or direct JSON.",
+            "display_name": "Contract Input Boundary",
+            "documentation": "",
+            "edited": false,
+            "field_order": [
+              "envelope",
+              "routing_context",
+              "input_value",
+              "contract_kind"
+            ],
+            "frozen": false,
+            "icon": "shield-check",
+            "id": "HulubulContractInputBoundary-hlb-lf-10-input-v1",
+            "is_input": true,
+            "legacy": false,
+            "metadata": {
+              "code_hash": "bd2e37da2b9b",
+              "dependencies": {
+                "dependencies": [
+                  {
+                    "name": "lfx",
+                    "version": "1.10.2"
+                  },
+                  {
+                    "name": "pydantic",
+                    "version": "2.13.4"
+                  },
+                  {
+                    "name": "hulubul",
+                    "version": null
+                  }
+                ],
+                "total_dependencies": 3
+              },
+              "module": "custom_components.contract_input_boundary"
+            },
+            "minimized": false,
+            "output_types": [],
+            "outputs": [
+              {
+                "allows_loop": false,
+                "cache": true,
+                "display_name": "Message",
+                "group_outputs": false,
+                "method": "build_output",
+                "name": "response",
+                "selected": "Message",
+                "tool_mode": true,
+                "types": [
+                  "Message"
+                ],
+                "value": "__UNDEFINED__"
+              }
+            ],
+            "pinned": false,
+            "template": {
+              "_type": "Component",
+              "code": {
+                "advanced": true,
+                "dynamic": true,
+                "fileTypes": [],
+                "file_path": "",
+                "info": "",
+                "list": false,
+                "load_from_db": false,
+                "multiline": true,
+                "name": "code",
+                "password": false,
+                "placeholder": "",
+                "required": true,
+                "show": true,
+                "title_case": false,
+                "type": "code",
+                "value": "\"\"\"Contract input boundary component: unified entry point for intake and router inputs.\n\nConsolidates IntakeInputBoundaryComponent and RouterInputBoundaryComponent into\na single, generic component that handles both:\n1. Structured integration path: fixed `envelope` and `routing_context` edges\n   (for LF-00/LF-10 upstream integration)\n2. Direct API invocation path: `input_value` MessageTextInput with JSON text\n   (for Run API testing)\n\nThe `contract_kind` dropdown selects which wrapper type to build (intake or\nrouter). If fixed edges are provided, they take precedence. If only\n`input_value` is provided, it is parsed and validated as the selected contract\nkind.\n\nSplit from the former contract_boundary.py (which held three components)\nbecause LangFlow's directory-based custom component loader registers exactly\none component per file, named after the file -- extra classes in the same\nfile are silently dropped from the sidebar palette.\n\"\"\"\n\nimport json\nfrom typing import Any\nfrom uuid import uuid4\n\nfrom lfx.custom.custom_component.component import Component\nfrom lfx.inputs.inputs import DropdownInput, HandleInput, MessageTextInput\nfrom lfx.schema.message import Message\nfrom lfx.template.field.base import Output\nfrom pydantic import BaseModel, ValidationError\n\nfrom hulubul.core.models.operational import (\n    IntakeInput,\n    MainFlowInput,\n    OperationalError,\n    RouterInput,\n    RoutingContext,\n)\nfrom hulubul.core.models.operational.enums import ErrorCode\nfrom hulubul.core.models.operational.errors import ERROR_POLICY\n\n__all__ = [\"ContractInputBoundaryComponent\"]\n\n\nclass ContractInputBoundaryComponent(Component):\n    \"\"\"Unified public entry point for intake and router inputs.\n\n    Supports two integration paths:\n    1. Structured edges: fixed `envelope` and `routing_context` (for LF-00/LF-10 upstream flows)\n    2. Direct API: literal JSON text via `input_value` (for Run API invocation)\n\n    The `contract_kind` selector determines which wrapper type to assemble (intake or router).\n    Fixed edges take precedence when supplied; otherwise, `input_value` is used.\n    \"\"\"\n\n    display_name = \"Contract Input Boundary\"\n    description = \"Public entry point for intake and router inputs via fixed edges or direct JSON.\"\n    icon = \"shield-check\"\n    name = \"HulubulContractInputBoundary\"\n\n    inputs = [  # noqa: RUF012\n        HandleInput(  # type: ignore[call-arg]\n            name=\"envelope\",\n            display_name=\"Envelope\",\n            info=(\n                \"Fixed MainFlowInput envelope: trusted context supplied by an \"\n                \"upstream edge, never authored by a model. Required if using \"\n                \"the fixed-edge path.\\n\\n\"\n                \"`advanced=False` is deliberate and load-bearing. LangFlow's \"\n                \"frontend treats an incoming edge into an `advanced` field as \"\n                \"invalid and silently strips it while loading/saving the graph \"\n                \"(see `DEV/reports/advanced-field-in-langflow.md`), so this \"\n                \"field must stay non-advanced for its edge to survive at all. \"\n                \"Keeping it out of the model-callable tool schema is a \"\n                \"separate concern, handled where it belongs: \"\n                \"`HulubulRunFlowComponent.get_required_data()` withholds \"\n                \"connection-only fields from the schema it hands the agent. \"\n                \"Any flow that invokes this component's flow via `RunFlow` \"\n                \"must therefore use `HulubulRunFlow`, not the stock node -- \"\n                \"stock `RunFlow` exposes this field to `lfx`'s \"\n                \"`create_input_schema_from_dict()`, which crashes on its raw \"\n                \"`type: \\\"other\\\"` label with `name 'other' is not defined` \"\n                \"and breaks every call to the *calling* flow. See \"\n                \"`DEV/knowledge/checkpoint9-lf10-runflow-injection-runbook.md`.\"\n            ),\n            input_types=[\"Data\", \"JSON\"],\n            advanced=False,\n            required=False,\n        ),\n        HandleInput(  # type: ignore[call-arg]\n            name=\"routing_context\",\n            display_name=\"Routing Context\",\n            info=(\n                \"Fixed RoutingContext: trusted context supplied by an upstream \"\n                \"edge, never authored by a model. Required if using the \"\n                \"fixed-edge path.\\n\\n\"\n                \"`advanced=False` for the same reason as `envelope` above, \"\n                \"and with the same requirement on callers.\"\n            ),\n            input_types=[\"Data\", \"JSON\"],\n            advanced=False,\n            required=False,\n        ),\n        MessageTextInput(  # type: ignore[call-arg]\n            name=\"input_value\",\n            display_name=\"Direct Input\",\n            info=(\n                \"Typed contract input (JSON text) for direct API invocation or \"\n                \"edge-supplied data. MessageTextInput rather than HandleInput: \"\n                \"HandleInput fields are edge-only in LangFlow (they never read \"\n                \"their own literal value), which made direct invocation unreachable \"\n                \"via the plain Run API. MessageTextInput accepts both literal \"\n                \"values and real edges.\"\n            ),\n            required=False,\n        ),\n        DropdownInput(  # type: ignore[call-arg]\n            name=\"contract_kind\",\n            display_name=\"Contract Kind\",\n            info=(\"Type of input to build: 'intake' for IntakeInput, 'router' for RouterInput.\"),\n            options=[\"intake\", \"router\"],\n            value=\"intake\",\n            required=True,\n        ),\n    ]\n\n    outputs = [  # noqa: RUF012\n        Output(  # type: ignore[call-arg]\n            display_name=\"Message\", name=\"response\", type_=Message, method=\"build_output\"\n        ),\n    ]\n\n    def __init__(self, **kwargs: Any) -> None:\n        \"\"\"Initialize the ContractInputBoundaryComponent.\n\n        Deliberately does NOT pre-assign any declared input field here.\n        LangFlow's `Component.set_attributes()` treats a name that is already\n        in `self.__dict__` but not in `self._attributes` as a reserved-word\n        collision the moment a differing runtime value is injected via a real\n        edge -- confirmed for `input_value` (loud crash: \"defines an input\n        parameter named 'input_value' that is a reserved word\") and, it turns\n        out, for `envelope`/`routing_context` too, just silently: the edge\n        into the field gets dropped instead of raising, discovered only when\n        an actual LF-00 flow round-tripped through the API with fewer edges\n        than were sent. Let the framework's own declarative default (each\n        input's own `value=`) populate every field instead.\n        \"\"\"\n        super().__init__(**kwargs)\n\n    def build_output(self) -> Message:\n        \"\"\"Build intake or router input from fixed edges or direct JSON.\n\n        Priority:\n        1. If both envelope and routing_context are supplied, assemble from fixed edges\n        2. Otherwise, parse and validate input_value as JSON\n\n        Returns:\n            Message: JSON-serialized IntakeInput or RouterInput\n\n        Raises:\n            ValueError: If neither path is available or if required fields are missing\n        \"\"\"\n        # Path 1: Fixed edges (structured integration from LF-00/LF-10 upstream).\n        # Truthy, not `is not None`: an unwired HandleInput field's framework\n        # default is `\"\"` (empty string), not `None`, once these fields are no\n        # longer explicitly pre-assigned in `__init__` (see its docstring).\n        if self.envelope and self.routing_context:\n            return self._build_from_fixed_edges()\n\n        # Path 2: Direct JSON input (Run API invocation)\n        if self.input_value:\n            return self._build_from_input_value()\n\n        # Neither path available\n        return self._make_error_response(ErrorCode.INVALID_CONTRACT)\n\n    @staticmethod\n    def _coerce_model(value: Any, model_cls: type[BaseModel]) -> Any:\n        \"\"\"Coerce a Data/Message/dict/already-hydrated-model edge value into `model_cls`.\n\n        A real edge value from another component can arrive as either a\n        JSON-primitive dict (string UUIDs, string enum values -- e.g.\n        `.model_dump(mode=\"json\")` output) or a dict of already-native\n        instances (e.g. `ExecutionEnvelopeComponent.build_envelope()` returns\n        `Data(data=envelope.model_dump())` -- note: no `mode=\"json\"`, so its\n        `actor_id`/`message_id`/`correlation_id` are real `UUID` objects, not\n        strings). This project's contracts are strict-typed and reject the\n        first shape via ordinary python-mode construction (a UUID/enum field\n        must already be a native instance) -- only `model_validate_json`\n        applies the standard JSON coercion rules; `default=str` in the\n        dump makes that same call handle the second shape too. Values\n        already an instance of `model_cls` (e.g. a real object passed\n        directly in a unit test) pass through unchanged; anything\n        unparseable is returned as-is and left for the caller's own\n        validation/error path to reject.\n\n        `isinstance(value, Message)` is checked before the generic\n        `hasattr(value, \"data\")` branch: `Message` also exposes a `.data`\n        attribute (its own field dict -- `sender`, `session_id`, `duration`,\n        etc.), which is not the wrapped payload at all; the actual JSON\n        lives in `.text`.\n        \"\"\"\n        if isinstance(value, model_cls):\n            return value\n        if isinstance(value, Message):\n            if not isinstance(value.text, str):\n                return value\n            try:\n                return model_cls.model_validate_json(value.text)\n            except (ValidationError, TypeError):\n                return value\n        candidate = value.data if hasattr(value, \"data\") else value\n        try:\n            if isinstance(candidate, str):\n                return model_cls.model_validate_json(candidate)\n            if isinstance(candidate, dict):\n                # LFX's own JSON/Data wrapper classes can leak their OWN\n                # fields (e.g. `default_value`) into `.data` at some points\n                # in the pipeline -- confirmed live against a real LF-00\n                # edge value. `model_cls` is strict (extra_forbidden), so\n                # pass through only the keys it actually declares.\n                filtered = {k: v for k, v in candidate.items() if k in model_cls.model_fields}\n                return model_cls.model_validate_json(json.dumps(filtered, default=str))\n        except (ValidationError, TypeError):\n            return value\n        return value\n\n    @staticmethod\n    def _unwrap_routing_context(value: Any) -> Any:\n        \"\"\"Unwrap a DataOperationResult-shaped routing_context edge value.\n\n        LF-00's mandatory context-prefetch feeds this boundary the raw\n        `DataOperationResult` returned by LF-70's `getRequestRoutingContext`\n        operation (RoutingContext lives at `.result`, already fully adapted\n        by LF-70's own RoutingContextAdapterComponent) -- not a bare\n        RoutingContext directly. LF-10 has no such predecessor and always\n        supplies a bare RoutingContext. Detect the DataOperationResult shape\n        (its `outcome`/`result` keys are not RoutingContext fields) and\n        unwrap it; pass anything else through unchanged so a bare\n        RoutingContext (dict or model instance) still works as before.\n\n        `isinstance(value, Message)` must be checked before the generic\n        `hasattr(value, \"data\")` branch (same ordering bug already fixed in\n        `_coerce_model`): confirmed live -- the real `RunFlow` context-\n        prefetch output arrives as a `Message` wrapping the full\n        `DataOperationResult` JSON text, not a `Data`/`JSON` object. Without\n        this check the unwrap silently no-ops (a `Message`'s own `.data` is\n        its OWN field dict, not the payload), and `_coerce_model` then tries\n        to validate the entire `DataOperationResult` as a bare\n        `RoutingContext` and fails with `INVALID_CONTRACT` -- with no\n        exception ever logged, since the failure is \"successfully\" caught by\n        `_build_from_fixed_edges`'s own error handling. This was silently\n        breaking every LF-00 request regardless of RoutingContext content.\n\n        A second, independent wrapping layer was found live on top of that:\n        `RunFlow` in non-tool mode surfaces a sub-flow component's output by\n        forwarding LangFlow's own internal per-output artifact record --\n        `{\"repr\": <str>, \"raw\": <actual payload>, \"type\": <str>}` -- as the\n        `Data`/`Message` content, rather than the bare payload. `_unwrap_one_layer`\n        peels exactly that shape off (recognised by having `raw`/`type` keys\n        without `outcome`/`result` of its own) before the `outcome`/`result`\n        check runs, so a payload that never went through `RunFlow` (e.g. LF-10\n        feeding a bare `RoutingContext`, or a direct `DataOperationResult`\n        with no `RunFlow` hop) is unaffected.\n        \"\"\"\n\n        def _unwrap_one_layer(candidate: Any) -> Any:\n            if (\n                isinstance(candidate, dict)\n                and \"raw\" in candidate\n                and \"type\" in candidate\n                and \"outcome\" not in candidate\n            ):\n                return candidate[\"raw\"]\n            return candidate\n\n        if isinstance(value, Message) and isinstance(value.text, str):\n            try:\n                parsed = json.loads(value.text)\n            except json.JSONDecodeError:\n                return value\n            parsed = _unwrap_one_layer(parsed)\n            if isinstance(parsed, dict) and \"outcome\" in parsed and \"result\" in parsed:\n                return parsed[\"result\"]\n            return value\n        candidate = value.data if hasattr(value, \"data\") else value\n        candidate = _unwrap_one_layer(candidate)\n        if isinstance(candidate, dict) and \"outcome\" in candidate and \"result\" in candidate:\n            return candidate[\"result\"]\n        return value\n\n    def _build_from_fixed_edges(self) -> Message:\n        \"\"\"Assemble input from fixed envelope/routing_context edges.\n\n        Returns:\n            Message: Serialized IntakeInput or RouterInput, as selected by contract_kind\n\n        Raises:\n            ValueError: If envelope or routing_context is None\n        \"\"\"\n        if self.envelope is None:\n            raise ValueError(\"INVALID_CONFIGURATION: envelope is required\")\n        if self.routing_context is None:\n            raise ValueError(\"INVALID_CONFIGURATION: routing_context is required\")\n\n        envelope = self._coerce_model(self.envelope, MainFlowInput)\n        routing_context = self._coerce_model(\n            self._unwrap_routing_context(self.routing_context), RoutingContext\n        )\n\n        try:\n            wrapper: IntakeInput | RouterInput\n            if self.contract_kind == \"router\":\n                wrapper = RouterInput(\n                    schema_version=envelope.schema_version,\n                    correlation_id=envelope.correlation_id,\n                    envelope=envelope,\n                    routing_context=routing_context,\n                )\n            else:  # default to \"intake\"\n                wrapper = IntakeInput(\n                    schema_version=envelope.schema_version,\n                    correlation_id=envelope.correlation_id,\n                    envelope=envelope,\n                    routing_context=routing_context,\n                )\n\n            return Message(text=wrapper.model_dump_json())\n\n        except (ValidationError, TypeError, AttributeError):\n            return self._make_error_response(ErrorCode.INVALID_CONTRACT)\n\n    def _build_from_input_value(self) -> Message:\n        \"\"\"Parse and validate input_value as JSON, then assemble the selected contract type.\n\n        Returns:\n            Message: Serialized IntakeInput or RouterInput, as selected by contract_kind\n        \"\"\"\n        raw_value = self.input_value\n        if isinstance(raw_value, Message):\n            raw_value = raw_value.text\n\n        if not raw_value or (isinstance(raw_value, str) and not raw_value.strip()):\n            return self._make_error_response(ErrorCode.INVALID_CONTRACT)\n\n        try:\n            # Parse JSON and validate as selected type\n            parsed_input: IntakeInput | RouterInput\n            if self.contract_kind == \"router\":\n                if isinstance(raw_value, str):\n                    parsed_input = RouterInput.model_validate_json(raw_value)\n                else:\n                    # JSON-mode validation for non-string dicts: a dict from\n                    # an edge or variable binding is shaped as JSON primitives\n                    # (string UUIDs in correlation_id, string source enums, etc.),\n                    # not native instances. Though currently unreachable (input_value\n                    # is always a string or Message in live flows), this is the\n                    # correct pattern if the else branch is ever exercised.\n                    # Same rationale as DataOperationResultBoundary and\n                    # DataAccessAgentComponent.\n                    value_json = json.dumps(raw_value, default=str)\n                    parsed_input = RouterInput.model_validate_json(value_json)\n            else:  # default to \"intake\"\n                if isinstance(raw_value, str):\n                    parsed_input = IntakeInput.model_validate_json(raw_value)\n                else:\n                    # JSON-mode validation for non-string dicts: same rationale\n                    # as RouterInput case above.\n                    value_json = json.dumps(raw_value, default=str)\n                    parsed_input = IntakeInput.model_validate_json(value_json)\n\n            return Message(text=parsed_input.model_dump_json())\n\n        except (ValidationError, json.JSONDecodeError, TypeError):\n            return self._make_error_response(ErrorCode.INVALID_CONTRACT)\n\n    def _make_error_response(self, code: ErrorCode) -> Message:\n        \"\"\"Create a canonical error response without exposing user values.\n\n        Args:\n            code: The ErrorCode\n\n        Returns:\n            Message: Serialized OperationalError\n        \"\"\"\n        policy = ERROR_POLICY[code]\n        error = OperationalError(\n            schema_version=\"1.0.0\",\n            code=code,\n            correlation_id=uuid4(),\n            category=policy.category,\n            message=policy.safe_message,\n            retryable=policy.retryable,\n        )\n\n        return Message(text=error.model_dump_json())\n"
+              },
+              "contract_kind": {
+                "_input_type": "DropdownInput",
+                "advanced": false,
+                "combobox": false,
+                "dialog_inputs": {},
+                "display_name": "Contract Kind",
+                "dynamic": false,
+                "external_options": {},
+                "info": "Type of input to build: 'intake' for IntakeInput, 'router' for RouterInput.",
+                "name": "contract_kind",
+                "options": [
+                  "intake",
+                  "router"
+                ],
+                "options_metadata": [],
+                "override_skip": false,
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "toggle": false,
+                "tool_mode": false,
+                "trace_as_metadata": true,
+                "track_in_telemetry": true,
+                "type": "str",
+                "value": "intake"
+              },
+              "envelope": {
+                "_input_type": "HandleInput",
+                "advanced": false,
+                "display_name": "Envelope",
+                "dynamic": false,
+                "info": "Fixed MainFlowInput envelope (advanced, not model-editable). Required if using fixed-edge path.",
+                "input_types": [
+                  "Data",
+                  "JSON"
+                ],
+                "list": false,
+                "list_add_label": "Add More",
+                "name": "envelope",
+                "override_skip": false,
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "trace_as_metadata": true,
+                "track_in_telemetry": false,
+                "type": "other",
+                "value": ""
+              },
+              "input_value": {
+                "_input_type": "MessageTextInput",
+                "advanced": false,
+                "display_name": "Direct Input",
+                "dynamic": false,
+                "info": "Typed contract input (JSON text) for direct API invocation or edge-supplied data. MessageTextInput rather than HandleInput: HandleInput fields are edge-only in LangFlow (they never read their own literal value), which made direct invocation unreachable via the plain Run API. MessageTextInput accepts both literal values and real edges.",
+                "input_types": [
+                  "Message"
+                ],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "name": "input_value",
+                "override_skip": false,
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "track_in_telemetry": false,
+                "type": "str",
+                "value": ""
+              },
+              "routing_context": {
+                "_input_type": "HandleInput",
+                "advanced": false,
+                "display_name": "Routing Context",
+                "dynamic": false,
+                "info": "Fixed RoutingContext (advanced, not model-editable). Required if using fixed-edge path.",
+                "input_types": [
+                  "Data",
+                  "JSON"
+                ],
+                "list": false,
+                "list_add_label": "Add More",
+                "name": "routing_context",
+                "override_skip": false,
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "trace_as_metadata": true,
+                "track_in_telemetry": false,
+                "type": "other",
+                "value": ""
+              }
+            },
+            "tool_mode": false
+          },
+          "type": "HulubulContractInputBoundary"
+        },
+        "dragging": false,
+        "id": "HulubulContractInputBoundary-hlb-lf-10-input-v1",
+        "measured": {
+          "height": 305,
+          "width": 320
+        },
+        "position": {
+          "x": -56.75145964639131,
+          "y": -29.726955052871638
+        },
+        "selected": false,
+        "type": "genericNode"
+      },
+      {
+        "data": {
+          "id": "Agent-hlb-lf-10-request-intake-v1",
+          "node": {
+            "base_classes": [
+              "Data",
+              "JSON",
+              "Message"
+            ],
+            "beta": false,
+            "conditional_paths": [],
+            "custom_fields": {},
+            "description": "Define the agent's instructions, then enter a task to complete using tools.",
+            "display_name": "Agent",
+            "documentation": "https://docs.langflow.org/agents",
+            "edited": false,
+            "field_order": [
+              "model",
+              "api_key",
+              "base_url_ibm_watsonx",
+              "project_id",
+              "system_prompt",
+              "context_id",
+              "n_messages",
+              "max_tokens",
+              "format_instructions",
+              "output_schema",
+              "tools",
+              "input_value",
+              "handle_parsing_errors",
+              "max_iterations",
+              "stream",
+              "add_current_date_tool",
+              "add_calculator_tool"
+            ],
+            "frozen": false,
+            "icon": "bot",
+            "id": "Agent-hlb-lf-10-request-intake-v1",
+            "last_updated": "2026-07-28T13:54:52.747Z",
+            "legacy": false,
+            "metadata": {
+              "code_hash": "d08c17dbf863",
+              "dependencies": {
+                "dependencies": [
+                  {
+                    "name": "langchain",
+                    "version": "1.3.11"
+                  },
+                  {
+                    "name": "lfx",
+                    "version": null
+                  },
+                  {
+                    "name": "langchain_core",
+                    "version": "1.4.8"
+                  }
+                ],
+                "total_dependencies": 3
+              },
+              "module": "lfx.components.models_and_agents.agent.AgentComponent"
+            },
+            "minimized": false,
+            "output_types": [],
+            "outputs": [
+              {
+                "allows_loop": false,
+                "cache": true,
+                "display_name": "Response",
+                "group_outputs": false,
+                "loop_types": null,
+                "method": "message_response",
+                "name": "response",
+                "options": null,
+                "required_inputs": null,
+                "selected": "Message",
+                "tool_mode": true,
+                "types": [
+                  "Message"
+                ],
+                "value": "__UNDEFINED__"
+              },
+              {
+                "allows_loop": false,
+                "cache": true,
+                "display_name": "Structured Response",
+                "group_outputs": false,
+                "loop_types": null,
+                "method": "json_response",
+                "name": "structured_response",
+                "options": null,
+                "required_inputs": null,
+                "selected": "Data",
+                "tool_mode": true,
+                "types": [
+                  "Data",
+                  "JSON"
+                ],
+                "value": "__UNDEFINED__"
+              }
+            ],
+            "pinned": false,
+            "template": {
+              "_frontend_node_flow_id": {
+                "input_types": [],
+                "value": "6843ae79-147f-55d4-a25b-01d6143a12cc"
+              },
+              "_frontend_node_folder_id": {
+                "input_types": [],
+                "value": "a6f9eb0d-e26e-4d3d-9232-fe1704342cd4"
+              },
+              "_type": "Component",
+              "add_calculator_tool": {
+                "_input_type": "BoolInput",
+                "advanced": true,
+                "display_name": "Calculator",
+                "dynamic": false,
+                "info": "If true, adds a zero-config arithmetic calculator tool to the agent (safe: only +, -, *, /, ** operators via AST).",
+                "input_types": [],
+                "list": false,
+                "list_add_label": "Add More",
+                "name": "add_calculator_tool",
+                "override_skip": false,
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_metadata": true,
+                "track_in_telemetry": true,
+                "type": "bool",
+                "value": false
+              },
+              "add_current_date_tool": {
+                "_input_type": "BoolInput",
+                "advanced": true,
+                "display_name": "Current Date",
+                "dynamic": false,
+                "info": "If true, will add a tool to the agent that returns the current date.",
+                "input_types": [],
+                "list": false,
+                "list_add_label": "Add More",
+                "name": "add_current_date_tool",
+                "override_skip": false,
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_metadata": true,
+                "track_in_telemetry": true,
+                "type": "bool",
+                "value": false
+              },
+              "api_key": {
+                "_input_type": "SecretStrInput",
+                "advanced": true,
+                "display_name": "API Key",
+                "dynamic": false,
+                "info": "Falls back to OPENAI_API_KEY environment variable",
+                "input_types": [],
+                "load_from_db": true,
+                "name": "api_key",
+                "override_skip": false,
+                "password": true,
+                "placeholder": "",
+                "real_time_refresh": true,
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "track_in_telemetry": false,
+                "type": "str",
+                "value": "OPENAI_API_KEY"
+              },
+              "base_url_ibm_watsonx": {
+                "_input_type": "DropdownInput",
+                "advanced": false,
+                "combobox": true,
+                "dialog_inputs": {},
+                "display_name": "watsonx API Endpoint",
+                "dynamic": false,
+                "external_options": {},
+                "info": "The base URL of the API (IBM watsonx.ai only)",
+                "input_types": [],
+                "name": "base_url_ibm_watsonx",
+                "options": [
+                  "https://us-south.ml.cloud.ibm.com",
+                  "https://eu-de.ml.cloud.ibm.com",
+                  "https://eu-gb.ml.cloud.ibm.com",
+                  "https://au-syd.ml.cloud.ibm.com",
+                  "https://jp-tok.ml.cloud.ibm.com",
+                  "https://ca-tor.ml.cloud.ibm.com"
+                ],
+                "options_metadata": [],
+                "override_skip": false,
+                "placeholder": "",
+                "real_time_refresh": true,
+                "required": false,
+                "show": false,
+                "title_case": false,
+                "toggle": false,
+                "tool_mode": false,
+                "trace_as_metadata": true,
+                "track_in_telemetry": true,
+                "type": "str",
+                "value": "https://us-south.ml.cloud.ibm.com"
+              },
+              "code": {
+                "advanced": true,
+                "dynamic": true,
+                "fileTypes": [],
+                "file_path": "",
+                "info": "",
+                "input_types": [],
+                "list": false,
+                "load_from_db": false,
+                "multiline": true,
+                "name": "code",
+                "password": false,
+                "placeholder": "",
+                "required": true,
+                "show": true,
+                "title_case": false,
+                "type": "code",
+                "value": "from __future__ import annotations\n\nimport uuid\nfrom contextlib import contextmanager\nfrom datetime import datetime, timezone\nfrom typing import TYPE_CHECKING, Any, cast\n\nfrom langchain.agents import create_agent\nfrom langchain.agents.middleware import ModelCallLimitMiddleware, ToolRetryMiddleware\n\nfrom lfx.components.models_and_agents.agent_helpers.graph_event_adapter import (\n    adapt_graph_events_to_executor_shape,\n)\nfrom lfx.components.models_and_agents.agent_helpers.messages_input_builder import (\n    build_initial_messages,\n)\nfrom lfx.components.models_and_agents.agent_helpers.placeholder_corrective_middleware import (\n    WatsonXPlaceholderMiddleware,\n)\nfrom lfx.components.models_and_agents.agent_helpers.single_tool_call_middleware import (\n    SingleToolCallMiddleware,\n)\nfrom lfx.components.models_and_agents.memory import MemoryComponent, aget_agent_chat_history\n\nif TYPE_CHECKING:\n    from langchain_core.tools import Tool\n\n    from lfx.schema.log import OnTokenFunctionType, SendMessageFunctionType\n\nfrom lfx.base.agents.agent import LCToolsAgentComponent\nfrom lfx.base.agents.callback import AgentAsyncHandler\nfrom lfx.base.agents.default_system_prompt import DEFAULT_SYSTEM_PROMPT_TEMPLATE\nfrom lfx.base.agents.events import ExceptionWithMessageError, process_agent_events\nfrom lfx.base.agents.token_callback import TokenUsageCallbackHandler\nfrom lfx.base.agents.utils import get_chat_output_sender_name\nfrom lfx.base.constants import STREAM_INFO_TEXT\nfrom lfx.base.models.unified_models import (\n    get_language_model_options,\n    get_llm,\n    handle_model_input_update,\n)\nfrom lfx.base.models.watsonx_constants import IBM_WATSONX_URLS\nfrom lfx.components.agentics.helpers.model_config import validate_model_selection\nfrom lfx.components.helpers import CalculatorComponent, CurrentDateComponent\nfrom lfx.components.langchain_utilities.ibm_granite_handler import is_watsonx_model\nfrom lfx.components.langchain_utilities.tool_calling import ToolCallingAgentComponent\nfrom lfx.custom.custom_component.component import get_component_toolkit\nfrom lfx.field_typing.range_spec import RangeSpec\nfrom lfx.inputs.inputs import BoolInput, DropdownInput, ModelInput, StrInput\nfrom lfx.io import IntInput, MessageTextInput, MultilineInput, Output, SecretStrInput, TableInput\nfrom lfx.log.logger import logger\nfrom lfx.memory import delete_message\nfrom lfx.schema.content_block import ContentBlock\nfrom lfx.schema.data import Data\nfrom lfx.schema.dotdict import dotdict\nfrom lfx.schema.message import Message\nfrom lfx.schema.table import EditMode\nfrom lfx.utils.constants import MESSAGE_SENDER_AI\n\n\ndef set_advanced_true(component_input):\n    component_input.advanced = True\n    return component_input\n\n\ndef _agent_base_inputs():\n    \"\"\"Return base inputs tailored to AgentComponent's create_agent path.\n\n    `get_base_inputs()` returns a shared list \u2014 replace, don't mutate. We drop\n    inputs that are no-ops here and override info text on the inputs whose\n    semantics shifted under create_agent.\n\n    `verbose` is dropped because the create_agent event stream already surfaces\n    every agent step via the \"Agent Steps\" content blocks; the legacy boolean\n    has nothing to toggle. Saved flows that still carry a `verbose` value just\n    ignore it on load (the schema no longer declares it).\n    \"\"\"\n    drop = {\"verbose\"}\n    overrides = {\n        \"handle_parsing_errors\": BoolInput(\n            name=\"handle_parsing_errors\",\n            display_name=\"Handle Parse Errors\",\n            value=True,\n            advanced=True,\n            info=(\n                \"Adds tool-execution retry as a safety net. `create_agent` already \"\n                \"feeds tool-call validation errors back to the LLM automatically; \"\n                \"this flag layers `ToolRetryMiddleware` on top so transient tool \"\n                \"runtime failures are retried (max 2 retries).\"\n            ),\n        ),\n        \"max_iterations\": IntInput(\n            name=\"max_iterations\",\n            display_name=\"Max Iterations\",\n            value=15,\n            advanced=True,\n            range_spec=RangeSpec(min=1, max=128000, step=1, step_type=\"int\"),\n            info=(\n                \"Maximum number of model calls the agent can make before stopping \"\n                \"(maps to `ModelCallLimitMiddleware.run_limit` on the create_agent \"\n                \"path). Must be at least 1 \u2014 it is a safety cap, never 'unlimited'.\"\n            ),\n        ),\n    }\n    return [overrides.get(inp.name, inp) for inp in LCToolsAgentComponent.get_base_inputs() if inp.name not in drop]\n\n\ndef _extract_text_content(value) -> str:\n    \"\"\"Pull a string payload from a Message-like, AIMessage-like, or string value.\"\"\"\n    if isinstance(value, str):\n        return value\n    text = getattr(value, \"text\", None)\n    if isinstance(text, str):\n        return text\n    content = getattr(value, \"content\", None)\n    if isinstance(content, str):\n        return content\n    return str(value) if value is not None else \"\"\n\n\n@contextmanager\ndef _suppress_send_message(component: Any):\n    \"\"\"Temporarily replace component.send_message with a no-op for the duration of the block.\n\n    Used during the structured-output prompt fallback: run_agent streams the agent's\n    final answer through self.send_message (correct for message_response), but in\n    json_response the orchestrator parses that text into structured Data which the\n    downstream Chat Output emits \u2014 leaving the original emission in place produces a\n    duplicate message in the playground. The original method is always restored on exit,\n    even when the wrapped call raises.\n    \"\"\"\n    original = component.send_message\n\n    async def _noop(message, *_args, **_kwargs):\n        return message\n\n    component.send_message = _noop\n    try:\n        yield\n    finally:\n        component.send_message = original\n\n\nclass AgentComponent(ToolCallingAgentComponent):\n    display_name: str = \"Agent\"\n    description: str = \"Define the agent's instructions, then enter a task to complete using tools.\"\n    documentation: str = \"https://docs.langflow.org/agents\"\n    icon = \"bot\"\n    beta = False\n    name = \"Agent\"\n\n    memory_inputs = [set_advanced_true(component_input) for component_input in MemoryComponent().inputs]\n\n    inputs = [\n        ModelInput(\n            name=\"model\",\n            display_name=\"Language Model\",\n            info=\"Select your model provider\",\n            real_time_refresh=True,\n            required=True,\n            # Agents require tool calling \u2014 the filter is honored by\n            # ``handle_model_input_update`` so models that can't run with\n            # tools never reach the picker (and any saved selection that\n            # no longer satisfies the constraint is auto-replaced).\n            filters={\"tool_calling\": True},\n        ),\n        SecretStrInput(\n            name=\"api_key\",\n            display_name=\"API Key\",\n            info=\"Overrides global provider settings. Leave blank to use your pre-configured API Key.\",\n            real_time_refresh=True,\n            advanced=True,\n        ),\n        DropdownInput(\n            name=\"base_url_ibm_watsonx\",\n            display_name=\"watsonx API Endpoint\",\n            info=\"The base URL of the API (IBM watsonx.ai only)\",\n            options=IBM_WATSONX_URLS,\n            value=IBM_WATSONX_URLS[0],\n            combobox=True,\n            show=False,\n            real_time_refresh=True,\n        ),\n        StrInput(\n            name=\"project_id\",\n            display_name=\"watsonx Project ID\",\n            info=\"The project ID associated with the foundation model (IBM watsonx.ai only)\",\n            show=False,\n            required=False,\n        ),\n        MultilineInput(\n            name=\"system_prompt\",\n            display_name=\"Agent Instructions\",\n            info=(\n                \"System Prompt: Initial instructions and context provided to guide the agent's behavior. \"\n                \"Supports dynamic placeholders: {current_date}, {model_name}, {optional_user_context}.\"\n            ),\n            value=DEFAULT_SYSTEM_PROMPT_TEMPLATE,\n            advanced=False,\n        ),\n        MessageTextInput(\n            name=\"context_id\",\n            display_name=\"Context ID\",\n            info=\"The context ID of the chat. Adds an extra layer to the local memory.\",\n            value=\"\",\n            advanced=True,\n        ),\n        IntInput(\n            name=\"n_messages\",\n            display_name=\"Number of Chat History Messages\",\n            value=100,\n            info=\"Number of chat history messages to retrieve.\",\n            advanced=True,\n            show=True,\n        ),\n        IntInput(\n            name=\"max_tokens\",\n            display_name=\"Max Tokens\",\n            info=\"Maximum number of tokens to generate. Field name varies by provider.\",\n            advanced=True,\n            range_spec=RangeSpec(min=1, max=128000, step=1, step_type=\"int\"),\n        ),\n        MultilineInput(\n            name=\"format_instructions\",\n            display_name=\"Output Format Instructions\",\n            info=\"Generic Template for structured output formatting. Valid only with Structured response.\",\n            value=(\n                \"You are an AI that extracts structured JSON objects from unstructured text. \"\n                \"Use a predefined schema with expected types (str, int, float, bool, dict). \"\n                \"Extract ALL relevant instances that match the schema - if multiple patterns exist, capture them all. \"\n                \"Fill missing or ambiguous values with defaults: null for missing values. \"\n                \"Remove exact duplicates but keep variations that have different field values. \"\n                \"Always return valid JSON in the expected format, never throw errors. \"\n                \"If multiple objects can be extracted, return them all in the structured format.\"\n            ),\n            advanced=True,\n        ),\n        TableInput(\n            name=\"output_schema\",\n            display_name=\"Output Schema\",\n            info=(\n                \"Schema Validation: Define the structure and data types for structured output. \"\n                \"No validation if no output schema.\"\n            ),\n            advanced=True,\n            required=False,\n            value=[],\n            table_schema=[\n                {\n                    \"name\": \"name\",\n                    \"display_name\": \"Name\",\n                    \"type\": \"str\",\n                    \"description\": \"Specify the name of the output field.\",\n                    \"default\": \"field\",\n                    \"edit_mode\": EditMode.INLINE,\n                },\n                {\n                    \"name\": \"description\",\n                    \"display_name\": \"Description\",\n                    \"type\": \"str\",\n                    \"description\": \"Describe the purpose of the output field.\",\n                    \"default\": \"description of field\",\n                    \"edit_mode\": EditMode.POPOVER,\n                },\n                {\n                    \"name\": \"type\",\n                    \"display_name\": \"Type\",\n                    \"type\": \"str\",\n                    \"edit_mode\": EditMode.INLINE,\n                    \"description\": (\"Indicate the data type of the output field (e.g., str, int, float, bool, dict).\"),\n                    \"options\": [\"str\", \"int\", \"float\", \"bool\", \"dict\"],\n                    \"default\": \"str\",\n                },\n                {\n                    \"name\": \"multiple\",\n                    \"display_name\": \"As List\",\n                    \"type\": \"boolean\",\n                    \"description\": \"Set to True if this output field should be a list of the specified type.\",\n                    \"default\": \"False\",\n                    \"edit_mode\": EditMode.INLINE,\n                },\n            ],\n        ),\n        *_agent_base_inputs(),\n        # removed memory inputs from agent component\n        # *memory_inputs,\n        BoolInput(\n            name=\"stream\",\n            display_name=\"Stream\",\n            info=STREAM_INFO_TEXT,\n            value=True,\n            advanced=True,\n        ),\n        BoolInput(\n            name=\"add_current_date_tool\",\n            display_name=\"Current Date\",\n            advanced=True,\n            info=\"If true, will add a tool to the agent that returns the current date.\",\n            value=True,\n        ),\n        BoolInput(\n            name=\"add_calculator_tool\",\n            display_name=\"Calculator\",\n            advanced=True,\n            info=(\n                \"If true, adds a zero-config arithmetic calculator tool to the agent \"\n                \"(safe: only +, -, *, /, ** operators via AST).\"\n            ),\n            value=True,\n        ),\n    ]\n    outputs = [\n        Output(name=\"response\", display_name=\"Response\", method=\"message_response\"),\n        Output(\n            name=\"structured_response\",\n            display_name=\"Structured Response\",\n            method=\"json_response\",\n            types=[\"Data\"],\n        ),\n    ]\n\n    def _resolve_selected_model(self):\n        \"\"\"Resolve the selected model, including legacy agent_llm/model_name inputs.\"\"\"\n        try:\n            from langchain_core.language_models import BaseLanguageModel\n\n            if isinstance(self.model, BaseLanguageModel):\n                return self.model\n        except ImportError:\n            pass\n\n        if isinstance(self.model, list) and self.model:\n            return self.model\n\n        legacy_provider = getattr(self, \"agent_llm\", None)\n        legacy_model_name = getattr(self, \"model_name\", None)\n        if not legacy_provider or not legacy_model_name:\n            return self.model\n\n        options = get_language_model_options(user_id=self.user_id)\n        for option in options:\n            if option.get(\"provider\") == legacy_provider and option.get(\"name\") == legacy_model_name:\n                return [option]\n\n        return [\n            {\n                \"name\": legacy_model_name,\n                \"provider\": legacy_provider,\n                \"metadata\": {},\n            }\n        ]\n\n    def _get_max_tokens_value(self):\n        \"\"\"Return the user-supplied max_tokens or None when unset/zero.\"\"\"\n        val = getattr(self, \"max_tokens\", None)\n        if val in {\"\", 0}:\n            return None\n        return val\n\n    def _get_llm(self):\n        \"\"\"Override parent to include max_tokens from the Agent's input field.\n\n        Streaming is mandatory for AgentComponent: ``runnable.astream_events(v2)`` only\n        emits ``on_chat_model_stream`` chunks when the underlying chat model is\n        instantiated with ``streaming=True``. Unlike the LanguageModel component (where\n        ``stream`` is a user-facing toggle), the Agent has no opt-out \u2014 the toggle is\n        kept in the UI for backwards compatibility but is intentionally ignored here.\n        Without ``stream=True``, the chat model accumulates the whole response and\n        only emits ``on_chat_model_end``, silently disabling the Playground's live-\n        typing view and breaking the streaming contract on the /events surface.\n        \"\"\"\n        return get_llm(\n            model=self.model,\n            user_id=self.user_id,\n            api_key=getattr(self, \"api_key\", None),\n            stream=True,\n            max_tokens=self._get_max_tokens_value(),\n            watsonx_url=getattr(self, \"base_url_ibm_watsonx\", None),\n            watsonx_project_id=getattr(self, \"project_id\", None),\n        )\n\n    async def get_agent_requirements(self):\n        \"\"\"Get the agent requirements for the agent.\"\"\"\n        from langchain_core.tools import StructuredTool\n\n        selected_model = self._resolve_selected_model()\n        try:\n            from langchain_core.language_models import BaseLanguageModel\n\n            is_connected_model = isinstance(selected_model, BaseLanguageModel)\n        except ImportError:\n            is_connected_model = False\n\n        if not is_connected_model:\n            validate_model_selection(selected_model)\n\n        # Ensure _get_llm() uses the resolved model (e.g. from legacy agent_llm/model_name)\n        self.model = selected_model\n        llm_model = self._get_llm()\n        if llm_model is None:\n            msg = \"No language model selected. Please choose a model to proceed.\"\n            raise ValueError(msg)\n\n        # Get memory data\n        self.chat_history = await self.get_memory_data()\n        await logger.adebug(f\"Retrieved {len(self.chat_history)} chat history messages\")\n        if isinstance(self.chat_history, Message):\n            self.chat_history = [self.chat_history]\n\n        # Add current date tool if enabled\n        if self.add_current_date_tool:\n            if not isinstance(self.tools, list):  # type: ignore[has-type]\n                self.tools = []\n            current_date_tool = (await CurrentDateComponent(**self.get_base_args()).to_toolkit()).pop(0)\n\n            if not isinstance(current_date_tool, StructuredTool):\n                msg = \"CurrentDateComponent must be converted to a StructuredTool\"\n                raise TypeError(msg)\n            # Skip if an externally-connected tool already provides the same name.\n            # Duplicate tool names are rejected by Anthropic/Gemini with HTTP 400.\n            if not any(getattr(t, \"name\", None) == current_date_tool.name for t in self.tools):\n                self.tools.append(current_date_tool)\n\n        # Add calculator tool if enabled (zero-config arithmetic)\n        if getattr(self, \"add_calculator_tool\", False):\n            if not isinstance(self.tools, list):  # type: ignore[has-type]\n                self.tools = []\n            calculator_tool = (await CalculatorComponent(**self.get_base_args()).to_toolkit()).pop(0)\n\n            if not isinstance(calculator_tool, StructuredTool):\n                msg = \"CalculatorComponent must be converted to a StructuredTool\"\n                raise TypeError(msg)\n            # Skip if an externally-connected tool already provides the same name.\n            # Duplicate tool names are rejected by Anthropic/Gemini with HTTP 400.\n            if not any(getattr(t, \"name\", None) == calculator_tool.name for t in self.tools):\n                self.tools.append(calculator_tool)\n\n        # Set shared callbacks for tracing the tools used by the agent\n        self.set_tools_callbacks(self.tools, self._get_shared_callbacks())\n\n        return llm_model, self.chat_history, self.tools\n\n    def _get_resolved_model_name(self) -> str:\n        \"\"\"Best-effort human-readable model name for {model_name} injection.\"\"\"\n        try:\n            from langchain_core.language_models import BaseLanguageModel\n\n            if isinstance(self.model, BaseLanguageModel):\n                return type(self.model).__name__\n        except ImportError:\n            pass\n\n        if isinstance(self.model, list) and self.model:\n            first = self.model[0]\n            if isinstance(first, dict):\n                name = first.get(\"name\")\n                if isinstance(name, str) and name:\n                    return name\n\n        legacy_model_name = getattr(self, \"model_name\", None)\n        if isinstance(legacy_model_name, str) and legacy_model_name:\n            return legacy_model_name\n        return \"\"\n\n    def _inject_dynamic_prompt_values(self, prompt: Any | None) -> str | None:\n        \"\"\"Replace known env placeholders in the system prompt.\n\n        Handles {current_date}, {model_name}, and {optional_user_context} (the\n        last one ships with the structured DEFAULT_SYSTEM_PROMPT_TEMPLATE and\n        is currently unused at the AgentComponent layer, so it resolves to \"\").\n        Uses str.replace (not str.format) so user prompts containing literal\n        braces such as JSON examples ({\"key\": 1}) never break the agent.\n\n        `system_prompt` is a connectable MultilineInput, so the value can arrive\n        as a Message (e.g. a Prompt node wired in). Normalize it to text first \u2014\n        a raw Message has no `.replace` and used to crash the agent build.\n        \"\"\"\n        if prompt is None:\n            return None\n        prompt = _extract_text_content(prompt)\n        if not prompt:\n            return prompt\n        replacements = {\n            \"{current_date}\": datetime.now(tz=timezone.utc).strftime(\"%Y-%m-%d %H:%M:%S UTC\"),\n            \"{model_name}\": self._get_resolved_model_name(),\n            \"{optional_user_context}\": \"\",\n        }\n        for placeholder, value in replacements.items():\n            prompt = prompt.replace(placeholder, value)\n        return prompt\n\n    def create_agent_runnable(self):\n        \"\"\"Build the LangGraph `CompiledStateGraph` via `langchain.agents.create_agent`.\n\n        Replaces the legacy `AgentExecutor` runnable inherited from\n        `ToolCallingAgentComponent`. Other agent components (tool_calling, csv, json,\n        openapi, sql*, vector_store_router) keep the legacy path \u2014 only AgentComponent\n        runs on the new graph API.\n\n        `max_iterations` and `handle_parsing_errors` (legacy AgentExecutor knobs) are\n        translated to LangGraph middleware. Without that translation those user inputs\n        would silently become no-ops on the new API.\n\n        Provider notes:\n        - WatsonX/Granite work natively with create_agent \u2014 `ChatWatsonx.bind_tools`\n          handles tool_choice correctly. The legacy `create_granite_agent` path was\n          dropped because it hardcoded `tool_choice='required'`, which the WatsonX\n          API now rejects.\n        - Ollama and other small/local models often emit malformed tool args. The\n          ToolRetryMiddleware (default `retry_on=(Exception,)`, `on_failure='continue'`)\n          catches Pydantic ValidationErrors from bad args and feeds the error back\n          to the LLM as a retry signal, so the agent recovers gracefully.\n        \"\"\"\n        llm = self._get_llm()\n        tools = self.tools or []\n\n        # Eager bind_tools validation. `create_agent(...)` is lazy \u2014 without this,\n        # an LLM that doesn't support tool calling fails on the first user message\n        # instead of when the user wires up the component, which is a much worse UX.\n        # Gated on a non-empty tools list so a no-tool Agent on a plain chat model\n        # (which legitimately has no `bind_tools`) isn't shut out at flow-build time.\n        # Providers signal \"no tool calling\" inconsistently \u2014 `NotImplementedError`\n        # (langchain default), `AttributeError` (no `bind_tools` attr), or `TypeError`\n        # (signature mismatch). Treat all three as the same UX failure.\n        if tools:\n            try:\n                llm.bind_tools(tools)\n            except (NotImplementedError, AttributeError, TypeError) as exc:\n                # Include the underlying error so a broken tool schema or a\n                # provider implementation bug is not silently disguised as a\n                # \"model can't call tools\" UX error.\n                msg = (\n                    f\"{self.display_name} does not support tool calling, \"\n                    \"or one of the connected tools failed to bind. \"\n                    \"Please connect a tool-calling capable language model and \"\n                    f\"verify your tools are well-formed. Underlying error: {exc!s}\"\n                )\n                raise NotImplementedError(msg) from exc\n\n        middleware = self._build_middleware(llm)\n        return create_agent(\n            model=llm,\n            tools=tools,\n            system_prompt=self.system_prompt or \"\",\n            middleware=middleware or None,\n        )\n\n    def _compute_recursion_limit(self) -> int:\n        \"\"\"Derive the LangGraph recursion_limit from the user-set max_iterations.\n\n        Mirrors the clamp in `_build_middleware` (max(1, max_iterations)) so a\n        saved 0 or negative value cannot under-cap the graph below one full\n        iteration. The +5 buffer covers start/end/router overhead.\n        \"\"\"\n        raw = getattr(self, \"max_iterations\", None)\n        run_limit = max(1, int(raw)) if raw is not None else 15\n        return run_limit * 2 + 5\n\n    def _build_middleware(self, llm: Any) -> list:\n        # `llm` is passed in (rather than re-fetched via `self._get_llm()`)\n        # because some providers do credential resolution / client instantiation\n        # lazily on each call. The caller \u2014 `create_agent_runnable` \u2014 already\n        # resolved it once for `bind_tools`, so reuse that instance here.\n        middleware: list = []\n        max_iterations = getattr(self, \"max_iterations\", None)\n        if max_iterations is not None:\n            # `max_iterations` is a safety cap, not an \"unlimited\" toggle. A saved\n            # 0 or negative value (falsy) must NOT silently drop the limiter and\n            # allow an unbounded model/tool loop \u2014 clamp it to a real minimum.\n            run_limit = max(1, int(max_iterations))\n            middleware.append(ModelCallLimitMiddleware(run_limit=run_limit))\n        # ToolRetryMiddleware only matters when there ARE tools to retry. Attaching\n        # it on a no-tools agent inflates the compiled graph and adds per-invocation\n        # middleware overhead for nothing, which is a measurable contributor to\n        # trivial-prompt latency (QA UI-003).\n        if getattr(self, \"handle_parsing_errors\", False) and self.tools:\n            middleware.append(ToolRetryMiddleware(max_retries=2))\n        # WatsonX models have two known platform quirks; both still reproduce on\n        # the current API, so we keep the protections from the legacy\n        # `create_granite_agent` path.\n        # 1. Multi-tool-call assistant turns are rejected (\"This model only\n        #    supports single tool-calls at once!\"). Clamp to one per turn.\n        # 2. Tool args occasionally come back as literal placeholder strings\n        #    (e.g. `<result-from-search>`). Re-invoke once with a corrective\n        #    SystemMessage.\n        # Order: SingleToolCallMiddleware first (outermost) so the clamp is\n        # applied to the final response, including any corrective re-invoke\n        # produced by WatsonXPlaceholderMiddleware.\n        if is_watsonx_model(llm):\n            middleware.append(SingleToolCallMiddleware())\n            middleware.append(WatsonXPlaceholderMiddleware())\n        return middleware\n\n    async def run_agent(self, agent) -> Message:\n        \"\"\"Run the LangGraph `CompiledStateGraph` and return the final agent Message.\n\n        Overrides the legacy `LCAgentComponent.run_agent` (which builds an\n        `{\"input\": str, \"chat_history\": [...]}` dict for `AgentExecutor`). The graph\n        wants `{\"messages\": [BaseMessage, ...]}`. The event stream is wrapped with\n        `adapt_graph_events_to_executor_shape` so the legacy `process_agent_events`\n        (in `lfx.base.agents.events`) can be reused unchanged.\n        \"\"\"\n        messages = build_initial_messages(\n            input_value=self.input_value,\n            chat_history=getattr(self, \"chat_history\", None),\n        )\n        input_dict = {\"messages\": messages}\n\n        agent_message = self._build_initial_agent_message()\n        token_usage_handler = TokenUsageCallbackHandler()\n\n        # Stream tokens to the event manager when running inside the Langflow runtime.\n        # This is what powers the live-typing view in the chat UI.\n        on_token_callback: OnTokenFunctionType | None = None\n        if getattr(self, \"_event_manager\", None):\n            on_token_callback = cast(\"OnTokenFunctionType\", self._event_manager.on_token)\n\n        # Align LangGraph's `recursion_limit` with `max_iterations` so the\n        # middleware cap (ModelCallLimitMiddleware) is what bounds the loop \u2014\n        # not LangGraph's default 25-step guard, which fires at ~12 model+tool\n        # iterations and raises a raw GraphRecursionError (QA UI-009/UI-010).\n        # Each iteration is ~2 graph steps (model node + tools node); add 5\n        # for start/end overhead.\n        recursion_limit = self._compute_recursion_limit()\n\n        stream = adapt_graph_events_to_executor_shape(\n            agent.astream_events(\n                input_dict,\n                config={\n                    \"callbacks\": [\n                        AgentAsyncHandler(self.log),\n                        token_usage_handler,\n                        *self._get_shared_callbacks(),\n                    ],\n                    \"recursion_limit\": recursion_limit,\n                },\n                version=\"v2\",\n            )\n        )\n        try:\n            result = await process_agent_events(\n                stream,\n                agent_message,\n                cast(\"SendMessageFunctionType\", self.send_message),\n                on_token_callback,\n            )\n        except ExceptionWithMessageError as e:\n            # Drop the half-stored partial message from the DB (only if it was\n            # actually persisted) and tell the frontend to remove the stale bubble.\n            if hasattr(e, \"agent_message\"):\n                msg_id = e.agent_message.get_id()\n                if msg_id:\n                    await delete_message(id_=msg_id)\n                await self._send_message_event(e.agent_message, category=\"remove_message\")\n            logger.error(f\"ExceptionWithMessageError: {e}\")\n            raise\n\n        usage_data = token_usage_handler.get_usage()\n        if usage_data:\n            self._token_usage = usage_data\n            result.properties.usage = usage_data\n            # Only round-trip the DB when the message was stored (Chat Output wired).\n            # `_should_skip_message=True` leaves `result.get_id()` empty; persisting\n            # then would create a phantom row.\n            if result.get_id():\n                stored_result = await self._update_stored_message(result)\n                await self._send_message_event(stored_result)\n                result = stored_result\n\n        self.status = result\n        return result\n\n    def _build_initial_agent_message(self) -> Message:\n        \"\"\"Construct the placeholder agent Message that `process_agent_events` mutates.\"\"\"\n        if hasattr(self, \"graph\"):\n            session_id = self.graph.session_id\n        elif hasattr(self, \"_session_id\"):\n            session_id = self._session_id\n        else:\n            session_id = None\n\n        sender_name = get_chat_output_sender_name(self) or self.display_name or \"AI\"\n        return Message(\n            sender=MESSAGE_SENDER_AI,\n            sender_name=sender_name,\n            properties={\"icon\": \"Bot\", \"state\": \"partial\"},\n            content_blocks=[ContentBlock(title=\"Agent Steps\", contents=[])],\n            session_id=session_id or uuid.uuid4(),\n        )\n\n    async def message_response(self) -> Message:\n        try:\n            llm_model, self.chat_history, self.tools = await self.get_agent_requirements()\n            # Set up and run agent\n            self.set(\n                llm=llm_model,\n                tools=self.tools or [],\n                chat_history=self.chat_history,\n                input_value=self.input_value,\n                system_prompt=self._inject_dynamic_prompt_values(self.system_prompt),\n            )\n            agent = self.create_agent_runnable()\n            result = await self.run_agent(agent)\n\n            # Store result for potential JSON output\n            self._agent_result = result\n\n        except (ValueError, TypeError, KeyError) as e:\n            await logger.aerror(f\"{type(e).__name__}: {e!s}\")\n            raise\n        except ExceptionWithMessageError as e:\n            await logger.aerror(f\"ExceptionWithMessageError occurred: {e}\")\n            raise\n        # Avoid catching blind Exception; let truly unexpected exceptions propagate\n        except Exception as e:\n            await logger.aerror(f\"Unexpected error: {e!s}\")\n            raise\n        else:\n            return result\n\n    async def json_response(self) -> Data:\n        \"\"\"Produce structured Data via native LLM structured output, with prompt-based fallback.\n\n        Native path (no tools, llm has with_structured_output) bypasses the agent loop and\n        returns provider-validated JSON. When tools are attached, falls back to running the\n        agent with a schema-augmented system prompt and parsing the final message content.\n        \"\"\"\n        from lfx.components.models_and_agents.structured_output.structured_output_orchestrator import (\n            orchestrate_structured_output,\n        )\n\n        try:\n            llm_model, self.chat_history, self.tools = await self.get_agent_requirements()\n        except (ValueError, TypeError) as exc:\n            await logger.aerror(f\"json_response.requirements_failed: {exc}\")\n            return Data(data={\"content\": \"\", \"error\": str(exc)})\n\n        injected_system_prompt = self._inject_dynamic_prompt_values(getattr(self, \"system_prompt\", \"\") or \"\") or \"\"\n        format_instructions = getattr(self, \"format_instructions\", \"\") or \"\"\n        output_schema = getattr(self, \"output_schema\", None) or []\n        has_tools = bool(self.tools)\n\n        async def _run_agent_for_fallback(augmented_prompt: str) -> str:\n            self.set(\n                llm=llm_model,\n                tools=self.tools or [],\n                chat_history=self.chat_history,\n                input_value=self.input_value,\n                system_prompt=augmented_prompt,\n            )\n            agent_runnable = self.create_agent_runnable()\n            with _suppress_send_message(self):\n                result = await self.run_agent(agent_runnable)\n            return _extract_text_content(result)\n\n        try:\n            return await orchestrate_structured_output(\n                llm=llm_model,\n                output_schema=output_schema,\n                system_prompt=injected_system_prompt,\n                format_instructions=format_instructions,\n                input_value=_extract_text_content(self.input_value),\n                run_prompt_fallback=_run_agent_for_fallback,\n                prefer_native=not has_tools,\n            )\n        except (\n            ExceptionWithMessageError,\n            ValueError,\n            TypeError,\n            NotImplementedError,\n            AttributeError,\n        ) as exc:\n            await logger.aerror(f\"json_response.orchestration_failed: {exc}\")\n            return Data(data={\"content\": \"\", \"error\": str(exc)})\n\n    async def get_memory_data(self):\n        # Scope by flow_id so default playground session names (e.g. \"New Session 0\")\n        # cannot leak chat history across unrelated flows. See issue #13059.\n        # The helper also returns [] when n_messages == 0, preserving the\n        # explicit \"memory disabled\" contract from MemoryComponent.retrieve_messages.\n        messages = await aget_agent_chat_history(\n            session_id=self.graph.session_id,\n            flow_id=getattr(self.graph, \"flow_id\", None),\n            context_id=self.context_id,\n            n_messages=self.n_messages,\n        )\n        return [\n            message for message in messages if getattr(message, \"id\", None) != getattr(self.input_value, \"id\", None)\n        ]\n\n    def update_input_types(self, build_config: dotdict) -> dotdict:\n        \"\"\"Update input types for all fields in build_config.\"\"\"\n        for key, value in build_config.items():\n            if isinstance(value, dict):\n                if value.get(\"input_types\") is None:\n                    build_config[key][\"input_types\"] = []\n            elif hasattr(value, \"input_types\") and value.input_types is None:\n                value.input_types = []\n        return build_config\n\n    async def update_build_config(\n        self,\n        build_config: dotdict,\n        field_value: list[dict],\n        field_name: str | None = None,\n    ) -> dotdict:\n        # Update model options with caching (for all field changes).\n        # The tool-calling constraint lives on the ModelInput's ``filters``\n        # field (declared above); ``handle_model_input_update`` reads it\n        # and applies the filter to both the dropdown options and the\n        # sticky-default re-injection path.\n        build_config = handle_model_input_update(\n            component=self,\n            build_config=dict(build_config),\n            field_value=field_value,\n            field_name=field_name,\n        )\n        build_config = dotdict(build_config)\n\n        if field_name == \"model\":\n            build_config = self.update_input_types(build_config)\n\n            # Validate required keys. `verbose` was dropped from the input set\n            # (see `_agent_base_inputs` \u2014 the create_agent event stream already\n            # surfaces every step), so it is intentionally NOT required here.\n            # Saved flows that still carry a `verbose` value just ignore it on\n            # load.\n            default_keys = [\n                \"code\",\n                \"_type\",\n                \"model\",\n                \"tools\",\n                \"input_value\",\n                \"add_current_date_tool\",\n                \"add_calculator_tool\",\n                \"system_prompt\",\n                \"max_iterations\",\n                \"handle_parsing_errors\",\n            ]\n            missing_keys = [key for key in default_keys if key not in build_config]\n            if missing_keys:\n                msg = f\"Missing required keys in build_config: {missing_keys}\"\n                raise ValueError(msg)\n        return dotdict({k: v.to_dict() if hasattr(v, \"to_dict\") else v for k, v in build_config.items()})\n\n    async def _get_tools(self) -> list[Tool]:\n        component_toolkit = get_component_toolkit()\n\n        tools = component_toolkit(component=self).get_tools(\n            tool_name=\"Call_Agent\",\n            # here we do not use the shared callbacks as we are exposing the agent as a tool\n            callbacks=self.get_langchain_callbacks(),\n        )\n        if hasattr(self, \"tools_metadata\"):\n            tools = component_toolkit(component=self, metadata=self.tools_metadata).update_tools_metadata(tools=tools)\n\n        return tools\n"
+              },
+              "context_id": {
+                "_input_type": "MessageTextInput",
+                "advanced": true,
+                "display_name": "Context ID",
+                "dynamic": false,
+                "info": "The context ID of the chat. Adds an extra layer to the local memory.",
+                "input_types": [
+                  "Message"
+                ],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "name": "context_id",
+                "override_skip": false,
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "track_in_telemetry": false,
+                "type": "str",
+                "value": ""
+              },
+              "format_instructions": {
+                "_input_type": "MultilineInput",
+                "advanced": true,
+                "ai_enabled": false,
+                "copy_field": false,
+                "display_name": "Output Format Instructions",
+                "dynamic": false,
+                "info": "Generic Template for structured output formatting. Valid only with Structured response.",
+                "input_types": [
+                  "Message"
+                ],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "multiline": true,
+                "name": "format_instructions",
+                "override_skip": false,
+                "password": false,
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "track_in_telemetry": false,
+                "type": "str",
+                "value": "You are an AI that extracts structured JSON objects from unstructured text. Use a predefined schema with expected types (str, int, float, bool, dict). Extract ALL relevant instances that match the schema - if multiple patterns exist, capture them all. Fill missing or ambiguous values with defaults: null for missing values. Remove exact duplicates but keep variations that have different field values. Always return valid JSON in the expected format, never throw errors. If multiple objects can be extracted, return them all in the structured format."
+              },
+              "handle_parsing_errors": {
+                "_input_type": "BoolInput",
+                "advanced": true,
+                "display_name": "Handle Parse Errors",
+                "dynamic": false,
+                "info": "Adds tool-execution retry as a safety net. `create_agent` already feeds tool-call validation errors back to the LLM automatically; this flag layers `ToolRetryMiddleware` on top so transient tool runtime failures are retried (max 2 retries).",
+                "input_types": [],
+                "list": false,
+                "list_add_label": "Add More",
+                "name": "handle_parsing_errors",
+                "override_skip": false,
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_metadata": true,
+                "track_in_telemetry": true,
+                "type": "bool",
+                "value": true
+              },
+              "input_value": {
+                "_input_type": "MessageInput",
+                "advanced": false,
+                "display_name": "Input",
+                "dynamic": false,
+                "info": "The input provided by the user for the agent to process.",
+                "input_types": [
+                  "Message"
+                ],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "name": "input_value",
+                "override_skip": false,
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": true,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "track_in_telemetry": false,
+                "type": "str",
+                "value": ""
+              },
+              "is_refresh": false,
+              "max_iterations": {
+                "_input_type": "IntInput",
+                "advanced": true,
+                "display_name": "Max Iterations",
+                "dynamic": false,
+                "info": "Maximum number of model calls the agent can make before stopping (maps to `ModelCallLimitMiddleware.run_limit` on the create_agent path). Must be at least 1 \u2014 it is a safety cap, never 'unlimited'.",
+                "input_types": [],
+                "list": false,
+                "list_add_label": "Add More",
+                "name": "max_iterations",
+                "override_skip": false,
+                "placeholder": "",
+                "range_spec": {
+                  "max": 128000,
+                  "min": 1,
+                  "step": 1,
+                  "step_type": "int"
+                },
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_metadata": true,
+                "track_in_telemetry": true,
+                "type": "int",
+                "value": 15
+              },
+              "max_tokens": {
+                "_input_type": "IntInput",
+                "advanced": true,
+                "display_name": "Max Tokens",
+                "dynamic": false,
+                "info": "Maximum number of tokens to generate. Field name varies by provider.",
+                "input_types": [],
+                "list": false,
+                "list_add_label": "Add More",
+                "name": "max_tokens",
+                "override_skip": false,
+                "placeholder": "",
+                "range_spec": {
+                  "max": 128000,
+                  "min": 1,
+                  "step": 1,
+                  "step_type": "int"
+                },
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_metadata": true,
+                "track_in_telemetry": true,
+                "type": "int",
+                "value": 8192
+              },
+              "model": {
+                "_input_type": "ModelInput",
+                "advanced": false,
+                "display_name": "Language Model",
+                "dynamic": false,
+                "external_options": {
+                  "fields": {
+                    "data": {
+                      "node": {
+                        "display_name": "Connect other models",
+                        "icon": "CornerDownLeft",
+                        "name": "connect_other_models"
+                      }
+                    }
+                  }
+                },
+                "filters": {
+                  "tool_calling": true
+                },
+                "info": "Select your model provider",
+                "input_types": [
+                  "LanguageModel"
+                ],
+                "list": false,
+                "list_add_label": "Add More",
+                "model_type": "language",
+                "name": "model",
+                "options": [
+                  {
+                    "category": "OpenAI",
+                    "icon": "OpenAI",
+                    "metadata": {
+                      "api_key_param": "api_key",
+                      "context_length": 128000,
+                      "max_tokens_field_name": "max_tokens",
+                      "model_class": "ChatOpenAI",
+                      "model_name_param": "model"
+                    },
+                    "name": "global/tinfoil/llama3-3-70b",
+                    "provider": "OpenAI"
+                  },
+                  {
+                    "category": "OpenAI",
+                    "icon": "OpenAI",
+                    "metadata": {
+                      "api_key_param": "api_key",
+                      "context_length": 128000,
+                      "max_tokens_field_name": "max_tokens",
+                      "model_class": "ChatOpenAI",
+                      "model_name_param": "model"
+                    },
+                    "name": "global/tinfoil/voxtral-small-24b",
+                    "provider": "OpenAI"
+                  },
+                  {
+                    "category": "OpenAI",
+                    "icon": "OpenAI",
+                    "metadata": {
+                      "api_key_param": "api_key",
+                      "context_length": 128000,
+                      "max_tokens_field_name": "max_tokens",
+                      "model_class": "ChatOpenAI",
+                      "model_name_param": "model"
+                    },
+                    "name": "global/redpill/gpt-oss-20b",
+                    "provider": "OpenAI"
+                  },
+                  {
+                    "category": "OpenAI",
+                    "icon": "OpenAI",
+                    "metadata": {
+                      "api_key_param": "api_key",
+                      "context_length": 128000,
+                      "max_tokens_field_name": "max_tokens",
+                      "model_class": "ChatOpenAI",
+                      "model_name_param": "model"
+                    },
+                    "name": "global/chutes/kimi-k2.6",
+                    "provider": "OpenAI"
+                  },
+                  {
+                    "category": "OpenAI",
+                    "icon": "OpenAI",
+                    "metadata": {
+                      "api_key_param": "api_key",
+                      "context_length": 128000,
+                      "max_tokens_field_name": "max_tokens",
+                      "model_class": "ChatOpenAI",
+                      "model_name_param": "model"
+                    },
+                    "name": "global/tinfoil/kimi-k2.6",
+                    "provider": "OpenAI"
+                  },
+                  {
+                    "icon": "OpenAI",
+                    "metadata": {
+                      "created": 0,
+                      "default": false,
+                      "deprecated": false,
+                      "icon": "OpenAI",
+                      "model_type": "llm",
+                      "not_enabled_locally": true,
+                      "not_supported": false,
+                      "preview": false,
+                      "reasoning": false,
+                      "search": false,
+                      "tool_calling": true
+                    },
+                    "name": "global/nearai/deepseek-v4-flash",
+                    "provider": "OpenAI"
+                  }
+                ],
+                "override_skip": false,
+                "placeholder": "Setup Provider",
+                "real_time_refresh": true,
+                "refresh_button": true,
+                "required": true,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "track_in_telemetry": false,
+                "type": "model",
+                "value": [
+                  {
+                    "icon": "OpenAI",
+                    "metadata": {
+                      "created": 0,
+                      "default": false,
+                      "deprecated": false,
+                      "icon": "OpenAI",
+                      "model_type": "llm",
+                      "not_supported": false,
+                      "preview": false,
+                      "reasoning": false,
+                      "search": false,
+                      "tool_calling": true
+                    },
+                    "name": "global/nearai/glm-5.2",
+                    "provider": "OpenAI"
+                  }
+                ]
+              },
+              "n_messages": {
+                "_input_type": "IntInput",
+                "advanced": true,
+                "display_name": "Number of Chat History Messages",
+                "dynamic": false,
+                "info": "Number of chat history messages to retrieve.",
+                "input_types": [],
+                "list": false,
+                "list_add_label": "Add More",
+                "name": "n_messages",
+                "override_skip": false,
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_metadata": true,
+                "track_in_telemetry": true,
+                "type": "int",
+                "value": 100
+              },
+              "output_schema": {
+                "_input_type": "TableInput",
+                "advanced": true,
+                "display_name": "Output Schema",
+                "dynamic": false,
+                "info": "Schema Validation: Define the structure and data types for structured output. No validation if no output schema.",
+                "input_types": [
+                  "DataFrame",
+                  "Table"
+                ],
+                "is_list": true,
+                "list_add_label": "Add More",
+                "name": "output_schema",
+                "override_skip": false,
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "table_icon": "Table",
+                "table_schema": [
+                  {
+                    "default": "field",
+                    "description": "Specify the name of the output field.",
+                    "display_name": "Name",
+                    "edit_mode": "inline",
+                    "name": "name",
+                    "type": "str"
+                  },
+                  {
+                    "default": "description of field",
+                    "description": "Describe the purpose of the output field.",
+                    "display_name": "Description",
+                    "edit_mode": "popover",
+                    "name": "description",
+                    "type": "str"
+                  },
+                  {
+                    "default": "str",
+                    "description": "Indicate the data type of the output field (e.g., str, int, float, bool, dict).",
+                    "display_name": "Type",
+                    "edit_mode": "inline",
+                    "name": "type",
+                    "options": [
+                      "str",
+                      "int",
+                      "float",
+                      "bool",
+                      "dict"
+                    ],
+                    "type": "str"
+                  },
+                  {
+                    "default": "False",
+                    "description": "Set to True if this output field should be a list of the specified type.",
+                    "display_name": "As List",
+                    "edit_mode": "inline",
+                    "name": "multiple",
+                    "type": "boolean"
+                  }
+                ],
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_metadata": true,
+                "track_in_telemetry": false,
+                "trigger_icon": "Table",
+                "trigger_text": "Open table",
+                "type": "table",
+                "value": [
+                  {
+                    "enum": [
+                      "clarificationRequired",
+                      "requestComplete",
+                      "failure"
+                    ],
+                    "name": "outcome",
+                    "required": true,
+                    "type": "str"
+                  },
+                  {
+                    "name": "facts",
+                    "required": false,
+                    "type": "object"
+                  },
+                  {
+                    "name": "missing_fields",
+                    "required": false,
+                    "type": "array"
+                  },
+                  {
+                    "name": "clarification_field",
+                    "required": false,
+                    "type": "str"
+                  },
+                  {
+                    "name": "safe_user_message",
+                    "required": false,
+                    "type": "str"
+                  },
+                  {
+                    "name": "request_id",
+                    "required": false,
+                    "type": "str"
+                  },
+                  {
+                    "name": "status",
+                    "required": false,
+                    "type": "str"
+                  },
+                  {
+                    "name": "error",
+                    "required": false,
+                    "type": "str"
+                  }
+                ]
+              },
+              "project_id": {
+                "_input_type": "StrInput",
+                "advanced": false,
+                "display_name": "watsonx Project ID",
+                "dynamic": false,
+                "info": "The project ID associated with the foundation model (IBM watsonx.ai only)",
+                "input_types": [],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "name": "project_id",
+                "override_skip": false,
+                "placeholder": "",
+                "required": false,
+                "show": false,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_metadata": true,
+                "track_in_telemetry": false,
+                "type": "str",
+                "value": ""
+              },
+              "stream": {
+                "_input_type": "BoolInput",
+                "advanced": true,
+                "display_name": "Stream",
+                "dynamic": false,
+                "info": "Stream the response from the model. Streaming works only in Chat.",
+                "input_types": [],
+                "list": false,
+                "list_add_label": "Add More",
+                "name": "stream",
+                "override_skip": false,
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_metadata": true,
+                "track_in_telemetry": true,
+                "type": "bool",
+                "value": true
+              },
+              "system_prompt": {
+                "_input_type": "MultilineInput",
+                "advanced": false,
+                "ai_enabled": false,
+                "copy_field": false,
+                "display_name": "Agent Instructions",
+                "dynamic": false,
+                "info": "System Prompt: Initial instructions and context provided to guide the agent's behavior. Supports dynamic placeholders: {current_date}, {model_name}, {optional_user_context}.",
+                "input_types": [
+                  "Message"
+                ],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "multiline": true,
+                "name": "system_prompt",
+                "override_skip": false,
+                "password": false,
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "track_in_telemetry": false,
+                "type": "str",
+                "value": "DO NOT narrate your steps. DO NOT explain your reasoning in prose. Silently call whichever tools you need, then respond with ONLY the final JSON object -- no text before it, no text after it, no markdown code fences. Narration between tool calls has previously caused your response to be cut off before reaching the JSON.\n\nYou are an AI agent responsible for intake processing in a parcel brokerage system.\n\nCRITICAL: You MUST return a valid JSON IntakeResult object. Never return plain text explanations.\n\nIntakeResult JSON Schema:\n{\n  \"outcome\": \"clarificationRequired\" | \"requestComplete\" | \"failure\",\n  \"facts\": { /* IntakeFacts with sender_actor_id, receiver_name, etc. */ },\n  \"missing_fields\": [\"field_name1\", \"field_name2\"],\n  \"clarification_field\": \"<field_name_or_null>\",\n  \"safe_user_message\": \"<message_for_user>\",\n  \"request_id\": \"<created_id_or_null>\",\n  \"status\": \"<status_or_null>\",\n  \"error\": \"<error_or_null>\"\n}\n\nCRITICAL: \"facts\" MUST use EXACTLY these eight key names, nothing else:\nsender_actor_id, sender_display_name, receiver_name, receiver_stable_id,\npickup_location, drop_off_location, parcel_declared_content, preferred_period.\nDo NOT confuse \"sender_actor_id\" (the trusted actor URN -- goes in \"facts\") with\n\"sender_id\" (a generated GRAPH NODE ID returned by the Graph Identifiers\nGenerator tool in Step A -- goes in \"identifiers\", a completely different object).\nThese name two different concepts; \"sender_id\" is never a valid key inside \"facts\" --\nconfirmed live: using it there gets the whole IntakeResult rejected.\n\nCRITICAL: every optional \"facts\" field you do not have a value for MUST be the JSON value null -- NEVER an empty string \"\". The schema requires at least 1 character for every populated text field (receiver_name, receiver_stable_id, pickup_location, drop_off_location, parcel_declared_content, preferred_period, sender_display_name); \"\" fails that check and the whole IntakeResult gets rejected -- confirmed live. If a field is unknown or not yet provided, omit a value by setting it to null, never to an empty string.\n\nCRITICAL VALIDATION CONSTRAINTS (YOU WILL BE REJECTED IF YOU VIOLATE THESE):\n1. If outcome=\"requestComplete\": MUST have request_id (non-empty string), MUST NOT include error\n2. If outcome=\"clarificationRequired\": MUST have clarification_field (non-empty string), MUST NOT include error\n3. If outcome=\"failure\": MUST have error (non-empty string), MUST NOT have request_id or clarification_field\n4. error field is ONLY allowed with outcome=\"failure\"\n5. clarification_field is ONLY allowed with outcome=\"clarificationRequired\"\n\nWORKFLOW:\n1. Extract facts ONLY from what the user explicitly provides this turn.\n2. Use sender_actor_id from session metadata.\n3. The three critical fields are: (receiver_name OR receiver_stable_id), pickup_location,\n   drop_off_location.\n4. Check routing_context FIRST, before anything else:\n   - If routing_context.binding_state == \"bound\" AND routing_context.request_status ==\n     \"needsClarification\": this is turn 2+ of an existing draft. Follow the CONTINUING DRAFT\n     workflow (step 5) below.\n   - Otherwise: this is the first turn for this request. Follow the NEW DRAFT workflow (step 6)\n     below.\n\n5. CONTINUING DRAFT workflow (routing_context.request_id is set, status is needsClarification):\n\n  Step R: Call the LF-70 tool with a \"readDeliveryRequest\" operation to get the draft's current\n    state. Same \"flow_tweak_data\" shape as every LF-70 call in this prompt:\n    {\n      \"HulubulDataOperationRequestBoundary-hlb-lf-70-request-v1~input_value\": \"<the operation payload JSON as a STRING>\"\n    }\n    Payload:\n    {\n      \"operation\": \"readDeliveryRequest\",\n      \"operation_id\": \"<any unique string>\",\n      \"caller\": \"LF-10\",\n      \"session_id\": \"<the envelope's session_id, verbatim>\",\n      \"actor_id\": \"<the sender's actor_id, verbatim>\",\n      \"schema_version\": \"1.0.0\",\n      \"correlation_id\": \"<the envelope's correlation_id, verbatim>\",\n      \"request_id\": \"<routing_context.request_id, verbatim>\"\n    }\n    The response's \"result\" is a snapshot: {request_id, status, updated_at, facts, missing_fields}.\n    \"facts\" is what is already known and persisted -- never ask about or re-collect anything\n    already present there.\n\n  CRITICAL -- attributing an unqualified answer: if this turn's message does not explicitly\n    self-label which field it answers (no qualifier like \"pickup:\", \"drop-off is\", \"it\n    contains\"), it is answering the clarification question rendered to the user last turn.\n    That field is DETERMINISTICALLY missing_fields[0] from the Step R snapshot you just read\n    -- the fixed priority order is always receiver identity, pickup_location, drop_off_location,\n    parcel_declared_content (this is not a heuristic: the renderer that asked the question\n    always picks the first entry of missing_fields, in that fixed order, nothing else).\n    Attribute an unqualified short answer to missing_fields[0], never to a different field,\n    even if the message could plausibly describe another field too. Only assign a value to a\n    field OTHER than missing_fields[0] when the message explicitly names or unambiguously\n    qualifies that other field. Confirmed live: a bare answer like \"Warsaw, royal st. 12\" to\n    \"Where should the parcel be picked up?\" was previously misfiled as drop_off_location\n    instead of pickup_location, leaving pickup_location missing forever and the same question\n    asked on every subsequent turn.\n\n  Merge: combine the snapshot's \"facts\" with whatever new facts the user supplies this turn. A\n    field supplied this turn overrides the same field from the snapshot; every other field\n    already in the snapshot is kept exactly as read.\n\n  Step I (only if this turn's message supplies a genuinely NEW fact the snapshot did not already\n    have -- e.g. pickup_location or drop_off_location for the first time): call the \"Graph\n    Identifiers Generator\" tool, passing only the new fact(s) this turn adds (never facts already\n    present in the snapshot -- those already have identifiers). Its response's newly generated\n    identifier(s) go into Step U's \"identifiers\" field below. If this turn adds nothing that needs\n    a new identifier, skip this step and send an empty identifiers object in Step U.\n\n  Step U: Call the LF-70 tool with an \"updateDeliveryRequest\" operation:\n    {\n      \"operation\": \"updateDeliveryRequest\",\n      \"operation_id\": \"<any unique string, different from Step R's>\",\n      \"caller\": \"LF-10\",\n      \"session_id\": \"<the envelope's session_id, verbatim>\",\n      \"actor_id\": \"<the sender's actor_id, verbatim>\",\n      \"schema_version\": \"1.0.0\",\n      \"correlation_id\": \"<the envelope's correlation_id, verbatim>\",\n      \"request_id\": \"<from the Step R snapshot>\",\n      \"expected_updated_at\": \"<updated_at from the Step R snapshot, verbatim>\",\n      \"expected_status\": \"needsClarification\",\n      \"updates\": { /* ONLY the new fact(s) this turn supplies -- a sparse patch, never re-send a\n                      fact already present in the Step R snapshot */ },\n      \"identifiers\": { /* the object from Step I if it ran, otherwise an empty object {} */ }\n    }\n    Capture updated_at from this response for Step T below.\n\n  Step T: Check whether the MERGED fact set (Step R's snapshot facts plus this turn's new facts)\n    now satisfies all three critical fields.\n    - If yes: call the LF-70 tool once more with a \"setRequestStatus\" operation:\n      {\n        \"operation\": \"setRequestStatus\",\n        \"operation_id\": \"<any unique string, different from the others above>\",\n        \"caller\": \"LF-10\",\n        \"session_id\": \"<the envelope's session_id, verbatim>\",\n        \"actor_id\": \"<the sender's actor_id, verbatim>\",\n        \"schema_version\": \"1.0.0\",\n        \"correlation_id\": \"<the envelope's correlation_id, verbatim>\",\n        \"request_id\": \"<from the Step R snapshot>\",\n        \"expected_updated_at\": \"<updated_at from Step U's response, verbatim>\",\n        \"expected_status\": \"needsClarification\",\n        \"target_status\": \"complete\"\n      }\n      If it confirms, the request's status is now complete. If it does not confirm, Step U's\n      update still persisted -- do NOT report a failure; report status=\"needsClarification\"\n      instead of \"complete\".\n    - If no: do not call setRequestStatus. The draft stays at status=\"needsClarification\".\n\n  Return IntakeResult using the MERGED facts (Step R's snapshot plus this turn's additions, not\n    just this turn's facts alone), the resulting status from Step T, request_id from the Step R\n    snapshot, and -- if still incomplete -- missing_fields/clarification_field selected from\n    whatever remains missing after the merge. Never re-ask about a field the snapshot or this\n    turn already supplied.\n\n6. NEW DRAFT workflow (no existing binding, routing_context.binding_state == \"absent\"):\n\n  Step A: Call the \"Graph Identifiers Generator\" tool FIRST, before calling LF-70. Pass it:\n    actor_id (the sender's actor_id from session metadata), receiver_name (if present),\n    receiver_stable_id (if present), parcel_declared_content (if present), pickup_location\n    (if present), drop_off_location (if present). Omit any field the user has not supplied --\n    never invent a value to fill it in. This tool deterministically generates the graph\n    identifiers (request_id, sender_id, sender_agent_id, and receiver/parcel/place IDs\n    if applicable, allocated only for what you actually supplied) -- you must NEVER invent\n    these identifiers yourself. Its JSON response is the exact object to use as the\n    \"identifiers\" field in Step B below, unchanged.\n\n  Step B: Call the LF-70 tool. Its argument is a JSON object called\n    \"flow_tweak_data\" with EXACTLY ONE key:\n\n    {\n      \"HulubulDataOperationRequestBoundary-hlb-lf-70-request-v1~input_value\": \"<the operation payload JSON as a STRING, see shape below>\"\n    }\n\n    Send only that key. Transport details are supplied by the component itself.\n\n    The \"~input_value\" value is a JSON string (escaped, as a string value) shaped EXACTLY\n    like this (flat top-level fields, no nested \"data\" wrapper):\n    {\n      \"operation\": \"createDeliveryRequest\",\n      \"operation_id\": \"<any unique string, e.g. reuse the correlation_id>\",\n      \"caller\": \"LF-10\",\n      \"session_id\": \"<the envelope's session_id, verbatim>\",\n      \"actor_id\": \"<the sender's actor_id, verbatim>\",\n      \"schema_version\": \"1.0.0\",\n      \"correlation_id\": \"<the envelope's correlation_id, verbatim>\",\n      \"identifiers\": { /* the ENTIRE JSON object returned by Graph Identifiers Generator in Step A, verbatim -- do not add, remove, or rename any key */ },\n      \"facts\": {\n        /* only the fields the user actually supplied, exactly as extracted -- omit anything\n           not provided, never a placeholder. Use these key names precisely:\n           receiver_name, pickup_location, drop_off_location, parcel_declared_content */\n      }\n    }\n    \"identifiers\" and \"facts\" are flat sibling fields at the top level of the operation payload\n    -- never nest them under a \"data\" key.\n\n  - Capture request_id and updated_at from LF-70's response to Step B (this is the same\n    request_id the Graph Identifiers Generator tool returned in Step A).\n\n  Step C: Transition the new request to its real status. Call the LF-70 tool again, same\n    \"flow_tweak_data\" shape as Step B, with this operation payload:\n    {\n      \"operation\": \"setRequestStatus\",\n      \"operation_id\": \"<any unique string, different from Step B's>\",\n      \"caller\": \"LF-10\",\n      \"session_id\": \"<the envelope's session_id, verbatim>\",\n      \"actor_id\": \"<the sender's actor_id, verbatim>\",\n      \"schema_version\": \"1.0.0\",\n      \"correlation_id\": \"<the envelope's correlation_id, verbatim>\",\n      \"request_id\": \"<the request_id from Step B's response>\",\n      \"expected_updated_at\": \"<the updated_at from Step B's response, verbatim>\",\n      \"expected_status\": \"new\",\n      \"target_status\": \"complete\" /* if all three critical fields were present in step 3 above,\n                                      otherwise \"needsClarification\" */\n    }\n  - If this call confirms (outcome=\"confirmed\"), the request's status is now the target_status\n    you sent.\n  - If it does not confirm (rejected, or any error), the request from Step B still persisted\n    successfully -- do NOT report a failure. Use \"new\" as the final status instead of the\n    intended target_status; everything else about the response is unaffected.\n\n7. Return IntakeResult (for the NEW DRAFT workflow; the CONTINUING DRAFT workflow's own return\n   shape is specified in step 5 above):\n\n   If all three critical fields were present (step 3 above):\n     * outcome=\"requestComplete\"\n     * facts populated with all extracted data\n     * request_id set to the value from Step B\n     * status set per Step C's outcome (see above)\n     * missing_fields=[] (empty array)\n     * clarification_field=null\n     * error=null (MUST NOT include error)\n\n   If any critical field was missing (step 3 above):\n     * outcome=\"clarificationRequired\"\n     * facts populated with what's known\n     * request_id set to the value from Step B\n     * status set per Step C's outcome (see above)\n     * missing_fields=[list of all missing fields]\n     * clarification_field=\"ONE specific field needing clarification\"\n     * clarification_field MUST be exactly one of these five names, and nothing else:\n       \"receiver_identity\", \"pickup_location\", \"drop_off_location\",\n       \"parcel_declared_content\", \"preferred_period\".\n       These are the only names the downstream renderer has a question for. Use\n       \"receiver_identity\" when the receiver is unknown -- NOT \"receiver_name\",\n       even though the facts object uses receiver_name. missing_fields is not\n       constrained this way; only clarification_field is.\n     * error=null (MUST NOT include error)\n\nIF ANY ERROR occurs:\n  - Return EXACTLY this JSON shape, with ONLY these two keys -- no facts, no status, no\n    missing_fields, no safe_user_message, no clarification_field, no request_id key at all\n    (not even set to null -- OMIT the key entirely):\n    {\"outcome\": \"failure\", \"error\": \"<human-readable error message>\"}\n    This is validated strictly: including ANY other key (even set to null) is REJECTED.\n    Copy this exact two-key shape every time you report a failure.\n\nCRITICAL FIELDS (minimum for requestComplete):\n- sender_actor_id (from session metadata, required for any outcome)\n- receiver_name OR receiver_stable_id (at least one required for requestComplete)\n- pickup_location (required for requestComplete)\n- drop_off_location (required for requestComplete)\n\nALWAYS RETURN VALID JSON FOLLOWING THE CONSTRAINTS ABOVE. Your final answer is ONLY the JSON object -- no prose before it, no prose after it, no markdown code fences around it, for every outcome including clarificationRequired. This applies even on a repair retry after a rejected response: do not explain what went wrong or what you are changing, just return the corrected JSON object."
+              },
+              "tools": {
+                "_input_type": "HandleInput",
+                "advanced": false,
+                "display_name": "Tools",
+                "dynamic": false,
+                "info": "These are the tools that the agent can use to help with tasks.",
+                "input_types": [
+                  "Tool"
+                ],
+                "list": true,
+                "list_add_label": "Add More",
+                "name": "tools",
+                "override_skip": false,
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "trace_as_metadata": true,
+                "track_in_telemetry": false,
+                "type": "other",
+                "value": ""
+              }
+            },
+            "tool_mode": false
+          },
+          "selected_output": "response",
+          "type": "Agent"
+        },
+        "dragging": false,
+        "id": "Agent-hlb-lf-10-request-intake-v1",
+        "measured": {
+          "height": 431,
+          "width": 320
+        },
+        "position": {
+          "x": 400,
+          "y": 0
+        },
+        "selected": false,
+        "type": "genericNode"
+      },
+      {
+        "data": {
+          "id": "RunFlow-hlb-lf-10-data-access-v1",
+          "node": {
+            "base_classes": [],
+            "beta": true,
+            "conditional_paths": [],
+            "custom_fields": {},
+            "description": "Executes another flow from within the same project, with Hulubul's cross-flow tool-schema and input-injection fixes. Can also be used as a tool for agents.\n **Select a Flow to use the tool mode**",
+            "display_name": "Hulubul Run Flow",
+            "documentation": "https://docs.langflow.org/run-flow",
+            "edited": false,
+            "field_order": [
+              "flow_name_selected",
+              "flow_id_selected",
+              "session_id",
+              "cache_flow"
+            ],
+            "frozen": false,
+            "icon": "Workflow",
+            "id": "RunFlow-hlb-lf-10-data-access-v1",
+            "last_updated": "2026-07-28T13:54:53.640Z",
+            "legacy": false,
+            "metadata": {
+              "code_hash": "a5a2338c3fe9",
+              "dependencies": {
+                "dependencies": [
+                  {
+                    "name": "lfx",
+                    "version": "1.10.2"
+                  },
+                  {
+                    "name": "hulubul",
+                    "version": null
+                  }
+                ],
+                "total_dependencies": 2
+              },
+              "module": "custom_components.run_flow"
+            },
+            "minimized": false,
+            "output_types": [],
+            "outputs": [
+              {
+                "allows_loop": false,
+                "cache": true,
+                "display_name": "Toolset",
+                "group_outputs": false,
+                "hidden": null,
+                "loop_types": null,
+                "method": "to_toolkit",
+                "name": "component_as_tool",
+                "options": null,
+                "required_inputs": null,
+                "selected": "Tool",
+                "tool_mode": true,
+                "types": [
+                  "Tool"
+                ],
+                "value": "__UNDEFINED__"
+              }
+            ],
+            "pinned": false,
+            "template": {
+              "_frontend_node_flow_id": {
+                "value": "6843ae79-147f-55d4-a25b-01d6143a12cc"
+              },
+              "_frontend_node_folder_id": {
+                "value": "a6f9eb0d-e26e-4d3d-9232-fe1704342cd4"
+              },
+              "_type": "Component",
+              "cache_flow": {
+                "_input_type": "BoolInput",
+                "advanced": true,
+                "display_name": "Cache Flow",
+                "dynamic": false,
+                "info": "Whether to cache the selected flow.",
+                "list": false,
+                "list_add_label": "Add More",
+                "name": "cache_flow",
+                "override_skip": false,
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_metadata": true,
+                "track_in_telemetry": true,
+                "type": "bool",
+                "value": false
+              },
+              "code": {
+                "advanced": true,
+                "dynamic": true,
+                "fileTypes": [],
+                "file_path": "",
+                "info": "",
+                "list": false,
+                "load_from_db": false,
+                "multiline": true,
+                "name": "code",
+                "password": false,
+                "placeholder": "",
+                "required": true,
+                "show": true,
+                "title_case": false,
+                "type": "code",
+                "value": "\"\"\"Run Flow variant that fixes stock ``RunFlow``'s cross-flow defects.\n\nDrop-in replacement for LangFlow's built-in **Run Flow** node. It fixes four\n``lfx==1.10.2`` defects and inherits everything else, so flow selection, output\nmapping, graph caching and tool exposure keep working as they do upstream:\n\n1. which target-flow fields become model-callable tool arguments\n   (``get_required_data``),\n2. which input category runtime payloads carry\n   (``_build_inputs_from_ioputs``),\n3. whether an agent's tool arguments reach the run that consumes them\n   (``_register_flow_output_method`` and ``__deepcopy__`` together), and\n4. whether a tool call survives a per-call copy when a cached tool-mode\n   output carries a live, unpicklable object (``__deepcopy__``).\n\nThe pure decisions (1, 2 and 4) live in\n:mod:`hulubul.request_intake.entrypoints.langflow.run_flow_policy`, which\ndocuments the defects being worked around and is unit-tested without a\nLangFlow installation. Nothing here monkey-patches ``lfx``.\n\nEvery override touches private ``lfx`` internals, so re-run the unit tests\nafter every ``lfx`` upgrade -- upstream may fix any of these, at which point\nthe corresponding override should be deleted rather than left as dead\ncompatibility code.\n\"\"\"\n\nfrom __future__ import annotations\n\nfrom copy import deepcopy\nfrom typing import Any, cast\n\nfrom lfx.components.flow_controls.run_flow import RunFlowComponent\nfrom lfx.log.logger import logger\nfrom lfx.schema.dotdict import dotdict\n\nfrom hulubul.request_intake.entrypoints.langflow.run_flow_policy import (\n    deepcopy_outputs_with_fallback,\n    excluded_field_names,\n    select_model_callable_fields,\n    with_unrestricted_input_type,\n)\n\n__all__ = [\"HulubulRunFlowComponent\"]\n\n\nclass HulubulRunFlowComponent(RunFlowComponent):\n    \"\"\"Execute another flow, with the cross-flow schema and injection fixes.\"\"\"\n\n    display_name = \"Hulubul Run Flow\"\n    description = (\n        \"Executes another flow from within the same project, with Hulubul's \"\n        \"cross-flow tool-schema and input-injection fixes. Can also be used as \"\n        \"a tool for agents.\\n **Select a Flow to use the tool mode**\"\n    )\n    documentation: str = \"https://docs.langflow.org/run-flow\"\n    name = \"HulubulRunFlow\"\n    icon = \"Workflow\"\n\n    # Detach the templates from the built-in component's class attributes, for\n    # the same reason the built-in detaches from its own base: the per-instance\n    # copies Component.__init__ makes must not alias a shared list.\n    inputs = deepcopy(RunFlowComponent.inputs)\n    outputs = deepcopy(RunFlowComponent.outputs)\n\n    async def get_required_data(self) -> tuple[str, list[dotdict]] | None:\n        \"\"\"Expose only the target-flow fields that are safe as tool arguments.\n\n        Withholding a field here keeps it off the model-callable tool schema\n        only; the node's own build config still carries it, so a fixed edge\n        into that field survives and keeps feeding the target flow.\n        \"\"\"\n        required_data = await super().get_required_data()\n        if required_data is None:\n            return None\n\n        flow_description, fields = required_data\n        if withheld := excluded_field_names(fields):\n            logger.debug(\n                f\"{self.name}: withheld {withheld} from the tool schema of \"\n                f\"flow {self.flow_name_selected!r} (connection-only or \"\n                f\"unmappable field types)\"\n            )\n        return flow_description, [dotdict(field) for field in select_model_callable_fields(fields)]\n\n    def _build_inputs_from_ioputs(\n        self,\n        ioputs: dict[str, dict[str, Any]],\n    ) -> list[dict[str, Any]]:\n        \"\"\"Stop the target flow's non-ChatInput boundary from being skipped.\"\"\"\n        return with_unrestricted_input_type(super()._build_inputs_from_ioputs(ioputs))\n\n    def _register_flow_output_method(self, *, vertex_id: str, output_name: str) -> str:\n        \"\"\"Name the dynamic resolver after the attribute it is published under.\n\n        Half of the tool-argument fix. Upstream stores the resolver as an\n        instance attribute named ``_resolve_flow_output__<vertex>__<output>``\n        while the closure behind it is still called ``_dynamic_resolver``.\n        ``ComponentToolkit`` re-resolves the method on the per-call copy it\n        makes, by ``getattr(copy, output_method.__name__)`` -- so it looks for\n        ``_dynamic_resolver``, misses, and silently falls back to the method\n        bound to the *original* component. See :meth:`__deepcopy__` for what\n        that costs and for the other half.\n\n        Each registration builds its own closure, so this renames nothing\n        shared.\n        \"\"\"\n        method_name = super()._register_flow_output_method(\n            vertex_id=vertex_id, output_name=output_name\n        )\n        getattr(self, method_name).__func__.__name__ = method_name\n        return method_name\n\n    def __deepcopy__(self, memo: dict[Any, Any]) -> HulubulRunFlowComponent:\n        \"\"\"Carry the dynamic flow-output resolvers onto the per-call copy.\n\n        The other half of the tool-argument fix. ``ComponentToolkit`` copies the\n        component per tool call, applies the agent's arguments to the copy, and\n        then calls the resolver. But ``Component.__deepcopy__`` rebuilds the\n        instance from its config and inputs and re-attaches a fixed set of\n        fields, so dynamically registered resolvers do not come across -- the\n        lookup on the copy fails and execution lands on the original, which\n        never received ``flow_tweak_data``. The target flow then runs with an\n        empty ``input_value`` and its boundary rejects the call as\n        ``INVALID_CONTRACT``, with nothing in the agent's own trace to explain\n        it: the tool call it logged was well-formed.\n\n        The copy's ``_outputs_map`` is restored by the time we get here, so\n        re-registering from it rebinds one resolver per dynamic flow output to\n        the copy.\n\n        A third, unrelated defect lives in the same base method:\n        ``Component.__deepcopy__`` deep-copies ``self._outputs_map`` with no\n        protection, unlike the try/except-and-shallow-copy fallback it already\n        applies to ``self._inputs`` two lines earlier. A tool-mode output's\n        cached value can carry a live ``asyncio.Task`` from LangFlow's own\n        tracing service (confirmed live, only on flow builds started through\n        the streaming endpoint the Playground UI uses -- see\n        :func:`~hulubul.request_intake.entrypoints.langflow.run_flow_policy.deepcopy_outputs_with_fallback`\n        for the full explanation), which cannot be deep-copied, so the tool\n        call fails after LangChain's own retries are exhausted. Detach\n        ``_outputs_map`` before the base copy runs so it has nothing risky to\n        choke on, then reattach a defensively-copied version.\n        \"\"\"\n        outputs_map = self._outputs_map\n        self._outputs_map = {}\n        try:\n            duplicate = cast(\"HulubulRunFlowComponent\", super().__deepcopy__(memo))\n        finally:\n            self._outputs_map = outputs_map\n\n        safe_outputs_map, fell_back = deepcopy_outputs_with_fallback(outputs_map, memo)\n        if fell_back:\n            logger.warning(\n                f\"{self.name}: deepcopy failed for outputs {fell_back} -- \"\n                \"falling back to a shared reference\"\n            )\n        duplicate._outputs_map = safe_outputs_map\n        duplicate._ensure_flow_output_methods()\n        return duplicate\n"
+              },
+              "flow_id_selected": {
+                "_input_type": "StrInput",
+                "advanced": false,
+                "display_name": "Flow ID",
+                "dynamic": false,
+                "info": "The ID of the flow to run.",
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "name": "flow_id_selected",
+                "override_skip": true,
+                "placeholder": "",
+                "required": false,
+                "show": false,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_metadata": true,
+                "track_in_telemetry": false,
+                "type": "str",
+                "value": "94f6774d-ebc7-5bf1-8486-886f91886a5f"
+              },
+              "flow_name_selected": {
+                "_input_type": "DropdownInput",
+                "advanced": false,
+                "combobox": false,
+                "dialog_inputs": {},
+                "display_name": "Flow Name",
+                "dynamic": false,
+                "external_options": {},
+                "info": "The name of the flow to run.",
+                "name": "flow_name_selected",
+                "options": [
+                  "lf-00-main-router",
+                  "lf-70-data-access",
+                  "lf-70-data-access (Backup) (1)",
+                  "lf-70-data-access-v2-manual-tests",
+                  "lf-70-data-access-v2-manual-tests (Backup) (1)",
+                  "lf-70-data-access-v2-manual-tests (Backup)",
+                  "lf-70-data-access-manual-tests (1)",
+                  "lf-70-data-access-manual-tests",
+                  "lf-70-data-access-manual-tests (Backup) (1)",
+                  "Simple Custom Agent",
+                  "lf-70-data-access-manual-tests (Backup)",
+                  "lf-70-data-access (Backup)"
+                ],
+                "options_metadata": [
+                  {
+                    "id": "38b7ee64-26c8-5d4d-97e4-6e62a0fcb557",
+                    "updated_at": "2026-07-28T13:47:24.991596"
+                  },
+                  {
+                    "id": "94f6774d-ebc7-5bf1-8486-886f91886a5f",
+                    "updated_at": "2026-07-28T11:18:48.191826"
+                  },
+                  {
+                    "id": "94ada48c-a9b5-4233-9bc0-0b8b9cf764a2",
+                    "updated_at": "2026-07-28T11:02:52.226788"
+                  },
+                  {
+                    "id": "a6ac335f-3b94-4906-9bdc-eb5c30cc010d",
+                    "updated_at": "2026-07-28T10:57:35.077464"
+                  },
+                  {
+                    "id": "231d50aa-8923-4fc2-8e48-48e32bf1483f",
+                    "updated_at": "2026-07-28T08:51:14.046270"
+                  },
+                  {
+                    "id": "a150d9ce-2eba-44fb-8855-2e3966fb8a6d",
+                    "updated_at": "2026-07-28T08:46:51.929057"
+                  },
+                  {
+                    "id": "8dc5e193-2b0d-4b20-aab5-8998a85b9cd9",
+                    "updated_at": "2026-07-27T19:32:17.666525"
+                  },
+                  {
+                    "id": "4e1f7f53-ddf5-4d07-baec-da2d62d5f82f",
+                    "updated_at": "2026-07-27T18:05:50.185964"
+                  },
+                  {
+                    "id": "09918650-9474-4672-bd12-22bcc0cb7b7b",
+                    "updated_at": "2026-07-27T17:36:57.698358"
+                  },
+                  {
+                    "id": "86d22727-173e-434b-891b-d4529b35fb1d",
+                    "updated_at": "2026-07-27T17:13:22.136244"
+                  },
+                  {
+                    "id": "bfc98b55-3d9d-4583-a459-a8f6309414f2",
+                    "updated_at": "2026-07-27T17:01:36.981046"
+                  },
+                  {
+                    "id": "1795b445-7e47-4594-b387-a5c8133f287d",
+                    "updated_at": "2026-07-27T14:34:42.165448"
+                  }
+                ],
+                "override_skip": false,
+                "placeholder": "",
+                "real_time_refresh": true,
+                "refresh_button": true,
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "toggle": false,
+                "tool_mode": false,
+                "trace_as_metadata": true,
+                "track_in_telemetry": true,
+                "type": "str",
+                "value": "lf-70-data-access"
+              },
+              "is_refresh": false,
+              "session_id": {
+                "_input_type": "MessageTextInput",
+                "advanced": true,
+                "display_name": "Session ID",
+                "dynamic": false,
+                "info": "The session ID to run the flow in.",
+                "input_types": [
+                  "Message"
+                ],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "name": "session_id",
+                "override_skip": false,
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "track_in_telemetry": false,
+                "type": "str",
+                "value": ""
+              },
+              "tools_metadata": {
+                "_input_type": "ToolsInput",
+                "advanced": false,
+                "display_name": "Actions",
+                "dynamic": false,
+                "info": "Modify tool names and descriptions to help agents understand when to use each tool.",
+                "is_list": true,
+                "list_add_label": "Add More",
+                "name": "tools_metadata",
+                "override_skip": false,
+                "placeholder": "",
+                "real_time_refresh": true,
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_metadata": true,
+                "track_in_telemetry": false,
+                "type": "tools",
+                "value": [
+                  {
+                    "args": {
+                      "flow_tweak_data": {
+                        "$ref": "#/$defs/InnerModel"
+                      }
+                    },
+                    "description": "Tool designed to execute the flow 'lf-70-data-access'. Flow details: LF-70 Data Access: validates a typed DataOperationRequest, executes it via the Data Access Agent against Neo4j MCP, and returns a validated DataOperationResult..",
+                    "display_description": "Executes another flow from within the same project. Can also be used as a tool for agents. \n **Select a Flow to use the tool mode**",
+                    "display_name": "lf-70-data-access_tool",
+                    "name": "lf-70-data-access_tool",
+                    "readonly": false,
+                    "status": true,
+                    "tags": [
+                      "lf-70-data-access_tool"
+                    ]
+                  }
+                ]
+              }
+            },
+            "tool_mode": true
+          },
+          "type": "HulubulRunFlow"
+        },
+        "dragging": false,
+        "id": "RunFlow-hlb-lf-10-data-access-v1",
+        "measured": {
+          "height": 325,
+          "width": 320
+        },
+        "position": {
+          "x": -41.85065010404663,
+          "y": 375.6686128618551
+        },
+        "selected": false,
+        "type": "genericNode"
+      },
+      {
+        "data": {
+          "id": "HulubulContractResultBoundary-hlb-lf-10-result-v1",
+          "node": {
+            "base_classes": [
+              "Message"
+            ],
+            "beta": false,
+            "conditional_paths": [],
+            "custom_fields": {},
+            "description": "Validates and serializes a contract result against all 11 ContractKind types.",
+            "display_name": "Contract Result Boundary",
+            "documentation": "",
+            "edited": false,
+            "field_order": [
+              "value"
+            ],
+            "frozen": false,
+            "icon": "shield-check",
+            "id": "HulubulContractResultBoundary-hlb-lf-10-result-v1",
+            "is_output": true,
+            "legacy": false,
+            "metadata": {
+              "code_hash": "e06c7472c5fc",
+              "dependencies": {
+                "dependencies": [
+                  {
+                    "name": "lfx",
+                    "version": "1.10.2"
+                  },
+                  {
+                    "name": "pydantic",
+                    "version": "2.13.4"
+                  },
+                  {
+                    "name": "hulubul",
+                    "version": null
+                  }
+                ],
+                "total_dependencies": 3
+              },
+              "module": "custom_components.contract_result_boundary"
+            },
+            "minimized": false,
+            "output_types": [],
+            "outputs": [
+              {
+                "allows_loop": false,
+                "cache": true,
+                "display_name": "Message",
+                "group_outputs": false,
+                "method": "build_output",
+                "name": "response",
+                "selected": "Message",
+                "tool_mode": true,
+                "types": [
+                  "Message"
+                ],
+                "value": "__UNDEFINED__"
+              }
+            ],
+            "pinned": false,
+            "template": {
+              "_type": "Component",
+              "code": {
+                "advanced": true,
+                "dynamic": true,
+                "fileTypes": [],
+                "file_path": "",
+                "info": "",
+                "list": false,
+                "load_from_db": false,
+                "multiline": true,
+                "name": "code",
+                "password": false,
+                "placeholder": "",
+                "required": true,
+                "show": true,
+                "title_case": false,
+                "type": "code",
+                "value": "\"\"\"Contract result boundary component: validates and serializes contract results.\n\nSplit from the former contract_boundary.py (which held three components)\nbecause LangFlow's directory-based custom component loader registers exactly\none component per file, named after the file -- extra classes in the same\nfile are silently dropped from the sidebar palette. See\nrouter_input_boundary.py and intake_input_boundary.py for the other two.\n\"\"\"\n\nimport json\nfrom typing import Any\nfrom uuid import uuid4\n\nfrom lfx.custom.custom_component.component import Component\nfrom lfx.inputs.inputs import HandleInput, StrInput\nfrom lfx.log.logger import logger\nfrom lfx.schema.data import JSON\nfrom lfx.schema.message import Message\nfrom lfx.template.field.base import Output\nfrom pydantic import BaseModel, TypeAdapter, ValidationError\n\nfrom hulubul.core.models.operational import (\n    ContractKind,\n    DataOperationResult,\n    DeliveryRequestSnapshot,\n    ErrorCode,\n    IntakeFacts,\n    IntakeInput,\n    IntakeResult,\n    MainFlowInput,\n    OperationalError,\n    RouterInput,\n    RouterResult,\n    RoutingContext,\n)\nfrom hulubul.core.models.operational.data_operations import DATA_OPERATION_ADAPTER\nfrom hulubul.core.models.operational.errors import ERROR_POLICY\nfrom hulubul.core.models.operational.json_extraction import extract_json_object_text\nfrom hulubul.request_intake.services.contract_result_policy import (\n    is_terminal_contract,\n    parse_terminal_kinds,\n    terminal_rejection_reason,\n)\n\n__all__ = [\"CONTRACT_TYPES\", \"ContractResultBoundaryComponent\"]\n\n# ============================================================================\n# Registry: All 11 ContractKind values \u2192 Model types\n# ============================================================================\n\nCONTRACT_TYPES = {\n    ContractKind.MAIN_FLOW_INPUT: MainFlowInput,\n    ContractKind.ROUTER_INPUT: RouterInput,\n    ContractKind.INTAKE_INPUT: IntakeInput,\n    ContractKind.ROUTING_CONTEXT: RoutingContext,\n    ContractKind.ROUTER_RESULT: RouterResult,\n    ContractKind.INTAKE_FACTS: IntakeFacts,\n    ContractKind.INTAKE_RESULT: IntakeResult,\n    ContractKind.DATA_OPERATION_REQUEST: DATA_OPERATION_ADAPTER,\n    ContractKind.DATA_OPERATION_RESULT: DataOperationResult,\n    ContractKind.DELIVERY_REQUEST_SNAPSHOT: DeliveryRequestSnapshot,\n    ContractKind.OPERATIONAL_ERROR: OperationalError,\n}\n\n# Verify registry contains all 11 ContractKind values\nassert set(CONTRACT_TYPES.keys()) == set(ContractKind), (\n    \"Registry missing or has extra ContractKind values\"\n)\n\n\nclass ContractResultBoundaryComponent(Component):\n    \"\"\"Validates and serializes contract results (OperationalError, RouterResult, IntakeResult).\n\n    Uses registry-driven conversion for all 11 ContractKind values. Validates/type-translates\n    only declared LFX Data/JSON values. Catches validation/type failures \u2192 INVALID_CONTRACT.\n    Unexpected programming errors remain exceptions.\n    \"\"\"\n\n    display_name = \"Contract Result Boundary\"\n    description = \"Validates and serializes a contract result against all 11 ContractKind types.\"\n    icon = \"shield-check\"\n    name = \"HulubulContractResultBoundary\"\n\n    inputs = [  # noqa: RUF012\n        HandleInput(  # type: ignore[call-arg]\n            name=\"value\",\n            display_name=\"Contract Value\",\n            info=\"The contract value to validate (Message/Data/JSON).\",\n            input_types=[\"Message\", \"Data\", \"JSON\"],\n            required=True,\n        ),\n        StrInput(  # type: ignore[call-arg]\n            name=\"terminal_kinds\",\n            display_name=\"Terminal Contract Kinds\",\n            info=(\n                \"ContractKind values that may legitimately end this flow, e.g. \"\n                \"intake-result, router-result, operational-error. Leave empty to \"\n                \"accept any of the 11 registered kinds -- the historical \"\n                \"behaviour, which answers 'is this a known contract?' but never \"\n                \"'is this the right contract for this turn?'. Declaring the set \"\n                \"makes a well-formed but out-of-place payload (a \"\n                \"data-operation-result surfacing to a sender, a router-result \"\n                \"that delegated to a specialist and never got a result back) a \"\n                \"visible INVALID_CONTRACT instead of a plausible-looking reply.\"\n            ),\n            is_list=True,\n            value=[],\n            required=False,\n            advanced=False,\n        ),\n    ]\n\n    outputs = [  # noqa: RUF012\n        Output(  # type: ignore[call-arg]\n            display_name=\"Message\", name=\"response\", type_=Message, method=\"build_output\"\n        ),\n    ]\n\n    def __init__(self, **kwargs: Any) -> None:\n        \"\"\"Initialize the ContractResultBoundaryComponent.\"\"\"\n        super().__init__(**kwargs)\n\n    @classmethod\n    def _as_dict(cls, value: Any) -> dict[str, Any]:\n        \"\"\"Coerce an incoming Message/Data/JSON edge value into a plain dict.\n\n        An Agent's final text is LLM-generated and not guaranteed to be valid\n        JSON, or may wrap the real answer in prose/markdown/a draft block.\n        Treat undecodable text as an empty dict rather than raising, so it is\n        validated normally and rejected as INVALID_CONTRACT downstream\n        instead of crashing the component build.\n        \"\"\"\n        if isinstance(value, Message):\n            text = value.text\n            if not isinstance(text, str):\n                return {}\n            try:\n                decoded = json.loads(extract_json_object_text(text))\n            except json.JSONDecodeError:\n                return {}\n            return decoded if isinstance(decoded, dict) else {}\n        if hasattr(value, \"data\"):\n            return dict(value.data)\n        return dict(value) if value else {}\n\n    def build_output(self) -> Message:\n        \"\"\"LFX-facing output: validate self.value.\n\n        Always returns Message (even for errors, wrapping the JSON error as\n        message text) so LFX registers a single declared output type. A\n        `Message | JSON` return annotation here makes LFX register\n        `output_types=[\"JSON\", \"Message\"]`, which the frontend's connection\n        check treats as a strict subset requirement against a Message-only\n        target -- silently rejecting every edge into this output.\n        \"\"\"\n        value = self._as_dict(self.value)\n        result = self.validate_contract_value(value)\n        if isinstance(result, Message):\n            return result\n        return Message(text=json.dumps(result.data))\n\n    def validate_contract_value(self, value: dict[str, Any] | Any) -> Message | JSON:\n        \"\"\"Validate and convert a contract value to typed model.\n\n        Attempts to validate the input value against all registered contract types.\n        On validation failure, returns canonical INVALID_CONTRACT OperationalError.\n\n        Args:\n            value: The contract value to validate (dict or other type)\n\n        Returns:\n            Message or JSON: Typed, validated contract or error\n\n        Raises:\n            ValueError: Only for unexpected programming errors, not validation failures\n        \"\"\"\n        if value is None:\n            return self._make_error_response(ErrorCode.INVALID_CONTRACT)\n\n        if not isinstance(value, dict):\n            return self._make_error_response(ErrorCode.INVALID_CONTRACT)\n\n        # JSON-mode validation, not python-mode: a real edge value (e.g. an\n        # Agent's JSON-decoded text output) is a dict of JSON primitives\n        # (string UUIDs, string enum values), which these strict-typed\n        # contracts reject via plain `model_validate`/`validate_python`\n        # (`Input should be an instance of UUID`/enum) -- confirmed live\n        # against the real router Agent output. `default=str` also makes\n        # this tolerate native-instance dicts (e.g. a `UUID` object), same\n        # rationale as `ContractInputBoundaryComponent._coerce_model`.\n        value_json = json.dumps(value, default=str)\n        allowed = parse_terminal_kinds(self.terminal_kinds)\n\n        # Try to validate against each registered contract type\n        for _contract_kind, model_type in CONTRACT_TYPES.items():\n            try:\n                # Handle TypeAdapter (for DATA_OPERATION_REQUEST)\n                if isinstance(model_type, TypeAdapter):\n                    instance = model_type.validate_json(value_json)\n                    if hasattr(instance, \"model_dump\"):\n                        data = instance.model_dump(mode=\"json\")\n                    else:\n                        data = dict(instance)\n                    if not is_terminal_contract(_contract_kind, data, allowed):\n                        return self._refuse_non_terminal(_contract_kind, data, allowed)\n                    return JSON(data=data)\n                # Handle BaseModel classes\n                elif isinstance(model_type, type) and issubclass(model_type, BaseModel):\n                    instance = model_type.model_validate_json(value_json)\n                    data = instance.model_dump(mode=\"json\")\n                    if not is_terminal_contract(_contract_kind, data, allowed):\n                        return self._refuse_non_terminal(_contract_kind, data, allowed)\n                    return JSON(data=data)\n                else:\n                    # Unknown type, skip\n                    continue\n            except ValidationError:\n                # Validation failure, continue to next type\n                continue\n            except (TypeError, ValueError, AttributeError):\n                # Other validation issues, continue\n                continue\n\n        # None of the registered types matched\n        # Return canonical INVALID_CONTRACT error (never expose raw values)\n        return self._make_error_response(ErrorCode.INVALID_CONTRACT)\n\n    def _refuse_non_terminal(\n        self,\n        kind: ContractKind,\n        payload: dict[str, Any],\n        allowed: frozenset[ContractKind],\n    ) -> JSON:\n        \"\"\"Reject a valid contract that has no business ending this flow.\n\n        The sender only ever sees the canonical safe message, so the real cause\n        has to be logged or it is lost -- and this refusal in particular (a\n        router that delegated to a specialist and never got a result back) is\n        otherwise indistinguishable from an ordinary routing reply.\n        \"\"\"\n        logger.warning(\n            f\"{self.name}: refused a non-terminal contract -- \"\n            f\"{terminal_rejection_reason(kind, payload, allowed)}\"\n        )\n        return self._make_error_response(ErrorCode.INVALID_CONTRACT)\n\n    def _make_error_response(\n        self,\n        code: ErrorCode,\n    ) -> JSON:\n        \"\"\"Create a canonical error response without exposing user values.\n\n        Args:\n            code: The ErrorCode\n\n        Returns:\n            JSON: Serialized OperationalError\n        \"\"\"\n        policy = ERROR_POLICY[code]\n        error = OperationalError(\n            schema_version=\"1.0.0\",\n            code=code,\n            correlation_id=uuid4(),\n            category=policy.category,\n            message=policy.safe_message,\n            retryable=policy.retryable,\n        )\n\n        return JSON(data=error.model_dump(mode=\"json\"))\n"
+              },
+              "value": {
+                "_input_type": "HandleInput",
+                "advanced": false,
+                "display_name": "Contract Value",
+                "dynamic": false,
+                "info": "The contract value to validate (Message/Data/JSON).",
+                "input_types": [
+                  "Message",
+                  "Data",
+                  "JSON"
+                ],
+                "list": false,
+                "list_add_label": "Add More",
+                "name": "value",
+                "override_skip": false,
+                "placeholder": "",
+                "required": true,
+                "show": true,
+                "title_case": false,
+                "trace_as_metadata": true,
+                "track_in_telemetry": false,
+                "type": "other",
+                "value": ""
+              }
+            },
+            "tool_mode": false
+          },
+          "type": "HulubulContractResultBoundary"
+        },
+        "dragging": false,
+        "id": "HulubulContractResultBoundary-hlb-lf-10-result-v1",
+        "measured": {
+          "height": 185,
+          "width": 320
+        },
+        "position": {
+          "x": 800,
+          "y": 0
+        },
+        "selected": false,
+        "type": "genericNode"
+      },
+      {
+        "data": {
+          "id": "HulubulGraphIdentifiersGenerator-hlb-lf-10-gen-identifiers-v1",
+          "node": {
+            "base_classes": [
+              "Message"
+            ],
+            "beta": false,
+            "conditional_paths": [],
+            "custom_fields": {},
+            "description": "Generate graph node identifiers (request_id, sender_id, etc.) deterministically. Pure deterministic component -- returns identifiers to be used verbatim in createDeliveryRequest/updateDeliveryRequest operations.",
+            "display_name": "Graph Identifiers Generator",
+            "documentation": "",
+            "edited": false,
+            "field_order": [
+              "actor_id",
+              "receiver_stable_id",
+              "receiver_name",
+              "parcel_declared_content",
+              "pickup_location",
+              "drop_off_location"
+            ],
+            "frozen": false,
+            "icon": "key",
+            "legacy": false,
+            "metadata": {
+              "code_hash": "2185601d9428",
+              "dependencies": {
+                "dependencies": [
+                  {
+                    "name": "lfx",
+                    "version": "1.10.2"
+                  },
+                  {
+                    "name": "hulubul",
+                    "version": null
+                  }
+                ],
+                "total_dependencies": 2
+              },
+              "module": "custom_components.graph_identifiers_generator"
+            },
+            "minimized": false,
+            "output_types": [],
+            "outputs": [
+              {
+                "allows_loop": false,
+                "cache": true,
+                "display_name": "Toolset",
+                "group_outputs": false,
+                "hidden": null,
+                "loop_types": null,
+                "method": "to_toolkit",
+                "name": "component_as_tool",
+                "options": null,
+                "required_inputs": null,
+                "selected": "Tool",
+                "tool_mode": true,
+                "types": [
+                  "Tool"
+                ],
+                "value": "__UNDEFINED__"
+              }
+            ],
+            "pinned": false,
+            "template": {
+              "_type": "Component",
+              "actor_id": {
+                "_input_type": "MessageTextInput",
+                "advanced": false,
+                "display_name": "Actor ID",
+                "dynamic": false,
+                "info": "Sender's stable identifier (URN or email).",
+                "input_types": [
+                  "Message"
+                ],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "name": "actor_id",
+                "override_skip": false,
+                "placeholder": "",
+                "required": true,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "track_in_telemetry": false,
+                "type": "str",
+                "value": ""
+              },
+              "code": {
+                "advanced": true,
+                "dynamic": true,
+                "fileTypes": [],
+                "file_path": "",
+                "info": "",
+                "list": false,
+                "load_from_db": false,
+                "multiline": true,
+                "name": "code",
+                "password": false,
+                "placeholder": "",
+                "required": true,
+                "show": true,
+                "title_case": false,
+                "type": "code",
+                "value": "\"\"\"Graph identifiers generator component for LF-10 deterministic ID allocation.\n\nImplements Task 9 (checkpoint 9, task 9.2) per DEC-010: graph node identifiers\n(request_id, sender_id, sender_agent_id, receiver_id, etc.) must be generated\ndeterministically by code *before* the operation reaches LF-70, not invented by\nthe LLM in LF-70's own Agent.\n\nWraps `new_graph_identifiers()` as a deterministic, pure-Python LangFlow component\nexposed as an Agent tool in LF-10, so the Agent can call it before constructing\nthe createDeliveryRequest/updateDeliveryRequest payload.\n\nInputs:\n- actor_id: The sender's stable identifier (required)\n- receiver_stable_id: Stable receiver identifier (optional)\n- receiver_name: Human-supplied receiver name (optional)\n- parcel_declared_content: Parcel content description (optional)\n- pickup_location: Pickup location (optional)\n- drop_off_location: Drop-off location (optional)\n\nOutputs:\n- identifiers: Message containing JSON string (GraphIdentifiers) for the Agent\n  to use verbatim in the createDeliveryRequest/updateDeliveryRequest payload\n  under the `identifiers` field.\n\"\"\"\n\nfrom lfx.custom.custom_component.component import Component\nfrom lfx.inputs.inputs import MessageTextInput\nfrom lfx.schema.message import Message\nfrom lfx.template.field.base import Output\n\nfrom hulubul.request_intake.services.graph_identifiers import new_graph_identifiers\n\n__all__ = [\"HulubulGraphIdentifiersGenerator\"]\n\n\nclass HulubulGraphIdentifiersGenerator(Component):\n    \"\"\"Deterministically generate graph node identifiers for intake operations.\n\n    Pure deterministic component (no I/O, no LLM) -- calls `new_graph_identifiers()`\n    with facts extracted by the Agent and returns the prefixed identifiers as-is.\n\n    Exposed as an Agent tool (`component_as_tool` output) so the Agent can call it\n    before constructing createDeliveryRequest/updateDeliveryRequest operations.\n    \"\"\"\n\n    display_name = \"Graph Identifiers Generator\"\n    description = (\n        \"Generate graph node identifiers (request_id, sender_id, etc.) deterministically. \"\n        \"Pure deterministic component -- returns identifiers to be used verbatim in \"\n        \"createDeliveryRequest/updateDeliveryRequest operations.\"\n    )\n    icon = \"key\"\n    name = \"HulubulGraphIdentifiersGenerator\"\n\n    inputs = [  # noqa: RUF012\n        MessageTextInput(  # type: ignore[call-arg]\n            name=\"actor_id\",\n            display_name=\"Actor ID\",\n            info=\"Sender's stable identifier (URN or email).\",\n            required=True,\n        ),\n        MessageTextInput(  # type: ignore[call-arg]\n            name=\"receiver_stable_id\",\n            display_name=\"Receiver Stable ID\",\n            info=\"Stable receiver identifier (email, phone). If absent, name-only.\",\n            required=False,\n        ),\n        MessageTextInput(  # type: ignore[call-arg]\n            name=\"receiver_name\",\n            display_name=\"Receiver Name\",\n            info=\"Human-supplied receiver name. Allocates receiver role if present.\",\n            required=False,\n        ),\n        MessageTextInput(  # type: ignore[call-arg]\n            name=\"parcel_declared_content\",\n            display_name=\"Parcel Content\",\n            info=\"Declared content. Allocates parcel role if present.\",\n            required=False,\n        ),\n        MessageTextInput(  # type: ignore[call-arg]\n            name=\"pickup_location\",\n            display_name=\"Pickup Location\",\n            info=\"Pickup location. Allocates pickup place if present.\",\n            required=False,\n        ),\n        MessageTextInput(  # type: ignore[call-arg]\n            name=\"drop_off_location\",\n            display_name=\"Drop-off Location\",\n            info=\"Drop-off location. Allocates drop-off place if present.\",\n            required=False,\n        ),\n    ]\n\n    outputs = [  # noqa: RUF012\n        Output(  # type: ignore[call-arg]\n            display_name=\"Identifiers\",\n            name=\"identifiers\",\n            type_=Message,\n            method=\"build_output\",\n        ),\n    ]\n\n    def build_output(self) -> Message:\n        \"\"\"Generate graph identifiers and return as Message with JSON text.\n\n        Derives include_receiver/include_parcel/include_pickup/include_drop_off from\n        the presence of facts. Always includes request and sender IDs; receiver,\n        parcel, and place IDs are sparse (only if their facts are present).\n\n        Returns:\n            Message: JSON-serialized GraphIdentifiers for the Agent to use as-is\n\n        Raises:\n            ValueError: If required fields are missing or invalid\n        \"\"\"\n        # Validate required inputs\n        if not self.actor_id:\n            raise ValueError(\"actor_id is required for identifier generation\")\n\n        # Derive sparse allocation flags from fact presence\n        include_receiver = bool(self.receiver_name)\n        include_parcel = bool(self.parcel_declared_content)\n        include_pickup = bool(self.pickup_location)\n        include_drop_off = bool(self.drop_off_location)\n\n        # Generate identifiers deterministically\n        identifiers = new_graph_identifiers(\n            actor_id=self.actor_id,\n            receiver_stable_id=self.receiver_stable_id if self.receiver_stable_id else None,\n            include_receiver=include_receiver,\n            include_parcel=include_parcel,\n            include_pickup=include_pickup,\n            include_drop_off=include_drop_off,\n        )\n\n        # Return as Message with JSON serialization (compatible with Agent tool output)\n        return Message(text=identifiers.model_dump_json())\n"
+              },
+              "drop_off_location": {
+                "_input_type": "MessageTextInput",
+                "advanced": false,
+                "display_name": "Drop-off Location",
+                "dynamic": false,
+                "info": "Drop-off location. Allocates drop-off place if present.",
+                "input_types": [
+                  "Message"
+                ],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "name": "drop_off_location",
+                "override_skip": false,
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "track_in_telemetry": false,
+                "type": "str",
+                "value": ""
+              },
+              "parcel_declared_content": {
+                "_input_type": "MessageTextInput",
+                "advanced": false,
+                "display_name": "Parcel Content",
+                "dynamic": false,
+                "info": "Declared content. Allocates parcel role if present.",
+                "input_types": [
+                  "Message"
+                ],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "name": "parcel_declared_content",
+                "override_skip": false,
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "track_in_telemetry": false,
+                "type": "str",
+                "value": ""
+              },
+              "pickup_location": {
+                "_input_type": "MessageTextInput",
+                "advanced": false,
+                "display_name": "Pickup Location",
+                "dynamic": false,
+                "info": "Pickup location. Allocates pickup place if present.",
+                "input_types": [
+                  "Message"
+                ],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "name": "pickup_location",
+                "override_skip": false,
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "track_in_telemetry": false,
+                "type": "str",
+                "value": ""
+              },
+              "receiver_name": {
+                "_input_type": "MessageTextInput",
+                "advanced": false,
+                "display_name": "Receiver Name",
+                "dynamic": false,
+                "info": "Human-supplied receiver name. Allocates receiver role if present.",
+                "input_types": [
+                  "Message"
+                ],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "name": "receiver_name",
+                "override_skip": false,
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "track_in_telemetry": false,
+                "type": "str",
+                "value": ""
+              },
+              "receiver_stable_id": {
+                "_input_type": "MessageTextInput",
+                "advanced": false,
+                "display_name": "Receiver Stable ID",
+                "dynamic": false,
+                "info": "Stable receiver identifier (email, phone). If absent, name-only.",
+                "input_types": [
+                  "Message"
+                ],
+                "list": false,
+                "list_add_label": "Add More",
+                "load_from_db": false,
+                "name": "receiver_stable_id",
+                "override_skip": false,
+                "placeholder": "",
+                "required": false,
+                "show": true,
+                "title_case": false,
+                "tool_mode": false,
+                "trace_as_input": true,
+                "trace_as_metadata": true,
+                "track_in_telemetry": false,
+                "type": "str",
+                "value": ""
+              }
+            },
+            "tool_mode": false
+          },
+          "type": "HulubulGraphIdentifiersGenerator"
+        },
+        "dragging": false,
+        "id": "HulubulGraphIdentifiersGenerator-hlb-lf-10-gen-identifiers-v1",
+        "measured": {
+          "height": 305,
+          "width": 320
+        },
+        "position": {
+          "x": 300,
+          "y": -29.726955052871638
+        },
+        "selected": false,
+        "type": "genericNode"
+      }
+    ],
+    "viewport": {
+      "x": 249.00426791898246,
+      "y": 299.596383916222,
+      "zoom": 0.7400690706758003
+    }
+  },
+  "description": "LF-10 Request Intake: validates a typed IntakeInput, extracts intake facts via the Request Intake Agent using LF-70 as a Tool Mode reference, and returns a validated IntakeResult.",
+  "endpoint_name": null,
+  "folder_id": "a6f9eb0d-e26e-4d3d-9232-fe1704342cd4",
+  "gradient": null,
+  "icon": null,
+  "icon_bg_color": null,
+  "id": "6843ae79-147f-55d4-a25b-01d6143a12cc",
+  "is_component": false,
+  "locked": false,
+  "mcp_enabled": false,
+  "name": "lf-10-request-intake",
+  "name_key": null,
+  "tags": null,
+  "updated_at": "2026-07-28T22:06:22+00:00",
+  "user_id": "4686a792-e21e-497a-9d27-c5b4d17296b5",
+  "webhook": false,
+  "workspace_id": null
+}

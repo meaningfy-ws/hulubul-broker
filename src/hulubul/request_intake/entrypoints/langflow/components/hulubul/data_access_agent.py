@@ -207,7 +207,12 @@ class HulubulDataAccessAgentComponent(AgentComponent):
         if not isinstance(parsed, dict):
             return False
         try:
-            DataOperationResult.model_validate(parsed)
+            # JSON-mode validation: parsed dict from json.loads() is shaped as
+            # JSON primitives (string operation/outcome enums, string datetimes),
+            # not native instances. Same rationale as DataOperationResultBoundary
+            # and ContractInputBoundary._coerce_model.
+            parsed_json = json.dumps(parsed, default=str)
+            DataOperationResult.model_validate_json(parsed_json)
         except ValidationError:
             return False
         return True
@@ -259,7 +264,11 @@ class HulubulDataAccessAgentComponent(AgentComponent):
             return None
 
         try:
-            repaired_result = DataOperationResult.model_validate(parsed)
+            # JSON-mode validation: the repaired result dict from the LLM is
+            # shaped as JSON primitives, not native instances. Same rationale as
+            # _is_valid_data_operation_result_shape and the boundary components.
+            parsed_json = json.dumps(parsed, default=str)
+            repaired_result = DataOperationResult.model_validate_json(parsed_json)
         except ValidationError as exc:
             # include_input/include_url=False: .errors() otherwise embeds the
             # actual offending value per error, which could be repaired,

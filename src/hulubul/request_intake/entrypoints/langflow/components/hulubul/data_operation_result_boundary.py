@@ -148,7 +148,16 @@ class DataOperationResultBoundaryComponent(Component):
             # affected-count/operation-match checks, so both still fall
             # through to INVALID_CONTRACT below.
             try:
-                bypass_result = DataOperationResult.model_validate(raw_value)
+                # JSON-mode validation, not python-mode: a result dict from
+                # Agent output or MCP edge is shaped as JSON primitives (string
+                # operation enums, string outcome enums, string created_at/updated_at
+                # datetimes), which python-mode validation rejects outright
+                # (`Input should be an instance of DataOperationOutcome`/datetime).
+                # `default=str` also makes this tolerate a dict that instead has
+                # native instances (e.g. a real `datetime` object), so it's safe
+                # either way -- same rationale as ContractInputBoundaryComponent._coerce_model.
+                value_json = json.dumps(raw_value, default=str)
+                bypass_result = DataOperationResult.model_validate_json(value_json)
             except ValidationError:
                 bypass_result = None
             if (
@@ -166,7 +175,11 @@ class DataOperationResultBoundaryComponent(Component):
 
         # First validate result contract
         try:
-            result = DataOperationResult.model_validate(raw_value)
+            # JSON-mode validation: result dicts from Agent output or MCP edges are
+            # shaped as JSON primitives (string enums, string datetimes), not native
+            # instances. Same rationale as the bypass path above.
+            value_json = json.dumps(raw_value, default=str)
+            result = DataOperationResult.model_validate_json(value_json)
         except ValidationError:
             # Result contract validation failed. `_repair_failed` (set by
             # HulubulDataAccessAgentComponent's tool-less repair pass, DEC-016)

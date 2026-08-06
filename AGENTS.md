@@ -56,6 +56,18 @@ flows directly instead of asking the developer to export run logs by hand.
   a specific historical Playground run, either reproduce it with `run_flow`
   here, or ask the developer to export/paste the trace JSON.
 
+### Two invocation mechanisms are not interchangeable for repro/verification
+
+LangFlow's plain `POST /api/v1/run/{flow_id}` and its streaming
+`POST /api/v1/build/{flow_id}/flow` + `GET /api/v1/build/{job_id}/events`
+(what the Playground UI actually uses) are **not equivalent** — a bug can
+reproduce 100% of the time on one and 0% of the time on the other with
+identical input (confirmed live, twice). If a developer reports a Playground
+bug your plain-run repro doesn't reproduce, don't conclude it's fixed or
+non-deterministic — switch mechanism before drawing either conclusion.
+Details, API shapes, and a minimal repro:
+[`.claude/resources/langflow-invocation-mechanisms.md`](.claude/resources/langflow-invocation-mechanisms.md).
+
 ## Top-level architecture
 
 | Path | Role |

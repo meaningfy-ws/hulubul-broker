@@ -16,6 +16,7 @@ and chat output can never diverge.
 from __future__ import annotations
 
 from types import MappingProxyType
+from typing import Final
 
 from hulubul.core.models.operational.enums import (
     IntakeField,
@@ -36,6 +37,9 @@ __all__ = [
     "render_router_result",
     "render_status_update",
 ]
+
+#: Asked when the intake flow names a field this module has no question for.
+GENERIC_CLARIFICATION_QUESTION: Final = "Could you tell me a bit more about the delivery?"
 
 CLARIFICATION_QUESTIONS: MappingProxyType[IntakeField, str] = MappingProxyType(
     {
@@ -103,6 +107,28 @@ def render_operational_error(error: OperationalError) -> str:
     return error.message
 
 
+def render_clarification_question(field_name: str) -> str:
+    """Render the question for a field name that may be outside the vocabulary.
+
+    ``IntakeResult.clarification_field`` is a plain ``str``, so the contract
+    admits names ``IntakeField`` does not define -- LF-10 asks for
+    ``receiver_name`` where this module knows ``receiver_identity``. Coercing
+    with ``IntakeField(...)`` raised ``ValueError`` there, and the caller in
+    the deterministic renderer catches ``ValueError`` while trying each
+    contract in turn, so a perfectly valid ``IntakeResult`` was reported as
+    matching no contract at all and took the whole flow down with it.
+
+    An unrecognized field is a vocabulary gap between two flows, not a reason
+    to fail a turn the sender is waiting on. Fall back to the generic prompt:
+    still a fixed, policy-owned string, never free text, and never the
+    unrecognized name itself.
+    """
+    try:
+        return render_clarification_message(IntakeField(field_name))
+    except ValueError:
+        return GENERIC_CLARIFICATION_QUESTION
+
+
 def render_intake_result(result: IntakeResult) -> str:
     """Render the deterministic safe message for an intake result.
 
@@ -115,7 +141,7 @@ def render_intake_result(result: IntakeResult) -> str:
     if result.outcome is IntakeOutcome.CLARIFICATION_REQUIRED:
         if result.clarification_field is None:
             raise ValueError("clarificationRequired outcome must include clarification_field")
-        return render_clarification_message(IntakeField(result.clarification_field))
+        return render_clarification_question(result.clarification_field)
     if result.outcome is IntakeOutcome.REQUEST_COMPLETE:
         if result.request_id is None:
             raise ValueError("requestComplete outcome must include request_id")

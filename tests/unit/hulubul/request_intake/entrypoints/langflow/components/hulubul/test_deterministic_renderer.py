@@ -13,6 +13,7 @@ Tests cover:
 - Response structure (Message type, never raw dict)
 """
 
+import json
 from uuid import uuid4
 
 import pytest
@@ -347,6 +348,98 @@ class TestInputValidation:
         assert isinstance(message, Message)
         assert isinstance(message.text, str)
         assert message.text is not None
+
+
+# ============================================================================
+# Test: Real Edge Value Shapes (Message-wrapped, JSON-primitive dict)
+# ============================================================================
+
+
+class TestRealEdgeValueShapes:
+    """Test the two edge-value shapes a live flow actually delivers.
+
+    Regression tests: confirmed live -- `ContractResultBoundaryComponent`
+    (the sole predecessor in every wiring that reaches this component) emits
+    its validated contract as a `Message` wrapping JSON *text*, not a
+    `Data`/`JSON` object, and that JSON text decodes to a dict of JSON
+    primitives (string UUIDs, string enum values -- i.e. what
+    `.model_dump(mode="json")` produces, not `.model_dump()`'s native-instance
+    shape already covered by every test above). Both gaps went undetected by
+    every prior test in this file, which always assigned `.model_dump()`
+    directly (native `UUID`/enum instances -- accepted by plain
+    `model_validate`, unlike the two real shapes here) and never a `Message`.
+    """
+
+    def test_accepts_message_wrapped_router_result(
+        self, renderer_component: DeterministicRendererComponent
+    ) -> None:
+        """A Message wrapping RouterResult JSON text renders correctly."""
+        result = RouterResult(
+            schema_version="1.0.0",
+            correlation_id=uuid4(),
+            outcome=RouterOutcome.ROUTED,
+            target=RouterTarget.INTAKE,
+            reason=RoutingReason.NO_BINDING,
+            safe_message="Request routed to intake flow.",
+        )
+
+        renderer_component.result = Message(text=result.model_dump_json())
+        message = renderer_component.build_message()
+
+        assert isinstance(message, Message)
+        assert isinstance(message.text, str)
+        assert message.text == render_router_result(result)
+
+    def test_accepts_json_primitive_dict_router_result(
+        self, renderer_component: DeterministicRendererComponent
+    ) -> None:
+        """A JSON-primitive dict (string UUID/enum values) renders correctly.
+
+        This is the exact shape `ContractResultBoundaryComponent` produces
+        via `instance.model_dump(mode="json")`, decoded from its `Message`
+        text -- not the native-instance shape `.model_dump()` produces.
+        """
+        result = RouterResult(
+            schema_version="1.0.0",
+            correlation_id=uuid4(),
+            outcome=RouterOutcome.ROUTED,
+            target=RouterTarget.INTAKE,
+            reason=RoutingReason.NO_BINDING,
+            safe_message="Request routed to intake flow.",
+        )
+
+        renderer_component.result = json.loads(result.model_dump_json())
+        message = renderer_component.build_message()
+
+        assert isinstance(message, Message)
+        assert isinstance(message.text, str)
+        assert message.text == render_router_result(result)
+
+    def test_accepts_message_wrapped_intake_result(
+        self, renderer_component: DeterministicRendererComponent
+    ) -> None:
+        """A Message wrapping IntakeResult JSON text renders correctly."""
+        result = IntakeResult(
+            outcome=IntakeOutcome.REQUEST_COMPLETE,
+            request_id="req-12345678",
+            safe_user_message="Your parcel request is confirmed.",
+        )
+
+        renderer_component.result = Message(text=result.model_dump_json())
+        message = renderer_component.build_message()
+
+        assert isinstance(message, Message)
+        assert isinstance(message.text, str)
+        assert message.text == render_intake_result(result)
+
+    def test_rejects_message_with_unparseable_text(
+        self, renderer_component: DeterministicRendererComponent
+    ) -> None:
+        """A Message wrapping non-JSON text is rejected, not crashed on."""
+        renderer_component.result = Message(text="not json at all")
+
+        with pytest.raises(ValueError, match="INVALID_INPUT"):
+            renderer_component.build_message()
 
 
 # ============================================================================

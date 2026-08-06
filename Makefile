@@ -21,6 +21,10 @@ NEO4J_USR    := neo4j
 NEO4J_PW     := $(shell sed -n 's/^NEO4J_PASSWORD=//p' $(ENV_FILE) 2>/dev/null)
 # Run a cypher file into Neo4j via the bundled cypher-shell (no local client needed).
 NEO4J_RUN    := docker compose -f $(COMPOSE_FILE) --env-file $(ENV_FILE) exec -T --env NEO4J_USERNAME=$(NEO4J_USR) --env NEO4J_PASSWORD=$(NEO4J_PW) neo4j cypher-shell --format plain
+# LangFlow deployment target. Override LANGFLOW_URL to push to a non-local
+# instance; the API key is read from .env (gitignored) like the Neo4j password.
+LANGFLOW_URL ?= http://localhost:7860
+LANGFLOW_KEY := $(shell sed -n 's/^LANGFLOW_API_KEY=//p' $(ENV_FILE) 2>/dev/null)
 
 ICON_DONE    = [✔]
 ICON_ERROR   = [x]
@@ -71,6 +75,10 @@ help: ## Display available targets
 	@ echo "    neo4j-browser       - Print the Neo4j Browser URL + credentials"
 	@ echo "    mcp-logs            - Follow the MCP server logs"
 	@ echo "    mcp-restart         - Restart the MCP server"
+	@ echo ""
+	@ echo -e "  $(BUILD_PRINT)LangFlow:$(END_BUILD_PRINT)"
+	@ echo "    langflow-deploy     - Push every flow in langflow/flows to a LangFlow instance"
+	@ echo "    check-flows         - Validate flow assets (manifest, normalization, lfx checks)"
 	@ echo ""
 	@ echo -e "  $(BUILD_PRINT)CI / Quality gates:$(END_BUILD_PRINT)"
 	@ echo "    install                  - Install project dependencies via Poetry"
@@ -274,6 +282,34 @@ mcp-restart: check-env ## Restart the MCP server
 	@ docker compose -f $(COMPOSE_FILE) --env-file $(ENV_FILE) restart mcp-neo4j
 
 #-----------------------------------------------------------------------------
+# LangFlow deployment
+#-----------------------------------------------------------------------------
+.PHONY: langflow-deploy
+
+# Push every flow file in langflow/flows/ to a running LangFlow instance,
+# upserting by the stable flow ID stored in the file itself.
+#
+# The glob is deliberately unfiltered ("everything in the flows directory") and
+# sorts lexically -- which is why the flow files carry numeric prefixes: 10-,
+# 20-, 30- reproduce the deployment_order declared in flow-manifest.yaml. Order
+# matters because a flow that references another by stable ID must be pushed
+# after it. Any additional flow file sorts after those three.
+#
+# --no-normalize / --keep-secrets mirror `acceptance-deploy`: the committed
+# files are already normalized by scripts/normalize_langflow_flows.py, and the
+# runtime variable references inside them must survive the push untouched.
+langflow-deploy: check-env ## Push every flow in langflow/flows to a LangFlow instance
+	@ test -n "$(LANGFLOW_KEY)" || { echo -e "$(BUILD_PRINT)$(ICON_ERROR) LANGFLOW_API_KEY is empty in $(ENV_FILE)$(END_BUILD_PRINT)"; exit 1; }
+	@ test -n "$$(ls langflow/flows/*.json 2>/dev/null)" || { echo -e "$(BUILD_PRINT)$(ICON_ERROR) No flow files in langflow/flows$(END_BUILD_PRINT)"; exit 1; }
+	@ echo -e "$(BUILD_PRINT)$(ICON_PROGRESS) Deploying flows to $(LANGFLOW_URL)$(END_BUILD_PRINT)"
+	@ cd langflow && for flow in flows/*.json; do \
+		echo "    $$flow"; \
+		poetry run lfx push --target $(LANGFLOW_URL) --api-key "$(LANGFLOW_KEY)" \
+			--no-normalize --keep-secrets "$$flow" || exit 1; \
+	done
+	@ echo -e "$(BUILD_PRINT)$(ICON_DONE) Flows deployed$(END_BUILD_PRINT)"
+
+#-----------------------------------------------------------------------------
 # Python quality, tests and CI
 # Namespaced so they never collide with the LinkML generation targets above:
 # `lint` stays LinkML-only (linkml-lint); Python style/type checks live under
@@ -306,6 +342,9 @@ typecheck: ## Type-check with mypy
 test-unit: ## Run unit tests with coverage (fails under 80%)
 	@ mkdir -p reports
 	poetry run pytest tests/unit --cov=hulubul --cov-branch --cov-fail-under=80 --junitxml=reports/junit-unit.xml
+
+test-static: ## Run static flow-topology tests (no live services, no coverage)
+	poetry run pytest tests/static
 
 test-feature: ## Run feature-level pytest-bdd suites (tests/feature); tests/e2e excluded (defense in depth)
 	@ mkdir -p reports
@@ -392,7 +431,7 @@ test-bdd: ## Run BDD step-definition tests
 
 # Static CI: schema + Python quality + fast tests (no comment on the target
 # line itself, so the prerequisite list stays exactly the canonical set).
-ci-static: lint check-model-generated lint-python format-check-python typecheck check-architecture check-operational-schemas test-unit test-feature
+ci-static: lint check-model-generated lint-python format-check-python typecheck check-architecture check-operational-schemas test-unit test-static test-feature
 
 # Acceptance CI: integration + system + BDD tests + evidence report.
 ci-acceptance: test-integration test-system test-bdd release-evidence
