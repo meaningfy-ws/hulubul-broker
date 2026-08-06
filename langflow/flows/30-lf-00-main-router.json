@@ -2660,7 +2660,7 @@
   "is_component": false,
   "locked": false,
   "mcp_enabled": false,
-  "name": "lf-00-main-router-v2",
+  "name": "lf-00-main-router",
   "name_key": null,
   "tags": null,
   "updated_at": "2026-08-05T08:34:43+00:00",
